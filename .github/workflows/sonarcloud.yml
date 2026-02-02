@@ -16,20 +16,24 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 24
-          cache: 'pnpm'
-
+      # 1️⃣ Instalar pnpm PRIMERO
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 10
+          run_install: false
 
+      # 2️⃣ Luego Node (SIN cache pnpm)
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      # 3️⃣ Instalar dependencias
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # 4️⃣ SonarCloud
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v2
         env:
