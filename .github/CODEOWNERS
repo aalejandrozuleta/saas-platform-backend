@@ -1,0 +1,7 @@
+# CODEOWNERS
+
+/shared/              @aalejandrozuleta
+/services/            @aalejandrozuleta
+/docker/              @aalejandrozuleta
+/scripts/             @aalejandrozuleta
+/.github/             @aalejandrozuleta

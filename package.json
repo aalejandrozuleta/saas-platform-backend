@@ -2,9 +2,12 @@
   "scripts": {
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "format": "prettier . --write"
+    "format": "prettier . --write",
+    "lint-staged": "lint-staged",
+    "test": "pnpm -r test"
   },
   "devDependencies": {
+    "@types/node": "^22.19.7",
     "@typescript-eslint/eslint-plugin": "^8.54.0",
     "@typescript-eslint/parser": "^8.54.0",
     "eslint": "^9.39.2",
@@ -12,6 +15,18 @@
     "eslint-plugin-boundaries": "^5.3.1",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-unused-imports": "^4.3.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
     "prettier": "^3.8.1"
+  },
+  "engines": {
+    "node": ">=20 <21",
+    "pnpm": ">=9"
+  },
+  "lint-staged": {
+    "**/*.ts": [
+      "eslint --fix",
+      "prettier --write"
+    ]
   }
 }
