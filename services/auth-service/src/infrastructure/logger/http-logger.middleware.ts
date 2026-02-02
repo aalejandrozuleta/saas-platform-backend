@@ -1,16 +1,11 @@
-import { randomUUID } from 'crypto';
-
+import { randomUUID } from 'node:crypto';
 import { Injectable, NestMiddleware } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 import { requestContextStorage } from '@shared/context';
-import { PinoLoggerAdapter } from '@shared/logger';
+import { logger } from '@shared/logger';
 
 @Injectable()
 export class HttpLoggerMiddleware implements NestMiddleware {
-  private readonly logger = new PinoLoggerAdapter({
-    level: 'info',
-    serviceName: 'auth-service',
-  });
 
   use(req: Request, res: Response, next: NextFunction): void {
     const requestId = (req.headers['x-request-id'] as string) ?? randomUUID();
@@ -28,7 +23,7 @@ export class HttpLoggerMiddleware implements NestMiddleware {
         res.on('finish', () => {
           const durationMs = Date.now() - start;
 
-          this.logger.info('HTTP Request', {
+          logger.info('HTTP Request', {
             requestId,
             correlationId,
             method: req.method,

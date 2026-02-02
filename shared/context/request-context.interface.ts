@@ -1,7 +1,7 @@
 /**
  * Contexto de ejecución de una request.
  * 
- * Se propaga durante todo el ciclo de vida usando AsyncLocalStorage.
+ * Se propaga durante el ciclo de vida usando AsyncLocalStorage.
  */
 export interface RequestContext {
   /** Identificador único de la request */

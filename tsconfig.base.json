@@ -1,35 +1,31 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
-    /* Lenguaje y runtime */
     "target": "ES2021",
     "lib": ["ES2021"],
-    "module": "CommonJS",
-    "moduleResolution": "Node",
 
-    /* Paths y aliases */
+    /* 🔥 CLAVE */
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+
     "baseUrl": ".",
     "paths": {
       "@shared/*": ["shared/*"]
     },
 
-    /* Estrictos (nivel profesional) */
     "strict": true,
     "noImplicitAny": true,
     "strictNullChecks": true,
     "noImplicitOverride": true,
     "noFallthroughCasesInSwitch": true,
 
-    /* Interoperabilidad */
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
 
-    /* Calidad */
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
 
-    /* Output (cada proyecto define el suyo) */
     "declaration": true,
     "sourceMap": true
   }

@@ -1,16 +1,20 @@
 import type { Request, Response, NextFunction } from 'express';
 
-const ALLOWED_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'];
+type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
 
-/**
- * Bloquea métodos HTTP no permitidos.
- */
+const ALLOWED_METHODS = new Set<HttpMethod>([
+  'GET',
+  'POST',
+  'PUT',
+  'DELETE',
+]);
+
 export function methodGuardMiddleware(
   req: Request,
   res: Response,
   next: NextFunction,
 ): void {
-  if (!ALLOWED_METHODS.includes(req.method)) {
+  if (!ALLOWED_METHODS.has(req.method as HttpMethod)) {
     res.status(405).json({
       error: 'Method Not Allowed',
     });
