@@ -1,27 +1,30 @@
 FROM node:24-alpine
 
-# Habilitar pnpm
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
 WORKDIR /app
 
-# Copiamos archivos de workspace
+# Workspace metadata
 COPY pnpm-workspace.yaml ./
-COPY package.json ./
 COPY pnpm-lock.yaml ./
 
-# Copiamos package.json del servicio y shared
+# Manifests mínimos
 COPY services/api-gateway/package.json services/api-gateway/
 COPY shared/package.json shared/
 
-# Instalamos TODAS las dependencias del workspace
-RUN pnpm install
+# Instalar deps + devDeps del micro
+RUN pnpm install --filter api-gateway... --include=dev
 
-# Copiamos el resto del código
+# Código fuente
 COPY services/api-gateway services/api-gateway
 COPY shared shared
+
+# 🔥 CLAVE ABSOLUTA: añadir .bin del micro al PATH
+ENV PATH="/app/services/api-gateway/node_modules/.bin:${PATH}"
 
 WORKDIR /app/services/api-gateway
 
 EXPOSE 3000
-CMD ["pnpm", "start:dev"]
+CMD ["pnpm", "dev"]
+
+

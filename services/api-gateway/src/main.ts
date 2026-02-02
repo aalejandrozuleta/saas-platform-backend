@@ -2,13 +2,14 @@ import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import helmet from 'helmet';
 import { logger } from '@saas/shared';
+import express from 'express';
+
 import { AppModule } from './app.module';
 import { methodGuardMiddleware } from './infrastructure/security/method-guard.middleware';
 import { pathSanitizerMiddleware } from './infrastructure/security/path-sanitizer.middleware';
 import { headerValidationMiddleware } from './infrastructure/security/header-validation.middleware';
 import { globalRateLimiter } from './infrastructure/security/rate-limit.middleware';
 import { timeoutMiddleware } from './infrastructure/security/timeout.middleware';
-import express from 'express';
 import { EnvService } from './config/env/env.service';
 
 

@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { logger } from '@saas/shared';
+
 import { envSchema, type EnvVars } from './env.schema';
 
 /**

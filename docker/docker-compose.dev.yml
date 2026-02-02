@@ -28,9 +28,6 @@ services:
       dockerfile: services/api-gateway/Dockerfile.dev
     env_file:
       - ../services/api-gateway/.env
-    volumes:
-      - ../services/api-gateway:/app
-      - ../shared:/shared
     networks:
       - saas-dev
 
@@ -46,7 +43,6 @@ services:
       - ../services/auth-service/.env
     volumes:
       - ../services/auth-service:/app
-      - ../shared:/shared
     depends_on:
       - auth-postgres
       - redis

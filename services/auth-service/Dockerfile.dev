@@ -1,26 +1,42 @@
 FROM node:24-alpine
 
-RUN corepack enable && corepack prepare pnpm@latest --activate
-
+# ===============================
+# Directorio root del monorepo
+# ===============================
 WORKDIR /app
 
-# Workspace
-COPY pnpm-workspace.yaml ./
-COPY package.json ./
-COPY pnpm-lock.yaml ./
+# ===============================
+# Instalamos pnpm
+# ===============================
+RUN npm install -g pnpm
 
-# Copiar manifests
-COPY services/auth-service/package.json services/auth-service/
-COPY shared/package.json shared/
+# ===============================
+# Copiamos archivos base del workspace
+# ===============================
+COPY package.json .
+COPY pnpm-lock.yaml .
+COPY pnpm-workspace.yaml .
+COPY tsconfig.base.json .
 
-# 🔴 INSTALAR DEPENDENCIAS DEL SERVICIO (CLAVE)
-RUN pnpm install --filter auth-service...
+# ===============================
+# Copiamos paquetes internos necesarios
+# ===============================
+COPY shared ./shared
+COPY services/auth-service ./services/auth-service
 
-# Copiar código
-COPY services/auth-service services/auth-service
-COPY shared shared
+# ===============================
+# Instalamos TODAS las deps del workspace
+# ===============================
+RUN pnpm install
 
+# ===============================
+# Entramos al auth-service
+# ===============================
 WORKDIR /app/services/auth-service
 
 EXPOSE 3001
-CMD ["pnpm", "dev"]
+
+# ===============================
+# Arranque dev
+# ===============================
+CMD ["pnpm", "run", "dev"]
