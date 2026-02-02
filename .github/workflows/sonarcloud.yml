@@ -43,5 +43,8 @@ jobs:
             -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
             -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
             -Dsonar.sources=shared,services
-            -Dsonar.exclusions=**/dist/**,**/node_modules/**
-            -Dsonar.typescript.tsconfigPath=tsconfig.base.json
+            -Dsonar.tests=services
+            -Dsonar.test.inclusions=**/*.spec.ts
+            -Dsonar.exclusions=**/dist/**,**/node_modules/**,**/*.module.ts,**/main.ts
+            -Dsonar.typescript.tsconfigPaths=tsconfig.base.json,services/*/tsconfig.json
+            -Dsonar.javascript.lcov.reportPaths=services/*/coverage/lcov.info
