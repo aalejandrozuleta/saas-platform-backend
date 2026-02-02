@@ -1,29 +1,36 @@
+import { Injectable } from '@nestjs/common';
 import { logger } from '@shared/logger';
-
 import { envSchema, type EnvVars } from './env.schema';
 
-
 /**
- * Servicio de acceso a variables de entorno ya validadas.
- * Nunca usar process.env fuera de aquí.
+ * Servicio centralizado de variables de entorno.
+ * Todas las variables están validadas en el arranque.
  */
-class EnvService {
+@Injectable()
+export class EnvService {
   private readonly env: EnvVars;
 
   constructor() {
     const parsed = envSchema.safeParse(process.env);
 
     if (!parsed.success) {
-      logger.error('Invalid environment configuration');
-      process.exit(1);
+      logger.error(
+        'Invalid environment configuration',
+        parsed.error.format(),
+      );
+
+      // Permite flush del logger antes de salir
+      process.exitCode = 1;
+      throw new Error('Environment validation failed');
     }
 
     this.env = parsed.data;
   }
 
+  /**
+   * Obtiene una variable de entorno validada.
+   */
   get<T extends keyof EnvVars>(key: T): EnvVars[T] {
     return this.env[key];
   }
 }
-
-export const envService = new EnvService();

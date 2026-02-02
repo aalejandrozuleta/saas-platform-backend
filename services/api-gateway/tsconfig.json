@@ -14,7 +14,10 @@
 
     "baseUrl": "./",
     "paths": {
-      "@shared/*": ["../../shared/*"]
+      "@shared/*": ["../../shared/*"],
+      "@/infrastructure/*": ["./src/infrastructure/*"],
+      "@/modules/*": ["./src/modules/*"],
+      "@/config/*": ["./src/config/*"],
     }
   },
   "include": ["src/**/*.ts"]

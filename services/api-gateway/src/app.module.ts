@@ -3,12 +3,14 @@ import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
 import { AuthController } from './modules/auth/auth.controller';
 import { HttpLoggerMiddleware } from './infrastructure/logger/http-logger.middleware';
 import { HealthController } from './infrastructure/health/health.controller';
+import { EnvModule } from './config/env/env.module';
 
 /**
  * Módulo raíz del API Gateway.
  * No contiene dominio ni lógica de negocio.
  */
 @Module({
+  imports: [EnvModule],
   controllers: [AuthController, HealthController],
 })
 export class AppModule implements NestModule {

@@ -18,7 +18,11 @@ export const envSchema = z.object({
 
   TRUST_PROXY: z.coerce.number().default(1),
 
-  AUTH_SERVICE_URL: z.string().default('localhost:3001')
+  AUTH_SERVICE_URL: z
+  .hostname()
+  .default('http://localhost:3001'),
+
+  AUTH_SERVICE_TIMEOUT: z.coerce.number().default(5000),
 });
 
 export type EnvVars = z.infer<typeof envSchema>;

@@ -1,46 +1,71 @@
-import type { Request, Response } from 'express';
-import fetch, { Headers } from 'node-fetch';
-import { envService } from 'src/config/env';
-
-
+import type { Request } from 'express';
+import { AuthServiceUnavailableException } from '../errors/auth-service.exception';
+import { EnvService } from '@/config/env/env.service';
 
 /**
  * Proxy HTTP hacia el Auth Service.
- * El Gateway NO implementa lógica de autenticación.
+ * Implementa timeout usando AbortController.
  */
 export class AuthProxy {
-  private static readonly AUTH_SERVICE_URL =
-    envService.get('AUTH_SERVICE_URL');
+  constructor(private readonly env: EnvService) { }
 
-  static async forward(
-    req: Request,
-    res: Response,
-    path: string,
-  ): Promise<void> {
-    const url = `${this.AUTH_SERVICE_URL}${path}`;
+  async forward<T>(req: Request, path: string): Promise<T> {
+    const url = `${this.env.get('AUTH_SERVICE_URL')}${path}`;
 
     const headers = new Headers();
 
-    // 🔹 Normalizar headers de Express → HeadersInit
     for (const [key, value] of Object.entries(req.headers)) {
       if (key === 'host') continue;
-      if (typeof value === 'string') {
-        headers.set(key, value);
-      } else if (Array.isArray(value)) {
-        headers.set(key, value.join(','));
-      }
+      if (typeof value === 'string') headers.set(key, value);
+      if (Array.isArray(value)) headers.set(key, value.join(','));
     }
 
-    const response = await fetch(url, {
-      method: req.method,
-      headers,
-      body: ['GET', 'HEAD'].includes(req.method)
-        ? undefined
-        : JSON.stringify(req.body),
-    });
+    const controller = new AbortController();
+    const timeout = this.env.get('AUTH_SERVICE_TIMEOUT');
 
-    const data = await response.text();
+    const timeoutId = setTimeout(() => {
+      controller.abort();
+    }, timeout);
 
-    res.status(response.status).send(data);
+    let response: Response;
+
+    try {
+      response = await fetch(url, {
+        method: req.method,
+        headers,
+        body: ['GET', 'HEAD'].includes(req.method)
+          ? undefined
+          : JSON.stringify(req.body),
+        signal: controller.signal,
+      });
+    } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        throw new AuthServiceUnavailableException({
+          reason: 'timeout',
+          timeout,
+          service: 'auth',
+        });
+      }
+
+      throw new AuthServiceUnavailableException({
+        reason: 'network_error',
+        service: 'auth',
+        cause: error,
+      });
+    } finally {
+      clearTimeout(timeoutId);
+    }
+
+    const text = await response.text();
+
+    if (!response.ok) {
+      throw new AuthServiceUnavailableException({
+        status: response.status,
+        response: text,
+        service: 'auth',
+      });
+    }
+
+    return JSON.parse(text) as T;
   }
 }
