@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "removeComments": true,
+    "sourceMap": false,
+    "incremental": false
+  },
+  "exclude": ["test", "**/*.spec.ts"]
+}

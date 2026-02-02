@@ -1,31 +1,13 @@
-import pino, { Logger as PinoLogger } from 'pino';
-import { PlatformLogger } from './logger.interface';
-import { LoggerOptions } from './logger.types';
-import { createPinoConfig } from './pino.config';
+import { PinoLoggerAdapter } from './adapters/pino.logger.adapter';
+import type { LoggerOptions } from './logger.types';
 
 /**
- * Implementación concreta del logger usando Pino.
+ * Fábrica del logger de la plataforma.
+ * ÚNICA instancia compartida.
  */
-export class PinoLoggerAdapter implements PlatformLogger {
-  private readonly logger: PinoLogger;
+const loggerOptions: LoggerOptions = {
+  level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
+  serviceName: 'platform',
+};
 
-  constructor(options: LoggerOptions) {
-    this.logger = pino(createPinoConfig(options));
-  }
-
-  info(message: string, meta?: Record<string, unknown>): void {
-    this.logger.info(meta ?? {}, message);
-  }
-
-  warn(message: string, meta?: Record<string, unknown>): void {
-    this.logger.warn(meta ?? {}, message);
-  }
-
-  error(message: string, meta?: Record<string, unknown>): void {
-    this.logger.error(meta ?? {}, message);
-  }
-
-  debug(message: string, meta?: Record<string, unknown>): void {
-    this.logger.debug(meta ?? {}, message);
-  }
-}
+export const logger = new PinoLoggerAdapter(loggerOptions);

@@ -1,16 +1,16 @@
 import { randomUUID } from 'crypto';
 
 import { Injectable, NestMiddleware } from '@nestjs/common';
-import { Request, Response, NextFunction } from 'express';
+import type { Request, Response, NextFunction } from 'express';
 import { requestContextStorage } from '@shared/context';
-import { PinoLoggerAdapter } from '@shared/logger';
+import { logger } from '@shared/logger';
 
+/**
+ * Middleware de logging global del Gateway.
+ * Se ejecuta una sola vez por request entrante.
+ */
 @Injectable()
 export class HttpLoggerMiddleware implements NestMiddleware {
-  private readonly logger = new PinoLoggerAdapter({
-    level: 'info',
-    serviceName: 'auth-service',
-  });
 
   use(req: Request, res: Response, next: NextFunction): void {
     const requestId = (req.headers['x-request-id'] as string) ?? randomUUID();
@@ -28,7 +28,7 @@ export class HttpLoggerMiddleware implements NestMiddleware {
         res.on('finish', () => {
           const durationMs = Date.now() - start;
 
-          this.logger.info('HTTP Request', {
+          logger.info('Incoming request', {
             requestId,
             correlationId,
             method: req.method,

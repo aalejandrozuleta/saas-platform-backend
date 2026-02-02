@@ -1,0 +1,21 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "target": "ES2023",
+
+    /* 🔥 ESTO ES LO CRÍTICO 🔥 */
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+
+    /* 🔒 FUERZA DECORATORS LEGACY */
+    "useDefineForClassFields": false,
+
+    "baseUrl": "./",
+    "paths": {
+      "@shared/*": ["../../shared/*"]
+    }
+  },
+  "include": ["src/**/*.ts"]
+}

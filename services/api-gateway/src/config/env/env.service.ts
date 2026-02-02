@@ -1,11 +1,13 @@
 import { logger } from '@shared/logger';
 
-import { envSchema, EnvVars } from './env.schema';
+import { envSchema, type EnvVars } from './env.schema';
+
 
 /**
- * Servicio centralizado de acceso a variables de entorno.
+ * Servicio de acceso a variables de entorno ya validadas.
+ * Nunca usar process.env fuera de aquí.
  */
-export class EnvService {
+class EnvService {
   private readonly env: EnvVars;
 
   constructor() {
@@ -23,3 +25,5 @@ export class EnvService {
     return this.env[key];
   }
 }
+
+export const envService = new EnvService();
