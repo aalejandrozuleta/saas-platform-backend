@@ -2,11 +2,11 @@ import { Controller, Post, Req } from '@nestjs/common';
 import type { Request } from 'express';
 
 import { AuthProxy } from '@/infrastructure/http/auth.proxy';
-import { successResponse } from '@shared/response';
+import { successResponse } from '@saas/shared';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authProxy: AuthProxy) {}
+  constructor(private readonly authProxy: AuthProxy) { }
 
   @Post('login')
   async login(@Req() req: Request) {

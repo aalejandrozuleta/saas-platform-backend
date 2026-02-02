@@ -1,0 +1,34 @@
+global:
+  scrape_interval: 5s
+  evaluation_interval: 5s
+
+scrape_configs:
+  # ============================
+  # API GATEWAY
+  # ============================
+  - job_name: "api-gateway"
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - api-gateway:3000
+        labels:
+          service: api-gateway
+
+  # ============================
+  # AUTH SERVICE
+  # ============================
+  - job_name: "auth-service"
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - auth-service:3001
+        labels:
+          service: auth-service
+
+  # ============================
+  # PROMETHEUS SELF-MONITORING
+  # ============================
+  - job_name: "prometheus"
+    static_configs:
+      - targets:
+          - localhost:9090

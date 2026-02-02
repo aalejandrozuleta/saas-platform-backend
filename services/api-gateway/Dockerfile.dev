@@ -1,0 +1,27 @@
+FROM node:24-alpine
+
+# Habilitar pnpm
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
+WORKDIR /app
+
+# Copiamos archivos de workspace
+COPY pnpm-workspace.yaml ./
+COPY package.json ./
+COPY pnpm-lock.yaml ./
+
+# Copiamos package.json del servicio y shared
+COPY services/api-gateway/package.json services/api-gateway/
+COPY shared/package.json shared/
+
+# Instalamos TODAS las dependencias del workspace
+RUN pnpm install
+
+# Copiamos el resto del código
+COPY services/api-gateway services/api-gateway
+COPY shared shared
+
+WORKDIR /app/services/api-gateway
+
+EXPOSE 3000
+CMD ["pnpm", "start:dev"]

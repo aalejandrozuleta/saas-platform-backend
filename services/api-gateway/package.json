@@ -2,13 +2,16 @@
   "name": "api-gateway",
   "private": true,
   "scripts": {
-    "start:dev": "nest start --watch",
-    "build": "nest build -p tsconfig.build.json",
-    "start:prod": "node dist/main.js"
+    "build": "nest build",
+    "start": "nest start",
+    "dev": "nest start --watch",
+    "start:debug": "nest start --debug --watch",
+    "start:prod": "node dist/main"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
     "@nestjs/core": "^10.0.0",
+    "@saas/shared": "workspace:*",
     "express": "^5.2.1",
     "express-rate-limit": "^8.2.1",
     "helmet": "^8.1.0",
@@ -16,6 +19,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@nestjs/cli": "^11.0.16",
     "@types/express": "^5.0.6",
     "@types/node": "^22.19.7"
   }

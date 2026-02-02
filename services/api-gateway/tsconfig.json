@@ -1,24 +1,32 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "target": "ES2023",
-
-    /* 🔥 ESTO ES LO CRÍTICO 🔥 */
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-
-    /* 🔒 FUERZA DECORATORS LEGACY */
-    "useDefineForClassFields": false,
-
+    "outDir": "./dist",
+    "rootDir": "./src",
     "baseUrl": "./",
     "paths": {
-      "@shared/*": ["../../shared/*"],
-      "@/infrastructure/*": ["./src/infrastructure/*"],
-      "@/modules/*": ["./src/modules/*"],
-      "@/config/*": ["./src/config/*"],
+      "@saas/shared": [
+        "../../shared/dist"
+      ],
+      "@saas/shared/*": [
+        "../../shared/dist/*"
+      ],
+      "@/infrastructure/*": [
+        "./src/infrastructure/*"
+      ],
+      "@/modules/*": [
+        "./src/modules/*"
+      ],
+      "@/config/*": [
+        "./src/config/*"
+      ],
     }
   },
-  "include": ["src/**/*.ts"]
+    "include": [
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
 }

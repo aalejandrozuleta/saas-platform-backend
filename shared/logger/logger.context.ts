@@ -1,4 +1,4 @@
-import { requestContextStorage } from '@shared/context';
+import { requestContextStorage } from "../context";
 
 /**
  * Agrega automáticamente información del contexto

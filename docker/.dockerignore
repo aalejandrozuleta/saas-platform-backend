@@ -1,1 +1,50 @@
+# =========================
+# Node / JS
+# =========================
+node_modules
+dist
+build
+coverage
+.nyc_output
 
+# =========================
+# Logs
+# =========================
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# =========================
+# Git
+# =========================
+.git
+.gitignore
+.github
+
+# =========================
+# Editor / OS
+# =========================
+.vscode
+.idea
+.DS_Store
+Thumbs.db
+
+# =========================
+# Env / Secrets
+# =========================
+.env
+.env.*
+*.pem
+*.key
+
+# =========================
+# Docs / Misc
+# =========================
+README.md
+*.md
+
+# =========================
+# Docker (evitar recursión)
+# =========================
+docker-compose*.yml
+Dockerfile*

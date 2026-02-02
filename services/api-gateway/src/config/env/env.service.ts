@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { logger } from '@shared/logger';
+import { logger } from '@saas/shared';
 import { envSchema, type EnvVars } from './env.schema';
 
 /**
@@ -14,22 +14,16 @@ export class EnvService {
     const parsed = envSchema.safeParse(process.env);
 
     if (!parsed.success) {
-      logger.error(
-        'Invalid environment configuration',
-        parsed.error.format(),
-      );
+      logger.error('Invalid environment configuration', {
+        errors: parsed.error,
+      });
 
-      // Permite flush del logger antes de salir
-      process.exitCode = 1;
       throw new Error('Environment validation failed');
     }
 
     this.env = parsed.data;
   }
 
-  /**
-   * Obtiene una variable de entorno validada.
-   */
   get<T extends keyof EnvVars>(key: T): EnvVars[T] {
     return this.env[key];
   }

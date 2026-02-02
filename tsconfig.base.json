@@ -1,32 +1,33 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
+    /* Target estable para Nest */
     "target": "ES2021",
     "lib": ["ES2021"],
 
-    /* 🔥 CLAVE */
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
+    /* Módulos */
+    "module": "CommonJS",
+    "moduleResolution": "Node",
 
-    "baseUrl": ".",
-    "paths": {
-      "@shared/*": ["shared/*"]
-    },
+    /* 🔥 DECORATORS LEGACY (CLAVE ABSOLUTA) */
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "useDefineForClassFields": false,
 
+    /* Strict */
     "strict": true,
     "noImplicitAny": true,
     "strictNullChecks": true,
-    "noImplicitOverride": true,
-    "noFallthroughCasesInSwitch": true,
 
+    /* Interop */
     "esModuleInterop": true,
-    "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
 
+    /* Calidad */
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
 
-    "declaration": true,
+    /* Source maps */
     "sourceMap": true
   }
 }

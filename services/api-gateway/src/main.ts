@@ -1,45 +1,23 @@
 import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
-import express from 'express';
 import helmet from 'helmet';
-import type { Express } from 'express';
-import { logger } from '@shared/logger';
-
+import { logger } from '@saas/shared';
 import { AppModule } from './app.module';
-import { envService } from './config/env';
-import { globalRateLimiter } from './infrastructure/security/rate-limit.middleware';
-import { timeoutMiddleware } from './infrastructure/security/timeout.middleware';
-import { headerValidationMiddleware } from './infrastructure/security/header-validation.middleware';
 import { methodGuardMiddleware } from './infrastructure/security/method-guard.middleware';
 import { pathSanitizerMiddleware } from './infrastructure/security/path-sanitizer.middleware';
+import { headerValidationMiddleware } from './infrastructure/security/header-validation.middleware';
+import { globalRateLimiter } from './infrastructure/security/rate-limit.middleware';
+import { timeoutMiddleware } from './infrastructure/security/timeout.middleware';
+import express from 'express';
+import { EnvService } from './config/env/env.service';
+
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
-
-  const server = app.getHttpAdapter().getInstance() as Express;
-
-  // 🔐 Trust proxy desde env
-  server.set('trust proxy', envService.get('TRUST_PROXY'));
+  const envService = app.get(EnvService);
 
   app.setGlobalPrefix('api/v1');
 
-  server.use(
-    helmet({
-      contentSecurityPolicy: false,
-      crossOriginEmbedderPolicy: false,
-    }),
-  );
-
-  server.use(methodGuardMiddleware);
-  server.use(pathSanitizerMiddleware);
-  server.use(headerValidationMiddleware);
-  server.use(globalRateLimiter);
-  server.use(timeoutMiddleware);
-
-  server.use(express.json({ limit: '1mb' }));
-  server.use(express.urlencoded({ extended: true, limit: '1mb' }));
-
-  // CORS desde env validado
   app.enableCors({
     origin:
       envService.get('CORS_ORIGINS').length > 0
@@ -48,10 +26,24 @@ async function bootstrap(): Promise<void> {
     credentials: true,
   });
 
-  const port = envService.get('PORT');
-  await app.listen(port);
+  app.use(
+    helmet({
+      contentSecurityPolicy: false,
+      crossOriginEmbedderPolicy: false,
+    }),
+  );
 
-  logger.info(`🚀 API Gateway running on port ${port}`);
+  app.use(methodGuardMiddleware);
+  app.use(pathSanitizerMiddleware);
+  app.use(headerValidationMiddleware);
+  app.use(globalRateLimiter);
+  app.use(timeoutMiddleware);
+
+  app.use(express.json({ limit: '1mb' }));
+  app.use(express.urlencoded({ extended: true, limit: '1mb' }));
+
+  await app.listen(envService.get('PORT'));
+  logger.info(`API Gateway running on port ${envService.get('PORT')}`);
 }
 
 void bootstrap();

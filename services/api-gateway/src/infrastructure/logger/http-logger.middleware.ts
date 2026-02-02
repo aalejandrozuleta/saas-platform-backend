@@ -1,8 +1,8 @@
 import { randomUUID } from 'node:crypto';
 import { Injectable, NestMiddleware } from '@nestjs/common';
 import type { Request, Response, NextFunction } from 'express';
-import { requestContextStorage } from '@shared/context';
-import { logger } from '@shared/logger';
+import { requestContextStorage } from '@saas/shared';
+import { logger } from '@saas/shared';
 
 /**
  * Middleware de logging global del Gateway.

@@ -1,48 +1,38 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    /* Módulos (NestJS + Node moderno) */
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "resolvePackageJsonExports": true,
-
-    /* Output (NO build final) */
     "outDir": "./dist",
-    "sourceMap": true,
-    "declaration": true,
-
-    /* Decorators (NestJS) */
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-
-    /* Interop */
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-
-    /* Calidad */
-    "isolatedModules": true,
-    "incremental": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-
-    /* Estrictos (controlados desde base) */
-    "strictNullChecks": true,
-    "noImplicitAny": false,
-
-    /* Target moderno */
-    "target": "ES2023",
-
-    /* Paths */
+    "rootDir": "./src",
     "baseUrl": "./",
     "paths": {
-      "@shared/*": ["../../shared/*"],
-      "@domain/*": ["src/domain/*"],
-      "@application/*": ["src/application/*"],
-      "@infrastructure/*": ["src/infrastructure/*"],
-      "@modules/*": ["src/modules/*"],
-      "@config/*": ["src/config/*"]
+      "@saas/shared": [
+        "../../shared/dist"
+      ],
+      "@saas/shared/*": [
+        "../../shared/dist/*"
+      ],
+      "@domain/*": [
+        "src/domain/*"
+      ],
+      "@application/*": [
+        "src/application/*"
+      ],
+      "@infrastructure/*": [
+        "src/infrastructure/*"
+      ],
+      "@modules/*": [
+        "src/modules/*"
+      ],
+      "@config/*": [
+        "src/config/*"
+      ]
     }
   },
-  "include": ["src/**/*.ts"],
-  "exclude": ["node_modules", "dist"]
+  "include": [
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
 }

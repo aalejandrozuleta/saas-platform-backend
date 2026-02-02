@@ -1,0 +1,25 @@
+{
+  "title": "Auth Service",
+  "uid": "auth-service",
+  "refresh": "5s",
+  "panels": [
+    {
+      "type": "graph",
+      "title": "Auth Requests / sec",
+      "targets": [
+        {
+          "expr": "sum(rate(http_requests_total{service=\"auth-service\"}[1m]))"
+        }
+      ]
+    },
+    {
+      "type": "logs",
+      "title": "Auth Logs",
+      "targets": [
+        {
+          "expr": "{service=\"auth-service\"}"
+        }
+      ]
+    }
+  ]
+}
