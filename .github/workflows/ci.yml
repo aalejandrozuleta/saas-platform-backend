@@ -40,4 +40,4 @@ jobs:
 
       # 6️⃣ Tests
       - name: Test
-        # run: pnpm test
+        run: pnpm test
