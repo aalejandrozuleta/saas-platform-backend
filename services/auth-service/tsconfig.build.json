@@ -1,4 +1,16 @@
 {
   "extends": "./tsconfig.json",
-  "exclude": ["node_modules", "test", "dist", "**/*spec.ts"]
+  "compilerOptions": {
+    /* Build optimizado */
+    "removeComments": true,
+    "sourceMap": false,
+    "incremental": false
+  },
+  "exclude": [
+    "node_modules",
+    "dist",
+    "test",
+    "**/*.spec.ts",
+    "**/*.test.ts"
+  ]
 }
