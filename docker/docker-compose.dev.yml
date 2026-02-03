@@ -32,9 +32,8 @@ services:
     env_file:
       - ../services/api-gateway/.env
     volumes:
-      - ../services/api-gateway:/app/services/api-gateway
-      - ../shared:/app/shared
-      - pnpm-store:/pnpm-store
+        - ..:/app
+        - pnpm-store:/pnpm-store
     environment:
       PNPM_STORE_PATH: /pnpm-store
     ports:
@@ -63,9 +62,8 @@ services:
     env_file:
       - ../services/auth-service/.env
     volumes:
-      - ../services/auth-service:/app/services/auth-service
-      - ../shared:/app/shared
-      - pnpm-store:/pnpm-store
+    - ..:/app
+    - pnpm-store:/pnpm-store
     environment:
       PNPM_STORE_PATH: /pnpm-store
     ports:
@@ -273,3 +271,4 @@ volumes:
   mongo-data:
   loki-data:
   pnpm-store:
+

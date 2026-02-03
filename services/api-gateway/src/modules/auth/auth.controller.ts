@@ -18,10 +18,7 @@ import { AuthProxy } from '@infrastructure/http/auth.proxy';
  * - Reenviar requests al auth-service
  * - Normalizar respuestas
  */
-@Controller({
-  path: 'auth',
-  version: '1',
-})
+@Controller()
 export class AuthController {
   constructor(private readonly authProxy: AuthProxy) {}
 

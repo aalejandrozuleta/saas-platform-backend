@@ -23,10 +23,6 @@ async function bootstrap(): Promise<void> {
    */
   const configService = app.get(ConfigService);
 
-  /**
-   * Prefijo global del microservicio
-   * Ejemplo final: /auth/v1/login
-   */
   app.setGlobalPrefix('auth');
 
   /**

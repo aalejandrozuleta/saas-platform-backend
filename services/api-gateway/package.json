@@ -6,11 +6,12 @@
     "start": "nest start",
     "predev": "pnpm --filter @saas/shared build",
     "dev": "pnpm exec nest start --watch",
+    "devs": "node --watch --require ts-node/register --require tsconfig-paths/register src/main.ts",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main"
   },
   "dependencies": {
-    "@nestjs/common": "^11.0.1",
+    "@nestjs/common": "^11.1.12",
     "@nestjs/core": "^11.0.1",
     "@nestjs/platform-express": "^11.0.1",
     "@saas/shared": "workspace:*",
@@ -24,6 +25,9 @@
   "devDependencies": {
     "@nestjs/cli": "^11.0.16",
     "@types/express": "^5.0.6",
-    "@types/node": "^22.19.7"
+    "@types/node": "^22.19.7",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^5.9.3"
   }
 }

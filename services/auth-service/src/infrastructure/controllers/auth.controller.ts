@@ -6,7 +6,7 @@ import { I18nService } from '@saas/shared/i18n';
 /**
  * Controller de autenticación
  */
-@Controller({ path: 'auth', version: '1' })
+@Controller()
 export class AuthController {
   constructor(
     private readonly registerUserUseCase: RegisterUserUseCase,

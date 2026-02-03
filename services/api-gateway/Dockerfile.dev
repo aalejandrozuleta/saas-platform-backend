@@ -1,26 +1,10 @@
 FROM node:24-alpine
 
-# =====================
-# BASE SETUP
-# =====================
 WORKDIR /app
 
 RUN npm install -g pnpm
-
 ENV PNPM_STORE_PATH=/pnpm-store
 
-# =====================
-# DEPENDENCIES
-# =====================
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.base.json ./
-COPY shared/package.json shared/package.json
-COPY services/api-gateway/package.json services/api-gateway/package.json
-
-RUN pnpm install --frozen-lockfile
-
-# =====================
-# RUNTIME
-# =====================
 WORKDIR /app/services/api-gateway
 EXPOSE 3000
 
