@@ -1,73 +1,64 @@
+import { Injectable, HttpException } from '@nestjs/common';
 import type { Request } from 'express';
-import { EnvService } from '@config/env/env.service';
-
-import { AuthServiceUnavailableException } from '../errors/auth-service.exception';
-
+import axios, { AxiosInstance } from 'axios';
 
 /**
- * Proxy HTTP hacia el Auth Service.
- * Implementa timeout usando AbortController.
+ * Proxy HTTP hacia el Auth Service
+ *
+ * Centraliza:
+ * - Base URL
+ * - Timeouts
+ * - Forward de headers
+ * - Manejo de errores
  */
+@Injectable()
 export class AuthProxy {
-  constructor(private readonly env: EnvService) { }
+  private readonly client: AxiosInstance;
 
-  async forward<T>(req: Request, path: string): Promise<T> {
-    const url = `${this.env.get('AUTH_SERVICE_URL')}${path}`;
+  constructor() {
+    this.client = axios.create({
+      baseURL: process.env.AUTH_SERVICE_URL ?? 'http://auth-service:3001',
+      timeout: 5000,
+    });
+  }
 
-    const headers = new Headers();
-
-    for (const [key, value] of Object.entries(req.headers)) {
-      if (key === 'host') continue;
-      if (typeof value === 'string') headers.set(key, value);
-      if (Array.isArray(value)) headers.set(key, value.join(','));
-    }
-
-    const controller = new AbortController();
-    const timeout = this.env.get('AUTH_SERVICE_TIMEOUT');
-
-    const timeoutId = setTimeout(() => {
-      controller.abort();
-    }, timeout);
-
-    let response: Response;
-
+  /**
+   * Reenvía una request al Auth Service
+   *
+   * @param req Request original
+   * @param path Path interno del auth-service (sin /auth)
+   */
+  async forward<T = unknown>(
+    req: Request,
+    path: string,
+  ): Promise<T> {
     try {
-      response = await fetch(url, {
-        method: req.method,
-        headers,
-        body: ['GET', 'HEAD'].includes(req.method)
-          ? undefined
-          : JSON.stringify(req.body),
-        signal: controller.signal,
+      const response = await this.client.request<T>({
+        url: path,
+        method: req.method as any,
+        data: req.body,
+        headers: this.extractHeaders(req),
       });
-    } catch (error) {
-      if (error instanceof DOMException && error.name === 'AbortError') {
-        throw new AuthServiceUnavailableException({
-          reason: 'timeout',
-          timeout,
-          service: 'auth',
-        });
-      }
 
-      throw new AuthServiceUnavailableException({
-        reason: 'network_error',
-        service: 'auth',
-        cause: error,
-      });
-    } finally {
-      clearTimeout(timeoutId);
+      return response.data;
+    } catch (error: any) {
+      throw new HttpException(
+        error.response?.data ?? 'Auth service error',
+        error.response?.status ?? 502,
+      );
     }
+  }
 
-    const text = await response.text();
-
-    if (!response.ok) {
-      throw new AuthServiceUnavailableException({
-        status: response.status,
-        response: text,
-        service: 'auth',
-      });
-    }
-
-    return JSON.parse(text) as T;
+  /**
+   * Extrae y filtra headers relevantes
+   */
+  private extractHeaders(req: Request): Record<string, string> {
+    return {
+      'content-type': req.headers['content-type'] as string,
+      'authorization': req.headers['authorization'] as string,
+      'accept-language': req.headers['accept-language'] as string,
+      'x-correlation-id': req.headers['x-correlation-id'] as string,
+      'x-forwarded-for': req.ip ?? '',
+    };
   }
 }

@@ -1,17 +1,17 @@
 FROM node:24-alpine
 
 WORKDIR /app
+
 RUN npm install -g pnpm
 
-COPY ./package.json ./package.json
-COPY ./pnpm-lock.yaml ./pnpm-lock.yaml
-COPY ./pnpm-workspace.yaml ./pnpm-workspace.yaml
-COPY ./tsconfig.base.json ./tsconfig.base.json
+ENV NODE_ENV=development
+ENV PNPM_STORE_PATH=/pnpm-store
 
-COPY ./shared/package.json ./shared/package.json
-COPY ./services/auth-service/package.json ./services/auth-service/package.json
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.base.json ./
+COPY shared/package.json shared/package.json
+COPY services/auth-service/package.json services/auth-service/package.json
 
-RUN pnpm install
+RUN pnpm install --frozen-lockfile
 
 WORKDIR /app/services/auth-service
 EXPOSE 3001

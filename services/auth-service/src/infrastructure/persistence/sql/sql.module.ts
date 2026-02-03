@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
-import { PrismaService } from './prisma.service';
 import { EnvModule } from '@config/env/env.module';
+
+import { PrismaService } from './prisma.service';
 
 /**
  * Módulo de persistencia SQL (PostgreSQL).

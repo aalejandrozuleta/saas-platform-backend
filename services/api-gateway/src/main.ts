@@ -3,7 +3,6 @@ import { NestFactory } from '@nestjs/core';
 import helmet from 'helmet';
 import { logger } from '@saas/shared';
 import express from 'express';
-
 import { AppModule } from './app.module';
 import { methodGuardMiddleware } from './infrastructure/security/method-guard.middleware';
 import { pathSanitizerMiddleware } from './infrastructure/security/path-sanitizer.middleware';
@@ -11,13 +10,17 @@ import { headerValidationMiddleware } from './infrastructure/security/header-val
 import { globalRateLimiter } from './infrastructure/security/rate-limit.middleware';
 import { timeoutMiddleware } from './infrastructure/security/timeout.middleware';
 import { EnvService } from './config/env/env.service';
+import { VersioningType } from '@nestjs/common';
 
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
   const envService = app.get(EnvService);
 
-  app.setGlobalPrefix('api/v1');
+  app.enableVersioning({
+    type: VersioningType.URI,
+    defaultVersion: '1',
+  });
 
   app.enableCors({
     origin:
