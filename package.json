@@ -21,7 +21,8 @@
     "eslint-plugin-unused-imports": "^4.3.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
-    "prettier": "^3.8.1"
+    "prettier": "^3.8.1",
+    "prisma": "^7.3.0"
   },
   "engines": {
     "node": ">=20",
@@ -32,5 +33,10 @@
       "eslint --fix",
       "prettier --write"
     ]
+  },
+  "dependencies": {
+    "@nestjs/mongoose": "^11.0.4",
+    "@prisma/client": "^7.3.0",
+    "mongoose": "^9.1.5"
   }
 }

@@ -1,40 +1,180 @@
-# SaaS Platform Backend
+# 🏗 SaaS Platform — Arquitectura General
 
-Backend profesional para una plataforma SaaS basada en **microservicios**, diseñado con **arquitectura hexagonal**, **monorepo**, y **estándares enterprise**.
-
-Este proyecto está pensado como **portafolio técnico**, demostrando buenas prácticas reales usadas en entornos de producción.
+Este repositorio implementa una plataforma SaaS moderna basada en microservicios, organizada como monorepo con PNPM, observabilidad completa y pipelines CI/CD.
 
 ---
 
-## 📊 Estado del proyecto
+## 🎯 Objetivo
 
-![CI](https://github.com/aalejandrozuleta/saas-platform-backend/actions/workflows/ci.yml/badge.svg)
-[![Quality Gate Status](https://sonarcloud.io/project/overview?id=aalejandrozuleta_saas-platform-backend)]
-[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=aalejandrozuleta_saas-platform-backend&metric=bugs)](https://sonarcloud.io/summary/new_code?id=aalejandrozuleta_saas-platform-backend)
-![CodeQL](https://github.com/aalejandrozuleta/saas-platform-backend/actions/workflows/codeql.yml/badge.svg)
-![Node.js](https://img.shields.io/badge/node-24.x-brightgreen)
-
----
-
-## 🧱 Arquitectura
-
-- **Monorepo con pnpm workspaces**
-- **Microservicios desacoplados**
-- **Arquitectura hexagonal (clean architecture)**
-- **Infraestructura transversal compartida**
-- **CI/CD con GitHub Actions**
-- **Análisis de calidad y seguridad automatizado**
+- Desarrollo local reproducible con Docker  
+- Microservicios desplegables de forma independiente  
+- Gateway centralizado  
+- Observabilidad (logs + métricas + dashboards)  
+- Calidad de código automatizada  
+- Arquitectura limpia (DDD / Hexagonal)
 
 ---
 
-## 📁 Estructura general
+## 📦 Estructura principal
 
-```txt
+```
 saas-platform/
-├── docker/               # Docker y docker-compose
-├── scripts/              # Scripts de automatización
-├── services/             # Microservicios
-│   └── auth-service/     # Servicio de autenticación
-├── shared/               # Infraestructura transversal
-├── tsconfig.base.json    # Configuración TS base
-└── README.md
+├── .github/
+├── docker/
+├── scripts/
+├── services/
+├── shared/
+├── package.json
+├── pnpm-workspace.yaml
+└── tsconfig.base.json
+```
+
+---
+
+## 1. CI/CD (.github)
+
+Workflows automatizados:
+
+- CI (lint, test, build)
+- CodeQL (seguridad)
+- SonarCloud (calidad)
+
+Incluye CODEOWNERS para control de revisiones.
+
+---
+
+## 2. Husky
+
+Git hooks:
+
+- pre-commit
+- pre-push
+- commit-msg
+
+Evita commits rotos y asegura calidad mínima local.
+
+---
+
+## 3. Docker (Infraestructura)
+
+```
+docker/
+├── nginx/
+├── prometheus/
+├── grafana/
+├── loki/
+├── promtail/
+├── docker-compose.dev.yml
+└── docker-compose.prod.yml
+```
+
+### Componentes
+
+NGINX:
+- Reverse proxy
+- Punto único de entrada
+- Routing hacia API Gateway
+
+Prometheus:
+- Recolección de métricas
+
+Grafana:
+- Dashboards
+- Logs
+- Métricas
+
+Loki + Promtail:
+- Centralización de logs
+
+---
+
+## 4. Scripts
+
+Automatización:
+
+- build-all.sh
+- dev.sh
+- lint.sh
+- test.sh
+
+---
+
+## 5. Servicios
+
+```
+services/
+├── api-gateway/
+└── auth-service/
+```
+
+Cada servicio contiene:
+
+- Dockerfile.dev / Dockerfile.prod
+- .env
+- package.json
+- tsconfig
+- README
+
+### API Gateway
+
+Responsable de:
+
+- Punto de entrada
+- Seguridad
+- Rate limiting
+- Proxy interno
+- Health checks
+
+### Auth Service
+
+Servicio de autenticación:
+
+- Arquitectura hexagonal
+- DDD
+- Casos de uso
+- Métricas
+- Persistencia
+- Cache
+
+---
+
+## 6. Shared
+
+Librería común:
+
+- Logger
+- Excepciones
+- Validaciones
+- Swagger
+- Builders de respuesta
+- Contexto async
+
+---
+
+## 7. Monorepo Root
+
+- PNPM workspaces
+- ESLint
+- Prettier
+- TS base
+
+---
+
+## 🧠 Flujo general
+
+Cliente → NGINX → API Gateway → Servicios
+
+Logs:
+Servicios → Promtail → Loki → Grafana
+
+Métricas:
+Servicios → Prometheus → Grafana
+
+---
+
+Arquitectura preparada para:
+
+- Escalamiento horizontal
+- Despliegue independiente
+- Observabilidad completa
+- Seguridad avanzada
