@@ -114,9 +114,11 @@ services:
     container_name: loki-dev
     volumes:
       - ./loki/loki.yml:/etc/loki/loki.yml
+      - loki-data:/loki
     command: -config.file=/etc/loki/loki.yml
     networks:
       - saas-dev
+
 
   promtail:
     image: grafana/promtail:3.0.0
@@ -209,3 +211,4 @@ networks:
 volumes:
   auth-postgres-data:
   mongo-data:
+  loki-data:
