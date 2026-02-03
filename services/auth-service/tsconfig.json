@@ -10,7 +10,7 @@
       "@application/*": ["src/application/*"],
       "@infrastructure/*": ["src/infrastructure/*"],
       "@modules/*": ["src/modules/*"],
-      "@config/*": ["src/config/*"]
+      "@config/*": ["src/config/*"],
     }
   },
   "references": [

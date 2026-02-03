@@ -29,7 +29,7 @@ services:
     env_file:
       - ../services/api-gateway/.env
     volumes:
-      - ../services/api-gateway/src:/app/services/api-gateway/src
+      - ..:/app
     networks:
       - saas-dev
 
@@ -44,7 +44,7 @@ services:
     env_file:
       - ../services/auth-service/.env
     volumes:
-      - ../services/auth-service/src:/app/services/auth-service/src
+      - ..:/app
     depends_on:
       - auth-postgres
       - redis

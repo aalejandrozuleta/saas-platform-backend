@@ -4,6 +4,7 @@
   "scripts": {
     "build": "nest build",
     "start": "nest start",
+    "predev": "pnpm --filter @saas/shared build",
     "dev": "pnpm exec nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main"

@@ -8,22 +8,24 @@
   "scripts": {
     "build": "nest build",
     "start": "nest start",
+    "predev": "pnpm --filter @saas/shared build",
     "dev": "pnpm exec nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    
     "test:cov": "jest --config jest.config.ts --coverage",
     "test": "jest --config jest.config.ts",
     "test:watch": "jest --watch --config jest.config.ts",
     "test:watch:cov": "jest --watch --coverage --config jest.config.ts"
-
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
+    "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.0.1",
     "@nestjs/platform-express": "^11.0.1",
+    "@prisma/adapter-pg": "^7.3.0",
     "@saas/shared": "workspace:*",
+    "pg": "^8.18.0",
     "prom-client": "^15.1.3",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",

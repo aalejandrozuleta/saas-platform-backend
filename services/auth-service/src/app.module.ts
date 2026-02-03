@@ -2,9 +2,11 @@ import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
 import { MetricsModule } from '@infrastructure/metrics/metrics.module';
 
 import { HttpLoggerMiddleware } from './infrastructure/logger/http-logger.middleware';
+import { MongoModule } from '@infrastructure/persistence/mongo/mongo.module';
+import { SqlModule } from '@infrastructure/persistence/sql/sql.module';
 
 @Module({
-  imports: [MetricsModule],
+  imports: [MetricsModule,MongoModule, SqlModule],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): void {
