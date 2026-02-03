@@ -1,16 +1,20 @@
 {
   "name": "saas-platform",
   "private": true,
+  "type": "module",
   "scripts": {
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier . --write",
     "lint-staged": "lint-staged",
     "test": "pnpm -r test",
-    "dev": "docker compose -f docker/docker-compose.dev.yml up --build"
+    "dev": "docker compose -f docker/docker-compose.dev.yml up --build",
+    "test:watch": "pnpm -r test:watch",
+    "test:cov": "pnpm -r test:cov"
   },
   "devDependencies": {
     "@nestjs/cli": "^11.0.16",
+    "@types/jest": "^30.0.0",
     "@types/node": "^22.19.7",
     "@typescript-eslint/eslint-plugin": "^8.54.0",
     "@typescript-eslint/parser": "^8.54.0",
@@ -20,9 +24,12 @@
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-unused-imports": "^4.3.0",
     "husky": "^9.1.7",
+    "jest": "^30.2.0",
     "lint-staged": "^16.2.7",
     "prettier": "^3.8.1",
-    "prisma": "^7.3.0"
+    "prisma": "^7.3.0",
+    "supertest": "^7.2.2",
+    "ts-jest": "^29.4.6"
   },
   "engines": {
     "node": ">=20",

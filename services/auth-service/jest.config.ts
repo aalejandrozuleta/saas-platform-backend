@@ -1,29 +1,23 @@
 import type { Config } from 'jest';
 
+import baseConfig from '../../jest.config.base.ts';
+
+/**
+ * Configuración Jest específica del auth-service.
+ */
 const config: Config = {
-  preset: 'ts-jest',
-  testEnvironment: 'node',
+  ...baseConfig,
 
+  // Importante: raíz del servicio
   rootDir: '.',
-  testMatch: ['<rootDir>/test/**/*.spec.ts'],
 
-  moduleFileExtensions: ['ts', 'js', 'json'],
+  // Nombre visible en logs / CI
+  displayName: 'auth-service',
 
-  moduleNameMapper: {
-    '^@shared/(.*)$': '<rootDir>/../../shared/$1',
+  roots: ['<rootDir>/src'],
 
-    '^@domain/(.*)$': '<rootDir>/src/domain/$1',
-    '^@application/(.*)$': '<rootDir>/src/application/$1',
-    '^@infrastructure/(.*)$': '<rootDir>/src/infrastructure/$1',
-    '^@modules/(.*)$': '<rootDir>/src/modules/$1',
-    '^@config/(.*)$': '<rootDir>/src/config/$1',
-  },
-
-  collectCoverageFrom: [
-    'src/**/*.ts',
-    '!src/**/*.module.ts',
-    '!src/main.ts',
-  ],
+  // Setup específico si luego lo necesitas
+  setupFilesAfterEnv: [],
 };
 
 export default config;

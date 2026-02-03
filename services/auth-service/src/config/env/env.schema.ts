@@ -13,6 +13,7 @@ export const envSchema = z.object({
   JWT_EXPIRES_IN: z.string(),
 
   DATABASE_URL: z.string(),
+  MONGO_URL: z.string(),
 });
 
 export type EnvVars = z.infer<typeof envSchema>;
