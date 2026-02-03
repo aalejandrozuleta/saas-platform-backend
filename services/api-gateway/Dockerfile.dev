@@ -1,30 +1,48 @@
 FROM node:24-alpine
 
-RUN corepack enable && corepack prepare pnpm@latest --activate
-
+# ===============================
+# Root del monorepo
+# ===============================
 WORKDIR /app
 
-# Workspace metadata
-COPY pnpm-workspace.yaml ./
-COPY pnpm-lock.yaml ./
+# ===============================
+# pnpm global
+# ===============================
+RUN npm install -g pnpm
 
-# Manifests mínimos
-COPY services/api-gateway/package.json services/api-gateway/
-COPY shared/package.json shared/
+# ===============================
+# Archivos base del workspace
+# ===============================
+COPY ./package.json ./package.json
+COPY ./pnpm-lock.yaml ./pnpm-lock.yaml
+COPY ./pnpm-workspace.yaml ./pnpm-workspace.yaml
+COPY ./tsconfig.base.json ./tsconfig.base.json
 
-# Instalar deps + devDeps del micro
-RUN pnpm install --filter api-gateway... --include=dev
+# ===============================
+# Paquetes internos
+# ===============================
+COPY ./shared ./shared
+COPY ./services/api-gateway ./services/api-gateway
 
-# Código fuente
-COPY services/api-gateway services/api-gateway
-COPY shared shared
+# ===============================
+# Instalar dependencias
+# ===============================
+RUN pnpm install
 
-# 🔥 CLAVE ABSOLUTA: añadir .bin del micro al PATH
-ENV PATH="/app/services/api-gateway/node_modules/.bin:${PATH}"
+# ===============================
+# Build shared (igual que auth)
+# ===============================
+WORKDIR /app/shared
+RUN pnpm run build
 
+# ===============================
+# Entramos al gateway
+# ===============================
 WORKDIR /app/services/api-gateway
 
 EXPOSE 3000
-CMD ["pnpm", "dev"]
 
-
+# ===============================
+# Dev mode
+# ===============================
+CMD ["pnpm", "run", "dev"]

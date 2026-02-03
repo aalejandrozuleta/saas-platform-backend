@@ -1,8 +1,8 @@
 import { Controller, Post, Req } from '@nestjs/common';
 import type { Request } from 'express';
 import { successResponse } from '@saas/shared';
+import { AuthProxy } from '@infrastructure/http/auth.proxy';
 
-import { AuthProxy } from '@/infrastructure/http/auth.proxy';
 
 @Controller('auth')
 export class AuthController {

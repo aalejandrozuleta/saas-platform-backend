@@ -4,19 +4,21 @@
   "scripts": {
     "build": "nest build",
     "start": "nest start",
-    "dev": "nest start --watch",
+    "dev": "pnpm exec nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main"
   },
   "dependencies": {
-    "@nestjs/common": "^10.0.0",
-    "@nestjs/core": "^10.0.0",
     "@saas/shared": "workspace:*",
     "express": "^5.2.1",
     "express-rate-limit": "^8.2.1",
     "helmet": "^8.1.0",
     "reflect-metadata": "^0.2.2",
-    "zod": "^4.3.6"
+    "zod": "^4.3.6",
+    "@nestjs/common": "^11.0.1",
+    "@nestjs/core": "^11.0.1",
+    "@nestjs/platform-express": "^11.0.1"
+
   },
   "devDependencies": {
     "@nestjs/cli": "^11.0.16",

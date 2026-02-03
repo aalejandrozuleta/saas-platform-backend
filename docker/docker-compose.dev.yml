@@ -28,6 +28,8 @@ services:
       dockerfile: services/api-gateway/Dockerfile.dev
     env_file:
       - ../services/api-gateway/.env
+    volumes:
+      - ../services/api-gateway/src:/app/services/api-gateway/src
     networks:
       - saas-dev
 
@@ -37,12 +39,12 @@ services:
   auth-service:
     container_name: auth-service-dev
     build:
-        context: ..
-        dockerfile: services/auth-service/Dockerfile.dev
+      context: ..
+      dockerfile: services/auth-service/Dockerfile.dev
     env_file:
       - ../services/auth-service/.env
     volumes:
-      - ../services/auth-service:/app
+      - ../services/auth-service/src:/app/services/auth-service/src
     depends_on:
       - auth-postgres
       - redis
@@ -60,26 +62,32 @@ services:
       POSTGRES_DB: auth_db
       POSTGRES_USER: auth_user
       POSTGRES_PASSWORD: auth_pass
+    ports:
+      - "5432:5432"
     volumes:
       - auth-postgres-data:/var/lib/postgresql/data
     networks:
       - saas-dev
 
   # =====================
-  # REDIS (SHARED)
+  # REDIS
   # =====================
   redis:
     image: redis:7-alpine
     container_name: redis-dev
+    ports:
+      - "6379:6379"
     networks:
       - saas-dev
 
   # =====================
-  # MONGO (INCIDENCIAS)
+  # MONGO
   # =====================
   mongo:
     image: mongo:7
     container_name: mongo-dev
+    ports:
+      - "27017:27017"
     volumes:
       - mongo-data:/data/db
     networks:
@@ -99,7 +107,7 @@ services:
       - saas-dev
 
   # =====================
-  # LOKI (LOGS)
+  # LOKI
   # =====================
   loki:
     image: grafana/loki:3.0.0
@@ -151,7 +159,7 @@ services:
       - saas-dev
 
   # =====================
-  # ADMIN UIs (DEV)
+  # PGADMIN
   # =====================
   pgadmin:
     image: dpage/pgadmin4
@@ -159,24 +167,40 @@ services:
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@local.dev
       PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
     networks:
       - saas-dev
 
+  # =====================
+  # REDIS COMMANDER
+  # =====================
   redis-commander:
     image: rediscommander/redis-commander
+    platform: linux/amd64
     container_name: redis-commander-dev
     environment:
       REDIS_HOSTS: local:redis:6379
+    ports:
+      - "8081:8081"
     networks:
       - saas-dev
 
+  # =====================
+  # MONGO EXPRESS
+  # =====================
   mongo-express:
     image: mongo-express
     container_name: mongo-express-dev
     environment:
       ME_CONFIG_MONGODB_SERVER: mongo
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: admin
+    ports:
+      - "8082:8081"
     networks:
       - saas-dev
+
 
 networks:
   saas-dev:

@@ -1,212 +1,343 @@
-# 🐳 Docker – Infraestructura de Desarrollo (DEV)
+# Docker – Infraestructura SaaS Platform
 
-Este directorio contiene **toda la infraestructura Docker** necesaria para levantar el entorno de desarrollo de la plataforma **SaaS**, incluyendo:
+Este directorio contiene TODA la infraestructura del entorno local y productivo.
 
-- API Gateway
-- Auth Service
-- Bases de datos
-- Cache
-- Observabilidad (métricas + logs)
-- Reverse proxy (Nginx)
-- Admin UIs
-- Mail catcher (DEV)
-
-👉 **No se requiere configuración del sistema** (`/etc/hosts`, DNS, etc.).
+Incluye reverse proxy, observabilidad, logging, dashboards y orquestación de servicios.
 
 ---
 
-## 📁 Estructura del directorio
+## Estructura
 
 docker/
-├── docker-compose.dev.yml
-├── docker-compose.prod.yml
-├── .dockerignore
-│
-├── nginx/
-│   ├── nginx.conf
-│   └── sites/
-│       └── default.conf
-│
-├── prometheus/
-│   └── prometheus.yml
-│
 ├── grafana/
 │   └── provisioning/
-│       ├── datasources/
-│       │   ├── prometheus.yml
-│       │   └── loki.yml
-│       └── dashboards/
-│           ├── dashboards.yml
-│           ├── saas-overview.json
-│           └── auth-service.json
+│       ├── dashboards/
+│       │   ├── auth-service.json
+│       │   ├── saas-overview.json
+│       │   └── dashboards.yml
+│       └── datasources/
+│           ├── loki.yml
+│           └── prometheus.yml
 │
 ├── loki/
 │   └── loki.yml
 │
+├── nginx/
+│   ├── nginx.conf
+│   └── sites/
+│       ├── default.conf
+│       └── gateway.conf
+│
+├── prometheus/
+│   └── prometheus.yml
+│
 ├── promtail/
 │   └── promtail.yml
 │
+├── docker-compose.dev.yml
+├── docker-compose.prod.yml
+├── .dockerignore
 └── README.md
 
 ---
 
-## 🧠 Arquitectura (resumen)
+# docker-compose.dev.yml
 
-Browser
-  ↓
-NGINX (localhost)
-  ↓
-/api    → API Gateway
-/auth   → Auth Service
-/admin  → Admin UIs
+Levanta el entorno completo de desarrollo:
 
-Infraestructura compartida:
+- nginx (reverse proxy)
+- api-gateway
+- auth-service
+- postgres
+- redis
+- mongo
+- prometheus
+- loki
+- promtail
+- grafana
+- mailpit
+- pgadmin
+- redis-commander
+- mongo-express
 
-- PostgreSQL (Auth)
-- Redis (cache / rate-limit)
-- MongoDB (incidencias / auditoría)
-- Prometheus (métricas)
-- Grafana (dashboards)
-- Loki (logs)
-- Promtail (shipper de logs)
-- Mailpit (SMTP fake DEV)
-
----
-
-## 🚀 Cómo levantar el entorno (DEV)
-
-Desde la raíz del proyecto:
+Arranque:
 
 docker compose -f docker/docker-compose.dev.yml up --build
 
-En segundo plano:
-
-docker compose -f docker/docker-compose.dev.yml up -d --build
-
-Ver contenedores:
-
-docker compose -f docker/docker-compose.dev.yml ps
-
-Ver logs de un servicio:
-
-docker compose -f docker/docker-compose.dev.yml logs -f api-gateway
-
-Parar todo:
+Apagar:
 
 docker compose -f docker/docker-compose.dev.yml down
 
+Reset completo:
+
+docker compose -f docker/docker-compose.dev.yml down -v
+
 ---
 
-## 🌐 URLs disponibles en DEV
+# docker-compose.prod.yml
 
-API Gateway:
-http://localhost/api
+Versión productiva:
 
-Auth Service:
-http://localhost/auth
+- sin mailpit
+- sin commanders
+- sin volúmenes de código
+- usa imágenes ya construidas
 
-Grafana:
-http://localhost/admin/grafana
+Pensado para VPS / cloud.
 
-Prometheus:
+---
+
+# .dockerignore
+
+Evita copiar basura al build:
+
+- node_modules
+- dist
+- .git
+- coverage
+
+Reduce tamaño y acelera builds.
+
+---
+
+# NGINX
+
+Ruta:
+
+docker/nginx
+
+nginx.conf:
+Configuración global del proxy (workers, gzip, includes).
+
+sites/default.conf:
+Fallback server.
+
+sites/gateway.conf:
+Reverse proxy principal hacia api-gateway.
+
+Flujo:
+
+Browser → NGINX → API Gateway → Microservicios
+
+---
+
+# PROMETHEUS
+
+Ruta:
+
+docker/prometheus/prometheus.yml
+
+Define targets y scrape intervals.
+
+Recolecta métricas desde /metrics de:
+
+- api-gateway
+- auth-service
+
+Acceso web:
+
 http://localhost:9090
 
-Mailpit:
+---
+
+# LOKI
+
+Ruta:
+
+docker/loki/loki.yml
+
+Backend de logs.
+
+Recibe logs enviados por promtail.
+
+No tiene UI propia.
+
+---
+
+# PROMTAIL
+
+Ruta:
+
+docker/promtail/promtail.yml
+
+Agente recolector:
+
+- lee stdout de Docker
+- etiqueta contenedores
+- envía logs a Loki
+
+Pipeline:
+
+Containers → Promtail → Loki → Grafana
+
+---
+
+# GRAFANA
+
+Ruta:
+
+docker/grafana
+
+## provisioning/datasources
+
+prometheus.yml:
+Conecta Grafana con Prometheus.
+
+loki.yml:
+Conecta Grafana con Loki.
+
+## provisioning/dashboards
+
+auth-service.json:
+Dashboard del microservicio auth (latencias, requests, errores).
+
+saas-overview.json:
+Vista general del sistema (CPU, RAM, tráfico, estado).
+
+dashboards.yml:
+Declara qué dashboards cargar al iniciar Grafana.
+
+Grafana arranca con todo precargado.
+
+Acceso:
+
+http://localhost:3005
+
+Usuario por defecto:
+admin
+admin
+
+---
+
+# MAILPIT
+
+Servidor SMTP falso para desarrollo.
+
+Todos los correos llegan aquí:
+
 http://localhost:8025
 
 ---
 
-## 📊 Observabilidad
-
-### Métricas
-- Prometheus scrapea /metrics
-- Grafana carga dashboards automáticamente
-
-### Logs
-- Pino → stdout
-- Promtail → Loki
-- Grafana → Explore (logs por service y requestId)
+# COMMANDERS / ADMIN UI
 
 ---
 
-## 🧪 Bases de datos (DEV)
+## PostgreSQL – PGAdmin
 
-PostgreSQL (Auth):
-HOST=auth-postgres
-PORT=5432
-DB=auth_db
-USER=auth_user
-PASS=auth_pass
+UI web para administrar auth-postgres.
 
-Redis:
-HOST=redis
-PORT=6379
+Acceso:
 
-MongoDB:
-HOST=mongo
-PORT=27017
+http://localhost:5050  (si expones puerto)
 
----
+Credenciales:
 
-## 📬 Correos (DEV)
+admin@local.dev
+admin
 
-Mailpit se usa como SMTP fake.
+Host interno al crear conexión:
 
-Configuración típica:
-
-SMTP_HOST=mailpit
-SMTP_PORT=1025
-SMTP_SECURE=false
-
-UI:
-http://localhost:8025
+auth-postgres
+Puerto:
+5432
 
 ---
 
-## 🔐 Buenas prácticas aplicadas
+## Redis – Redis Commander
 
-- Node 24 en contenedores
-- PNPM workspaces
-- Sin volúmenes de node_modules
-- Un DB por microservicio
-- Infra desacoplada
-- Observabilidad desde el día 1
-- DEV ≈ PROD (arquitecturalmente)
+UI web para Redis.
 
----
+Acceso:
 
-## 🛑 Errores comunes (evitados)
+http://localhost:8081
 
-- docker-compose up (legacy)
-- localhost entre contenedores
-- montar node_modules
-- editar /etc/hosts
-- logs sin requestId
+Redis interno:
+
+redis:6379
 
 ---
 
-## 🔄 Flujo típico de trabajo
+## MongoDB – Mongo Express
 
-docker compose -f docker/docker-compose.dev.yml up -d
-pnpm dev
-open http://localhost/admin/grafana
+UI web para Mongo.
 
----
+Acceso:
 
-## 🧭 Roadmap
+http://localhost:8082
 
-- Docker PROD
-- TLS + hardening Nginx
-- Alertas Prometheus
-- CI/CD
-- Runbook de incidentes
+Mongo interno:
+
+mongo
 
 ---
 
-## ✅ Estado del stack
+# RED INTERNA
 
-Arquitectura:   OK
-Observabilidad: OK
-Escalabilidad:  OK
-Nivel técnico:  Senior / Lead
+Todos los servicios están conectados a:
+
+saas-dev
+
+Comunicación usando nombres de servicio:
+
+auth-service
+api-gateway
+redis
+mongo
+auth-postgres
+
+Nunca usar localhost entre contenedores.
+
+---
+
+# VOLUMENES
+
+Persistencia real:
+
+auth-postgres-data
+mongo-data
+
+Listar:
+
+docker volume ls
+
+Eliminar:
+
+docker volume rm docker_auth-postgres-data docker_mongo-data
+
+---
+
+# DESARROLLO
+
+Solo se monta el código fuente:
+
+services/auth-service/src
+services/api-gateway/src
+
+node_modules vive dentro del contenedor.
+
+Hot reload activo con:
+
+nest start --watch
+
+---
+
+# RESUMEN
+
+Este directorio representa un mini cloud local:
+
+- Reverse proxy
+- Microservicios
+- PostgreSQL + Redis + Mongo
+- Métricas (Prometheus)
+- Logs (Loki + Promtail)
+- Dashboards (Grafana)
+- Mail sandbox
+- Admin UIs
+- Dev y Prod separados
+
+Infraestructura SaaS real.
+
+Nada aquí es decorativo.
+
 EOF

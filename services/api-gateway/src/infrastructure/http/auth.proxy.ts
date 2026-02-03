@@ -1,8 +1,7 @@
 import type { Request } from 'express';
-
 import { AuthServiceUnavailableException } from '../errors/auth-service.exception';
+import { EnvService } from '@config/env/env.service';
 
-import { EnvService } from '@/config/env/env.service';
 
 /**
  * Proxy HTTP hacia el Auth Service.
