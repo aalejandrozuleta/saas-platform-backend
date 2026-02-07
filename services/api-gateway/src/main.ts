@@ -3,6 +3,8 @@ import { NestFactory } from '@nestjs/core';
 import helmet from 'helmet';
 import { logger } from '@saas/shared';
 import express from 'express';
+import { VersioningType } from '@nestjs/common';
+
 import { AppModule } from './app.module';
 import { methodGuardMiddleware } from './infrastructure/security/method-guard.middleware';
 import { pathSanitizerMiddleware } from './infrastructure/security/path-sanitizer.middleware';
@@ -10,7 +12,6 @@ import { headerValidationMiddleware } from './infrastructure/security/header-val
 import { globalRateLimiter } from './infrastructure/security/rate-limit.middleware';
 import { timeoutMiddleware } from './infrastructure/security/timeout.middleware';
 import { EnvService } from './config/env/env.service';
-import { VersioningType } from '@nestjs/common';
 
 
 async function bootstrap(): Promise<void> {

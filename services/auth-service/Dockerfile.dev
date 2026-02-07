@@ -8,4 +8,4 @@ ENV PNPM_STORE_PATH=/pnpm-store
 WORKDIR /app/services/auth-service
 EXPOSE 3001
 
-CMD ["pnpm", "run", "devs"]
+CMD ["pnpm", "run", "dev"]

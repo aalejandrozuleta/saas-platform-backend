@@ -1,12 +1,21 @@
 import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
+import { EnvModule } from '@config/env/env.module';
+import { AuditMongoModule } from '@infrastructure/audit/mongo/audit.module';
 import { MetricsModule } from '@infrastructure/metrics/metrics.module';
-import { MongoModule } from '@infrastructure/persistence/mongo/mongo.module';
 import { SqlModule } from '@infrastructure/persistence/sql/sql.module';
-
-import { HttpLoggerMiddleware } from './infrastructure/logger/http-logger.middleware';
+import { AuthModule } from '@modules/auth/auth.module';
+import { HttpLoggerMiddleware } from '@infrastructure/logger/http-logger.middleware';
+import { MongoModule } from '@infrastructure/persistence/mongo/mongo.module';
 
 @Module({
-  imports: [MetricsModule,MongoModule, SqlModule],
+  imports: [
+    EnvModule,
+    MongoModule,        // ← conexión primero
+    AuditMongoModule,   // ← luego schemas
+    MetricsModule,
+    SqlModule,
+    AuthModule,
+  ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): void {

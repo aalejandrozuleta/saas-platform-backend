@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { UserRepository } from '@domain/repositories/user.repository';
 import { EmailVO } from '@domain/value-objects/email.vo';
 import { User } from '@domain/entities/user.entity';
+
 import { UserMapper } from '../mappers/user.mapper';
 import { PrismaService } from '../sql/prisma.service';
 

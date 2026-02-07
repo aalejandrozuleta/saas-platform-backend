@@ -1,9 +1,10 @@
+import { randomUUID } from 'crypto';
+
 import { UserRepository } from '@domain/repositories/user.repository';
 import { EmailVO } from '@domain/value-objects/email.vo';
 import { PasswordVO } from '@domain/value-objects/password.vo';
 import { User } from '@domain/entities/user.entity';
 import { EmailAlreadyExistsError } from '@domain/errors/email-already-exists.error';
-import { randomUUID } from 'crypto';
 import { PasswordHasherService } from '@infrastructure/crypto/password-hasher.service';
 
 /**

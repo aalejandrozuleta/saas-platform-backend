@@ -1,12 +1,12 @@
 import { Body, Controller, Post, Req } from '@nestjs/common';
 import { RegisterUserDto } from '@application/dto/register/register-user.dto';
-import { RegisterUserUseCase } from '../../application/use-cases/register-user.use-case';
 import { I18nService } from '@saas/shared/i18n';
+import { RegisterUserUseCase } from '@application/use-cases/register-user.use-case';
 
 /**
  * Controller de autenticación
  */
-@Controller()
+@Controller({version: '1'}) // 🔴 AQUÍ va el path base
 export class AuthController {
   constructor(
     private readonly registerUserUseCase: RegisterUserUseCase,

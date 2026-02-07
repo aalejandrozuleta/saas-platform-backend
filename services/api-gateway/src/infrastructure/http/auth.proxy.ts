@@ -34,7 +34,7 @@ export class AuthProxy {
   ): Promise<T> {
     try {
       const response = await this.client.request<T>({
-        url: path,
+        url: `/v1/auth${path}`,
         method: req.method as any,
         data: req.body,
         headers: this.extractHeaders(req),

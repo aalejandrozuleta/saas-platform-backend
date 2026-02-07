@@ -1,11 +1,11 @@
+import { randomUUID } from 'crypto';
+
 import {
   Controller,
   Post,
   Req,
 } from '@nestjs/common';
 import type { Request } from 'express';
-import { randomUUID } from 'crypto';
-
 import { successResponse } from '@saas/shared';
 import { AuthProxy } from '@infrastructure/http/auth.proxy';
 
@@ -18,7 +18,7 @@ import { AuthProxy } from '@infrastructure/http/auth.proxy';
  * - Reenviar requests al auth-service
  * - Normalizar respuestas
  */
-@Controller()
+@Controller('auth')
 export class AuthController {
   constructor(private readonly authProxy: AuthProxy) {}
 

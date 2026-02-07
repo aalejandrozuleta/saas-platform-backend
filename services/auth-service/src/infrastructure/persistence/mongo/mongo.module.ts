@@ -1,20 +1,19 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { EnvModule } from '@config/env/env.module';
-import { EnvService } from '@config/env/env.service';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
-/**
- * Módulo de conexión a MongoDB (auditoría).
- */
 @Module({
   imports: [
-    EnvModule,
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     MongooseModule.forRootAsync({
-      inject: [EnvService],
-      useFactory: (env: EnvService) => ({
-        uri: env.get('MONGO_URL'),
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        uri: config.get<string>('MONGO_URL'),
       }),
     }),
   ],
+  exports: [MongooseModule],
 })
 export class MongoModule {}
