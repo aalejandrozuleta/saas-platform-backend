@@ -1,7 +1,8 @@
 import { EmailVO } from '@domain/value-objects/email.vo';
 import { User } from '@domain/entities/user.entity';
 import { UserStatus as DomainUserStatus } from '@domain/enums/user-status.enum';
-import { UserStatus as PrismaUserStatus } from 'generated/prisma/enums';
+
+import { UserStatus as PrismaUserStatus } from '../../../../generated/prisma/enums';;
 
 /**
  * Mapper de Usuario
@@ -42,6 +43,8 @@ export class UserMapper {
         return DomainUserStatus.PENDING;
       case PrismaUserStatus.BLOCKED:
         return DomainUserStatus.BLOCKED;
+      default:
+        return UserMapper.assertUnreachable(status);
     }
   }
 
@@ -55,6 +58,13 @@ export class UserMapper {
         return PrismaUserStatus.PENDING;
       case DomainUserStatus.BLOCKED:
         return PrismaUserStatus.BLOCKED;
+      default:
+        return UserMapper.assertUnreachable(status);
     }
   }
+
+  private static assertUnreachable(value: never): never {
+    throw new Error(`Estado no soportado: ${value}`);
+  }
+
 }

@@ -18,6 +18,51 @@ const config: Config = {
 
   // Setup específico si luego lo necesitas
   setupFilesAfterEnv: [],
+
+  testMatch: ['**/*.spec.ts'],
+
+  collectCoverageFrom: [
+    'src/**/*.ts',
+
+    // ⛔️ excluir tests
+    '!src/**/*.spec.ts',
+    '!src/**/*.test.ts',
+    '!src/**/__tests__/**',
+  ],
+
+
+  coveragePathIgnorePatterns: [
+    '/node_modules/',
+
+    // tests
+    '\\.spec\\.ts$',
+    '\\.test\\.ts$',
+    '/__tests__/',
+
+    // DTOs
+    '/application/dto/',
+
+    // Contracts & wiring
+    '/domain/repositories/',
+    '/domain/token/',
+    '/modules/',
+    '\\.module\\.ts$',
+    '\\.providers\\.ts$',
+
+    // Config & bootstrap
+    '/config/',
+    'main.ts',
+  ],
+
+    moduleNameMapper: {
+    '^@domain/(.*)$': '<rootDir>/src/domain/$1',
+    '^@application/(.*)$': '<rootDir>/src/application/$1',
+    '^@infrastructure/(.*)$': '<rootDir>/src/infrastructure/$1',
+    '^@modules/(.*)$': '<rootDir>/src/modules/$1',
+    '^@config/(.*)$': '<rootDir>/src/config/$1',
+
+    '^@prisma$': '<rootDir>/generated/prisma',
+  },
 };
 
 export default config;

@@ -7,11 +7,23 @@ import boundaries from 'eslint-plugin-boundaries';
 
 export default [
   /**
+   * ❗ Ignorados globales (OBLIGATORIO EN FLAT CONFIG)
+   */
+  {
+    ignores: [
+      '**/node_modules/**',
+      '**/dist/**',
+      '**/.turbo/**',
+      '**/.next/**',
+      '**/coverage/**',
+    ],
+  },
+
+  /**
    * Configuración base TypeScript
    */
   {
     files: ['**/*.ts'],
-    ignores: ['**/dist/**', '**/node_modules/**'],
     languageOptions: {
       parser: tsParser,
       parserOptions: {
@@ -32,7 +44,14 @@ export default [
       'import/order': [
         'error',
         {
-          groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
+          groups: [
+            'builtin',
+            'external',
+            'internal',
+            'parent',
+            'sibling',
+            'index',
+          ],
           'newlines-between': 'always',
         },
       ],

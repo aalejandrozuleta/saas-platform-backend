@@ -9,12 +9,12 @@
       "@application/*": ["src/application/*"],
       "@infrastructure/*": ["src/infrastructure/*"],
       "@modules/*": ["src/modules/*"],
-      "@config/*": ["src/config/*"]
-    }
+      "@config/*": ["src/config/*"],
+      "@prisma/*": ["generated/prisma/*"]    }
   },
   "references": [
     { "path": "../../shared" }
   ],
-  "include": ["src/**/*.ts"],
+  "include": ["src/**/*.ts", "generated/**/*.ts"],
   "exclude": ["node_modules", "dist"]
 }
