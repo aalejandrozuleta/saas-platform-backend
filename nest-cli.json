@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json.schemastore.org/nest-cli",
+  "collection": "@nestjs/schematics",
+  "monorepo": true,
+  "projects": {
+    "auth-service": {
+      "type": "application",
+      "root": "services/auth-service",
+      "entryFile": "main",
+      "sourceRoot": "services/auth-service/src",
+      "compilerOptions": {
+        "tsConfigPath": "services/auth-service/tsconfig.build.json",
+        "deleteOutDir": true
+      }
+    }
+  }
+}

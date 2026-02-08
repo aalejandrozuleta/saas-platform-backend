@@ -13,7 +13,6 @@ import { globalRateLimiter } from './infrastructure/security/rate-limit.middlewa
 import { timeoutMiddleware } from './infrastructure/security/timeout.middleware';
 import { EnvService } from './config/env/env.service';
 
-
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
   const envService = app.get(EnvService);

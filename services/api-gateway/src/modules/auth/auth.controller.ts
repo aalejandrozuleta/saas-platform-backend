@@ -28,8 +28,7 @@ export class AuthController {
   @Post('register')
   async register(@Req() req: Request) {
     this.prepareRequest(req);
-
-    const data = await this.authProxy.forward(req, '/register');
+    const data = await this.authProxy.forward(req, '/register');    
     return successResponse(data);
   }
 

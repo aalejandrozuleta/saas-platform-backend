@@ -1,14 +1,15 @@
 import { Provider } from '@nestjs/common';
-import { UserRepository } from '@domain/repositories/user.repository';
+// import { UserRepository } from '@domain/repositories/user.repository';
 import { UserPrismaRepository } from '@infrastructure/persistence/prisma/user.prisma.repository';
 import { PasswordHasherService } from '@infrastructure/crypto/password-hasher.service';
+import { USER_REPOSITORY } from '@domain/token/user-repository.token';
 
 /**
  * Providers del módulo Auth
  */
 export const authProviders: Provider[] = [
   {
-    provide: UserRepository,
+    provide: USER_REPOSITORY,
     useClass: UserPrismaRepository,
   },
   PasswordHasherService,

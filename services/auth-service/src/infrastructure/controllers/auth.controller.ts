@@ -1,6 +1,6 @@
 import { Body, Controller, Post, Req } from '@nestjs/common';
 import { RegisterUserDto } from '@application/dto/register/register-user.dto';
-import { I18nService } from '@saas/shared/i18n';
+import { I18nService } from '@saas/shared';
 import { RegisterUserUseCase } from '@application/use-cases/register-user.use-case';
 
 /**

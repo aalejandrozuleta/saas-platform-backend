@@ -14,6 +14,7 @@ import axios, { AxiosInstance } from 'axios';
 @Injectable()
 export class AuthProxy {
   private readonly client: AxiosInstance;
+  private readonly AUTH_BASE_PATH = '/auth/v1';
 
   constructor() {
     this.client = axios.create({
@@ -34,7 +35,7 @@ export class AuthProxy {
   ): Promise<T> {
     try {
       const response = await this.client.request<T>({
-        url: `/v1/auth${path}`,
+        url: `${this.AUTH_BASE_PATH}${path}`,
         method: req.method as any,
         data: req.body,
         headers: this.extractHeaders(req),

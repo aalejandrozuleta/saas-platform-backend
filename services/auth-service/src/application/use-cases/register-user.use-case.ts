@@ -6,12 +6,15 @@ import { PasswordVO } from '@domain/value-objects/password.vo';
 import { User } from '@domain/entities/user.entity';
 import { EmailAlreadyExistsError } from '@domain/errors/email-already-exists.error';
 import { PasswordHasherService } from '@infrastructure/crypto/password-hasher.service';
+import { Inject } from '@nestjs/common';
+import { USER_REPOSITORY } from '@domain/token/user-repository.token';
 
 /**
  * Caso de uso para registrar usuario
  */
 export class RegisterUserUseCase {
   constructor(
+    @Inject(USER_REPOSITORY)
     private readonly userRepository: UserRepository,
     private readonly passwordHasher: PasswordHasherService,
   ) {}
