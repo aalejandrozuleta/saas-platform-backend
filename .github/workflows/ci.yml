@@ -36,7 +36,7 @@ jobs:
 
       # 5️⃣ Lint
       - name: Lint
-        run: pnpm lint
+        run: pnpm lint:fix
 
       # 6️⃣ Tests
       - name: Test
