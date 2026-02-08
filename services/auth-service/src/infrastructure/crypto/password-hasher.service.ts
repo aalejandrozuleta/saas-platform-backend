@@ -1,10 +1,11 @@
+import { PasswordHasher } from '@application/ports/password-hasher.port';
 import * as argon2 from 'argon2';
 
 /**
  * Servicio de hash de contraseñas
  * Implementación con Argon2id (recomendado por OWASP)
  */
-export class PasswordHasherService {
+export class PasswordHasherService implements PasswordHasher{
   /**
    * Genera un hash seguro para una contraseña
    * @param password Contraseña en texto plano

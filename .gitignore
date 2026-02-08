@@ -16,6 +16,7 @@ build/
 coverage/
 .tmp/
 .cache/
+.tsbuild/
 
 ############################################
 # TypeScript

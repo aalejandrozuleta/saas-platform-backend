@@ -5,25 +5,25 @@ import { EmailVO } from '@domain/value-objects/email.vo';
 import { PasswordVO } from '@domain/value-objects/password.vo';
 import { User } from '@domain/entities/user.entity';
 import { EmailAlreadyExistsError } from '@domain/errors/email-already-exists.error';
-import { PasswordHasherService } from '@infrastructure/crypto/password-hasher.service';
 import { Inject } from '@nestjs/common';
 import { USER_REPOSITORY } from '@domain/token/user-repository.token';
 import { PLATFORM_LOGGER, PlatformLogger } from '@saas/shared';
-import { AuditService } from '@application/audit/audit.service';
 import { AuditCategory } from '@domain/audit/audit-category.enum';
 import { AuthAuditEvent } from '@domain/audit/auth-events.enum';
+import { PasswordHasher } from '@application/ports/password-hasher.port';
+import { AuditLogger } from '@application/ports/audit-logger.port';
 
 /**
  * Caso de uso para registrar usuario
  */
 export class RegisterUserUseCase {
   constructor(
-     @Inject(USER_REPOSITORY)
+    @Inject(USER_REPOSITORY)
     private readonly userRepository: UserRepository,
 
-    private readonly passwordHasher: PasswordHasherService,
+    private readonly passwordHasher: PasswordHasher,
 
-    private readonly auditService: AuditService,
+    private readonly auditLogger: AuditLogger,
 
     @Inject(PLATFORM_LOGGER)
     private readonly logger: PlatformLogger,
@@ -48,7 +48,7 @@ export class RegisterUserUseCase {
         ip: context.ip,
       });
 
-      await this.auditService.log({
+      await this.auditLogger.log({
         userId: exists.id,
         category: AuditCategory.AUTH,
         event: AuthAuditEvent.REGISTER_FAILED,
@@ -70,7 +70,7 @@ export class RegisterUserUseCase {
 
     await this.userRepository.save(user);
 
-    await this.auditService.log({
+    await this.auditLogger.log({
       userId: user.id,
       category: AuditCategory.AUTH,
       event: AuthAuditEvent.REGISTER_SUCCESS,

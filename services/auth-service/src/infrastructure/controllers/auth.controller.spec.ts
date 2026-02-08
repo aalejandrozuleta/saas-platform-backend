@@ -7,6 +7,13 @@ import { EmailVO } from '@domain/value-objects/email.vo';
 
 import { AuthController } from './auth.controller';
 
+/**
+ * Tests unitarios del AuthController
+ *
+ * - No levanta servidor HTTP
+ * - No usa supertest
+ * - Aísla completamente el controller
+ */
 describe('AuthController', () => {
   let controller: AuthController;
   let registerUserUseCase: jest.Mocked<RegisterUserUseCase>;
@@ -37,6 +44,7 @@ describe('AuthController', () => {
   });
 
   it('debe registrar usuario y devolver respuesta en español', async () => {
+    // Arrange
     const user = User.create({
       id: 'uuid-test',
       email: EmailVO.create('test@example.com'),
@@ -52,16 +60,26 @@ describe('AuthController', () => {
     };
 
     const req = {
+      ip: '127.0.0.1',
       headers: {
         'accept-language': 'es',
+        'x-country': 'CO',
+        'x-device-fingerprint': 'device-123',
       },
     };
 
+    // Act
     const result = await controller.register(dto, req);
 
+    // Assert
     expect(registerUserUseCase.execute).toHaveBeenCalledWith(
       dto.email,
       dto.password,
+      {
+        ip: '127.0.0.1',
+        country: 'CO',
+        deviceFingerprint: 'device-123',
+      },
     );
 
     expect(i18n.translate).toHaveBeenCalledWith(
@@ -79,14 +97,14 @@ describe('AuthController', () => {
   });
 
   it('debe usar inglés por defecto si no es español', async () => {
-    registerUserUseCase.execute.mockResolvedValue(
-      User.create({
-        id: 'uuid-test',
-        email: EmailVO.create('test@example.com'),
-        passwordHash: 'hash',
-      }),
-    );
+    // Arrange
+    const user = User.create({
+      id: 'uuid-test',
+      email: EmailVO.create('test@example.com'),
+      passwordHash: 'hash',
+    });
 
+    registerUserUseCase.execute.mockResolvedValue(user);
     i18n.translate.mockReturnValue('User registered successfully');
 
     const dto: RegisterUserDto = {
@@ -95,12 +113,25 @@ describe('AuthController', () => {
     };
 
     const req = {
+      ip: '127.0.0.1',
       headers: {
         'accept-language': 'en',
       },
     };
 
+    // Act
     const result = await controller.register(dto, req);
+
+    // Assert
+    expect(registerUserUseCase.execute).toHaveBeenCalledWith(
+      dto.email,
+      dto.password,
+      {
+        ip: '127.0.0.1',
+        country: undefined,
+        deviceFingerprint: undefined,
+      },
+    );
 
     expect(i18n.translate).toHaveBeenCalledWith(
       'REGISTER_SUCCESS',
