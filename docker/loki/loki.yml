@@ -5,15 +5,14 @@ server:
 
 common:
   path_prefix: /loki
-  storage:
-    filesystem:
-      directories:
-        - /loki/chunks
-        - /loki/index
-  replication_factor: 1
+
   ring:
     kvstore:
       store: inmemory
+
+storage_config:
+  filesystem:
+    directory: /loki/chunks
 
 schema_config:
   configs:
@@ -24,3 +23,9 @@ schema_config:
       index:
         prefix: index_
         period: 24h
+
+limits_config:
+  retention_period: 168h
+
+analytics:
+  reporting_enabled: false

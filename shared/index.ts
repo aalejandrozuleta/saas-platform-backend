@@ -7,3 +7,5 @@ export * from './response';
 // export * from './swagger';
 // export * from './utils';
 // export * from './validators';
+export * from './i18n';
+export * from './shared.module';

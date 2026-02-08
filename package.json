@@ -10,7 +10,8 @@
     "test": "pnpm -r test",
     "dev": "docker compose -f docker/docker-compose.dev.yml up --build",
     "test:watch": "pnpm -r test:watch",
-    "test:cov": "pnpm -r test:cov"
+    "test:cov": "pnpm -r test:cov",
+    "dev:auth": "nest start auth-service --watch"
   },
   "devDependencies": {
     "@nestjs/cli": "^11.0.16",
@@ -42,8 +43,28 @@
     ]
   },
   "dependencies": {
-    "@nestjs/mongoose": "^11.0.4",
+    "@nestjs/common": "11.1.13",
+    "@nestjs/config": "3.2.3",
+    "@nestjs/core": "11.1.13",
+    "@nestjs/mongoose": "11.0.4",
+    "@nestjs/platform-express": "11.1.13",
     "@prisma/client": "^7.3.0",
     "mongoose": "^9.1.5"
+  },
+  "pnpm": {
+    "overrides": {
+      "@nestjs/common": "11.1.13",
+      "@nestjs/core": "11.1.13",
+      "@nestjs/platform-express": "11.1.13",
+      "@nestjs/config": "3.2.3",
+      "@nestjs/mongoose": "11.0.4"
+    },
+    "ignoredBuiltDependencies": [
+      "@nestjs/core",
+      "@prisma/engines",
+      "argon2",
+      "prisma",
+      "unrs-resolver"
+    ]
   }
 }

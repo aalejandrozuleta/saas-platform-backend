@@ -4,25 +4,27 @@
   "scripts": {
     "build": "nest build",
     "start": "nest start",
+    "predev": "pnpm --filter @saas/shared build",
     "dev": "pnpm exec nest start --watch",
+    "devs": "node --watch --require ts-node/register --require tsconfig-paths/register src/main.ts",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main"
   },
   "dependencies": {
+    "@nestjs/platform-express": "11.1.13",
     "@saas/shared": "workspace:*",
+    "axios": "^1.13.4",
     "express": "^5.2.1",
     "express-rate-limit": "^8.2.1",
     "helmet": "^8.1.0",
     "reflect-metadata": "^0.2.2",
-    "zod": "^4.3.6",
-    "@nestjs/common": "^11.0.1",
-    "@nestjs/core": "^11.0.1",
-    "@nestjs/platform-express": "^11.0.1"
-
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@nestjs/cli": "^11.0.16",
     "@types/express": "^5.0.6",
-    "@types/node": "^22.19.7"
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^5.9.3"
   }
 }

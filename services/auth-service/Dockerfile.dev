@@ -1,23 +1,11 @@
 FROM node:24-alpine
 
 WORKDIR /app
+
 RUN npm install -g pnpm
-
-COPY ./package.json ./package.json
-COPY ./pnpm-lock.yaml ./pnpm-lock.yaml
-COPY ./pnpm-workspace.yaml ./pnpm-workspace.yaml
-COPY ./tsconfig.base.json ./tsconfig.base.json
-
-COPY ./shared ./shared
-COPY ./services/auth-service ./services/auth-service
-
-RUN pnpm install
-
-# 🔥 build shared
-WORKDIR /app/shared
-RUN pnpm run build
+ENV PNPM_STORE_PATH=/pnpm-store
 
 WORKDIR /app/services/auth-service
+EXPOSE 3001
 
-EXPOSE 3000
 CMD ["pnpm", "run", "dev"]

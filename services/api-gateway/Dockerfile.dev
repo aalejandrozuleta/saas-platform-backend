@@ -1,48 +1,11 @@
 FROM node:24-alpine
 
-# ===============================
-# Root del monorepo
-# ===============================
 WORKDIR /app
 
-# ===============================
-# pnpm global
-# ===============================
 RUN npm install -g pnpm
+ENV PNPM_STORE_PATH=/pnpm-store
 
-# ===============================
-# Archivos base del workspace
-# ===============================
-COPY ./package.json ./package.json
-COPY ./pnpm-lock.yaml ./pnpm-lock.yaml
-COPY ./pnpm-workspace.yaml ./pnpm-workspace.yaml
-COPY ./tsconfig.base.json ./tsconfig.base.json
-
-# ===============================
-# Paquetes internos
-# ===============================
-COPY ./shared ./shared
-COPY ./services/api-gateway ./services/api-gateway
-
-# ===============================
-# Instalar dependencias
-# ===============================
-RUN pnpm install
-
-# ===============================
-# Build shared (igual que auth)
-# ===============================
-WORKDIR /app/shared
-RUN pnpm run build
-
-# ===============================
-# Entramos al gateway
-# ===============================
 WORKDIR /app/services/api-gateway
-
 EXPOSE 3000
 
-# ===============================
-# Dev mode
-# ===============================
 CMD ["pnpm", "run", "dev"]

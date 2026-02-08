@@ -1,0 +1,117 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id            String     @id @default(uuid())
+  email         String     @unique
+  emailVerified Boolean    @default(false)
+  passwordHash  String
+  status        UserStatus @default(ACTIVE)
+
+  failedLoginAttempts Int       @default(0)
+  blockedUntil        DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relaciones
+  security      UserSecurity?
+  devices       Device[]
+  sessions      Session[]
+  refreshTokens RefreshToken[]
+  recoveryCodes RecoveryCode[]
+}
+
+model UserSecurity {
+  userId           String           @id
+  twoFactorEnabled Boolean          @default(false)
+  twoFactorMethod  TwoFactorMethod?
+  trustedCountries String[]
+
+  lastPasswordChange DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Device {
+  id          String  @id @default(uuid())
+  userId      String
+  fingerprint String
+  deviceName  String?
+  os          String?
+  browser     String?
+  country     String?
+  ipAddress   String
+  isTrusted   Boolean @default(false)
+
+  lastUsedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sessions Session[]
+
+  @@unique([userId, fingerprint])
+}
+
+model Session {
+  id        String  @id @default(uuid())
+  userId    String
+  deviceId  String?
+  ipAddress String
+  country   String?
+
+  startedAt DateTime  @default(now())
+  endedAt   DateTime?
+  revokedAt DateTime?
+
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  device        Device?        @relation(fields: [deviceId], references: [id])
+  refreshTokens RefreshToken[]
+}
+
+model RefreshToken {
+  id        String    @id @default(uuid())
+  userId    String
+  sessionId String
+  tokenHash String
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  session Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+}
+
+model RecoveryCode {
+  id        String    @id @default(uuid())
+  userId    String
+  codeHash  String
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum UserStatus {
+  ACTIVE
+  BLOCKED
+  PENDING
+}
+
+enum TwoFactorMethod {
+  TOTP
+  EMAIL
+  SMS
+}

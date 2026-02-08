@@ -1,10 +1,13 @@
+import { Injectable } from '@nestjs/common';
 import { logger } from '@saas/shared';
 
 import { envSchema, EnvVars } from './env.schema';
 
 /**
- * Servicio centralizado de acceso a variables de entorno.
+ * Servicio centralizado de acceso a variables de entorno
+ * validadas con Zod.
  */
+@Injectable()
 export class EnvService {
   private readonly env: EnvVars;
 
@@ -12,7 +15,9 @@ export class EnvService {
     const parsed = envSchema.safeParse(process.env);
 
     if (!parsed.success) {
-      logger.error('Invalid environment configuration');
+      logger.error('Invalid environment configuration', {
+        errors: parsed.error.flatten(),
+      });
       process.exit(1);
     }
 
