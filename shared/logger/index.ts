@@ -8,3 +8,4 @@ export * from './events/auth.events';
 export { logger } from './logger.factory';
 export * from './logger.token';
 export * from './logger.provider';
+export * from './http-logger.middleware';

@@ -11,7 +11,8 @@
     "dev": "docker compose -f docker/docker-compose.dev.yml up --build",
     "test:watch": "pnpm -r test:watch",
     "test:cov": "pnpm -r test:cov",
-    "dev:auth": "nest start auth-service --watch"
+    "dev:auth": "nest start auth-service --watch",
+    "sonar:local": "dotenv -e .env.sonar -- sonar-scanner"
   },
   "devDependencies": {
     "@nestjs/cli": "^11.0.16",
@@ -19,6 +20,7 @@
     "@types/node": "^22.19.7",
     "@typescript-eslint/eslint-plugin": "^8.54.0",
     "@typescript-eslint/parser": "^8.54.0",
+    "dotenv-cli": "^11.0.0",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-boundaries": "^5.3.1",

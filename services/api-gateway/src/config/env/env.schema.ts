@@ -10,7 +10,7 @@ export const envSchema = z.object({
 
   PORT: z.coerce.number().int().positive(),
 
-  AUTH_SERVICE_URL: z.string().url(),
+  AUTH_SERVICE_URL: z.string(),
   AUTH_SERVICE_TIMEOUT: z.coerce.number().int().positive(),
 
   CORS_ORIGINS: z

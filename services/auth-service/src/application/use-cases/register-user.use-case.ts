@@ -1,9 +1,9 @@
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 
 import { UserRepository } from '@domain/repositories/user.repository';
 import { EmailVO } from '@domain/value-objects/email.vo';
 import { PasswordVO } from '@domain/value-objects/password.vo';
-import { User } from '@domain/entities/user.entity';
+import { User } from '@domain/entities/user.entity'; 
 import { EmailAlreadyExistsError } from '@domain/errors/email-already-exists.error';
 import { Inject } from '@nestjs/common';
 import { USER_REPOSITORY } from '@domain/token/user-repository.token';

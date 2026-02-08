@@ -16,7 +16,7 @@ export class EnvService {
 
     if (!parsed.success) {
       logger.error('Invalid environment configuration', {
-        errors: parsed.error.flatten(),
+        errors: parsed.error,
       });
       process.exit(1);
     }

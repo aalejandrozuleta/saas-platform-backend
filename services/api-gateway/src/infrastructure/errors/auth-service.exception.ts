@@ -1,6 +1,4 @@
-import { BaseException } from '@saas/shared';
-import { ErrorCode } from '@saas/shared';
-
+import { BaseException, ErrorCode } from '@saas/shared';
 /**
  * Error cuando el Auth Service no está disponible.
  */

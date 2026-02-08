@@ -16,14 +16,14 @@ jobs:
         with:
           fetch-depth: 0
 
-      # 1️⃣ Instalar pnpm PRIMERO
+      # 1️⃣ pnpm
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 10
           run_install: false
 
-      # 2️⃣ Luego Node (SIN cache pnpm)
+      # 2️⃣ Node
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -33,7 +33,15 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # 4️⃣ SonarCloud
+      # 4️⃣ Ejecutar tests con coverage (CLAVE)
+      - name: Run tests with coverage (auth-service)
+        run: pnpm --filter auth-service test:cov
+
+      # 5️⃣ Verificar coverage (debug útil)
+      - name: Verify coverage files
+        run: ls -la services/**/coverage/lcov.info
+
+      # 6️⃣ SonarCloud
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v2
         env:
@@ -43,8 +51,6 @@ jobs:
             -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
             -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
             -Dsonar.sources=shared,services
-            -Dsonar.tests=services
-            -Dsonar.test.inclusions=**/*.spec.ts
             -Dsonar.exclusions=**/dist/**,**/node_modules/**,**/*.module.ts,**/main.ts
             -Dsonar.typescript.tsconfigPaths=tsconfig.base.json,services/*/tsconfig.json
-            -Dsonar.javascript.lcov.reportPaths=services/*/coverage/lcov.info
+            -Dsonar.javascript.lcov.reportPaths=services/**/coverage/lcov.info

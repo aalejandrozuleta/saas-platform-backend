@@ -4,9 +4,9 @@ import { AuditMongoModule } from '@infrastructure/audit/mongo/audit-mongo.module
 import { MetricsModule } from '@infrastructure/metrics/metrics.module';
 import { SqlModule } from '@infrastructure/persistence/sql/sql.module';
 import { AuthModule } from '@modules/auth/auth.module';
-import { HttpLoggerMiddleware } from '@infrastructure/logger/http-logger.middleware';
 import { MongoModule } from '@infrastructure/persistence/mongo/mongo.module';
 import { ConfigModule } from '@nestjs/config';
+import { HttpLoggerMiddleware } from '@saas/shared';
 
 @Module({
   imports: [

@@ -35,8 +35,8 @@ const config: Config = {
     '/node_modules/',
 
     // tests
-    '\\.spec\\.ts$',
-    '\\.test\\.ts$',
+    String.raw`\.spec\.ts$`,
+    String.raw`\.test\.ts$`,
     '/__tests__/',
 
     // DTOs
@@ -46,15 +46,16 @@ const config: Config = {
     '/domain/repositories/',
     '/domain/token/',
     '/modules/',
-    '\\.module\\.ts$',
-    '\\.providers\\.ts$',
+    String.raw`\.module\.ts$`,
+    String.raw`\.providers\.ts$`,
 
     // Config & bootstrap
     '/config/',
     'main.ts',
   ],
 
-    moduleNameMapper: {
+
+  moduleNameMapper: {
     '^@domain/(.*)$': '<rootDir>/src/domain/$1',
     '^@application/(.*)$': '<rootDir>/src/application/$1',
     '^@infrastructure/(.*)$': '<rootDir>/src/infrastructure/$1',
