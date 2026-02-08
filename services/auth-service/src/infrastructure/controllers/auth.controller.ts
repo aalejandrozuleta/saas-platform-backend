@@ -6,7 +6,7 @@ import { RegisterUserUseCase } from '@application/use-cases/register-user.use-ca
 /**
  * Controller de autenticación
  */
-@Controller({version: '1'}) // 🔴 AQUÍ va el path base
+@Controller({version: '1'}) 
 export class AuthController {
   constructor(
     private readonly registerUserUseCase: RegisterUserUseCase,
@@ -22,6 +22,11 @@ export class AuthController {
     const user = await this.registerUserUseCase.execute(
       dto.email,
       dto.password,
+      {
+        ip: req.ip,
+        country: req.headers['x-country'] as string,
+        deviceFingerprint: req.headers['x-device-fingerprint'] as string,
+      },
     );
 
     return {

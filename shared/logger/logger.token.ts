@@ -1,0 +1,1 @@
+export const PLATFORM_LOGGER = Symbol('PLATFORM_LOGGER');

@@ -1,0 +1,3 @@
+export const AUDIT_EVENT_REPOSITORY = Symbol(
+  'AUDIT_EVENT_REPOSITORY',
+);

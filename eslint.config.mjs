@@ -23,7 +23,8 @@ export default [
    * Configuración base TypeScript
    */
   {
-    files: ['**/*.ts'],
+    files: ['**/*.ts', '**/*.test.ts',
+    '**/__tests__/**/*.ts'],
     languageOptions: {
       parser: tsParser,
       parserOptions: {
