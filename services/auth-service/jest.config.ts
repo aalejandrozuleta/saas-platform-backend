@@ -64,6 +64,11 @@ const config: Config = {
 
     '^@prisma$': '<rootDir>/generated/prisma',
   },
+
+  testPathIgnorePatterns: [
+    '/node_modules/',
+    '\\.int\\.spec\\.ts$', // 🔥 EXCLUIR INTEGRATION TESTS
+  ],
 };
 
 export default config;
