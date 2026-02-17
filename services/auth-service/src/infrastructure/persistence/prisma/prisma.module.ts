@@ -4,11 +4,11 @@ import { EnvModule } from '@config/env/env.module';
 import { PrismaService } from './prisma.service';
 
 /**
- * Módulo de persistencia SQL (PostgreSQL).
+ * Módulo de persistencia SQL (PostgreSQL) usando Prisma.
  */
 @Module({
   imports: [EnvModule],
   providers: [PrismaService],
   exports: [PrismaService],
 })
-export class SqlModule {}
+export class PrismaModule {}

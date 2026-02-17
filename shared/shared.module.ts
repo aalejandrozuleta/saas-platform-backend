@@ -4,7 +4,7 @@ import { LoggerProvider } from './logger/logger.provider';
 import { PLATFORM_LOGGER } from './logger/logger.token';
 
 @Module({
-  providers: [LoggerProvider],
-  exports: [PLATFORM_LOGGER], // 👈 CLAVE
+    providers: [LoggerProvider],
+  exports: [PLATFORM_LOGGER],
 })
 export class SharedModule {}

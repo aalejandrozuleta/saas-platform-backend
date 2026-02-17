@@ -1,1 +1,0 @@
-export const AUDIT_LOGGER_KEY = Symbol('AUDIT_LOGGER_KEY');

@@ -1,4 +1,4 @@
-import { BaseException } from '@saas/shared';
+import { BaseException, ErrorCode } from '@saas/shared';
 
 /**
  * Credenciales inválidas
@@ -7,7 +7,7 @@ export class InvalidCredentialsError extends BaseException {
   constructor() {
     super(
       'Invalid credentials',
-      'INVALID_CREDENTIALS',
+      ErrorCode.INVALID_CREDENTIALS,
       { httpStatus: 401 },
     );
   }

@@ -2,11 +2,10 @@ import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
 import { EnvModule } from '@config/env/env.module';
 import { AuditMongoModule } from '@infrastructure/audit/mongo/audit-mongo.module';
 import { MetricsModule } from '@infrastructure/metrics/metrics.module';
-import { SqlModule } from '@infrastructure/persistence/prisma/prisma.module';
+import { PrismaModule } from '@infrastructure/persistence/prisma/prisma.module';
 import { AuthModule } from '@modules/auth/auth.module';
 import { MongoModule } from '@infrastructure/persistence/mongo/mongo.module';
 import { ConfigModule } from '@nestjs/config';
-import { HttpLoggerMiddleware } from '@saas/shared';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
@@ -20,12 +19,12 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     MongoModule,
     AuditMongoModule,
     MetricsModule,
-    SqlModule,
+    PrismaModule,
     AuthModule,
   ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): void {
-    consumer.apply(HttpLoggerMiddleware).forRoutes('*');
+    // consumer.apply(HttpLoggerMiddleware).forRoutes('*');
   }
 }

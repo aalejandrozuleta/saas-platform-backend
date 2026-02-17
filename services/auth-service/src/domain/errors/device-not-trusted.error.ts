@@ -1,9 +1,5 @@
-import { BaseException } from '@saas/shared';
+import { BaseException, ErrorCode } from '@saas/shared';
 
-/**
- * Error lanzado cuando un login requiere verificación adicional
- * debido a un dispositivo no confiable o contexto sospechoso.
- */
 export class DeviceNotTrustedError extends BaseException {
   constructor(metadata?: {
     deviceFingerprint?: string;
@@ -12,9 +8,8 @@ export class DeviceNotTrustedError extends BaseException {
   }) {
     super(
       'Device not trusted',
-      'DEVICE_NOT_TRUSTED',
+      ErrorCode.DEVICE_NOT_TRUSTED,
       {
-        httpStatus: 403,
         ...metadata,
       },
     );

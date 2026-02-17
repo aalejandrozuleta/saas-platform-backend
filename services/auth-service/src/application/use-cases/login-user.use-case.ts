@@ -4,13 +4,6 @@ import { Inject } from '@nestjs/common';
 import { EmailVO } from '@domain/value-objects/email.vo';
 import { PasswordVO } from '@domain/value-objects/password.vo';
 import { InvalidCredentialsError } from '@domain/errors/invalid-credentials.error';
-import { USER_REPOSITORY } from '@domain/token/user-repository.token';
-import { SECURITY_REPOSITORY } from '@domain/token/security-repository.token';
-import { DEVICE_REPOSITORY } from '@domain/token/device.repository.token';
-import { SESSION_REPOSITORY } from '@domain/token/session-repository.token';
-import { REFRESH_TOKEN_REPOSITORY } from '@domain/token/refresh-token-repository.token';
-import { PASSWORD_HASHER } from '@domain/token/password-hasher.token';
-import { TOKEN_SERVICE } from '@domain/token/token-service.token';
 import { UserRepository } from '@domain/repositories/user.repository';
 import { SecurityRepository } from '@domain/repositories/security.repository';
 import { DeviceRepository } from '@domain/repositories/device.repository';
@@ -18,18 +11,18 @@ import { SessionRepository } from '@application/ports/session.repository';
 import { RefreshTokenRepository } from '@application/ports/refresh-token.repository';
 import { PasswordHasher } from '@application/ports/password-hasher.port';
 import { TokenService } from '@application/ports/token.service';
-import { LoginValidationService } from '@application/services/login/login-validation.service';
 import { LoginContext } from '@domain/value-objects/login-context.vo';
 import { Device } from '@domain/entities/device/device.entity';
 import { DomainEventBus } from '@application/events/domain-event.bus';
 import { LoginFailedEvent } from '@application/events/login-failed.event';
 import { LoginSucceededEvent } from '@application/events/login-succeeded.event';
-import { DOMAIN_EVENT_BUS } from '@domain/token/domain-event.token';
 import { LoginBlockedEvent } from '@application/events/login-blocked.event';
 import { UnitOfWork } from '@application/ports/unit-of-work.port';
-import { UNIT_OF_WORK } from '@domain/token/unit-of-work.token';
 import { LoginAttemptedEvent } from '@application/events/login-attempted.event';
 import { UserBlockedError } from '@domain/errors/user-blocked.error';
+import { LoginPolicy } from '@domain/policies/login.policy';
+import { DEVICE_REPOSITORY, REFRESH_TOKEN_REPOSITORY, SECURITY_REPOSITORY, SESSION_REPOSITORY, USER_REPOSITORY } from '@domain/token/repositories.tokens';
+import { DOMAIN_EVENT_BUS, PASSWORD_HASHER, TOKEN_SERVICE, UNIT_OF_WORK } from '@domain/token/services.tokens';
 
 
 export class LoginUserUseCase {
@@ -55,7 +48,7 @@ export class LoginUserUseCase {
     @Inject(TOKEN_SERVICE)
     private readonly tokenService: TokenService,
 
-    private readonly validation: LoginValidationService,
+    private readonly policy: LoginPolicy,
 
     @Inject(DOMAIN_EVENT_BUS)
     private readonly eventBus: DomainEventBus,
@@ -85,7 +78,7 @@ export class LoginUserUseCase {
 
     // 🔹 Manejo explícito de bloqueo
     try {
-      this.validation.validateAttempts(
+      this.policy.validateAttempts(
         user.failedLoginAttempts,
         user.blockedUntil,
       );
@@ -95,7 +88,7 @@ export class LoginUserUseCase {
           new LoginBlockedEvent(
             user.id,
             context,
-            
+            new Date()
           ),
         );
       }
@@ -144,7 +137,7 @@ export class LoginUserUseCase {
       device = device.updateLastUsed();
       await this.deviceRepository.save(device);
 
-      this.validation.validateDevice(device.isTrusted);
+      this.policy.validateDevice(device.isTrusted);
 
       // ===== SESSION =====
       const session = await this.sessionRepository.create({

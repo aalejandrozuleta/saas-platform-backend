@@ -1,21 +1,45 @@
+import { Inject, Injectable } from '@nestjs/common';
 import { AuditLogger } from '@application/ports/audit-logger.port';
 import { AuditCategory } from '@domain/audit/audit-category.enum';
-import { AuthAuditEvent } from '@domain/audit/auth-events.enum';
+import { AUDIT_LOGGER_KEY } from '@domain/token/audit-logger.token';
 import { LoginContext } from '@domain/value-objects/login-context.vo';
 
+import { AuthAuditEvent } from './auth-events.enum';
 
 /**
- * Servicio de aplicación responsable de
- * traducir eventos de login en registros de auditoría.
+ * Servicio de aplicación encargado de traducir
+ * eventos del dominio Login en registros de auditoría.
  *
  * No conoce Mongo.
  * No conoce infraestructura.
- * Solo usa el puerto AuditLogger.
+ * Solo depende del puerto AuditLogger.
  */
+@Injectable()
 export class LoginAuditService {
   constructor(
+    @Inject(AUDIT_LOGGER_KEY)
     private readonly auditLogger: AuditLogger,
   ) {}
+
+  /**
+   * Registra intento de login
+   */
+  async loginAttempted(
+    email: string,
+    context: LoginContext,
+  ): Promise<void> {
+    await this.auditLogger.log({
+      category: AuditCategory.AUTH,
+      event: AuthAuditEvent.LOGIN_ATTEMPT,
+      userId: null,
+      ip: context.ip,
+      country: context.country,
+      deviceFingerprint: context.deviceFingerprint,
+      metadata: {
+        email,
+      },
+    });
+  }
 
   /**
    * Registra login exitoso
@@ -29,8 +53,10 @@ export class LoginAuditService {
       category: AuditCategory.AUTH,
       event: AuthAuditEvent.LOGIN_SUCCESS,
       userId,
+      ip: context.ip,
+      country: context.country,
+      deviceFingerprint: context.deviceFingerprint,
       metadata: {
-        ...context.toAuditMetadata(),
         sessionId,
       },
     });
@@ -48,10 +74,10 @@ export class LoginAuditService {
       category: AuditCategory.AUTH,
       event: AuthAuditEvent.LOGIN_FAILED,
       userId,
-      metadata: {
-        ...context.toAuditMetadata(),
-        reason,
-      },
+      ip: context.ip,
+      country: context.country,
+      deviceFingerprint: context.deviceFingerprint,
+      reason,
     });
   }
 
@@ -67,8 +93,10 @@ export class LoginAuditService {
       category: AuditCategory.AUTH,
       event: AuthAuditEvent.LOGIN_BLOCKED,
       userId,
+      ip: context.ip,
+      country: context.country,
+      deviceFingerprint: context.deviceFingerprint,
       metadata: {
-        ...context.toAuditMetadata(),
         blockedUntil,
       },
     });
@@ -85,7 +113,9 @@ export class LoginAuditService {
       category: AuditCategory.AUTH,
       event: AuthAuditEvent.LOGIN_DEVICE_NOT_TRUSTED,
       userId,
-      metadata: context.toAuditMetadata(),
+      ip: context.ip,
+      country: context.country,
+      deviceFingerprint: context.deviceFingerprint,
     });
   }
 
@@ -100,7 +130,9 @@ export class LoginAuditService {
       category: AuditCategory.AUTH,
       event: AuthAuditEvent.LOGIN_COUNTRY_NOT_TRUSTED,
       userId,
-      metadata: context.toAuditMetadata(),
+      ip: context.ip,
+      country: context.country,
+      deviceFingerprint: context.deviceFingerprint,
     });
   }
 }

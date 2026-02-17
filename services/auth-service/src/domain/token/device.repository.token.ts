@@ -1,1 +1,0 @@
-export const DEVICE_REPOSITORY = Symbol('DEVICE_REPOSITORY');

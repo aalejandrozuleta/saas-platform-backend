@@ -1,1 +1,0 @@
-export const SECURITY_REPOSITORY = Symbol('SECURITY_REPOSITORY');

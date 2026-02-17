@@ -1,8 +1,11 @@
-import { AuditEvent } from "./audit-event.type";
+import { AuditEvent } from './audit-event.type';
 
 /**
- * Puerto de salida para persistencia de auditoría.
- * No conoce Mongo, NestJS ni ninguna base de datos.
+ * Puerto de dominio para persistencia de auditoría.
+ *
+ * ⚠ No conoce Mongo.
+ * ⚠ No conoce NestJS.
+ * ⚠ Solo define contrato.
  */
 export interface AuditEventRepository {
   /**
