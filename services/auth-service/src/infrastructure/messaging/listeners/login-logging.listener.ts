@@ -1,6 +1,6 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
-import { LoginSucceededEvent } from '@application/events/login-succeeded.event';
+import { LoginSucceededEvent } from '@application/events/login/login-succeeded.event';
 import { PLATFORM_LOGGER, PlatformLogger } from '@saas/shared';
 
 /**
@@ -12,7 +12,7 @@ export class LoginLoggingListener {
   constructor(
     @Inject(PLATFORM_LOGGER)
     private readonly logger: PlatformLogger,
-  ) {}
+  ) { }
 
   /**
    * Maneja el evento de login exitoso

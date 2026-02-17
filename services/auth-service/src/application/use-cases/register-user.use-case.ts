@@ -6,14 +6,13 @@ import { PasswordVO } from '@domain/value-objects/password.vo';
 import { User } from '@domain/entities/user/user.entity';
 import { EmailAlreadyExistsError } from '@domain/errors/email-already-exists.error';
 import { Inject } from '@nestjs/common';
-import { USER_REPOSITORY } from '@domain/token/user-repository.token';
 import { PLATFORM_LOGGER, PlatformLogger } from '@saas/shared';
 import { AuditCategory } from '@domain/audit/audit-category.enum';
-import { AuthAuditEvent } from '@domain/audit/auth-events.enum';
 import { PasswordHasher } from '@application/ports/password-hasher.port';
 import { AuditLogger } from '@application/ports/audit-logger.port';
-import { PASSWORD_HASHER } from '@domain/token/password-hasher.token';
-import { AUDIT_LOGGER_KEY } from '@domain/token/audit-logger.token';
+import { USER_REPOSITORY } from '@domain/token/repositories.tokens';
+import { AUDIT_LOGGER, PASSWORD_HASHER } from '@domain/token/services.tokens';
+import { AuthAuditEvent } from '@application/audit/auth-events.enum';
 
 /**
  * Caso de uso para registrar usuario
@@ -26,7 +25,7 @@ export class RegisterUserUseCase {
     @Inject(PASSWORD_HASHER)
     private readonly passwordHasher: PasswordHasher,
 
-    @Inject(AUDIT_LOGGER_KEY)
+    @Inject(AUDIT_LOGGER)
     private readonly auditLogger: AuditLogger,
 
     @Inject(PLATFORM_LOGGER)

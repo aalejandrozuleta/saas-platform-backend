@@ -1,13 +1,15 @@
-import { Inject } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { AuditLogger } from '@application/ports/audit-logger.port';
-import { AuditEventRepository } from '@domain/audit/audit-event.repository';
 import { AuditEvent } from '@domain/audit/audit-event.type';
-import { AUDIT_EVENT_REPOSITORY } from '@domain/audit/audit-event-repository.token';
+import { AuditEventRepository } from '@domain/audit/audit-event.repository';
+import { AUDIT_EVENT_REPOSITORY } from '@domain/token/services.tokens';
 
 /**
  * Servicio de auditoría
  * Implementación concreta del puerto AuditLogger
  */
+
+@Injectable()
 export class AuditService implements AuditLogger {
   constructor(
     @Inject(AUDIT_EVENT_REPOSITORY)

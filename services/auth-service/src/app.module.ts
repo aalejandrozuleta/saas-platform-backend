@@ -1,6 +1,5 @@
 import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
 import { EnvModule } from '@config/env/env.module';
-import { AuditMongoModule } from '@infrastructure/audit/mongo/audit-mongo.module';
 import { MetricsModule } from '@infrastructure/metrics/metrics.module';
 import { PrismaModule } from '@infrastructure/persistence/prisma/prisma.module';
 import { AuthModule } from '@modules/auth/auth.module';
@@ -11,13 +10,9 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 @Module({
   imports: [
     EventEmitterModule.forRoot(),
-    ConfigModule.forRoot({
-      isGlobal: true,
-      envFilePath: 'services/auth-service/.env',
-    }),
+    ConfigModule.forRoot({ isGlobal: true }),
     EnvModule,
     MongoModule,
-    AuditMongoModule,
     MetricsModule,
     PrismaModule,
     AuthModule,

@@ -1,7 +1,6 @@
+import { DomainEventBus } from '@application/events/domain-event.bus';
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-
-import { DomainEventBus } from './domain-event.bus';
 
 /**
  * Implementación del bus de eventos usando NestJS EventEmitter
