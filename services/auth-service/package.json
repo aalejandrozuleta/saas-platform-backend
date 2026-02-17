@@ -18,6 +18,7 @@
     "test:watch:cov": "jest --watch --coverage --config jest.config.ts"
   },
   "dependencies": {
+    "@nestjs/event-emitter": "^3.0.1",
     "@nestjs/mongoose": "11.0.4",
     "@prisma/adapter-pg": "^7.3.0",
     "@saas/shared": "workspace:*",

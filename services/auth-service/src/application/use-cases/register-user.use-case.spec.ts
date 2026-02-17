@@ -1,7 +1,7 @@
 import { UserRepository } from '@domain/repositories/user.repository';
 import { EmailAlreadyExistsError } from '@domain/errors/email-already-exists.error';
 import { EmailVO } from '@domain/value-objects/email.vo';
-import { User } from '@domain/entities/user.entity';
+import { User } from '@domain/entities/user/user.entity';
 import { PlatformLogger } from '@saas/shared';
 import { PasswordHasher } from '@application/ports/password-hasher.port';
 import { AuditLogger } from '@application/ports/audit-logger.port';

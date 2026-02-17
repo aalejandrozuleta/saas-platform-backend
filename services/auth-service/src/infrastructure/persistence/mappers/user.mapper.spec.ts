@@ -1,4 +1,4 @@
-import { User } from '@domain/entities/user.entity';
+import { User } from '@domain/entities/user/user.entity';
 import { EmailVO } from '@domain/value-objects/email.vo';
 import { UserStatus as DomainUserStatus } from '@domain/enums/user-status.enum';
 
@@ -104,33 +104,33 @@ describe('UserMapper', () => {
     });
   });
   describe('UserMapper - casos inválidos', () => {
-  it('debe lanzar error si recibe un estado de Prisma no soportado', () => {
-    const raw = {
-      id: 'uuid-invalid',
-      email: 'invalid@example.com',
-      passwordHash: 'hash',
-      status: 'INVALID_STATUS' as unknown as PrismaUserStatus,
-      createdAt: new Date(),
-    };
+    it('debe lanzar error si recibe un estado de Prisma no soportado', () => {
+      const raw = {
+        id: 'uuid-invalid',
+        email: 'invalid@example.com',
+        passwordHash: 'hash',
+        status: 'INVALID_STATUS' as unknown as PrismaUserStatus,
+        createdAt: new Date(),
+      };
 
-    expect(() => UserMapper.toDomain(raw)).toThrow(
-      'Estado no soportado',
-    );
-  });
-
-  it('debe lanzar error si recibe un estado de dominio no soportado', () => {
-    const user = User.fromPersistence({
-      id: 'uuid-invalid',
-      email: EmailVO.create('invalid@example.com'),
-      passwordHash: 'hash',
-      status: 'INVALID_STATUS' as unknown as DomainUserStatus,
-      createdAt: new Date(),
+      expect(() => UserMapper.toDomain(raw)).toThrow(
+        'Estado no soportado',
+      );
     });
 
-    expect(() => UserMapper.toPersistence(user)).toThrow(
-      'Estado no soportado',
-    );
+    it('debe lanzar error si recibe un estado de dominio no soportado', () => {
+      const user = User.fromPersistence({
+        id: 'uuid-invalid',
+        email: EmailVO.create('invalid@example.com'),
+        passwordHash: 'hash',
+        status: 'INVALID_STATUS' as unknown as DomainUserStatus,
+        createdAt: new Date(),
+      });
+
+      expect(() => UserMapper.toPersistence(user)).toThrow(
+        'Estado no soportado',
+      );
+    });
   });
-});
 
 });

@@ -1,0 +1,21 @@
+import { Injectable } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+
+import { DomainEventBus } from './domain-event.bus';
+
+/**
+ * Implementación del bus de eventos usando NestJS EventEmitter
+ */
+@Injectable()
+export class NestDomainEventBus implements DomainEventBus {
+  constructor(
+    private readonly eventEmitter: EventEmitter2,
+  ) {}
+
+  publish(event: object): void {
+    this.eventEmitter.emit(
+      event.constructor.name,
+      event,
+    );
+  }
+}

@@ -1,4 +1,4 @@
-import { User } from '../entities/user.entity';
+import { User } from '../entities/user/user.entity';
 import { EmailVO } from '../value-objects/email.vo';
 
 /**

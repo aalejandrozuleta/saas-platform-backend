@@ -1,11 +1,12 @@
 import { Inject } from '@nestjs/common';
+import { AuditLogger } from '@application/ports/audit-logger.port';
 import { AuditEventRepository } from '@domain/audit/audit-event.repository';
 import { AuditEvent } from '@domain/audit/audit-event.type';
 import { AUDIT_EVENT_REPOSITORY } from '@domain/audit/audit-event-repository.token';
-import { AuditLogger } from '@application/ports/audit-logger.port';
 
 /**
- * Caso de uso para registrar auditoría de seguridad.
+ * Servicio de auditoría
+ * Implementación concreta del puerto AuditLogger
  */
 export class AuditService implements AuditLogger {
   constructor(
@@ -14,7 +15,7 @@ export class AuditService implements AuditLogger {
   ) {}
 
   /**
-   * Registra un evento de auditoría.
+   * Registra un evento de auditoría
    */
   async log(event: Omit<AuditEvent, 'createdAt'>): Promise<void> {
     await this.repository.save({

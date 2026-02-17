@@ -2,14 +2,16 @@ import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
 import { EnvModule } from '@config/env/env.module';
 import { AuditMongoModule } from '@infrastructure/audit/mongo/audit-mongo.module';
 import { MetricsModule } from '@infrastructure/metrics/metrics.module';
-import { SqlModule } from '@infrastructure/persistence/sql/sql.module';
+import { SqlModule } from '@infrastructure/persistence/prisma/prisma.module';
 import { AuthModule } from '@modules/auth/auth.module';
 import { MongoModule } from '@infrastructure/persistence/mongo/mongo.module';
 import { ConfigModule } from '@nestjs/config';
 import { HttpLoggerMiddleware } from '@saas/shared';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
   imports: [
+    EventEmitterModule.forRoot(),
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: 'services/auth-service/.env',

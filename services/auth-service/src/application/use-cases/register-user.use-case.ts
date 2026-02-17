@@ -3,7 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { UserRepository } from '@domain/repositories/user.repository';
 import { EmailVO } from '@domain/value-objects/email.vo';
 import { PasswordVO } from '@domain/value-objects/password.vo';
-import { User } from '@domain/entities/user.entity'; 
+import { User } from '@domain/entities/user/user.entity';
 import { EmailAlreadyExistsError } from '@domain/errors/email-already-exists.error';
 import { Inject } from '@nestjs/common';
 import { USER_REPOSITORY } from '@domain/token/user-repository.token';
@@ -12,6 +12,8 @@ import { AuditCategory } from '@domain/audit/audit-category.enum';
 import { AuthAuditEvent } from '@domain/audit/auth-events.enum';
 import { PasswordHasher } from '@application/ports/password-hasher.port';
 import { AuditLogger } from '@application/ports/audit-logger.port';
+import { PASSWORD_HASHER } from '@domain/token/password-hasher.token';
+import { AUDIT_LOGGER_KEY } from '@domain/token/audit-logger.token';
 
 /**
  * Caso de uso para registrar usuario
@@ -21,8 +23,10 @@ export class RegisterUserUseCase {
     @Inject(USER_REPOSITORY)
     private readonly userRepository: UserRepository,
 
+    @Inject(PASSWORD_HASHER)
     private readonly passwordHasher: PasswordHasher,
 
+    @Inject(AUDIT_LOGGER_KEY)
     private readonly auditLogger: AuditLogger,
 
     @Inject(PLATFORM_LOGGER)

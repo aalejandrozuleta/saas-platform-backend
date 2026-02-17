@@ -1,3 +1,5 @@
+import { ErrorCode } from "./ErrorCode.enum";
+
 /**
  * Excepción base para toda la plataforma.
  * 
@@ -13,7 +15,7 @@ export abstract class BaseException extends Error {
 
   protected constructor(
     message: string,
-    code: string,
+    code: ErrorCode,
     metadata?: Record<string, unknown>
   ) {
     super(message);
