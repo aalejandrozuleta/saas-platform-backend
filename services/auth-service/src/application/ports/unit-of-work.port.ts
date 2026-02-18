@@ -1,6 +1,10 @@
+import { Prisma } from '@prisma/client';
+
 /**
- * Ejecuta operaciones dentro de una transacción
+ * Ejecuta una unidad de trabajo dentro de una transacción real.
  */
 export interface UnitOfWork {
-  execute<T>(work: () => Promise<T>): Promise<T>;
+  execute<T>(
+    work: (tx: Prisma.TransactionClient) => Promise<T>,
+  ): Promise<T>;
 }
