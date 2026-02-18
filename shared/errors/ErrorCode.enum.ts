@@ -8,6 +8,7 @@ export enum ErrorCode {
   FORBIDDEN = 'FORBIDDEN',
   NOT_FOUND = 'NOT_FOUND',
   CONFLICT = 'CONFLICT',
+  TOO_MANY_REQUESTS = 'TOO_MANY_REQUESTS',
 
   // 🔹 Dominio seguridad
   DEVICE_NOT_TRUSTED = 'DEVICE_NOT_TRUSTED',

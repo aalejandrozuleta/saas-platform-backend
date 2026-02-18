@@ -219,7 +219,7 @@ export class LoginUserUseCase {
           ipAddress: context.ip,
           country: context.country,
           isTrusted: false,
-          createdAt: new Date(),
+          createdAt: this.clock.now(),
         });
 
         device = await this.deviceRepository.save(device, tx);
@@ -241,6 +241,21 @@ export class LoginUserUseCase {
         context.country,
       );
 
+      const activeSessions =
+        await this.sessionRepository.countActiveSessions(
+          user.id,
+          tx,
+        );
+
+      if (activeSessions >= 3) {
+
+        await this.sessionRepository.revokeOldestActiveSession(
+          user.id,
+          this.clock.now(),
+          tx,
+        );
+      }
+
       const session = await this.sessionRepository.create(
         {
           userId: user.id,
@@ -258,15 +273,16 @@ export class LoginUserUseCase {
 
       const refresh = this.tokenService.generateRefreshToken();
 
-      await this.refreshTokenRepository.create(
-        {
-          userId: user.id,
-          sessionId: session.id,
-          tokenHash: await this.passwordHasher.hash(refresh.token),
-          expiresAt: refresh.expiresAt,
-        },
-        tx,
-      );
+      const familyId = randomUUID();
+
+      await this.refreshTokenRepository.create({
+        userId: user.id,
+        sessionId: session.id,
+        jti: refresh.jti,
+        familyId,
+        tokenHash: await this.passwordHasher.hash(refresh.token),
+        expiresAt: refresh.expiresAt,
+      }, tx);
 
       return {
         token: accessToken,

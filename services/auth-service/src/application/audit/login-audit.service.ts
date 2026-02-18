@@ -1,8 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { AuditLogger } from '@application/ports/audit-logger.port';
 import { AuditCategory } from '@domain/audit/audit-category.enum';
-import { AUDIT_LOGGER_KEY } from '@domain/token/audit-logger.token';
 import { LoginContext } from '@domain/value-objects/login-context.vo';
+import { AUDIT_LOGGER } from '@domain/token/services.tokens';
 
 import { AuthAuditEvent } from './auth-events.enum';
 
@@ -17,7 +17,7 @@ import { AuthAuditEvent } from './auth-events.enum';
 @Injectable()
 export class LoginAuditService {
   constructor(
-    @Inject(AUDIT_LOGGER_KEY)
+    @Inject(AUDIT_LOGGER)
     private readonly auditLogger: AuditLogger,
   ) {}
 

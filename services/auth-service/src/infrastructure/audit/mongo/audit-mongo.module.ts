@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { AUDIT_EVENT_REPOSITORY } from '@domain/audit/audit-event-repository.token';
 import { AuditEventMongoRepository } from '@infrastructure/persistence/mongo/audit-event-mongo.repository';
+import { AUDIT_EVENT_REPOSITORY } from '@domain/token/services.tokens';
 
 import { AuditEventDocument, AuditEventSchema } from './audit.schema';
 

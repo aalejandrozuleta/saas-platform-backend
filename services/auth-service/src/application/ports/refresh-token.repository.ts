@@ -5,6 +5,8 @@ export interface RefreshTokenRepository {
     params: {
       userId: string;
       sessionId: string;
+      jti: string;
+      familyId: string;
       tokenHash: string;
       expiresAt: Date;
     },

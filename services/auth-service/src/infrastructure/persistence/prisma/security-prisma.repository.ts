@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { SecurityRepository } from '@domain/repositories/security.repository';
+import { UserBlockedError } from '@domain/errors/user-blocked.error';
 
 /**
  * Repositorio Prisma para seguridad.
@@ -8,7 +9,7 @@ import { SecurityRepository } from '@domain/repositories/security.repository';
 @Injectable()
 export class SecurityPrismaRepository implements SecurityRepository {
 
-  constructor(private readonly prisma: Prisma.TransactionClient | any) {}
+  constructor(private readonly prisma: Prisma.TransactionClient | any) { }
 
   private client(tx?: Prisma.TransactionClient) {
     return tx ?? this.prisma;
@@ -24,17 +25,36 @@ export class SecurityPrismaRepository implements SecurityRepository {
 
     const client = this.client(tx);
 
-    const updated = await client.user.update({
-      where: { id: userId },
+    // Incremento protegido por condición
+    const updated = await client.user.updateMany({
+      where: {
+        id: userId,
+        OR: [
+          { blockedUntil: null },
+          { blockedUntil: { lt: now } }
+        ],
+        failedLoginAttempts: {
+          lt: maxAttempts,
+        },
+      },
       data: {
         failedLoginAttempts: { increment: 1 },
       },
-      select: {
-        failedLoginAttempts: true,
-      },
     });
 
-    if (updated.failedLoginAttempts >= maxAttempts) {
+
+    // Si no se actualizó nada, ya superó el límite
+    if (updated.count === 0) {
+      throw new UserBlockedError();
+    }
+
+    // Obtener valor actualizado
+    const user = await client.user.findUnique({
+      where: { id: userId },
+      select: { failedLoginAttempts: true },
+    });
+
+    if (user && user.failedLoginAttempts >= maxAttempts) {
       await client.user.update({
         where: { id: userId },
         data: {
@@ -46,6 +66,7 @@ export class SecurityPrismaRepository implements SecurityRepository {
       });
     }
   }
+
 
   async resetFailedLoginAttempts(
     userId: string,

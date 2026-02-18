@@ -1,7 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 import { AuditCategory } from '@domain/audit/audit-category.enum';
-import { AuditEventName } from '@domain/audit/audit-event.type';
 
 /**
  * Documento Mongo para eventos de auditoría
@@ -21,7 +20,7 @@ export class AuditEventDocument extends Document {
   category!: AuditCategory;
 
   @Prop({ required: true })
-  event!: AuditEventName;
+  event!: string;
 
   @Prop({ required: true })
   ip!: string;
