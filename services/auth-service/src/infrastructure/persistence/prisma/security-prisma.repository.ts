@@ -3,13 +3,14 @@ import { Prisma } from '@prisma/client';
 import { SecurityRepository } from '@domain/repositories/security.repository';
 import { UserBlockedError } from '@domain/errors/user-blocked.error';
 
+import { PrismaService } from './prisma.service';
+
 /**
  * Repositorio Prisma para seguridad.
  */
 @Injectable()
 export class SecurityPrismaRepository implements SecurityRepository {
-
-  constructor(private readonly prisma: Prisma.TransactionClient | any) { }
+  constructor(private readonly prisma: PrismaService) { }
 
   private client(tx?: Prisma.TransactionClient) {
     return tx ?? this.prisma;

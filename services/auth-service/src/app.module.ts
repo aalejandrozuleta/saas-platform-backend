@@ -1,7 +1,6 @@
 import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
 import { EnvModule } from '@config/env/env.module';
 import { MetricsModule } from '@infrastructure/metrics/metrics.module';
-import { PrismaModule } from '@infrastructure/persistence/prisma/prisma.module';
 import { AuthModule } from '@modules/auth/auth.module';
 import { MongoModule } from '@infrastructure/persistence/mongo/mongo.module';
 import { ConfigModule } from '@nestjs/config';
@@ -14,7 +13,6 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     EnvModule,
     MongoModule,
     MetricsModule,
-    PrismaModule,
     AuthModule,
   ],
 })

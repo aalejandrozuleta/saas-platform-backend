@@ -6,6 +6,8 @@ import { SharedModule } from '@saas/shared';
 import { AuditModule } from '@infrastructure/audit/audit.module';
 import { LoginSucceededAuditListener } from '@infrastructure/messaging/listeners/login-audit.listener';
 import { LoginLoggingListener } from '@infrastructure/messaging/listeners/login-logging.listener';
+import { PrismaModule } from '@infrastructure/persistence/prisma/prisma.module';
+import { LoginUserUseCase } from '@application/use-cases/login-user.use-case';
 
 import { authProviders } from './auth.providers';
 /**
@@ -16,10 +18,12 @@ import { authProviders } from './auth.providers';
     I18nModule,
     SharedModule,
     AuditModule,
+    PrismaModule
   ],
   controllers: [AuthController],
   providers: [
     RegisterUserUseCase,
+    LoginUserUseCase,
     ...authProviders,
     LoginSucceededAuditListener,
     LoginLoggingListener,
