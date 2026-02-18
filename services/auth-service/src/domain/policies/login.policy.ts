@@ -1,92 +1,63 @@
 import { UserBlockedError } from '@domain/errors/user-blocked.error';
 import { DeviceNotTrustedError } from '@domain/errors/device-not-trusted.error';
 import { InvalidCredentialsError } from '@domain/errors/invalid-credentials.error';
+import { DeviceFingerprintRequiredError } from '@domain/errors/device-fingerprint-required.error';
 import { UserStatus } from '@domain/enums/user-status.enum';
 
 /**
- * Política de negocio para autenticación.
- *
+ * Política de autenticación.
  * Contiene exclusivamente reglas puras de dominio.
- * No accede a infraestructura ni repositorios.
  */
 export class LoginPolicy {
-  private readonly MAX_ATTEMPTS = 5;
-  private readonly LOCK_DURATION_MINUTES = 15;
+  constructor(
+    private readonly maxAttempts: number,
+    private readonly lockDurationMinutes: number,
+  ) {}
 
-  /**
-   * Valida que el usuario esté en estado válido para autenticación.
-   *
-   * @param status - Estado actual del usuario
-   * @throws InvalidCredentialsError si el usuario no está activo
-   */
   validateUserStatus(status: UserStatus): void {
     if (status !== UserStatus.ACTIVE) {
       throw new InvalidCredentialsError();
     }
   }
 
-  /**
-   * Valida si la cuenta está actualmente bloqueada.
-   *
-   * @param failedAttempts - Número de intentos fallidos actuales
-   * @param blockedUntil - Fecha hasta la cual la cuenta está bloqueada
-   * @throws UserBlockedError si la cuenta está bloqueada
-   */
   validateAttempts(
     failedAttempts: number,
-    blockedUntil?: Date,
+    blockedUntil: Date | undefined,
+    now: Date,
   ): void {
-    if (blockedUntil && blockedUntil > new Date()) {
+
+    if (blockedUntil && blockedUntil > now) {
       throw new UserBlockedError(blockedUntil);
     }
 
-    if (failedAttempts >= this.MAX_ATTEMPTS) {
+    if (failedAttempts >= this.maxAttempts) {
       throw new UserBlockedError();
     }
   }
 
-  /**
-   * Determina si la cuenta debe bloquearse.
-   *
-   * @param failedAttempts - Número de intentos fallidos acumulados
-   * @returns true si debe bloquearse
-   */
   shouldLockAccount(failedAttempts: number): boolean {
-    return failedAttempts >= this.MAX_ATTEMPTS;
+    return failedAttempts >= this.maxAttempts;
   }
 
-  /**
-   * Duración del bloqueo en minutos.
-   *
-   * @returns minutos de bloqueo
-   */
   lockDuration(): number {
-    return this.LOCK_DURATION_MINUTES;
+    return this.lockDurationMinutes;
   }
 
-  /**
-   * Valida si el dispositivo es confiable.
-   *
-   * @param isTrusted - Indicador de confianza del dispositivo
-   * @throws DeviceNotTrustedError si el dispositivo no es confiable
-   */
+  getMaxAttempts(): number {
+    return this.maxAttempts;
+  }
+
   validateDevice(isTrusted: boolean): void {
     if (!isTrusted) {
       throw new DeviceNotTrustedError();
     }
   }
 
-  /**
-   * Valida si el país actual está dentro de los países confiables.
-   *
-   * @param trustedCountries - Lista de países confiables del usuario
-   * @param country - País actual detectado
-   * @throws DeviceNotTrustedError si el país no es confiable
-   */
   validateCountry(
     trustedCountries: string[] | undefined,
     country?: string,
   ): void {
+
     if (!trustedCountries?.length || !country) return;
 
     if (!trustedCountries.includes(country)) {
@@ -97,15 +68,9 @@ export class LoginPolicy {
     }
   }
 
-  /**
-   * Valida que el contexto tenga fingerprint válido.
-   *
-   * @param fingerprint - Identificador del dispositivo
-   * @throws Error si es inválido
-   */
   validateDeviceFingerprint(fingerprint?: string): void {
     if (!fingerprint) {
-      throw new Error('DEVICE_FINGERPRINT_REQUIRED');
+      throw new DeviceFingerprintRequiredError();
     }
   }
 }

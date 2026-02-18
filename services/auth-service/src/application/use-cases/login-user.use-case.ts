@@ -35,17 +35,10 @@ import { LoginBlockedEvent } from '@application/events/login/login-blocked.event
 import { LoginSucceededEvent } from '@application/events/login/login-succeeded.event';
 import { InvalidCredentialsError } from '@domain/errors/invalid-credentials.error';
 import { UserBlockedError } from '@domain/errors/user-blocked.error';
+import { Clock } from '@application/ports/clock.port';
 
 /**
  * Caso de uso encargado de autenticar usuarios.
- *
- * Responsabilidades:
- * - Validar usuario y estado
- * - Controlar intentos fallidos
- * - Gestionar bloqueo de cuenta
- * - Validar seguridad de dispositivo y país
- * - Crear sesión y tokens
- * - Emitir eventos de dominio
  */
 export class LoginUserUseCase {
   constructor(
@@ -77,16 +70,11 @@ export class LoginUserUseCase {
     private readonly eventBus: DomainEventBus,
 
     private readonly policy: LoginPolicy,
-  ) {}
 
-  /**
-   * Ejecuta el flujo completo de autenticación.
-   *
-   * @param email - Email del usuario
-   * @param password - Contraseña en texto plano
-   * @param context - Contexto de login (IP, país, fingerprint)
-   * @returns Tokens de acceso y refresh
-   */
+    @Inject('CLOCK')
+    private readonly clock: Clock,
+  ) { }
+
   async execute(
     email: string,
     password: string,
@@ -100,6 +88,7 @@ export class LoginUserUseCase {
     this.policy.validateDeviceFingerprint(context.deviceFingerprint);
 
     const user = await this.validateUser(email, context);
+
     await this.validatePassword(user, password, context);
 
     const result = await this.performLogin(user, context);
@@ -131,8 +120,9 @@ export class LoginUserUseCase {
 
     if (!user) {
       this.eventBus.publish(
-        new LoginFailedEvent(null, context, 'EMAIL_NOT_FOUND'),
+        new LoginFailedEvent(null, context, 'INVALID_CREDENTIALS'),
       );
+
       throw new InvalidCredentialsError();
     }
 
@@ -142,8 +132,10 @@ export class LoginUserUseCase {
       this.policy.validateAttempts(
         user.failedLoginAttempts,
         user.blockedUntil,
+        this.clock.now(),
       );
     } catch (error) {
+
       if (error instanceof UserBlockedError) {
         this.eventBus.publish(
           new LoginBlockedEvent(
@@ -153,6 +145,7 @@ export class LoginUserUseCase {
           ),
         );
       }
+
       throw error;
     }
 
@@ -160,7 +153,7 @@ export class LoginUserUseCase {
   }
 
   /**
-   * Valida contraseña y maneja intentos fallidos.
+   * Valida contraseña y gestiona intentos fallidos.
    */
   private async validatePassword(
     user: User,
@@ -176,19 +169,20 @@ export class LoginUserUseCase {
     );
 
     if (!valid) {
-      const nextAttempts = user.failedLoginAttempts + 1;
+      await this.securityRepository.registerFailedAttempt(
+        user.id,
+        this.policy.getMaxAttempts(),
+        this.policy.lockDuration(),
+        this.clock.now(),
+      );
 
-      await this.securityRepository.incrementFailedLoginAttempts(user.id);
-
-      if (this.policy.shouldLockAccount(nextAttempts)) {
-        await this.securityRepository.lockAccount(
-          user.id,
-          this.policy.lockDuration(),
-        );
-      }
 
       this.eventBus.publish(
-        new LoginFailedEvent(user.id, context, 'INVALID_PASSWORD'),
+        new LoginFailedEvent(
+          user.id,
+          context,
+          'INVALID_PASSWORD',
+        ),
       );
 
       throw new InvalidCredentialsError();
@@ -205,7 +199,10 @@ export class LoginUserUseCase {
 
     return this.uow.execute(async (tx) => {
 
-      await this.securityRepository.resetFailedLoginAttempts(user.id, tx);
+      await this.securityRepository.resetFailedLoginAttempts(
+        user.id,
+        tx,
+      );
 
       let device = await this.deviceRepository.getByUserIdAndFingerprint(
         user.id,
@@ -214,6 +211,7 @@ export class LoginUserUseCase {
       );
 
       if (!device) {
+
         device = Device.create({
           id: randomUUID(),
           userId: user.id,
@@ -228,6 +226,7 @@ export class LoginUserUseCase {
       }
 
       device = device.updateLastUsed();
+
       await this.deviceRepository.save(device, tx);
 
       this.policy.validateDevice(device.isTrusted);

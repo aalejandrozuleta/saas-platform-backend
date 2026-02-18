@@ -6,6 +6,7 @@ import { SECURITY_REPOSITORY, USER_REPOSITORY } from '@domain/token/repositories
 import { UserPrismaRepository } from '@infrastructure/persistence/prisma/user.prisma.repository';
 import { PrismaUnitOfWork } from '@infrastructure/persistence/prisma/prisma-unit-of-work';
 import { SecurityPrismaRepository } from '@infrastructure/persistence/prisma/security-prisma.repository';
+import { SystemClock } from '@application/services/system-clock.service';
 
 /**
  * Providers del módulo Auth
@@ -31,5 +32,9 @@ export const authProviders: Provider[] = [
     provide: SECURITY_REPOSITORY,
     useClass: SecurityPrismaRepository,
   },
+  {
+    provide: 'CLOCK',
+    useClass: SystemClock,
+  }
 ];
 
