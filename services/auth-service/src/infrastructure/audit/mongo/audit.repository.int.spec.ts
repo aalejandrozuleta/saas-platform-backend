@@ -2,13 +2,14 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { MongooseModule, getConnectionToken } from '@nestjs/mongoose';
 import { Connection } from 'mongoose';
 
+import { AuditCategory } from '../../../domain/audit/audit-category.enum';
+import { AuthAuditEvent } from '../../../domain/audit/auth-events.enum';
+
 import { MongoAuditEventRepository } from './audit.repository';
 import {
   AuditEventDocument,
   AuditEventSchema,
 } from './audit.schema';
-import { AuditCategory } from '../../../domain/audit/audit-category.enum';
-import { AuthAuditEvent } from '../../../domain/audit/auth-events.enum';
 
 describe('MongoAuditEventRepository (integration)', () => {
   let repository: MongoAuditEventRepository;

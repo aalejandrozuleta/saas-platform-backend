@@ -3,6 +3,7 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import helmet from 'helmet';
+import { GlobalExceptionFilter } from '@saas/shared';
 
 import { AppModule } from './app.module';
 
@@ -42,6 +43,11 @@ async function bootstrap(): Promise<void> {
       contentSecurityPolicy: true,
     }),
   );
+
+    /**
+   * Filtro global de excepciones
+   */
+  app.useGlobalFilters(new GlobalExceptionFilter());
 
   /**
    * Validaciones globales

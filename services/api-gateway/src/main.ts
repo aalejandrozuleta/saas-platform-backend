@@ -1,7 +1,6 @@
 import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import helmet from 'helmet';
-import { logger } from '@saas/shared';
 import express from 'express';
 import { VersioningType } from '@nestjs/common';
 
@@ -47,7 +46,7 @@ async function bootstrap(): Promise<void> {
   app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 
   await app.listen(envService.get('PORT'));
-  logger.info(`API Gateway running on port ${envService.get('PORT')}`);
+  // logger.info(`API Gateway running on port ${envService.get('PORT')}`);
 }
 
 void bootstrap();

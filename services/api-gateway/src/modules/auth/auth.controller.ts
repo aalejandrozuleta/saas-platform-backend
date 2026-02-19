@@ -38,9 +38,12 @@ export class AuthController {
   @Post('login')
   async login(@Req() req: Request) {
     this.prepareRequest(req);
-
-    const data = await this.authProxy.forward(req, '/login');
-    return successResponse(data);
+    try {
+      const data = await this.authProxy.forward(req, '/login');
+      return successResponse(data);
+    } catch (error) {
+      throw error;
+    }
   }
 
   /**

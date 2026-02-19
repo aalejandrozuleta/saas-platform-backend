@@ -1,6 +1,5 @@
 import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
 import { AuthModule } from '@modules/auth/auth.module';
-import { HttpLoggerMiddleware } from '@saas/shared';
 
 import { HealthController } from './infrastructure/health/health.controller';
 import { EnvModule } from './config/env/env.module';
@@ -16,6 +15,6 @@ import { EnvModule } from './config/env/env.module';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): void {
-    consumer.apply(HttpLoggerMiddleware).forRoutes('*');
+    // consumer.apply(HttpLoggerMiddleware).forRoutes('*');
   }
 }

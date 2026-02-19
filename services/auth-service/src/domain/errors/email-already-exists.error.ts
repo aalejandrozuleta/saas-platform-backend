@@ -1,10 +1,15 @@
-/**
- * Error de dominio cuando el email ya existe
- */
-export class EmailAlreadyExistsError extends Error {
-  readonly code = 'EMAIL_ALREADY_EXISTS';
+import { BaseException, ErrorCode } from '@saas/shared';
 
+/**
+ * El email ya está registrado en el sistema
+ */
+export class EmailAlreadyExistsError extends BaseException {
   constructor() {
-    super('EMAIL_ALREADY_EXISTS');
+    super(
+      'Email already exists',
+      ErrorCode.EMAIL_ALREADY_EXISTS,
+      409,
+    );
   }
 }
+

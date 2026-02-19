@@ -1,60 +1,85 @@
+import { Request, Response } from 'express';
 import {
   ExceptionFilter,
   Catch,
   ArgumentsHost,
   HttpException,
+  HttpStatus,
 } from '@nestjs/common';
-import { Request, Response } from 'express';
 
-import { BaseException } from '../errors/BaseException';
-import { ErrorCode } from '../errors/ErrorCode.enum';
-import { HttpErrorMapper } from '../errors/HttpError.mapper';
+import { BaseException, ErrorCode } from '../errors';
 
+
+
+/**
+ * Filtro global de excepciones.
+ *
+ * Responsabilidades:
+ * - Traducir errores de dominio (BaseException) a HTTP.
+ * - Normalizar errores HttpException de Nest.
+ * - Garantizar formato uniforme de respuesta.
+ * - Evitar exposición de detalles internos.
+ */
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
-  catch(exception: unknown, host: ArgumentsHost) {
+  catch(exception: unknown, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
 
-    // 1️⃣ BaseException
-    if (exception instanceof BaseException) {
-      const status = HttpErrorMapper[exception.code];
+    const timestamp = new Date().toISOString();
+    const path = request.url;
 
-      return response.status(status).json({
+    /**
+     * 1️⃣ Errores de dominio (BaseException)
+     */
+    if (exception instanceof BaseException) {
+      response.status(exception.httpStatus).json({
         success: false,
         error: {
           code: exception.code,
           message: exception.message,
           metadata: exception.metadata ?? null,
         },
-        path: request.url,
-        timestamp: new Date().toISOString(),
+        path,
+        timestamp,
       });
+      return;
     }
 
-    // 2️⃣ Nest HttpException
+    /**
+     * 2️⃣ HttpException (errores de Nest o manuales)
+     */
     if (exception instanceof HttpException) {
-      return response.status(exception.getStatus()).json({
+      const status = exception.getStatus();
+      const body = exception.getResponse();
+
+      response.status(status).json({
         success: false,
-        error: {
-          code: ErrorCode.INTERNAL_ERROR,
-          message: exception.message,
-        },
-        path: request.url,
-        timestamp: new Date().toISOString(),
+        error:
+          typeof body === 'object'
+            ? body
+            : {
+                code: ErrorCode.INTERNAL_ERROR,
+                message: body,
+              },
+        path,
+        timestamp,
       });
+      return;
     }
 
-    // 3️⃣ Fallback
-    return response.status(500).json({
+    /**
+     * 3️⃣ Fallback inesperado
+     */
+    response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
       success: false,
       error: {
         code: ErrorCode.INTERNAL_ERROR,
         message: 'Internal server error',
       },
-      path: request.url,
-      timestamp: new Date().toISOString(),
+      path,
+      timestamp,
     });
   }
 }

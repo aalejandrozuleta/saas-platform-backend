@@ -3,9 +3,9 @@ import { EmailVO } from '@domain/value-objects/email.vo';
 import { User } from '@domain/entities/user/user.entity';
 import { UserStatus } from '@domain/enums/user-status.enum';
 
-import { PrismaService } from './prisma.service';
 import { UserMapper } from '../mappers/user.mapper';
 
+import { PrismaService } from './prisma.service';
 import { UserPrismaRepository } from './user.prisma.repository';
 
 

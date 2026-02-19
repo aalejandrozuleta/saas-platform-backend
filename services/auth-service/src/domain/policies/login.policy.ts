@@ -10,8 +10,8 @@ import { UserStatus } from '@domain/enums/user-status.enum';
  */
 export class LoginPolicy {
   constructor(
-    private readonly maxAttempts: number,
-    private readonly lockDurationMinutes: number,
+    private readonly maxAttempts: number = 3,
+    private readonly lockDurationMinutes: number = 15,
   ) {}
 
   validateUserStatus(status: UserStatus): void {

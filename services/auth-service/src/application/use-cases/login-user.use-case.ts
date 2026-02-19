@@ -80,7 +80,6 @@ export class LoginUserUseCase {
     password: string,
     context: LoginContext,
   ): Promise<{ token: string; refreshToken: string }> {
-
     this.eventBus.publish(
       new LoginAttemptedEvent(email, context),
     );
@@ -164,8 +163,8 @@ export class LoginUserUseCase {
     const passwordVO = PasswordVO.create(password);
 
     const valid = await this.passwordHasher.verify(
-      passwordVO.getValue(),
       user.passwordHash,
+      passwordVO.getValue(),
     );
 
     if (!valid) {
@@ -218,7 +217,7 @@ export class LoginUserUseCase {
           fingerprint: context.deviceFingerprint!,
           ipAddress: context.ip,
           country: context.country,
-          isTrusted: false,
+          isTrusted: true,
           createdAt: this.clock.now(),
         });
 

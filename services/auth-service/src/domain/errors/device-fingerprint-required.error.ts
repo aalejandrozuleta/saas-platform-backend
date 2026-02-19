@@ -1,8 +1,15 @@
+import { BaseException, ErrorCode } from '@saas/shared';
+
 /**
  * Error lanzado cuando el fingerprint es obligatorio.
  */
-export class DeviceFingerprintRequiredError extends Error {
+
+export class DeviceFingerprintRequiredError extends BaseException {
   constructor() {
-    super('DEVICE_FINGERPRINT_REQUIRED');
+    super(
+      'Device fingerprint required',
+      ErrorCode.DEVICE_FINGERPRINT_REQUIRED,
+      400
+    );
   }
 }

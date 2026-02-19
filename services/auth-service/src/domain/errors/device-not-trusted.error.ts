@@ -9,9 +9,8 @@ export class DeviceNotTrustedError extends BaseException {
     super(
       'Device not trusted',
       ErrorCode.DEVICE_NOT_TRUSTED,
-      {
-        ...metadata,
-      },
+      403,
+      metadata
     );
   }
 }

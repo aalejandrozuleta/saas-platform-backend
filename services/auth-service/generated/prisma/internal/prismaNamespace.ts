@@ -951,11 +951,14 @@ export type SessionScalarFieldEnum = (typeof SessionScalarFieldEnum)[keyof typeo
 
 export const RefreshTokenScalarFieldEnum = {
   id: 'id',
+  jti: 'jti',
+  familyId: 'familyId',
   userId: 'userId',
   sessionId: 'sessionId',
   tokenHash: 'tokenHash',
   expiresAt: 'expiresAt',
   revokedAt: 'revokedAt',
+  replacedBy: 'replacedBy',
   createdAt: 'createdAt'
 } as const
 

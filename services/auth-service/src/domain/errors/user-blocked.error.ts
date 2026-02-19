@@ -8,7 +8,8 @@ export class UserBlockedError extends BaseException {
     super(
       'User is blocked',
       ErrorCode.UNAUTHORIZED,
-      { blockedUntil, httpStatus: 403 },
+      403,
+      { blockedUntil }
     );
   }
 }

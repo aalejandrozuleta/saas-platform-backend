@@ -1,6 +1,6 @@
-import { Injectable, HttpException } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import type { Request } from 'express';
-import axios, { AxiosInstance } from 'axios';
+import axios, { AxiosError, AxiosInstance } from 'axios';
 
 /**
  * Proxy HTTP hacia el Auth Service
@@ -42,10 +42,29 @@ export class AuthProxy {
       });
 
       return response.data;
-    } catch (error: any) {
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        if (error.response) {
+          throw new HttpException(
+            error.response.data ?? {
+              message: 'Upstream error',
+            },
+            error.response.status,
+          );
+
+        }
+
+        if (error.request) {
+          throw new HttpException(
+            'Auth service unavailable',
+            HttpStatus.SERVICE_UNAVAILABLE,
+          );
+        }
+      }
+
       throw new HttpException(
-        error.response?.data ?? 'Auth service error',
-        error.response?.status ?? 502,
+        'Unexpected gateway error',
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -54,12 +73,25 @@ export class AuthProxy {
    * Extrae y filtra headers relevantes
    */
   private extractHeaders(req: Request): Record<string, string> {
-    return {
-      'content-type': req.headers['content-type'] as string,
-      'authorization': req.headers['authorization'] as string,
-      'accept-language': req.headers['accept-language'] as string,
-      'x-correlation-id': req.headers['x-correlation-id'] as string,
-      'x-forwarded-for': req.ip ?? '',
+    const headers: Record<string, string> = {};
+
+    const copy = (key: string) => {
+      const value = req.headers[key];
+      if (typeof value === 'string') {
+        headers[key] = value;
+      }
     };
+
+    copy('content-type');
+    copy('authorization');
+    copy('accept-language');
+    copy('x-correlation-id');
+    copy('x-country');
+    copy('x-device-fingerprint');
+
+    headers['x-forwarded-for'] = req.ip ?? '';
+
+    return headers;
   }
+
 }

@@ -7,7 +7,8 @@ export class AuthServiceUnavailableException extends BaseException {
     super(
       'Auth service unavailable',
       ErrorCode.INTERNAL_ERROR,
-      metadata,
+      503,
+      metadata
     );
   }
 }

@@ -8,7 +8,7 @@ export class InvalidCredentialsError extends BaseException {
     super(
       'Invalid credentials',
       ErrorCode.INVALID_CREDENTIALS,
-      { httpStatus: 401 },
+      401,
     );
   }
 }
