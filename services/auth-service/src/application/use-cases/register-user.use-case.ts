@@ -4,7 +4,6 @@ import { UserRepository } from '@domain/repositories/user.repository';
 import { EmailVO } from '@domain/value-objects/email.vo';
 import { PasswordVO } from '@domain/value-objects/password.vo';
 import { User } from '@domain/entities/user/user.entity';
-import { EmailAlreadyExistsError } from '@domain/errors/email-already-exists.error';
 import { Inject } from '@nestjs/common';
 import { PLATFORM_LOGGER, PlatformLogger } from '@saas/shared';
 import { AuditCategory } from '@domain/audit/audit-category.enum';
@@ -13,6 +12,7 @@ import { AuditLogger } from '@application/ports/audit-logger.port';
 import { USER_REPOSITORY } from '@domain/token/repositories.tokens';
 import { AUDIT_LOGGER, PASSWORD_HASHER } from '@domain/token/services.tokens';
 import { AuthAuditEvent } from '@application/audit/auth-events.enum';
+import { DomainErrorFactory } from '@domain/errors/domain-error.factory';
 
 /**
  * Caso de uso para registrar usuario
@@ -60,7 +60,7 @@ export class RegisterUserUseCase {
         country: context.country,
         deviceFingerprint: context.deviceFingerprint,
       });
-      throw new EmailAlreadyExistsError();
+      throw DomainErrorFactory.emailAlreadyExists();
     }
 
     const hash = await this.passwordHasher.hash(passwordVO.getValue());

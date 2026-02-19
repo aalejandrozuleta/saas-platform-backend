@@ -33,9 +33,8 @@ import { LoginAttemptedEvent } from '@application/events/login/login-attempted.e
 import { LoginFailedEvent } from '@application/events/login/login-failed.event';
 import { LoginBlockedEvent } from '@application/events/login/login-blocked.event';
 import { LoginSucceededEvent } from '@application/events/login/login-succeeded.event';
-import { InvalidCredentialsError } from '@domain/errors/invalid-credentials.error';
-import { UserBlockedError } from '@domain/errors/user-blocked.error';
 import { Clock } from '@application/ports/clock.port';
+import { DomainErrorFactory } from '@domain/errors/domain-error.factory';
 
 /**
  * Caso de uso encargado de autenticar usuarios.
@@ -122,7 +121,7 @@ export class LoginUserUseCase {
         new LoginFailedEvent(null, context, 'INVALID_CREDENTIALS'),
       );
 
-      throw new InvalidCredentialsError();
+      throw DomainErrorFactory.invalidCredentials();
     }
 
     this.policy.validateUserStatus(user.status);
@@ -135,7 +134,7 @@ export class LoginUserUseCase {
       );
     } catch (error) {
 
-      if (error instanceof UserBlockedError) {
+      if (error instanceof DomainErrorFactory.userBlocked().constructor) {
         this.eventBus.publish(
           new LoginBlockedEvent(
             user.id,
@@ -184,7 +183,7 @@ export class LoginUserUseCase {
         ),
       );
 
-      throw new InvalidCredentialsError();
+      throw DomainErrorFactory.invalidCredentials();
     }
   }
 

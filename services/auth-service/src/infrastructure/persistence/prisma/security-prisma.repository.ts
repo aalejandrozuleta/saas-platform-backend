@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { SecurityRepository } from '@domain/repositories/security.repository';
-import { UserBlockedError } from '@domain/errors/user-blocked.error';
+import { DomainErrorFactory } from '@domain/errors/domain-error.factory';
 
 import { PrismaService } from './prisma.service';
 
@@ -46,7 +46,7 @@ export class SecurityPrismaRepository implements SecurityRepository {
 
     // Si no se actualizó nada, ya superó el límite
     if (updated.count === 0) {
-      throw new UserBlockedError();
+      throw DomainErrorFactory.userBlocked();
     }
 
     // Obtener valor actualizado

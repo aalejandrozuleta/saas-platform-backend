@@ -8,20 +8,17 @@ import {
 } from '@nestjs/common';
 
 import { BaseException, ErrorCode } from '../errors';
-
-
+import { I18nService } from '../i18n';
 
 /**
- * Filtro global de excepciones.
- *
- * Responsabilidades:
- * - Traducir errores de dominio (BaseException) a HTTP.
- * - Normalizar errores HttpException de Nest.
- * - Garantizar formato uniforme de respuesta.
- * - Evitar exposición de detalles internos.
+ * Filtro global de excepciones con soporte i18n.
  */
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
+  constructor(
+    private readonly i18n: I18nService,
+  ) {}
+
   catch(exception: unknown, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
@@ -30,25 +27,37 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     const timestamp = new Date().toISOString();
     const path = request.url;
 
+    const acceptLanguage = request.headers['accept-language'];
+    const lang =
+      typeof acceptLanguage === 'string'
+        ? acceptLanguage.split(',')[0]
+        : undefined;
+
     /**
-     * 1️⃣ Errores de dominio (BaseException)
+     * 1️⃣ Errores de dominio
      */
     if (exception instanceof BaseException) {
+      const translatedMessage = this.i18n.translate(
+        exception.messageKey,
+        lang,
+      );
+
       response.status(exception.httpStatus).json({
         success: false,
         error: {
           code: exception.code,
-          message: exception.message,
+          message: translatedMessage,
           metadata: exception.metadata ?? null,
         },
         path,
         timestamp,
       });
+
       return;
     }
 
     /**
-     * 2️⃣ HttpException (errores de Nest o manuales)
+     * 2️⃣ HttpException
      */
     if (exception instanceof HttpException) {
       const status = exception.getStatus();
@@ -66,17 +75,23 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         path,
         timestamp,
       });
+
       return;
     }
 
     /**
-     * 3️⃣ Fallback inesperado
+     * 3️⃣ Fallback
      */
+    const fallbackMessage = this.i18n.translate(
+      'common.internal_error',
+      lang,
+    );
+
     response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
       success: false,
       error: {
         code: ErrorCode.INTERNAL_ERROR,
-        message: 'Internal server error',
+        message: fallbackMessage,
       },
       path,
       timestamp,

@@ -8,14 +8,16 @@ export abstract class BaseException extends Error {
   public readonly code: ErrorCode;
   public readonly metadata?: Record<string, unknown>;
   public readonly httpStatus: number;
+  public readonly messageKey: string;
 
   protected constructor(
-    message: string,
+    messageKey: string,
     code: ErrorCode,
     httpStatus: number,
-    metadata?: Record<string, unknown>
+    metadata?: Record<string, unknown>,
   ) {
-    super(message);
+    super(messageKey); 
+    this.messageKey = messageKey;
     this.code = code;
     this.httpStatus = httpStatus;
     this.metadata = metadata;

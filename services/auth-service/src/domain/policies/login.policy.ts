@@ -1,8 +1,5 @@
-import { UserBlockedError } from '@domain/errors/user-blocked.error';
-import { DeviceNotTrustedError } from '@domain/errors/device-not-trusted.error';
-import { InvalidCredentialsError } from '@domain/errors/invalid-credentials.error';
-import { DeviceFingerprintRequiredError } from '@domain/errors/device-fingerprint-required.error';
 import { UserStatus } from '@domain/enums/user-status.enum';
+import { DomainErrorFactory } from '@domain/errors/domain-error.factory';
 
 /**
  * Política de autenticación.
@@ -16,7 +13,7 @@ export class LoginPolicy {
 
   validateUserStatus(status: UserStatus): void {
     if (status !== UserStatus.ACTIVE) {
-      throw new InvalidCredentialsError();
+      throw DomainErrorFactory.invalidCredentials();
     }
   }
 
@@ -27,11 +24,11 @@ export class LoginPolicy {
   ): void {
 
     if (blockedUntil && blockedUntil > now) {
-      throw new UserBlockedError(blockedUntil);
+      throw DomainErrorFactory.userBlocked(blockedUntil);
     }
 
     if (failedAttempts >= this.maxAttempts) {
-      throw new UserBlockedError();
+      throw DomainErrorFactory.userBlocked();
     }
   }
 
@@ -49,7 +46,7 @@ export class LoginPolicy {
 
   validateDevice(isTrusted: boolean): void {
     if (!isTrusted) {
-      throw new DeviceNotTrustedError();
+      throw DomainErrorFactory.deviceNotTrusted();
     }
   }
 
@@ -61,16 +58,13 @@ export class LoginPolicy {
     if (!trustedCountries?.length || !country) return;
 
     if (!trustedCountries.includes(country)) {
-      throw new DeviceNotTrustedError({
-        country,
-        reason: 'COUNTRY_NOT_TRUSTED',
-      });
+      throw DomainErrorFactory.deviceNotTrusted();
     }
   }
 
   validateDeviceFingerprint(fingerprint?: string): void {
     if (!fingerprint) {
-      throw new DeviceFingerprintRequiredError();
+      throw DomainErrorFactory.deviceFingerprintRequired  ();
     }
   }
 }
