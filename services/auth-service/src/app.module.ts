@@ -29,6 +29,7 @@ const APP_FILTER_TOKEN = APP_FILTER;
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): void {
+    
     // consumer.apply(HttpLoggerMiddleware).forRoutes('*');
   }
 }

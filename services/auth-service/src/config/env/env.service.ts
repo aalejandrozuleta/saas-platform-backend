@@ -15,9 +15,7 @@ export class EnvService {
     const parsed = envSchema.safeParse(process.env);
 
     if (!parsed.success) {
-      // logger.error('Invalid environment configuration', {
-      //   errors: parsed.error,
-      // });
+      console.error('Error validando variables de entorno:', parsed.error);
       process.exit(1);
     }
 

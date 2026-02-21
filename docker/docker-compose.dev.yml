@@ -51,6 +51,7 @@ services:
     env_file:
       - ../services/auth-service/.env
     volumes:
+      - ../services/auth-service:/app/services/auth-service
       - pnpm-store:/pnpm-store
     ports:
       - "3001:3001"
