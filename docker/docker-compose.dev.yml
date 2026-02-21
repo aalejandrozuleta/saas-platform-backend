@@ -26,12 +26,12 @@ services:
   api-gateway:
     container_name: api-gateway-dev
     build:
-      context: ../services/api-gateway
-      dockerfile: Dockerfile.dev
+      context: ..
+      dockerfile: services/api-gateway/Dockerfile.dev
     env_file:
       - ../services/api-gateway/.env
     volumes:
-      - ../services/api-gateway:/app
+      - ../:/app
       - pnpm-store:/pnpm-store
     environment:
       PNPM_STORE_PATH: /pnpm-store
