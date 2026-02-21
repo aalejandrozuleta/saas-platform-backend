@@ -9,7 +9,7 @@
     "build": "nest build auth-service",
     "predev": "pnpm --filter @saas/shared build",
     "start": "node dist/src/main.js",
-    "dev": "nest start auth-service --watch",
+    "dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "test:cov": "jest --config jest.config.ts --coverage",

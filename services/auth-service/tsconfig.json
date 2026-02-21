@@ -10,11 +10,10 @@
       "@infrastructure/*": ["src/infrastructure/*"],
       "@modules/*": ["src/modules/*"],
       "@config/*": ["src/config/*"],
-      "@prisma/*": ["generated/prisma/*"]    }
+      "@prisma-client": ["src/generated/prisma"],
+      "@prisma-client/*": ["src/generated/prisma/*"]
+     }
   },
-  "references": [
-    { "path": "../../shared" }
-  ],
-  "include": ["src/**/*.ts", "generated/**/*.ts"],
+  "include": ["src/**/*.ts", "src/generated/prisma/**/*.ts"],
   "exclude": ["node_modules", "dist"]
 }

@@ -5,7 +5,18 @@ WORKDIR /app
 RUN npm install -g pnpm
 ENV PNPM_STORE_PATH=/pnpm-store
 
+# Copiar workspace completo (necesario para pnpm workspaces)
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY tsconfig.base.json ./
+
+# Copiar solo lo necesario
+COPY services ./services
+COPY shared ./shared
+
+RUN pnpm install
+
 WORKDIR /app/services/auth-service
+
 EXPOSE 3001
 
 CMD ["pnpm", "run", "dev"]

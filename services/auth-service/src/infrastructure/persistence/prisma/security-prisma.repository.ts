@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
 import { SecurityRepository } from '@domain/repositories/security.repository';
 import { DomainErrorFactory } from '@domain/errors/domain-error.factory';
+import type { PrismaClient } from '@prisma-client/client';
 
 import { PrismaService } from './prisma.service';
 
@@ -12,7 +12,7 @@ import { PrismaService } from './prisma.service';
 export class SecurityPrismaRepository implements SecurityRepository {
   constructor(private readonly prisma: PrismaService) { }
 
-  private client(tx?: Prisma.TransactionClient) {
+  private client(tx?: PrismaClient) {
     return tx ?? this.prisma;
   }
 
@@ -21,7 +21,7 @@ export class SecurityPrismaRepository implements SecurityRepository {
     maxAttempts: number,
     lockDurationMinutes: number,
     now: Date,
-    tx?: Prisma.TransactionClient,
+    tx?: PrismaClient,
   ): Promise<void> {
 
     const client = this.client(tx);
@@ -71,7 +71,7 @@ export class SecurityPrismaRepository implements SecurityRepository {
 
   async resetFailedLoginAttempts(
     userId: string,
-    tx?: Prisma.TransactionClient,
+    tx?: PrismaClient
   ): Promise<void> {
 
     await this.client(tx).user.update({
@@ -86,7 +86,7 @@ export class SecurityPrismaRepository implements SecurityRepository {
 
   async findByUserId(
     userId: string,
-    tx?: Prisma.TransactionClient,
+    tx?: PrismaClient
   ) {
 
     return this.client(tx).userSecurity.findUnique({

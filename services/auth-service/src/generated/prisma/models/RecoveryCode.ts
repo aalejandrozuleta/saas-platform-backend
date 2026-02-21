@@ -8,7 +8,7 @@
  *
  * 🟢 You can import this file directly.
  */
-import type * as runtime from "@prisma/client/runtime/client"
+import type * as runtime from "@prisma-client/client/runtime/client"
 import type * as $Enums from "../enums"
 import type * as Prisma from "../internal/prismaNamespace"
 
@@ -125,11 +125,11 @@ export type RecoveryCodeAggregateArgs<ExtArgs extends runtime.Types.Extensions.I
 }
 
 export type GetRecoveryCodeAggregateType<T extends RecoveryCodeAggregateArgs> = {
-      [P in keyof T & keyof AggregateRecoveryCode]: P extends '_count' | 'count'
-    ? T[P] extends true
-      ? number
-      : Prisma.GetScalarType<T[P], AggregateRecoveryCode[P]>
-    : Prisma.GetScalarType<T[P], AggregateRecoveryCode[P]>
+  [P in keyof T & keyof AggregateRecoveryCode]: P extends '_count' | 'count'
+  ? T[P] extends true
+  ? number
+  : Prisma.GetScalarType<T[P], AggregateRecoveryCode[P]>
+  : Prisma.GetScalarType<T[P], AggregateRecoveryCode[P]>
 }
 
 
@@ -161,15 +161,15 @@ export type RecoveryCodeGroupByOutputType = {
 type GetRecoveryCodeGroupByPayload<T extends RecoveryCodeGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<RecoveryCodeGroupByOutputType, T['by']> &
-      {
-        [P in ((keyof T) & (keyof RecoveryCodeGroupByOutputType))]: P extends '_count'
-          ? T[P] extends boolean
-            ? number
-            : Prisma.GetScalarType<T[P], RecoveryCodeGroupByOutputType[P]>
-          : Prisma.GetScalarType<T[P], RecoveryCodeGroupByOutputType[P]>
-      }
-    >
+    {
+      [P in ((keyof T) & (keyof RecoveryCodeGroupByOutputType))]: P extends '_count'
+      ? T[P] extends boolean
+      ? number
+      : Prisma.GetScalarType<T[P], RecoveryCodeGroupByOutputType[P]>
+      : Prisma.GetScalarType<T[P], RecoveryCodeGroupByOutputType[P]>
+    }
   >
+>
 
 
 
@@ -769,10 +769,10 @@ export interface RecoveryCodeDelegate<ExtArgs extends runtime.Types.Extensions.I
     args?: Prisma.Subset<T, RecoveryCodeCountArgs>,
   ): Prisma.PrismaPromise<
     T extends runtime.Types.Utils.Record<'select', any>
-      ? T['select'] extends true
-        ? number
-        : Prisma.GetScalarType<T['select'], RecoveryCodeCountAggregateOutputType>
-      : number
+    ? T['select'] extends true
+    ? number
+    : Prisma.GetScalarType<T['select'], RecoveryCodeCountAggregateOutputType>
+    : number
   >
 
   /**
@@ -826,8 +826,8 @@ export interface RecoveryCodeDelegate<ExtArgs extends runtime.Types.Extensions.I
       Prisma.Extends<'take', Prisma.Keys<T>>
     >,
     OrderByArg extends Prisma.True extends HasSelectOrTake
-      ? { orderBy: RecoveryCodeGroupByArgs['orderBy'] }
-      : { orderBy?: RecoveryCodeGroupByArgs['orderBy'] },
+    ? { orderBy: RecoveryCodeGroupByArgs['orderBy'] }
+    : { orderBy?: RecoveryCodeGroupByArgs['orderBy'] },
     OrderFields extends Prisma.ExcludeUnderscoreKeys<Prisma.Keys<Prisma.MaybeTupleToUnion<T['orderBy']>>>,
     ByFields extends Prisma.MaybeTupleToUnion<T['by']>,
     ByValid extends Prisma.Has<ByFields, OrderFields>,
@@ -838,49 +838,49 @@ export interface RecoveryCodeDelegate<ExtArgs extends runtime.Types.Extensions.I
     ? `Error: "by" must not be empty.`
     : HavingValid extends Prisma.False
     ? {
-        [P in HavingFields]: P extends ByFields
-          ? never
-          : P extends string
-          ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
-          : [
-              Error,
-              'Field ',
-              P,
-              ` in "having" needs to be provided in "by"`,
-            ]
-      }[HavingFields]
+      [P in HavingFields]: P extends ByFields
+      ? never
+      : P extends string
+      ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+      : [
+        Error,
+        'Field ',
+        P,
+        ` in "having" needs to be provided in "by"`,
+      ]
+    }[HavingFields]
     : 'take' extends Prisma.Keys<T>
     ? 'orderBy' extends Prisma.Keys<T>
-      ? ByValid extends Prisma.True
-        ? {}
-        : {
-            [P in OrderFields]: P extends ByFields
-              ? never
-              : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-          }[OrderFields]
-      : 'Error: If you provide "take", you also need to provide "orderBy"'
+    ? ByValid extends Prisma.True
+    ? {}
+    : {
+      [P in OrderFields]: P extends ByFields
+      ? never
+      : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+    }[OrderFields]
+    : 'Error: If you provide "take", you also need to provide "orderBy"'
     : 'skip' extends Prisma.Keys<T>
     ? 'orderBy' extends Prisma.Keys<T>
-      ? ByValid extends Prisma.True
-        ? {}
-        : {
-            [P in OrderFields]: P extends ByFields
-              ? never
-              : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-          }[OrderFields]
-      : 'Error: If you provide "skip", you also need to provide "orderBy"'
+    ? ByValid extends Prisma.True
+    ? {}
+    : {
+      [P in OrderFields]: P extends ByFields
+      ? never
+      : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+    }[OrderFields]
+    : 'Error: If you provide "skip", you also need to provide "orderBy"'
     : ByValid extends Prisma.True
     ? {}
     : {
-        [P in OrderFields]: P extends ByFields
-          ? never
-          : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-      }[OrderFields]
+      [P in OrderFields]: P extends ByFields
+      ? never
+      : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+    }[OrderFields]
   >(args: Prisma.SubsetIntersection<T, RecoveryCodeGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetRecoveryCodeGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
-/**
- * Fields of the RecoveryCode model
- */
-readonly fields: RecoveryCodeFieldRefs;
+  /**
+   * Fields of the RecoveryCode model
+   */
+  readonly fields: RecoveryCodeFieldRefs;
 }
 
 /**
@@ -927,7 +927,7 @@ export interface RecoveryCodeFieldRefs {
   readonly usedAt: Prisma.FieldRef<"RecoveryCode", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"RecoveryCode", 'DateTime'>
 }
-    
+
 
 // Custom InputTypes
 /**

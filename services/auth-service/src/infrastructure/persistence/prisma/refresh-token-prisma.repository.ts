@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma, PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma-client/client';
 import { RefreshTokenRepository } from '@application/ports/refresh-token.repository';
 
 import { PrismaService } from './prisma.service';
@@ -9,11 +9,10 @@ import { PrismaService } from './prisma.service';
  */
 @Injectable()
 export class RefreshTokenPrismaRepository
-  implements RefreshTokenRepository
-{
+  implements RefreshTokenRepository {
   constructor(
     private readonly prisma: PrismaService,
-  ) {}
+  ) { }
 
   /**
    * Crea un refresh token asociado a una sesión.
@@ -27,7 +26,7 @@ export class RefreshTokenPrismaRepository
       tokenHash: string;
       expiresAt: Date;
     },
-    tx?: Prisma.TransactionClient,
+    tx?: PrismaClient
   ): Promise<void> {
     const client = this.getClient(tx);
 
@@ -49,7 +48,7 @@ export class RefreshTokenPrismaRepository
    */
   async revokeBySession(
     sessionId: string,
-    tx?: Prisma.TransactionClient,
+    tx?: PrismaClient
   ): Promise<void> {
     const client = this.getClient(tx);
 
@@ -68,8 +67,8 @@ export class RefreshTokenPrismaRepository
    * Resuelve el cliente adecuado según exista o no transacción.
    */
   private getClient(
-    tx?: Prisma.TransactionClient,
-  ): Prisma.TransactionClient | PrismaClient {
+    tx?: PrismaClient
+  ) {
     return tx ?? this.prisma;
   }
 }

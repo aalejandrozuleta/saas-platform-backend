@@ -9,7 +9,7 @@
       "entryFile": "main",
       "sourceRoot": "services/auth-service/src",
       "compilerOptions": {
-        "tsConfigPath": "services/auth-service/tsconfig.build.json",
+        "tsConfigPath": "services/auth-service/tsconfig.json",
         "deleteOutDir": true
       }
     }

@@ -11,7 +11,7 @@
  * Please import the `PrismaClient` class from the `client.ts` file instead.
  */
 
-import * as runtime from "@prisma/client/runtime/client"
+import * as runtime from "@prisma-client/client/runtime/client"
 import type * as Prisma from "./prismaNamespace"
 
 
@@ -20,7 +20,7 @@ const config: runtime.GetPrismaClientConfig = {
   "clientVersion": "7.3.0",
   "engineVersion": "9d6ad21cbbceab97458517b147a6a09ff43aa735",
   "activeProvider": "postgresql",
-  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\n// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?\n// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init\n\ngenerator client {\n  provider = \"prisma-client\"\n  output   = \"../generated/prisma\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n}\n\nmodel User {\n  id            String     @id @default(uuid())\n  email         String     @unique\n  emailVerified Boolean    @default(false)\n  passwordHash  String\n  status        UserStatus @default(ACTIVE)\n\n  failedLoginAttempts Int       @default(0)\n  blockedUntil        DateTime?\n\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n\n  // Relaciones\n  security      UserSecurity?\n  devices       Device[]\n  sessions      Session[]\n  refreshTokens RefreshToken[]\n  recoveryCodes RecoveryCode[]\n}\n\nmodel UserSecurity {\n  userId           String           @id\n  twoFactorEnabled Boolean          @default(false)\n  twoFactorMethod  TwoFactorMethod?\n  trustedCountries String[]\n\n  lastPasswordChange DateTime?\n\n  user User @relation(fields: [userId], references: [id], onDelete: Cascade)\n}\n\nmodel Device {\n  id          String  @id @default(uuid())\n  userId      String\n  fingerprint String\n  deviceName  String?\n  os          String?\n  browser     String?\n  country     String?\n  ipAddress   String\n  isTrusted   Boolean @default(false)\n\n  lastUsedAt DateTime?\n  createdAt  DateTime  @default(now())\n\n  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)\n  sessions Session[]\n\n  @@unique([userId, fingerprint])\n}\n\nmodel Session {\n  id        String  @id @default(uuid())\n  userId    String\n  deviceId  String?\n  ipAddress String\n  country   String?\n\n  startedAt DateTime  @default(now())\n  endedAt   DateTime?\n  revokedAt DateTime?\n\n  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)\n  device        Device?        @relation(fields: [deviceId], references: [id])\n  refreshTokens RefreshToken[]\n}\n\nmodel RefreshToken {\n  id         String    @id @default(uuid())\n  jti        String    @unique\n  familyId   String\n  userId     String\n  sessionId  String\n  tokenHash  String\n  expiresAt  DateTime\n  revokedAt  DateTime?\n  replacedBy String?\n  createdAt  DateTime  @default(now())\n\n  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)\n  session Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)\n\n  @@index([userId])\n  @@index([sessionId])\n  @@index([familyId])\n}\n\nmodel RecoveryCode {\n  id        String    @id @default(uuid())\n  userId    String\n  codeHash  String\n  usedAt    DateTime?\n  createdAt DateTime  @default(now())\n\n  user User @relation(fields: [userId], references: [id], onDelete: Cascade)\n}\n\nenum UserStatus {\n  ACTIVE\n  BLOCKED\n  PENDING\n}\n\nenum TwoFactorMethod {\n  TOTP\n  EMAIL\n  SMS\n}\n",
+  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\n// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?\n// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init\n\ngenerator client {\n  provider = \"prisma-client\"\n  output   = \"../src/generated/prisma\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n}\n\nmodel User {\n  id            String     @id @default(uuid())\n  email         String     @unique\n  emailVerified Boolean    @default(false)\n  passwordHash  String\n  status        UserStatus @default(ACTIVE)\n\n  failedLoginAttempts Int       @default(0)\n  blockedUntil        DateTime?\n\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n\n  // Relaciones\n  security      UserSecurity?\n  devices       Device[]\n  sessions      Session[]\n  refreshTokens RefreshToken[]\n  recoveryCodes RecoveryCode[]\n}\n\nmodel UserSecurity {\n  userId           String           @id\n  twoFactorEnabled Boolean          @default(false)\n  twoFactorMethod  TwoFactorMethod?\n  trustedCountries String[]\n\n  lastPasswordChange DateTime?\n\n  user User @relation(fields: [userId], references: [id], onDelete: Cascade)\n}\n\nmodel Device {\n  id          String  @id @default(uuid())\n  userId      String\n  fingerprint String\n  deviceName  String?\n  os          String?\n  browser     String?\n  country     String?\n  ipAddress   String\n  isTrusted   Boolean @default(false)\n\n  lastUsedAt DateTime?\n  createdAt  DateTime  @default(now())\n\n  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)\n  sessions Session[]\n\n  @@unique([userId, fingerprint])\n}\n\nmodel Session {\n  id        String  @id @default(uuid())\n  userId    String\n  deviceId  String?\n  ipAddress String\n  country   String?\n\n  startedAt DateTime  @default(now())\n  endedAt   DateTime?\n  revokedAt DateTime?\n\n  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)\n  device        Device?        @relation(fields: [deviceId], references: [id])\n  refreshTokens RefreshToken[]\n}\n\nmodel RefreshToken {\n  id         String    @id @default(uuid())\n  jti        String    @unique\n  familyId   String\n  userId     String\n  sessionId  String\n  tokenHash  String\n  expiresAt  DateTime\n  revokedAt  DateTime?\n  replacedBy String?\n  createdAt  DateTime  @default(now())\n\n  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)\n  session Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)\n\n  @@index([userId])\n  @@index([sessionId])\n  @@index([familyId])\n}\n\nmodel RecoveryCode {\n  id        String    @id @default(uuid())\n  userId    String\n  codeHash  String\n  usedAt    DateTime?\n  createdAt DateTime  @default(now())\n\n  user User @relation(fields: [userId], references: [id], onDelete: Cascade)\n}\n\nenum UserStatus {\n  ACTIVE\n  BLOCKED\n  PENDING\n}\n\nenum TwoFactorMethod {\n  TOTP\n  EMAIL\n  SMS\n}\n",
   "runtimeDataModel": {
     "models": {},
     "enums": {},
@@ -37,10 +37,10 @@ async function decodeBase64AsWasm(wasmBase64: string): Promise<WebAssembly.Modul
 }
 
 config.compilerWasm = {
-  getRuntime: async () => await import("@prisma/client/runtime/query_compiler_fast_bg.postgresql.js"),
+  getRuntime: async () => await import("@prisma-client/client/runtime/query_compiler_fast_bg.postgresql.js"),
 
   getQueryCompilerWasmModule: async () => {
-    const { wasm } = await import("@prisma/client/runtime/query_compiler_fast_bg.postgresql.wasm-base64.js")
+    const { wasm } = await import("@prisma-client/client/runtime/query_compiler_fast_bg.postgresql.wasm-base64.js")
     return await decodeBase64AsWasm(wasm)
   },
 
@@ -53,26 +53,26 @@ export type LogOptions<ClientOptions extends Prisma.PrismaClientOptions> =
   'log' extends keyof ClientOptions ? ClientOptions['log'] extends Array<Prisma.LogLevel | Prisma.LogDefinition> ? Prisma.GetEvents<ClientOptions['log']> : never : never
 
 export interface PrismaClientConstructor {
-    /**
-   * ## Prisma Client
-   * 
-   * Type-safe database client for TypeScript
-   * @example
-   * ```
-   * const prisma = new PrismaClient()
-   * // Fetch zero or more Users
-   * const users = await prisma.user.findMany()
-   * ```
-   * 
-   * Read more in our [docs](https://pris.ly/d/client).
-   */
+  /**
+ * ## Prisma Client
+ * 
+ * Type-safe database client for TypeScript
+ * @example
+ * ```
+ * const prisma = new PrismaClient()
+ * // Fetch zero or more Users
+ * const users = await prisma.user.findMany()
+ * ```
+ * 
+ * Read more in our [docs](https://pris.ly/d/client).
+ */
 
   new <
     Options extends Prisma.PrismaClientOptions = Prisma.PrismaClientOptions,
     LogOpts extends LogOptions<Options> = LogOptions<Options>,
     OmitOpts extends Prisma.PrismaClientOptions['omit'] = Options extends { omit: infer U } ? U : Prisma.PrismaClientOptions['omit'],
     ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs
-  >(options: Prisma.Subset<Options, Prisma.PrismaClientOptions> ): PrismaClient<LogOpts, OmitOpts, ExtArgs>
+  >(options: Prisma.Subset<Options, Prisma.PrismaClientOptions>): PrismaClient<LogOpts, OmitOpts, ExtArgs>
 }
 
 /**
@@ -108,15 +108,15 @@ export interface PrismaClient<
    */
   $disconnect(): runtime.Types.Utils.JsPromise<void>;
 
-/**
-   * Executes a prepared raw query and returns the number of affected rows.
-   * @example
-   * ```
-   * const result = await prisma.$executeRaw`UPDATE User SET cool = ${true} WHERE email = ${'user@email.com'};`
-   * ```
-   *
-   * Read more in our [docs](https://pris.ly/d/raw-queries).
-   */
+  /**
+     * Executes a prepared raw query and returns the number of affected rows.
+     * @example
+     * ```
+     * const result = await prisma.$executeRaw`UPDATE User SET cool = ${true} WHERE email = ${'user@email.com'};`
+     * ```
+     *
+     * Read more in our [docs](https://pris.ly/d/raw-queries).
+     */
   $executeRaw<T = unknown>(query: TemplateStringsArray | Prisma.Sql, ...values: any[]): Prisma.PrismaPromise<number>;
 
   /**
@@ -176,14 +176,14 @@ export interface PrismaClient<
     extArgs: ExtArgs
   }>>
 
-      /**
-   * `prisma.user`: Exposes CRUD operations for the **User** model.
-    * Example usage:
-    * ```ts
-    * // Fetch zero or more Users
-    * const users = await prisma.user.findMany()
-    * ```
-    */
+  /**
+* `prisma.user`: Exposes CRUD operations for the **User** model.
+* Example usage:
+* ```ts
+* // Fetch zero or more Users
+* const users = await prisma.user.findMany()
+* ```
+*/
   get user(): Prisma.UserDelegate<ExtArgs, { omit: OmitOpts }>;
 
   /**

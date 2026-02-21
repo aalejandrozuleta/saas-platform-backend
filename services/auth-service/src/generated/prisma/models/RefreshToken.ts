@@ -8,7 +8,7 @@
  *
  * 🟢 You can import this file directly.
  */
-import type * as runtime from "@prisma/client/runtime/client"
+import type * as runtime from "@prisma-client/client/runtime/client"
 import type * as $Enums from "../enums"
 import type * as Prisma from "../internal/prismaNamespace"
 
@@ -155,11 +155,11 @@ export type RefreshTokenAggregateArgs<ExtArgs extends runtime.Types.Extensions.I
 }
 
 export type GetRefreshTokenAggregateType<T extends RefreshTokenAggregateArgs> = {
-      [P in keyof T & keyof AggregateRefreshToken]: P extends '_count' | 'count'
-    ? T[P] extends true
-      ? number
-      : Prisma.GetScalarType<T[P], AggregateRefreshToken[P]>
-    : Prisma.GetScalarType<T[P], AggregateRefreshToken[P]>
+  [P in keyof T & keyof AggregateRefreshToken]: P extends '_count' | 'count'
+  ? T[P] extends true
+  ? number
+  : Prisma.GetScalarType<T[P], AggregateRefreshToken[P]>
+  : Prisma.GetScalarType<T[P], AggregateRefreshToken[P]>
 }
 
 
@@ -196,15 +196,15 @@ export type RefreshTokenGroupByOutputType = {
 type GetRefreshTokenGroupByPayload<T extends RefreshTokenGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<RefreshTokenGroupByOutputType, T['by']> &
-      {
-        [P in ((keyof T) & (keyof RefreshTokenGroupByOutputType))]: P extends '_count'
-          ? T[P] extends boolean
-            ? number
-            : Prisma.GetScalarType<T[P], RefreshTokenGroupByOutputType[P]>
-          : Prisma.GetScalarType<T[P], RefreshTokenGroupByOutputType[P]>
-      }
-    >
+    {
+      [P in ((keyof T) & (keyof RefreshTokenGroupByOutputType))]: P extends '_count'
+      ? T[P] extends boolean
+      ? number
+      : Prisma.GetScalarType<T[P], RefreshTokenGroupByOutputType[P]>
+      : Prisma.GetScalarType<T[P], RefreshTokenGroupByOutputType[P]>
+    }
   >
+>
 
 
 
@@ -1088,10 +1088,10 @@ export interface RefreshTokenDelegate<ExtArgs extends runtime.Types.Extensions.I
     args?: Prisma.Subset<T, RefreshTokenCountArgs>,
   ): Prisma.PrismaPromise<
     T extends runtime.Types.Utils.Record<'select', any>
-      ? T['select'] extends true
-        ? number
-        : Prisma.GetScalarType<T['select'], RefreshTokenCountAggregateOutputType>
-      : number
+    ? T['select'] extends true
+    ? number
+    : Prisma.GetScalarType<T['select'], RefreshTokenCountAggregateOutputType>
+    : number
   >
 
   /**
@@ -1145,8 +1145,8 @@ export interface RefreshTokenDelegate<ExtArgs extends runtime.Types.Extensions.I
       Prisma.Extends<'take', Prisma.Keys<T>>
     >,
     OrderByArg extends Prisma.True extends HasSelectOrTake
-      ? { orderBy: RefreshTokenGroupByArgs['orderBy'] }
-      : { orderBy?: RefreshTokenGroupByArgs['orderBy'] },
+    ? { orderBy: RefreshTokenGroupByArgs['orderBy'] }
+    : { orderBy?: RefreshTokenGroupByArgs['orderBy'] },
     OrderFields extends Prisma.ExcludeUnderscoreKeys<Prisma.Keys<Prisma.MaybeTupleToUnion<T['orderBy']>>>,
     ByFields extends Prisma.MaybeTupleToUnion<T['by']>,
     ByValid extends Prisma.Has<ByFields, OrderFields>,
@@ -1157,49 +1157,49 @@ export interface RefreshTokenDelegate<ExtArgs extends runtime.Types.Extensions.I
     ? `Error: "by" must not be empty.`
     : HavingValid extends Prisma.False
     ? {
-        [P in HavingFields]: P extends ByFields
-          ? never
-          : P extends string
-          ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
-          : [
-              Error,
-              'Field ',
-              P,
-              ` in "having" needs to be provided in "by"`,
-            ]
-      }[HavingFields]
+      [P in HavingFields]: P extends ByFields
+      ? never
+      : P extends string
+      ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+      : [
+        Error,
+        'Field ',
+        P,
+        ` in "having" needs to be provided in "by"`,
+      ]
+    }[HavingFields]
     : 'take' extends Prisma.Keys<T>
     ? 'orderBy' extends Prisma.Keys<T>
-      ? ByValid extends Prisma.True
-        ? {}
-        : {
-            [P in OrderFields]: P extends ByFields
-              ? never
-              : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-          }[OrderFields]
-      : 'Error: If you provide "take", you also need to provide "orderBy"'
+    ? ByValid extends Prisma.True
+    ? {}
+    : {
+      [P in OrderFields]: P extends ByFields
+      ? never
+      : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+    }[OrderFields]
+    : 'Error: If you provide "take", you also need to provide "orderBy"'
     : 'skip' extends Prisma.Keys<T>
     ? 'orderBy' extends Prisma.Keys<T>
-      ? ByValid extends Prisma.True
-        ? {}
-        : {
-            [P in OrderFields]: P extends ByFields
-              ? never
-              : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-          }[OrderFields]
-      : 'Error: If you provide "skip", you also need to provide "orderBy"'
+    ? ByValid extends Prisma.True
+    ? {}
+    : {
+      [P in OrderFields]: P extends ByFields
+      ? never
+      : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+    }[OrderFields]
+    : 'Error: If you provide "skip", you also need to provide "orderBy"'
     : ByValid extends Prisma.True
     ? {}
     : {
-        [P in OrderFields]: P extends ByFields
-          ? never
-          : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-      }[OrderFields]
+      [P in OrderFields]: P extends ByFields
+      ? never
+      : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+    }[OrderFields]
   >(args: Prisma.SubsetIntersection<T, RefreshTokenGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetRefreshTokenGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
-/**
- * Fields of the RefreshToken model
- */
-readonly fields: RefreshTokenFieldRefs;
+  /**
+   * Fields of the RefreshToken model
+   */
+  readonly fields: RefreshTokenFieldRefs;
 }
 
 /**
@@ -1252,7 +1252,7 @@ export interface RefreshTokenFieldRefs {
   readonly replacedBy: Prisma.FieldRef<"RefreshToken", 'String'>
   readonly createdAt: Prisma.FieldRef<"RefreshToken", 'DateTime'>
 }
-    
+
 
 // Custom InputTypes
 /**

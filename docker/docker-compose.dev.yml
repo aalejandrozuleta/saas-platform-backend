@@ -26,27 +26,17 @@ services:
   api-gateway:
     container_name: api-gateway-dev
     build:
-      context: ..
-      dockerfile: services/api-gateway/Dockerfile.dev
+      context: ../services/api-gateway
+      dockerfile: Dockerfile.dev
     env_file:
       - ../services/api-gateway/.env
     volumes:
-        - ..:/app
-        - pnpm-store:/pnpm-store
+      - ../services/api-gateway:/app
+      - pnpm-store:/pnpm-store
     environment:
       PNPM_STORE_PATH: /pnpm-store
     ports:
       - "3000:3000"
-    deploy:
-      resources:
-        limits:
-          cpus: "0.75"
-          memory: 768M
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
     networks:
       - saas-dev
 
@@ -61,10 +51,7 @@ services:
     env_file:
       - ../services/auth-service/.env
     volumes:
-    - ..:/app
-    - pnpm-store:/pnpm-store
-    environment:
-      PNPM_STORE_PATH: /pnpm-store
+      - pnpm-store:/pnpm-store
     ports:
       - "3001:3001"
     depends_on:
@@ -74,19 +61,8 @@ services:
         condition: service_started
       mongo:
         condition: service_started
-    deploy:
-      resources:
-        limits:
-          cpus: "0.75"
-          memory: 768M
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
     networks:
       - saas-dev
-
   # =====================
   # POSTGRES
   # =====================

@@ -1,6 +1,5 @@
 import { Device } from '@domain/entities/device/device.entity';
-
-import { Device as PrismaDevice } from '../../../../generated/prisma/client';
+import { Device as PrismaDevice } from '@prisma-client/client';
 
 
 /**

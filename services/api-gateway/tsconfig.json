@@ -13,9 +13,6 @@
       "@config/*": ["src/config/*"]
     }
   },
-  "references": [
-    { "path": "../../shared" }
-  ],
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "dist"]
 }

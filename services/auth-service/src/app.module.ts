@@ -6,7 +6,7 @@ import { I18nModule } from '@infrastructure/i18n/i18n.module';
 import { MongoModule } from '@infrastructure/persistence/mongo/mongo.module';
 import { ConfigModule } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
-import { GlobalExceptionFilter } from '@saas/shared/filters/global-exception.filter';
+import { GlobalExceptionFilter } from '@saas/shared';
 import { APP_FILTER } from '@nestjs/core';
 
 const APP_FILTER_TOKEN = APP_FILTER;

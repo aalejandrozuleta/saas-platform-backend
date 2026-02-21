@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
 import { SessionRepository } from '@application/ports/session.repository';
+import type { PrismaClient } from '@prisma-client/client';
 
 import { PrismaService } from './prisma.service';
 
@@ -18,13 +18,13 @@ export class SessionPrismaRepository implements SessionRepository {
 
   constructor(
     private readonly prisma: PrismaService,
-  ) {}
+  ) { }
 
   /**
    * Obtiene el cliente correcto dependiendo
    * si estamos dentro de una transacción.
    */
-  private client(tx?: Prisma.TransactionClient) {
+  private client(tx?: PrismaClient) {
     return tx ?? this.prisma;
   }
 
@@ -42,7 +42,7 @@ export class SessionPrismaRepository implements SessionRepository {
       ipAddress: string;
       country?: string;
     },
-    tx?: Prisma.TransactionClient,
+    tx?: PrismaClient,
   ): Promise<{ id: string }> {
 
     const session = await this.client(tx).session.create({
@@ -73,7 +73,7 @@ export class SessionPrismaRepository implements SessionRepository {
    */
   async countActiveSessions(
     userId: string,
-    tx?: Prisma.TransactionClient,
+    tx?: PrismaClient,
   ): Promise<number> {
 
     return this.client(tx).session.count({
@@ -97,7 +97,7 @@ export class SessionPrismaRepository implements SessionRepository {
   async revokeOldestActiveSession(
     userId: string,
     now: Date,
-    tx?: Prisma.TransactionClient,
+    tx?: PrismaClient,
   ): Promise<void> {
 
     const client = this.client(tx);

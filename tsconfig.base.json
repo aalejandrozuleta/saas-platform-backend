@@ -28,6 +28,8 @@
     "skipLibCheck": true,
 
     /* Source maps */
-    "sourceMap": true
+    "sourceMap": true,
+
+    "baseUrl": "."
   }
 }
