@@ -1,4 +1,5 @@
-import { Prisma } from '@prisma-client/client';
+
+import { Prisma } from '@prisma/client';
 
 import { Device } from '../entities/device/device.entity';
 

@@ -1,4 +1,4 @@
-import { Prisma } from '@prisma-client/client';
+import { Prisma } from '@prisma/client';
 
 /**
  * Ejecuta una unidad de trabajo dentro de una transacción real.

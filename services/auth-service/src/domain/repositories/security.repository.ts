@@ -1,4 +1,4 @@
-import { Prisma } from '@prisma-client/client';
+import { Prisma } from '@prisma/client';
 
 /**
  * Repositorio de seguridad del usuario.

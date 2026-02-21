@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { SecurityRepository } from '@domain/repositories/security.repository';
 import { DomainErrorFactory } from '@domain/errors/domain-error.factory';
-import type { PrismaClient } from '@prisma-client/client';
+import type { PrismaClient } from '@prisma/client';
 
 import { PrismaService } from './prisma.service';
 

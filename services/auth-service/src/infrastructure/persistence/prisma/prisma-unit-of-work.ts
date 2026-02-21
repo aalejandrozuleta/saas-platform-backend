@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma-client/client';
 import { UnitOfWork } from '@application/ports/unit-of-work.port';
+import { Prisma } from '@prisma/client';
 
 import { PrismaService } from './prisma.service';
+
 
 @Injectable()
 export class PrismaUnitOfWork implements UnitOfWork {
