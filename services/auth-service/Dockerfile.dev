@@ -14,6 +14,7 @@ COPY services ./services
 COPY shared ./shared
 
 RUN pnpm install
+RUN pnpm --filter auth-service exec prisma generate
 
 WORKDIR /app/services/auth-service
 
