@@ -6,19 +6,19 @@ scrape_configs:
   # ============================
   # API GATEWAY
   # ============================
-  - job_name: "api-gateway"
-    metrics_path: /metrics
-    static_configs:
-      - targets:
-          - api-gateway:3000
-        labels:
-          service: api-gateway
+  # - job_name: "api-gateway"
+  #   metrics_path: /metrics
+  #   static_configs:
+  #     - targets:
+  #         - api-gateway:3000
+  #       labels:
+  #         service: api-gateway
 
   # ============================
   # AUTH SERVICE
   # ============================
   - job_name: "auth-service"
-    metrics_path: /metrics
+    metrics_path: /auth/v1/metrics
     static_configs:
       - targets:
           - auth-service:3001

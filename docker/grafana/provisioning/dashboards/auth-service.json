@@ -1,23 +1,29 @@
 {
   "title": "Auth Service",
   "uid": "auth-service",
+  "schemaVersion": 38,
+  "version": 2,
   "refresh": "5s",
   "panels": [
     {
-      "type": "graph",
-      "title": "Auth Requests / sec",
+      "type": "timeseries",
+      "title": "Requests/sec",
+      "gridPos": { "x": 0, "y": 0, "w": 12, "h": 6 },
       "targets": [
         {
-          "expr": "sum(rate(http_requests_total{service=\"auth-service\"}[1m]))"
+          "expr": "sum(rate(http_requests_total{service=\"auth-service\",route!=\"/metrics\"}[2m]))",
+          "refId": "A"
         }
       ]
     },
     {
-      "type": "logs",
-      "title": "Auth Logs",
+      "type": "timeseries",
+      "title": "Latency P95",
+      "gridPos": { "x": 12, "y": 0, "w": 12, "h": 6 },
       "targets": [
         {
-          "expr": "{service=\"auth-service\"}"
+          "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{service=\"auth-service\",route!=\"/metrics\"}[5m])) by (le)) * 1000",
+          "refId": "A"
         }
       ]
     }
