@@ -40,8 +40,12 @@ export class AuthController {
     this.prepareRequest(req);
     try {
       const data = await this.authProxy.forward(req, '/login');
+      console.log('data',data);
+      
       return successResponse(data);
     } catch (error) {
+      console.log('error', error);
+      
       throw error;
     }
   }

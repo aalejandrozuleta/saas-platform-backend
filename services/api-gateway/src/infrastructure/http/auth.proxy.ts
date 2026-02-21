@@ -43,6 +43,8 @@ export class AuthProxy {
 
       return response.data;
     } catch (error) {
+      console.log('error', error);
+      
       if (error instanceof AxiosError) {
         if (error.response) {
           throw new HttpException(
@@ -88,8 +90,6 @@ export class AuthProxy {
     copy('x-correlation-id');
     copy('x-country');
     copy('x-device-fingerprint');
-
-    headers['x-forwarded-for'] = req.ip ?? '';
 
     return headers;
   }
