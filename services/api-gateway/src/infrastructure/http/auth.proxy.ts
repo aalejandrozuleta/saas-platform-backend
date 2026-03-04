@@ -19,7 +19,7 @@ export class AuthProxy {
 
   constructor(private readonly envService: EnvService) {
     this.client = axios.create({
-      baseURL: this.envService.get('AUTH_SERVICE_URL') ?? 'http://auth-service:3001',
+      baseURL: this.envService.get('AUTH_SERVICE_URL'),
       timeout: this.envService.get('AUTH_SERVICE_TIMEOUT') ?? 5000,
     });
   }

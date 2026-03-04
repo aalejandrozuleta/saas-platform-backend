@@ -16,7 +16,7 @@ export class JwtTokenService implements TokenService {
     userId: string;
     sessionId: string;
   }): string {
-    return sign(payload, this.envService.get('JWT_ACCESS_SECRET')!, {
+    return sign(payload, this.envService.get('JWT_ACCESS_SECRET'), {
       expiresIn: '15m',
     });
   }
@@ -34,7 +34,7 @@ export class JwtTokenService implements TokenService {
 
     const token = sign(
       { jti },
-      this.envService.get('JWT_REFRESH_SECRET')!,
+      this.envService.get('JWT_REFRESH_SECRET'),
       { expiresIn: '7d' },
     );
 

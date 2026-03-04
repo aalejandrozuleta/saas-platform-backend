@@ -13,7 +13,8 @@ COPY tsconfig.base.json ./
 COPY services ./services
 COPY shared ./shared
 
-RUN pnpm install
+# NOSONAR: pnpm install scripts required for prisma
+RUN pnpm install --frozen-lockfile
 
 WORKDIR /app/services/api-gateway
 
