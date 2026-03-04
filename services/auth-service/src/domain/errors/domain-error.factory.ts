@@ -39,11 +39,19 @@ export class DomainErrorFactory {
     );
   }
 
-  static deviceNotTrusted(): DomainException { 
+  static deviceNotTrusted(): DomainException {
     return DomainException.create(
       'auth.device_not_trusted',
       ErrorCode.DEVICE_NOT_TRUSTED,
       403,
-     );
-   }
+    );
+  }
+
+  static countryNotTrusted(): DomainException {
+    return DomainException.create(
+      'auth.country_not_trusted',
+      ErrorCode.COUNTRY_NOT_TRUSTED,
+      403,
+    );
+  }
 }

@@ -16,4 +16,5 @@ export const HttpErrorMapper: Record<ErrorCode, number> = {
   [ErrorCode.INVALID_CREDENTIALS]: 401,
   [ErrorCode.DEVICE_FINGERPRINT_REQUIRED]: 400,
   [ErrorCode.EMAIL_ALREADY_EXISTS]: 409,
+  [ErrorCode.COUNTRY_NOT_TRUSTED]: 403
 };

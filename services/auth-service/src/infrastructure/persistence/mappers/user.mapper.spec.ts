@@ -78,4 +78,55 @@ describe('UserMapper', () => {
       );
     });
   });
+
+  it('debe mapear correctamente estado PENDING', () => {
+    const raw = {
+      id: 'uuid-pending',
+      email: 'pending@example.com',
+      passwordHash: 'hash',
+      status: PrismaUserStatus.PENDING,
+      emailVerified: false,
+      failedLoginAttempts: 0,
+      blockedUntil: null,
+      createdAt: new Date(),
+    };
+
+    const user = UserMapper.toDomain(raw);
+
+    expect(user.status).toBe(DomainUserStatus.PENDING);
+  });
+
+  it('debe mapear correctamente estado BLOCKED', () => {
+    const raw = {
+      id: 'uuid-blocked',
+      email: 'blocked@example.com',
+      passwordHash: 'hash',
+      status: PrismaUserStatus.BLOCKED,
+      emailVerified: true,
+      failedLoginAttempts: 5,
+      blockedUntil: new Date(),
+      createdAt: new Date(),
+    };
+
+    const user = UserMapper.toDomain(raw);
+
+    expect(user.status).toBe(DomainUserStatus.BLOCKED);
+  });
+
+  it('debe mapear correctamente DomainStatus a PrismaStatus', () => {
+    const user = User.fromPersistence({
+      id: 'uuid-map',
+      email: EmailVO.create('map@example.com'),
+      passwordHash: 'hash',
+      status: DomainUserStatus.PENDING,
+      emailVerified: false,
+      failedLoginAttempts: 0,
+      blockedUntil: undefined,
+      createdAt: new Date(),
+    });
+
+    const persistence = UserMapper.toPersistence(user);
+
+    expect(persistence.status).toBe(PrismaUserStatus.PENDING);
+  });
 });
