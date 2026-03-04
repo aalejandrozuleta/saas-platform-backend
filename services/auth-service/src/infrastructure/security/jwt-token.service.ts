@@ -3,18 +3,20 @@ import { randomUUID } from 'node:crypto';
 import { sign } from 'jsonwebtoken';
 import { Injectable } from '@nestjs/common';
 import { TokenService } from '@application/ports/token.service';
+import { EnvService } from '@config/env/env.service';
 
 /**
  * Implementación JWT del servicio de tokens.
  */
 @Injectable()
 export class JwtTokenService implements TokenService {
+  constructor(private readonly envService: EnvService) {}
 
   generateAccessToken(payload: {
     userId: string;
     sessionId: string;
   }): string {
-    return sign(payload, process.env.JWT_ACCESS_SECRET!, {
+    return sign(payload, this.envService.get('JWT_ACCESS_SECRET')!, {
       expiresIn: '15m',
     });
   }
@@ -32,7 +34,7 @@ export class JwtTokenService implements TokenService {
 
     const token = sign(
       { jti },
-      process.env.JWT_REFRESH_SECRET!,
+      this.envService.get('JWT_REFRESH_SECRET')!,
       { expiresIn: '7d' },
     );
 
