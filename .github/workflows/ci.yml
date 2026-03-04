@@ -13,31 +13,22 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # 1️⃣ Instalar pnpm
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 10
-          run_install: false
 
-      # 2️⃣ Instalar Node
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 24
+          cache: pnpm
 
-      # 3️⃣ Verificar pnpm (debug)
-      - name: Verify pnpm
-        run: pnpm -v
-
-      # 4️⃣ Instalar dependencias
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # 5️⃣ Lint
       - name: Lint
-        run: pnpm lint:fix
+        run: pnpm lint
 
-      # 6️⃣ Tests
       - name: Test
         run: pnpm test
