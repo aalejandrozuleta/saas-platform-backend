@@ -8,12 +8,17 @@ import { ConfigModule } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { GlobalExceptionFilter } from '@saas/shared';
 import { APP_FILTER } from '@nestjs/core';
+import { ScheduleModule } from '@nestjs/schedule';
+import { MaintenanceModule } from '@infrastructure/maintenance/maintenance.module';
+
 
 const APP_FILTER_TOKEN = APP_FILTER;
 @Module({
   imports: [
     EventEmitterModule.forRoot(),
     ConfigModule.forRoot({ isGlobal: true }),
+    ScheduleModule.forRoot(),
+    MaintenanceModule,
     EnvModule,
     MongoModule,
     MetricsModule,

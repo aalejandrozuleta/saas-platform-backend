@@ -78,6 +78,12 @@ model Session {
   user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   device        Device?        @relation(fields: [deviceId], references: [id])
   refreshTokens RefreshToken[]
+
+  @@index([id])
+  @@index([userId])
+  @@index([deviceId])
+  @@index([endedAt])
+  @@index([revokedAt])
 }
 
 model RefreshToken {
@@ -95,6 +101,8 @@ model RefreshToken {
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   session Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 
+  @@index([expiresAt])
+  @@index([revokedAt])
   @@index([userId])
   @@index([sessionId])
   @@index([familyId])
