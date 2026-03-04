@@ -43,8 +43,6 @@ export class AuthProxy {
 
       return response.data;
     } catch (error) {
-      console.log('error', error);
-      
       if (error instanceof AxiosError) {
         if (error.response) {
           throw new HttpException(
