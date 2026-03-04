@@ -20,7 +20,7 @@ import { AuthProxy } from '@infrastructure/http/auth.proxy';
  */
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authProxy: AuthProxy) {}
+  constructor(private readonly authProxy: AuthProxy) { }
 
   /**
    * Registro de usuario
@@ -28,7 +28,7 @@ export class AuthController {
   @Post('register')
   async register(@Req() req: Request) {
     this.prepareRequest(req);
-    const data = await this.authProxy.forward(req, '/register');    
+    const data = await this.authProxy.forward(req, '/register');
     return successResponse(data);
   }
 
@@ -38,12 +38,8 @@ export class AuthController {
   @Post('login')
   async login(@Req() req: Request) {
     this.prepareRequest(req);
-    try {
-      const data = await this.authProxy.forward(req, '/login');
-      return successResponse(data);
-    } catch (error) {
-      throw error;
-    }
+    const data = await this.authProxy.forward(req, '/login');
+    return successResponse(data);
   }
 
   /**
@@ -52,7 +48,6 @@ export class AuthController {
   @Post('refresh')
   async refresh(@Req() req: Request) {
     this.prepareRequest(req);
-
     const data = await this.authProxy.forward(req, '/refresh');
     return successResponse(data);
   }

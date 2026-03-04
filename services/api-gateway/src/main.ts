@@ -47,7 +47,6 @@ async function bootstrap(): Promise<void> {
   app.getHttpAdapter().getInstance().set('trust proxy', 1);
 
   await app.listen(envService.get('PORT'));
-  // logger.info(`API Gateway running on port ${envService.get('PORT')}`);
 }
 
 void bootstrap();

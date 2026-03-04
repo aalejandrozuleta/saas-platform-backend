@@ -1,4 +1,4 @@
-import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { EnvModule } from '@config/env/env.module';
 import { MetricsModule } from '@infrastructure/metrics/metrics.module';
 import { AuthModule } from '@modules/auth/auth.module';
@@ -32,9 +32,5 @@ const APP_FILTER_TOKEN = APP_FILTER;
     },
   ],
 })
-export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer): void {
-    
-    // consumer.apply(HttpLoggerMiddleware).forRoutes('*');
-  }
+export class AppModule {
 }

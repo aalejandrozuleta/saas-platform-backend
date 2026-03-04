@@ -2,19 +2,22 @@ FROM node:24-alpine
 
 WORKDIR /app
 
-RUN npm install -g pnpm
 ENV PNPM_STORE_PATH=/pnpm-store
 
-# Copiar workspace completo (necesario para pnpm workspaces)
+# Instalar pnpm
+RUN npm install -g pnpm
+
+# Copiar archivos del workspace
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY tsconfig.base.json ./
 
-# Copiar solo lo necesario
+# Copiar código
 COPY services ./services
 COPY shared ./shared
 
-RUN pnpm install
-RUN pnpm --filter auth-service exec prisma generate
+# Instalar dependencias y generar Prisma en una sola capa
+RUN pnpm install && \
+    pnpm --filter auth-service exec prisma generate
 
 WORKDIR /app/services/auth-service
 

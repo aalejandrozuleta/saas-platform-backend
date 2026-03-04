@@ -6,9 +6,6 @@ import prettierConfig from 'eslint-config-prettier';
 import boundaries from 'eslint-plugin-boundaries';
 
 export default [
-  /**
-   * ❗ Ignorados globales (OBLIGATORIO EN FLAT CONFIG)
-   */
   {
     ignores: [
       '**/node_modules/**',
@@ -19,12 +16,8 @@ export default [
     ],
   },
 
-  /**
-   * Configuración base TypeScript
-   */
   {
-    files: ['**/*.ts', '**/*.test.ts',
-    '**/__tests__/**/*.ts'],
+    files: ['**/*.ts'],
     languageOptions: {
       parser: tsParser,
       parserOptions: {
@@ -64,13 +57,10 @@ export default [
     },
   },
 
-  /**
-   * Reglas de arquitectura
-   */
   {
     files: ['**/*.ts'],
     plugins: {
-      boundaries,
+      boundaries: boundaries,
     },
     settings: {
       'boundaries/elements': [
@@ -98,8 +88,5 @@ export default [
     },
   },
 
-  /**
-   * Prettier (siempre al final)
-   */
   prettierConfig,
 ];

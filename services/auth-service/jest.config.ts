@@ -67,7 +67,7 @@ const config: Config = {
 
   testPathIgnorePatterns: [
     '/node_modules/',
-    '\\.int\\.spec\\.ts$', // 🔥 EXCLUIR INTEGRATION TESTS
+    '\\.int\\.spec\\.ts$', 
   ],
 };
 
