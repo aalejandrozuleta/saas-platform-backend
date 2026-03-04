@@ -1,14 +1,12 @@
-
 import { EmailVO } from '@domain/value-objects/email.vo';
 import { User } from '@domain/entities/user/user.entity';
 import { UserStatus } from '@domain/enums/user-status.enum';
+import { UserStatus as PrismaUserStatus } from '@prisma/client';
 
 import { UserMapper } from '../mappers/user.mapper';
 
 import { PrismaService } from './prisma.service';
 import { UserPrismaRepository } from './user.prisma.repository';
-
-
 
 jest.mock('../mappers/user.mapper', () => ({
   UserMapper: {
@@ -19,7 +17,6 @@ jest.mock('../mappers/user.mapper', () => ({
 
 describe('UserPrismaRepository', () => {
   let repository: UserPrismaRepository;
-  let prisma: PrismaService;
 
   const prismaMock = {
     user: {
@@ -29,8 +26,9 @@ describe('UserPrismaRepository', () => {
   };
 
   beforeEach(() => {
-    prisma = prismaMock as unknown as PrismaService;
-    repository = new UserPrismaRepository(prisma);
+    repository = new UserPrismaRepository(
+      prismaMock as unknown as PrismaService,
+    );
     jest.clearAllMocks();
   });
 
@@ -42,7 +40,10 @@ describe('UserPrismaRepository', () => {
         id: 'uuid',
         email: email.getValue(),
         passwordHash: 'hash',
-        status: 'ACTIVE',
+        status: PrismaUserStatus.ACTIVE,
+        emailVerified: false,
+        failedLoginAttempts: 0,
+        blockedUntil: null,
         createdAt: new Date(),
       };
 
@@ -51,30 +52,30 @@ describe('UserPrismaRepository', () => {
         email,
         passwordHash: prismaUser.passwordHash,
         status: UserStatus.ACTIVE,
+        emailVerified: false,
+        failedLoginAttempts: 0,
+        blockedUntil: undefined,
         createdAt: prismaUser.createdAt,
       });
 
-      // 🔑 CAST CORRECTO (SOLO EL MÉTODO)
-      (
-        prismaMock.user.findUnique as jest.Mock
-      ).mockResolvedValue(prismaUser);
-
+      prismaMock.user.findUnique.mockResolvedValue(prismaUser);
       (UserMapper.toDomain as jest.Mock).mockReturnValue(domainUser);
 
       const result = await repository.findByEmail(email);
 
-      expect(result).toBe(domainUser);
       expect(prismaMock.user.findUnique).toHaveBeenCalledWith({
         where: { email: email.getValue() },
       });
+
+      expect(UserMapper.toDomain).toHaveBeenCalledWith(prismaUser);
+
+      expect(result).toBe(domainUser);
     });
 
     it('debe retornar null si no existe', async () => {
       const email = EmailVO.create('notfound@example.com');
 
-      (
-        prismaMock.user.findUnique as jest.Mock
-      ).mockResolvedValue(null);
+      prismaMock.user.findUnique.mockResolvedValue(null);
 
       const result = await repository.findByEmail(email);
 
@@ -95,7 +96,10 @@ describe('UserPrismaRepository', () => {
         id: user.id,
         email: user.email.getValue(),
         passwordHash: user.passwordHash,
-        status: 'ACTIVE',
+        status: PrismaUserStatus.ACTIVE,
+        emailVerified: false,
+        failedLoginAttempts: 0,
+        blockedUntil: undefined,
       };
 
       (UserMapper.toPersistence as jest.Mock).mockReturnValue(
@@ -103,6 +107,8 @@ describe('UserPrismaRepository', () => {
       );
 
       await repository.save(user);
+
+      expect(UserMapper.toPersistence).toHaveBeenCalledWith(user);
 
       expect(prismaMock.user.create).toHaveBeenCalledWith({
         data: persistenceUser,

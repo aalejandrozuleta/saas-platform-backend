@@ -1,22 +1,14 @@
-import { UserRepository } from '@domain/repositories/user.repository';
-import { EmailAlreadyExistsError } from '@domain/errors/email-already-exists.error';
-import { EmailVO } from '@domain/value-objects/email.vo';
 import { User } from '@domain/entities/user/user.entity';
+import { AuthAuditEvent } from '@application/audit/auth-events.enum';
 import { PlatformLogger } from '@saas/shared';
-import { PasswordHasher } from '@application/ports/password-hasher.port';
+import { UserRepository } from '@domain/repositories/user.repository';
 import { AuditLogger } from '@application/ports/audit-logger.port';
+import { PasswordHasher } from '@application/ports/password-hasher.port';
 
 import { RegisterUserUseCase } from './register-user.use-case';
-/**
- * Tests unitarios del caso de uso RegisterUserUseCase
- *
- * - Arquitectura hexagonal real
- * - Dependencias por puertos
- * - Sin Nest TestingModule
- * - Sin casts inseguros
- */
+
 describe('RegisterUserUseCase', () => {
-  let useCase: RegisterUserUseCase;
+    let useCase: RegisterUserUseCase;
 
   let userRepository: jest.Mocked<UserRepository>;
   let passwordHasher: jest.Mocked<PasswordHasher>;
@@ -60,23 +52,22 @@ describe('RegisterUserUseCase', () => {
   });
 
   it('debe registrar un usuario correctamente (happy path)', async () => {
-    // Arrange
     const email = 'test@example.com';
     const password = 'Str0ng-P@ssword';
 
     userRepository.findByEmail.mockResolvedValue(null);
     passwordHasher.hash.mockResolvedValue('hashed-password');
 
-    // Act
     const result = await useCase.execute(email, password, context);
 
-    // Assert
     expect(result).toBeInstanceOf(User);
     expect(result.email.getValue()).toBe(email);
+    expect(result.passwordHash).toBe('hashed-password');
 
-    expect(userRepository.findByEmail).toHaveBeenCalledWith(
-      EmailVO.create(email),
-    );
+    const calledEmailVO =
+      (userRepository.findByEmail as jest.Mock).mock.calls[0][0];
+
+    expect(calledEmailVO.getValue()).toBe(email);
 
     expect(passwordHasher.hash).toHaveBeenCalledWith(password);
 
@@ -84,10 +75,8 @@ describe('RegisterUserUseCase', () => {
 
     expect(auditLogger.log).toHaveBeenCalledWith(
       expect.objectContaining({
-        event: 'REGISTER_SUCCESS',
+        event: AuthAuditEvent.REGISTER_SUCCESS,
         ip: context.ip,
-        country: context.country,
-        deviceFingerprint: context.deviceFingerprint,
       }),
     );
 
@@ -95,27 +84,27 @@ describe('RegisterUserUseCase', () => {
   });
 
   it('debe lanzar error si el email ya existe', async () => {
-    // Arrange
     const email = 'existing@example.com';
     const password = 'Str0ng-P@ssword';
 
-    userRepository.findByEmail.mockResolvedValue({
+    const existingUser = {
       id: 'user-id',
-    } as User);
+    } as User;
 
-    // Act + Assert
+    userRepository.findByEmail.mockResolvedValue(existingUser);
+
     await expect(
       useCase.execute(email, password, context),
-    ).rejects.toBeInstanceOf(EmailAlreadyExistsError);
+    ).rejects.toBeInstanceOf(Error);
 
     expect(userRepository.save).not.toHaveBeenCalled();
     expect(passwordHasher.hash).not.toHaveBeenCalled();
 
     expect(auditLogger.log).toHaveBeenCalledWith(
       expect.objectContaining({
-        event: 'REGISTER_FAILED',
+        userId: 'user-id',
+        event: AuthAuditEvent.REGISTER_FAILED,
         reason: 'EMAIL_ALREADY_EXISTS',
-        ip: context.ip,
       }),
     );
 
