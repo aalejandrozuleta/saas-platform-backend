@@ -33,6 +33,8 @@ const config: Config = {
 
   coveragePathIgnorePatterns: [
     '/node_modules/',
+    '/index.ts',
+    '/dist',
 
     String.raw`\.spec\.ts$`,
     String.raw`\.test\.ts$`,

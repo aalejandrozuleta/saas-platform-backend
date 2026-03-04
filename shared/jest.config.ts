@@ -1,6 +1,6 @@
 import type { Config } from 'jest';
 
-import baseConfig from '../../jest.config.base.ts';
+import baseConfig from '../jest.config.base.ts';
 
 /**
  * Configuración Jest específica del auth-service.
@@ -12,9 +12,9 @@ const config: Config = {
   rootDir: '.',
 
   // Nombre visible en logs / CI
-  displayName: 'auth-service',
+  displayName: 'shared',
 
-  roots: ['<rootDir>/src'],
+  roots: ['<rootDir>'],
 
   // Setup específico si luego lo necesitas
   setupFilesAfterEnv: [],
@@ -22,54 +22,47 @@ const config: Config = {
   testMatch: ['**/*.spec.ts'],
 
   collectCoverageFrom: [
-    'src/**/*.ts',
+  '**/*.ts',
 
-    // ⛔️ excluir tests
-    '!src/**/*.spec.ts',
-    '!src/**/*.test.ts',
-    '!src/**/__tests__/**',
-  ],
+  '!**/*.spec.ts',
+  '!**/*.test.ts',
+  '!**/__tests__/**',
+
+  '!jest.config.ts',
+  '!../jest.config.base.ts'
+],
 
 
   coveragePathIgnorePatterns: [
     '/node_modules/',
+    '/dist/',
     '/index.ts',
-    '/dist',
 
-    // tests
     String.raw`\.spec\.ts$`,
     String.raw`\.test\.ts$`,
     '/__tests__/',
 
-    // DTOs
     '/application/dto/',
 
-    // Contracts & wiring
     '/domain/repositories/',
     '/domain/token/',
     '/modules/',
     String.raw`\.module\.ts$`,
     String.raw`\.providers\.ts$`,
 
-    // Config & bootstrap
-    '/config/',
     'main.ts',
   ],
 
 
   moduleNameMapper: {
-    '^@domain/(.*)$': '<rootDir>/src/domain/$1',
-    '^@application/(.*)$': '<rootDir>/src/application/$1',
     '^@infrastructure/(.*)$': '<rootDir>/src/infrastructure/$1',
     '^@modules/(.*)$': '<rootDir>/src/modules/$1',
     '^@config/(.*)$': '<rootDir>/src/config/$1',
-
-    '^@prisma$': '<rootDir>/generated/prisma',
   },
 
   testPathIgnorePatterns: [
     '/node_modules/',
-    '\\.int\\.spec\\.ts$', 
+    '\\.int\\.spec\\.ts$',
   ],
 };
 
