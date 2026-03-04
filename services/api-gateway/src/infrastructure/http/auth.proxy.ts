@@ -1,6 +1,7 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import type { Request } from 'express';
 import axios, { AxiosError, AxiosInstance } from 'axios';
+import { EnvService } from '@config/env/env.service';
 
 /**
  * Proxy HTTP hacia el Auth Service
@@ -16,10 +17,10 @@ export class AuthProxy {
   private readonly client: AxiosInstance;
   private readonly AUTH_BASE_PATH = '/auth/v1';
 
-  constructor() {
+  constructor(private readonly envService: EnvService) {
     this.client = axios.create({
-      baseURL: process.env.AUTH_SERVICE_URL ?? 'http://auth-service:3001',
-      timeout: 5000,
+      baseURL: this.envService.get('AUTH_SERVICE_URL') ?? 'http://auth-service:3001',
+      timeout: this.envService.get('AUTH_SERVICE_TIMEOUT') ?? 5000,
     });
   }
 
