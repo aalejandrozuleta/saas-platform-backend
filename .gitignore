@@ -62,6 +62,7 @@ docker-volumes/
 __tests__/
 test-results/
 playwright-report/
+.jest-cache
 
 ############################################
 # Monorepo / Workspace

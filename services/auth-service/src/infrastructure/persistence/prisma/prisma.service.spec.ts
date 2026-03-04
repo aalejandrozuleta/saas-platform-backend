@@ -1,6 +1,8 @@
 import { PrismaPg } from '@prisma/adapter-pg';
+import { EnvService } from '@config/env/env.service';
 
 import { PrismaService } from './prisma.service';
+
 
 /**
  * Mock del Prisma Client generado
@@ -22,14 +24,30 @@ jest.mock('@prisma/adapter-pg', () => ({
   PrismaPg: jest.fn(),
 }));
 
+/**
+ * Mock del EnvService
+ */
+jest.mock('@config/env/env.service', () => ({
+  EnvService: class {
+    get = jest.fn((key: string) => {
+      if (key === 'DATABASE_URL') {
+        return 'postgresql://test:test@localhost:5432/test';
+      }
+      return null;
+    });
+  },
+}));
+
 describe('PrismaService', () => {
   let service: PrismaService;
+  let envService: EnvService;
 
   beforeEach(() => {
     jest.clearAllMocks();
     process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/test';
 
-    service = new PrismaService();
+    envService = new EnvService();
+    service = new PrismaService(envService);
   });
 
   it('debe instanciar el adapter PrismaPg con la DATABASE_URL', () => {

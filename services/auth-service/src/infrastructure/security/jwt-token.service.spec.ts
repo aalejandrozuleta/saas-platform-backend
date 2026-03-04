@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 
 import { sign } from 'jsonwebtoken';
+import { EnvService } from '@config/env/env.service';
 
 import { JwtTokenService } from './jwt-token.service';
 
@@ -9,9 +10,18 @@ jest.mock('node:crypto');
 
 describe('JwtTokenService', () => {
   let service: JwtTokenService;
+  let envService: jest.Mocked<EnvService>;
 
   beforeEach(() => {
-    service = new JwtTokenService();
+    envService = {
+      get: jest.fn((key: string) => {
+        if (key === 'JWT_ACCESS_SECRET') return 'access-secret';
+        if (key === 'JWT_REFRESH_SECRET') return 'refresh-secret';
+        return undefined;
+      }),
+    } as unknown as jest.Mocked<EnvService>;
+
+    service = new JwtTokenService(envService);
 
     process.env.JWT_ACCESS_SECRET = 'access-secret';
     process.env.JWT_REFRESH_SECRET = 'refresh-secret';

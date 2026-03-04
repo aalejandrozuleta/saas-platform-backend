@@ -7,15 +7,19 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier . --write",
     "lint-staged": "lint-staged",
-    "test": "pnpm -r test",
     "dev": "docker compose -f docker/docker-compose.dev.yml up --build",
-    "test:watch": "pnpm -r test:watch",
-    "test:cov": "pnpm -r test:cov",
     "dev:auth": "nest start auth-service --watch",
-    "sonar:local": "dotenv -e .env.sonar -- sonar-scanner"
+    "sonar:local": "dotenv -e .env.sonar -- sonar-scanner",
+    "test": "pnpm -r --parallel test",
+    "test:watch": "pnpm -r --parallel test:watch",
+    "test:cov": "pnpm -r test:cov",
+    "test:auth": "pnpm --filter auth-service test",
+    "test:gateway": "pnpm --filter api-gateway test"
   },
   "devDependencies": {
     "@nestjs/cli": "^11.0.16",
+    "@swc/core": "^1.15.18",
+    "@swc/jest": "^0.2.39",
     "@types/jest": "^30.0.0",
     "@types/node": "^22.19.7",
     "@typescript-eslint/eslint-plugin": "^8.54.0",
@@ -31,8 +35,7 @@
     "lint-staged": "^16.2.7",
     "prettier": "^3.8.1",
     "prisma": "^7.3.0",
-    "supertest": "^7.2.2",
-    "ts-jest": "^29.4.6"
+    "supertest": "^7.2.2"
   },
   "engines": {
     "node": ">=20",

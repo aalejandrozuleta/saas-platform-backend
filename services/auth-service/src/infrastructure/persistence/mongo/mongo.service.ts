@@ -14,6 +14,7 @@ export class AuditEventDocument extends Document {
   userId!: string;
 
   @Prop({
+    type: String,
     required: true,
     enum: Object.values(AuditCategory),
   })
