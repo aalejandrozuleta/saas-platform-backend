@@ -33,6 +33,10 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # Generar Prisma Client (si es necesario para los tests)
+      - name: Generate Prisma Client
+        run: pnpm --filter auth-service exec prisma generate
+
       # 4️⃣ Ejecutar tests con coverage (CLAVE)
       - name: Run tests with coverage (auth-service)
         run: pnpm --filter auth-service test:cov
