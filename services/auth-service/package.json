@@ -6,7 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "build": "nest build auth-service",
+    "build": "nest build",
     "predev": "pnpm --filter @saas/shared build",
     "start": "node dist/src/main.js",
     "dev": "nest start --watch",

@@ -30,8 +30,14 @@ jobs:
       - name: Generate Prisma Client
         run: pnpm --filter auth-service exec prisma generate
 
+      - name: Typecheck
+        run: pnpm typecheck
+
       - name: Lint
         run: pnpm lint
 
       - name: Test
         run: pnpm test
+
+      - name: Build
+        run: pnpm build
