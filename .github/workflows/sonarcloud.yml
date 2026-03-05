@@ -17,38 +17,42 @@ jobs:
         with:
           fetch-depth: 0
 
-      # Setup pnpm
+      # pnpm
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 10
           run_install: false
 
-      # Setup Node
+      # Node
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 24
           cache: pnpm
 
-      # Install dependencies
+      # Dependencias
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # Generate Prisma Client
+      # Prisma
       - name: Generate Prisma Client
         run: pnpm --filter auth-service exec prisma generate
 
-      # Run tests with coverage
+      # Tests + coverage
       - name: Run tests with coverage
         run: pnpm test:cov
 
-      # Verify coverage files (debug)
+      # Debug coverage
       - name: Verify coverage files
         run: find . -name lcov.info
 
-      # SonarCloud Scan
+      # SonarCloud
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v2
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
+            -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
