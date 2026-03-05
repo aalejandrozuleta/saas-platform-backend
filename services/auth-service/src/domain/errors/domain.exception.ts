@@ -1,8 +1,10 @@
 import { BaseException, ErrorCode } from '@saas/shared';
 
 /**
- * Excepción concreta del dominio Auth.
- * Extiende la excepción base compartida.
+ * Excepción base del dominio.
+ *
+ * Representa errores derivados de reglas de negocio
+ * que deben ser manejados por la capa de aplicación.
  */
 export class DomainException extends BaseException {
   /**

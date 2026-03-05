@@ -15,7 +15,8 @@
     "test:cov": "jest --config jest.config.cjs --coverage",
     "test": "jest --config jest.config.cjs",
     "test:watch": "jest --watch --config jest.config.cjs",
-    "test:watch:cov": "jest --watch --coverage --config jest.config.cjs"
+    "test:watch:cov": "jest --watch --coverage --config jest.config.cjs",
+    "docs": "typedoc --options typedoc.json"
   },
   "dependencies": {
     "@nestjs/event-emitter": "^3.0.1",

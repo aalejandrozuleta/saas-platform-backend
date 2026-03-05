@@ -37,8 +37,19 @@ import { Clock } from '@application/ports/clock.port';
 import { DomainErrorFactory } from '@domain/errors/domain-error.factory';
 
 /**
- * Caso de uso encargado de autenticar usuarios.
+ * Caso de uso encargado de autenticar un usuario en el sistema.
+ *
+ * Flujo:
+ * 1. Buscar usuario por email
+ * 2. Validar contraseña
+ * 3. Evaluar políticas de login
+ * 4. Registrar intento de autenticación
+ * 5. Crear sesión y refresh token
+ * 6. Emitir eventos de dominio
+ *
+ * Este caso de uso representa el punto central del proceso de autenticación.
  */
+
 export class LoginUserUseCase {
   constructor(
     @Inject(USER_REPOSITORY)
