@@ -2,7 +2,8 @@ name: SonarCloud
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
   pull_request:
 
 jobs:
@@ -11,50 +12,43 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      # 1️⃣ pnpm
+      # Setup pnpm
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 10
           run_install: false
 
-      # 2️⃣ Node
+      # Setup Node
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 24
+          cache: pnpm
 
-      # 3️⃣ Instalar dependencias
+      # Install dependencies
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # Generar Prisma Client (si es necesario para los tests)
+      # Generate Prisma Client
       - name: Generate Prisma Client
         run: pnpm --filter auth-service exec prisma generate
 
-      # 4️⃣ Ejecutar tests con coverage (CLAVE)
-      - name: Run tests with coverage (auth-service)
-        run: pnpm --filter auth-service test:cov
+      # Run tests with coverage
+      - name: Run tests with coverage
+        run: pnpm test:cov
 
-      # 5️⃣ Verificar coverage (debug útil)
+      # Verify coverage files (debug)
       - name: Verify coverage files
-        run: ls -la services/**/coverage/lcov.info
+        run: find . -name lcov.info
 
-      # 6️⃣ SonarCloud
+      # SonarCloud Scan
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v2
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          args: >
-            -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
-            -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
-            -Dsonar.sources=shared,services
-            -Dsonar.exclusions=**/dist/**,**/node_modules/**,**/*.module.ts,**/main.ts
-            -Dsonar.typescript.tsconfigPaths=tsconfig.base.json,services/*/tsconfig.json
-            -Dsonar.javascript.lcov.reportPaths=services/**/coverage/lcov.info
