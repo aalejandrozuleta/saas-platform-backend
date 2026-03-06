@@ -21,7 +21,6 @@ runs:
       shell: bash
       run: pnpm install --frozen-lockfile
 
-    # Cache Prisma generated clients
     - name: Cache Prisma
       id: cache-prisma
       uses: actions/cache@v4
@@ -34,4 +33,4 @@ runs:
     - name: Generate Prisma Client
       if: steps.cache-prisma.outputs.cache-hit != 'true'
       shell: bash
-      run: pnpm -r exec prisma generate
+      run: pnpm --filter "./services/*" exec prisma generate
