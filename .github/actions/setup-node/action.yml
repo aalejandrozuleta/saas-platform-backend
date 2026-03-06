@@ -3,7 +3,6 @@ description: Setup Node, pnpm, cache and prisma
 
 runs:
   using: composite
-
   steps:
     - name: Setup pnpm
       uses: pnpm/action-setup@v4
@@ -40,7 +39,7 @@ runs:
           services/**/generated/prisma
         key: prisma-${{ hashFiles('**/schema.prisma') }}
 
-    - name: Generate Prisma
+    - name: Generate Prisma Client
       if: steps.cache-prisma.outputs.cache-hit != 'true'
       shell: bash
       run: pnpm --filter auth-service exec prisma generate
