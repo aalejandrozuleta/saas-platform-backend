@@ -57,7 +57,7 @@
     "@nestjs/core": "11.1.13",
     "@nestjs/mongoose": "11.0.4",
     "@nestjs/platform-express": "11.1.13",
-    "@prisma/client": "^7.3.0",
+    "@prisma/client": "^7.4.2",
     "mongoose": "^9.1.5"
   },
   "pnpm": {
