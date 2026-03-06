@@ -41,6 +41,19 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # Usa tu acción reutilizable
+      - name: Setup environment
+        uses: ./.github/actions/setup-node
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build service
+        run: pnpm --filter ${{ matrix.service }} build
+
+      - name: Generate deploy bundle
+        run: pnpm deploy --filter ${{ matrix.service }} --prod ./deploy/${{ matrix.service }}
+
       - name: Build Docker image
         run: |
           docker build \
