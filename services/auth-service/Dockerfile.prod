@@ -1,0 +1,46 @@
+# =========================
+# Builder
+# =========================
+FROM node:24-alpine AS builder
+
+WORKDIR /app
+
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+
+RUN npm install -g pnpm
+
+# Copiar workspace
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY tsconfig.base.json ./
+
+COPY services ./services
+COPY shared ./shared
+
+# Instalar dependencias
+RUN pnpm install --frozen-lockfile
+
+# Generar prisma
+RUN pnpm --filter auth-service exec prisma generate
+
+# Build
+RUN pnpm --filter auth-service build
+
+# Crear bundle mínimo del servicio
+RUN pnpm deploy --filter auth-service --prod /prod/auth-service
+
+# =========================
+# Runtime
+# =========================
+FROM node:24-alpine
+
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+# Copiar bundle mínimo
+COPY --from=builder /prod/auth-service ./
+
+EXPOSE 3001
+
+CMD ["node", "dist/main.js"]

@@ -1,0 +1,12 @@
+name: custom-codeql-config
+
+queries:
+  - uses: security-extended
+  - uses: security-and-quality
+
+paths-ignore:
+  - node_modules
+  - dist
+  - docs
+  - docker
+  - "**/*.spec.ts"

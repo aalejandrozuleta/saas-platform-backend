@@ -1,11 +1,12 @@
 # =========================
-# Node / JS
+# Node
 # =========================
 node_modules
+**/node_modules
 dist
-build
+**/dist
 coverage
-.nyc_output
+**/coverage
 
 # =========================
 # Logs
@@ -22,15 +23,14 @@ pnpm-debug.log*
 .github
 
 # =========================
-# Editor / OS
+# Editor
 # =========================
 .vscode
 .idea
 .DS_Store
-Thumbs.db
 
 # =========================
-# Env / Secrets
+# Secrets
 # =========================
 .env
 .env.*
@@ -38,13 +38,13 @@ Thumbs.db
 *.key
 
 # =========================
-# Docs / Misc
+# Docs
 # =========================
+docs
 README.md
 *.md
 
 # =========================
-# Docker (evitar recursión)
+# Docker
 # =========================
 docker-compose*.yml
-Dockerfile*
