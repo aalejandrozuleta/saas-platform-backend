@@ -4,6 +4,7 @@ description: Setup Node, pnpm, cache and prisma
 runs:
   using: composite
   steps:
+
     - name: Setup pnpm
       uses: pnpm/action-setup@v4
       with:
@@ -16,30 +17,21 @@ runs:
         node-version: 24
         cache: pnpm
 
-    - name: Get pnpm store
-      shell: bash
-      run: echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_ENV
-
-    - name: Cache pnpm store
-      uses: actions/cache@v4
-      with:
-        path: ${{ env.STORE_PATH }}
-        key: pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
-
     - name: Install dependencies
       shell: bash
       run: pnpm install --frozen-lockfile
 
+    # Cache Prisma generated clients
     - name: Cache Prisma
       id: cache-prisma
       uses: actions/cache@v4
       with:
         path: |
-          node_modules/.prisma
-          services/**/generated/prisma
-        key: prisma-${{ hashFiles('**/schema.prisma') }}
+          **/node_modules/.prisma
+          **/generated/prisma
+        key: prisma-${{ runner.os }}-${{ hashFiles('**/schema.prisma') }}
 
     - name: Generate Prisma Client
       if: steps.cache-prisma.outputs.cache-hit != 'true'
       shell: bash
-      run: pnpm --filter auth-service exec prisma generate
+      run: pnpm -r exec prisma generate
