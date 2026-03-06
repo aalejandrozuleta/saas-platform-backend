@@ -9,6 +9,7 @@ on:
 
 jobs:
   analyze:
+    name: Analyze
     runs-on: ubuntu-latest
 
     permissions:
@@ -17,15 +18,18 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - uses: ./.github/actions/setup-node
 
-      - uses: github/codeql-action/init@v3
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v4
         with:
           languages: javascript
 
-      - name: Build
+      - name: Build project
         run: pnpm build
 
-      - uses: github/codeql-action/analyze@v3
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v4
