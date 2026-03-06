@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import z from 'zod';
 
 import { envSchema, type EnvVars } from './env.schema';
 
@@ -14,6 +15,7 @@ export class EnvService {
     const parsed = envSchema.safeParse(process.env);
 
     if (!parsed.success) {
+      z.treeifyError(parsed.error);
       throw new Error('Environment validation failed');
     }
 

@@ -11,6 +11,9 @@ import { LoginUserUseCase } from '@application/use-cases/login-user.use-case';
 import { LoginContext } from '@domain/value-objects/login-context.vo';
 import { I18nService } from '@saas/shared';
 import { Request } from 'express';
+import { RegisterSwagger } from '@infrastructure/swagger/register.swagger';
+import { LoginSwagger } from '@infrastructure/swagger/login.swagger';
+import { ApiTags } from '@nestjs/swagger';
 
 /**
  * Controller de autenticación
@@ -22,6 +25,7 @@ import { Request } from 'express';
  *
  * No contiene lógica de negocio.
  */
+@ApiTags('Auth')
 @Controller({ version: '1' })
 export class AuthController {
   constructor(
@@ -34,6 +38,7 @@ export class AuthController {
    * Registro de usuario
    */
   @Post('register')
+  @RegisterSwagger()
   async register(
     @Body() dto: RegisterUserDto,
     @Req() req: Request,
@@ -63,6 +68,7 @@ export class AuthController {
    * Login de usuario
    */
   @Post('login')
+  @LoginSwagger()
   async login(
     @Body() dto: LoginUserDto,
     @Req() req: Request,

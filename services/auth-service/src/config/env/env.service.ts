@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
-
 import { envSchema, EnvVars } from './env.schema';
+
 
 /**
  * Servicio centralizado de acceso a variables de entorno
@@ -15,7 +15,7 @@ export class EnvService {
     const parsed = envSchema.safeParse(process.env);
 
     if (!parsed.success) {
-      process.exit(1);
+      throw new Error(`Error en variables de entorno`);
     }
 
     this.env = parsed.data;

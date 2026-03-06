@@ -2,6 +2,7 @@ import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { setupSwagger } from '@saas/shared';
 import helmet from 'helmet';
 
 import { AppModule } from './app.module';
@@ -23,7 +24,6 @@ async function bootstrap(): Promise<void> {
    * (env, validado previamente con Zod o Joi)
    */
   const configService = app.get(ConfigService);
-
   app.setGlobalPrefix('auth');
 
   /**
@@ -58,6 +58,10 @@ async function bootstrap(): Promise<void> {
    * Permite cierre limpio del proceso (Docker / Kubernetes)
    */
   app.enableShutdownHooks();
+
+  if (configService.get<string>('NODE_ENV') === 'development') {
+    setupSwagger(app, 'Auth Service');
+  }
 
   /**
    * Puerto obtenido desde ConfigService
