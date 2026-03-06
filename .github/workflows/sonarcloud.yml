@@ -6,22 +6,18 @@ on:
   pull_request:
 
 jobs:
-  setup:
-    uses: ./.github/workflows/setup-node.yml
-
   sonar:
-    needs: setup
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      - name: Test coverage
+      - uses: ./.github/actions/setup-node
+
+      - name: Run tests with coverage
         run: pnpm test:cov
 
-      - name: SonarCloud
+      - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v2
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

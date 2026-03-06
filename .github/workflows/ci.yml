@@ -6,29 +6,22 @@ on:
   pull_request:
 
 jobs:
-  detect:
-    uses: ./.github/workflows/detect-services.yml
-
-  setup:
-    needs: detect
-    uses: ./.github/workflows/setup-node.yml
-
   ci:
-    needs: [detect, setup]
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        service: ${{ fromJson(needs.detect.outputs.services) }}
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Lint service
-        run: pnpm --filter ${{ matrix.service }} lint
+      - uses: ./.github/actions/setup-node
 
-      - name: Test service
-        run: pnpm --filter ${{ matrix.service }} test
+      - name: Typecheck
+        run: pnpm typecheck
 
-      - name: Build service
-        run: pnpm --filter ${{ matrix.service }} build
+      - name: Lint
+        run: pnpm lint
+
+      - name: Test
+        run: pnpm test
+
+      - name: Build
+        run: pnpm build
