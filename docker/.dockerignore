@@ -8,6 +8,10 @@ dist
 coverage
 **/coverage
 
+# permitir deploy
+!deploy
+!deploy/**
+
 # =========================
 # Logs
 # =========================
