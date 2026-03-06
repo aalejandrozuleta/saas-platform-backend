@@ -5,7 +5,13 @@ on:
     branches: [main]
 
 permissions:
-  contents: write
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
 
 jobs:
   docs:
@@ -19,8 +25,10 @@ jobs:
       - name: Generate docs
         run: pnpm docs:code
 
-      - name: Deploy docs
-        uses: peaceiris/actions-gh-pages@v4
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: docs/code
+          path: docs/code
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
