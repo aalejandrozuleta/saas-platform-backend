@@ -14,7 +14,7 @@ COPY services ./services
 COPY shared ./shared
 
 # NOSONAR: pnpm install scripts required for prisma
-RUN pnpm install --frozen-lockfile
+RUN pnpm install
 
 WORKDIR /app/services/api-gateway
 

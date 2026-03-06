@@ -17,7 +17,7 @@ COPY shared ./shared
 
 # Instalar dependencias y generar Prisma en una sola capa
 # NOSONAR: pnpm install scripts required for prisma
-RUN pnpm install --frozen-lockfile && \
+RUN pnpm install && \
     pnpm --filter auth-service exec prisma generate
 
 WORKDIR /app/services/auth-service
