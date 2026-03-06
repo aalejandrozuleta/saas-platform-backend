@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>SaaS Platform Backend Documentation</title>
+
+    <style>
+      body {
+        font-family:
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          'Segoe UI',
+          Roboto,
+          sans-serif;
+        margin: 0;
+        background: #f6f8fa;
+        color: #1f2328;
+      }
+
+      header {
+        background: #0d1117;
+        color: white;
+        padding: 28px 40px;
+      }
+
+      header h1 {
+        margin: 0;
+        font-size: 28px;
+      }
+
+      header p {
+        margin-top: 6px;
+        opacity: 0.7;
+      }
+
+      .container {
+        max-width: 1100px;
+        margin: auto;
+        padding: 40px;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 20px;
+      }
+
+      .card {
+        background: white;
+        border-radius: 10px;
+        padding: 22px;
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.06);
+        transition: 0.15s ease;
+      }
+
+      .card:hover {
+        transform: translateY(-3px);
+      }
+
+      .card h2 {
+        margin-top: 0;
+        font-size: 18px;
+      }
+
+      .card p {
+        font-size: 14px;
+        opacity: 0.7;
+      }
+
+      .card a {
+        display: block;
+        margin-top: 10px;
+        font-weight: 600;
+        text-decoration: none;
+        color: #0969da;
+      }
+
+      .section {
+        margin-top: 40px;
+      }
+
+      footer {
+        text-align: center;
+        margin-top: 60px;
+        padding: 20px;
+        font-size: 13px;
+        opacity: 0.6;
+      }
+    </style>
+  </head>
+
+  <body>
+    <header>
+      <h1>SaaS Platform Backend</h1>
+
+      <p>Technical documentation and architecture reference</p>
+    </header>
+
+    <div class="container">
+      <div class="grid">
+        <div class="card">
+          <h2>Architecture</h2>
+
+          <p>High level architecture and system design.</p>
+
+          <a href="./architecture/system-overview.md">System overview</a>
+          <a href="./architecture/auth-service.md">Auth service architecture</a>
+        </div>
+
+        <div class="card">
+          <h2>System Diagrams</h2>
+
+          <p>Context, container and component diagrams.</p>
+
+          <a href="./diagrams/system-context.md">System context</a>
+          <a href="./diagrams/auth-containers.md">Auth containers</a>
+          <a href="./diagrams/auth-components.md">Auth components</a>
+        </div>
+
+        <div class="card">
+          <h2>Business Flows</h2>
+
+          <p>Authentication and system flows.</p>
+
+          <a href="./flows/register-flow.md">Register flow</a>
+          <a href="./flows/login-flow.md">Login flow</a>
+        </div>
+
+        <div class="card">
+          <h2>Service Documentation</h2>
+
+          <p>TypeDoc generated reference.</p>
+
+          <a href="./code/auth-service/">Auth Service API</a>
+          <a href="./code/api-gateway/">API Gateway API</a>
+        </div>
+
+        <div class="card">
+          <h2>Source Code</h2>
+
+          <p>Complete repository and project source.</p>
+
+          <a href="https://github.com/aalejandrozuleta/saas-platform-backend">GitHub repository</a>
+        </div>
+      </div>
+
+      <footer>SaaS Platform Backend Documentation</footer>
+    </div>
+  </body>
+</html>
