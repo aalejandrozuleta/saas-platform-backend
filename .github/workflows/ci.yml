@@ -6,38 +6,29 @@ on:
   pull_request:
 
 jobs:
+  detect:
+    uses: ./.github/workflows/detect-services.yml
+
+  setup:
+    needs: detect
+    uses: ./.github/workflows/setup-node.yml
+
   ci:
+    needs: [detect, setup]
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        service: ${{ fromJson(needs.detect.outputs.services) }}
+
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10
+      - name: Lint service
+        run: pnpm --filter ${{ matrix.service }} lint
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 24
-          cache: pnpm
+      - name: Test service
+        run: pnpm --filter ${{ matrix.service }} test
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Generate Prisma Client
-        run: pnpm --filter auth-service exec prisma generate
-
-      - name: Typecheck
-        run: pnpm typecheck
-
-      - name: Lint
-        run: pnpm lint
-
-      - name: Test
-        run: pnpm test
-
-      - name: Build
-        run: pnpm build
+      - name: Build service
+        run: pnpm --filter ${{ matrix.service }} build
