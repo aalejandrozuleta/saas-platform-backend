@@ -8,7 +8,7 @@
   "scripts": {
     "build": "nest build",
     "predev": "pnpm --filter @saas/shared build",
-    "start": "node dist/src/main.js",
+    "start": "node dist/main.js",
     "dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
@@ -46,5 +46,11 @@
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
     "typescript": "^5.9.3"
-  }
+  },
+  "files": [
+    "dist",
+    "prisma",
+    "package.json",
+    "pnpm-lock.yaml"
+  ]
 }

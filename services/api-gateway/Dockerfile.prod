@@ -1,31 +1,10 @@
-FROM node:24-alpine AS builder
-
-WORKDIR /app
-
-ENV PNPM_HOME="/pnpm"
-ENV PATH="$PNPM_HOME:$PATH"
-
-RUN npm install -g pnpm
-
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-COPY tsconfig.base.json ./
-
-COPY services ./services
-COPY shared ./shared
-
-RUN pnpm install --frozen-lockfile
-
-RUN pnpm --filter api-gateway build
-
-RUN pnpm deploy --filter api-gateway --prod /prod/api-gateway
-
 FROM node:24-alpine
 
 WORKDIR /app
 
-ENV NODE_ENV=production
+COPY deploy/api-gateway .
 
-COPY --from=builder /prod/api-gateway ./
+ENV NODE_ENV=production
 
 EXPOSE 3000
 

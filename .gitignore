@@ -76,6 +76,7 @@ playwright-report/
 **/dist/
 **/coverage/
 docs/code
+deploy
 
 ############################################
 # NestJS specific
