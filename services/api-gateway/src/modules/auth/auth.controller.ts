@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import type { Request, Response } from 'express';
 import { successResponse } from '@saas/shared';
-import { AuthProxy } from '@infrastructure/http/auth.proxy';
+import { AuthProxy } from '@infrastructure/http/proxies/auth.proxy';
 
 /**
  * Controller de Auth en el API Gateway
