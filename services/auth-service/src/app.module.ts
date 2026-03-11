@@ -10,6 +10,7 @@ import { GlobalExceptionFilter } from '@saas/shared';
 import { APP_FILTER } from '@nestjs/core';
 import { ScheduleModule } from '@nestjs/schedule';
 import { MaintenanceModule } from '@infrastructure/maintenance/maintenance.module';
+import { RedisModule } from '@infrastructure/persistence/cache/redis.module';
 
 
 const APP_FILTER_TOKEN = APP_FILTER;
@@ -23,7 +24,8 @@ const APP_FILTER_TOKEN = APP_FILTER;
     MongoModule,
     MetricsModule,
     AuthModule,
-    I18nModule
+    I18nModule,
+    RedisModule
   ],
   providers: [
     {

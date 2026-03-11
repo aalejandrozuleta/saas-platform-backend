@@ -19,6 +19,7 @@ import {
   TOKEN_SERVICE,
   UNIT_OF_WORK,
   DOMAIN_EVENT_BUS,
+  SESSION_CACHE,
 } from '@domain/token/services.tokens';
 import { UserRepository } from '@domain/repositories/user.repository';
 import { SecurityRepository } from '@domain/repositories/security.repository';
@@ -35,6 +36,8 @@ import { LoginBlockedEvent } from '@application/events/login/login-blocked.event
 import { LoginSucceededEvent } from '@application/events/login/login-succeeded.event';
 import { Clock } from '@application/ports/clock.port';
 import { DomainErrorFactory } from '@domain/errors/domain-error.factory';
+import { SessionCache } from '@application/ports/session-cache.port';
+import { EnvService } from '@config/env/env.service';
 
 /**
  * Caso de uso encargado de autenticar un usuario en el sistema.
@@ -83,6 +86,12 @@ export class LoginUserUseCase {
 
     @Inject('CLOCK')
     private readonly clock: Clock,
+
+    @Inject(SESSION_CACHE)
+    private readonly sessionCache: SessionCache,
+
+    private readonly envService: EnvService,
+
   ) { }
 
   async execute(
@@ -279,6 +288,13 @@ export class LoginUserUseCase {
         userId: user.id,
         sessionId: session.id,
       });
+
+      await this.sessionCache.storeSession(
+        session.id,
+        user.id,
+        device.id,
+        this.envService.get('REDIS_SESSION_TTL')
+      );
 
       const refresh = this.tokenService.generateRefreshToken();
 

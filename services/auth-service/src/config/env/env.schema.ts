@@ -11,10 +11,17 @@ export const envSchema = z.object({
 
   JWT_ACCESS_SECRET: z.string().min(10),
   JWT_REFRESH_SECRET: z.string().min(10),
-  JWT_EXPIRES_IN: z.string(),
+
+  ACCESS_TOKEN_TTL: z.coerce.number().default(900),
+  REFRESH_TOKEN_TTL: z.coerce.number().default(604800),
+  REDIS_SESSION_TTL: z.coerce.number().default(900),
 
   DATABASE_URL: z.string(),
   MONGO_URL: z.string(),
+
+  REDIS_HOST: z.string(),
+  REDIS_PORT: z.coerce.number(),
+  REDIS_PASSWORD: z.string().optional(),
 });
 
 export type EnvVars = z.infer<typeof envSchema>;
