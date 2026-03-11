@@ -63,6 +63,28 @@ export class RefreshTokenPrismaRepository
     });
   }
 
+  async findByJti(jti: string) {
+
+    return this.prisma.refreshToken.findUnique({
+      where: { jti },
+    });
+  }
+
+
+  async revoke(
+    jti: string,
+    replacedBy: string,
+  ) {
+
+    await this.prisma.refreshToken.update({
+      where: { jti },
+      data: {
+        revokedAt: new Date(),
+        replacedBy,
+      },
+    });
+  }
+
   /**
    * Resuelve el cliente adecuado según exista o no transacción.
    */

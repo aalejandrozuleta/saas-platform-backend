@@ -19,4 +19,9 @@ export interface TokenService {
     jti: string;
     expiresAt: Date;
   };
+
+  /**
+ * Verifica refresh token.
+ */
+  verifyRefreshToken(token: string): { jti: string };
 }

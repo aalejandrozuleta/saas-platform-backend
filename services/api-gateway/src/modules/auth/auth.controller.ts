@@ -4,8 +4,9 @@ import {
   Controller,
   Post,
   Req,
+  Res,
 } from '@nestjs/common';
-import type { Request } from 'express';
+import type { Request, Response } from 'express';
 import { successResponse } from '@saas/shared';
 import { AuthProxy } from '@infrastructure/http/auth.proxy';
 
@@ -36,20 +37,40 @@ export class AuthController {
    * Login de usuario
    */
   @Post('login')
-  async login(@Req() req: Request) {
+  async login(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+
     this.prepareRequest(req);
-    const data = await this.authProxy.forward(req, '/login');
-    return successResponse(data);
+
+    const result = await this.authProxy.forward(req, '/login');
+
+    if (result.cookies) {
+      res.setHeader('set-cookie', result.cookies);
+    }
+
+    return successResponse(result.data);
   }
 
   /**
    * Refresh de sesión
    */
   @Post('refresh')
-  async refresh(@Req() req: Request) {
+  async refresh(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+
     this.prepareRequest(req);
-    const data = await this.authProxy.forward(req, '/refresh');
-    return successResponse(data);
+
+    const result = await this.authProxy.forward(req, '/refresh');
+
+    if (result.cookies) {
+      res.setHeader('set-cookie', result.cookies);
+    }
+
+    return successResponse(result.data);
   }
 
   /**

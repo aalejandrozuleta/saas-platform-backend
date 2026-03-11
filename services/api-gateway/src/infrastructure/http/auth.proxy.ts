@@ -1,20 +1,28 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import type { Request } from 'express';
-import axios, { AxiosError, AxiosInstance } from 'axios';
+import axios, {
+  AxiosError,
+  AxiosInstance,
+  Method,
+} from 'axios';
+import CircuitBreaker from 'opossum';
 import { EnvService } from '@config/env/env.service';
+import type { AxiosRequestConfig } from 'axios';
+
+
 
 /**
- * Proxy HTTP hacia el Auth Service
+ * Proxy resiliente hacia el Auth Service.
  *
- * Centraliza:
- * - Base URL
- * - Timeouts
- * - Forward de headers
- * - Manejo de errores
+ * Incluye:
+ * - Retry controlado
+ * - Timeout
+ * - Circuit breaker
  */
 @Injectable()
 export class AuthProxy {
   private readonly client: AxiosInstance;
+  private readonly breaker: CircuitBreaker<[AxiosRequestConfig], any>;
   private readonly AUTH_BASE_PATH = '/auth/v1';
 
   constructor(private readonly envService: EnvService) {
@@ -22,29 +30,42 @@ export class AuthProxy {
       baseURL: this.envService.get('AUTH_SERVICE_URL'),
       timeout: this.envService.get('AUTH_SERVICE_TIMEOUT') ?? 5000,
     });
+
+    this.breaker = new CircuitBreaker(
+      (config: AxiosRequestConfig) => this.client.request(config),
+      {
+        timeout: this.envService.get('AUTH_SERVICE_CIRCUIT_TIMEOUT') ?? 10000,
+        errorThresholdPercentage: 50,
+        resetTimeout: 15000,
+      },
+    );
   }
 
-  /**
-   * Reenvía una request al Auth Service
-   *
-   * @param req Request original
-   * @param path Path interno del auth-service (sin /auth)
-   */
   async forward<T = unknown>(
     req: Request,
     path: string,
-  ): Promise<T> {
-    try {
-      const response = await this.client.request<T>({
-        url: `${this.AUTH_BASE_PATH}${path}`,
-        method: req.method as any,
-        data: req.body,
-        headers: this.extractHeaders(req),
-      });
+  ): Promise<{ data: T; cookies?: string[] }> {
 
-      return response.data;
+    const config: AxiosRequestConfig = {
+      url: `${this.AUTH_BASE_PATH}${path}`,
+      method: req.method as Method,
+      data: req.body,
+      headers: this.extractHeaders(req),
+    };
+
+    try {
+      const response: any =
+        await this.retryRequest(config);
+
+      return {
+        data: response.data,
+        cookies: response.headers['set-cookie'],
+      };
+
     } catch (error) {
+
       if (error instanceof AxiosError) {
+
         if (error.response) {
           throw new HttpException(
             error.response.data ?? {
@@ -52,7 +73,6 @@ export class AuthProxy {
             },
             error.response.status,
           );
-
         }
 
         if (error.request) {
@@ -64,16 +84,44 @@ export class AuthProxy {
       }
 
       throw new HttpException(
-        'Unexpected gateway error',
-        HttpStatus.INTERNAL_SERVER_ERROR,
+        'Gateway upstream failure',
+        HttpStatus.BAD_GATEWAY,
       );
     }
   }
 
   /**
-   * Extrae y filtra headers relevantes
+   * Ejecuta request con retry controlado
+   */
+  private async retryRequest(
+    config: AxiosRequestConfig,
+  ) {
+
+    const retries =
+      this.envService.get('AUTH_SERVICE_RETRIES') ?? 2;
+
+    let attempt = 0;
+
+    while (true) {
+
+      try {
+        return await this.breaker.fire(config);
+      } catch (error) {
+
+        attempt++;
+
+        if (attempt > retries) {
+          throw error;
+        }
+      }
+    }
+  }
+
+  /**
+   * Filtra headers seguros
    */
   private extractHeaders(req: Request): Record<string, string> {
+
     const headers: Record<string, string> = {};
 
     const copy = (key: string) => {
@@ -89,8 +137,8 @@ export class AuthProxy {
     copy('x-correlation-id');
     copy('x-country');
     copy('x-device-fingerprint');
+    copy('cookie');
 
     return headers;
   }
-
 }

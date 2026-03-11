@@ -13,7 +13,7 @@ import { DeviceRepository } from '@domain/repositories/device.repository';
 import { SessionRepository } from '@application/ports/session.repository';
 import { RefreshTokenRepository } from '@application/ports/refresh-token.repository';
 import { PasswordHasher } from '@application/ports/password-hasher.port';
-import { TokenService } from '@application/ports/token.service';
+import { TokenService } from '@application/ports/token.service.token';
 import { UnitOfWork } from '@application/ports/unit-of-work.port';
 import { DomainEventBus } from '@application/events/domain-event.bus';
 import { Clock } from '@application/ports/clock.port';

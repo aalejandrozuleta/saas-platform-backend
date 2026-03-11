@@ -1,8 +1,8 @@
 import { randomUUID } from 'node:crypto';
 
-import { sign } from 'jsonwebtoken';
+import { sign, verify } from 'jsonwebtoken';
 import { Injectable } from '@nestjs/common';
-import { TokenService } from '@application/ports/token.service';
+import { TokenService } from '@application/ports/token.service.token';
 import { EnvService } from '@config/env/env.service';
 
 /**
@@ -77,5 +77,14 @@ export class JwtTokenService implements TokenService {
       jti,
       expiresAt,
     };
+  }
+
+  verifyRefreshToken(token: string): { jti: string } {
+    const payload = verify(
+      token,
+      this.envService.get('JWT_REFRESH_SECRET'),
+    ) as { jti: string };
+
+    return payload;
   }
 }

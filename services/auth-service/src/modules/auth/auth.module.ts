@@ -8,6 +8,7 @@ import { LoginSucceededAuditListener } from '@infrastructure/messaging/listeners
 import { LoginLoggingListener } from '@infrastructure/messaging/listeners/login-logging.listener';
 import { PrismaModule } from '@infrastructure/persistence/prisma/prisma.module';
 import { LoginUserUseCase } from '@application/use-cases/login-user.use-case';
+import { RefreshTokenUseCase } from '@application/use-cases/refresh-token.use-case';
 
 import { authProviders } from './auth.providers';
 /**
@@ -24,6 +25,7 @@ import { authProviders } from './auth.providers';
   providers: [
     RegisterUserUseCase,
     LoginUserUseCase,
+    RefreshTokenUseCase,
     ...authProviders,
     LoginSucceededAuditListener,
     LoginLoggingListener,

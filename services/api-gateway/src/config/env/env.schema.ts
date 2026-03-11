@@ -11,7 +11,9 @@ export const envSchema = z.object({
   PORT: z.coerce.number().int().positive(),
 
   AUTH_SERVICE_URL: z.string(),
-  AUTH_SERVICE_TIMEOUT: z.coerce.number().int().positive(),
+  AUTH_SERVICE_TIMEOUT: z.coerce.number().default(5000),
+  AUTH_SERVICE_RETRIES: z.coerce.number().default(2),
+  AUTH_SERVICE_CIRCUIT_TIMEOUT: z.coerce.number().default(10000),
 
   CORS_ORIGINS: z
     .string()

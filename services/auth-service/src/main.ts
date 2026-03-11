@@ -4,6 +4,7 @@ import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { setupSwagger } from '@saas/shared';
 import helmet from 'helmet';
+import cookieParser from 'cookie-parser';
 
 import { AppModule } from './app.module';
 
@@ -25,6 +26,7 @@ async function bootstrap(): Promise<void> {
    */
   const configService = app.get(ConfigService);
   app.setGlobalPrefix('auth');
+  app.use(cookieParser());
 
   /**
    * Versionado de API

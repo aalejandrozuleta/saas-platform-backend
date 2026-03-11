@@ -18,4 +18,23 @@ export interface RefreshTokenRepository {
     sessionId: string,
     tx?: Prisma.TransactionClient,
   ): Promise<void>;
+
+  findByJti(
+    jti: string,
+    tx?: Prisma.TransactionClient,
+  ): Promise<{
+    id: string;
+    userId: string;
+    sessionId: string;
+    familyId: string;
+    tokenHash: string;
+    expiresAt: Date;
+    revokedAt: Date | null;
+  } | null>;
+
+  revoke(
+    jti: string,
+    replacedBy: string,
+    tx?: Prisma.TransactionClient,
+  ): Promise<void>;
 }

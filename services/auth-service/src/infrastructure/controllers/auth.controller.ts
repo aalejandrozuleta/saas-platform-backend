@@ -3,6 +3,7 @@ import {
   Controller,
   Post,
   Req,
+  Res
 } from '@nestjs/common';
 import { RegisterUserDto } from '@application/dto/register/register-user.dto';
 import { LoginUserDto } from '@application/dto/login/login-user.dto';
@@ -10,10 +11,11 @@ import { RegisterUserUseCase } from '@application/use-cases/register-user.use-ca
 import { LoginUserUseCase } from '@application/use-cases/login-user.use-case';
 import { LoginContext } from '@domain/value-objects/login-context.vo';
 import { I18nService } from '@saas/shared';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 import { RegisterSwagger } from '@infrastructure/swagger/register.swagger';
 import { LoginSwagger } from '@infrastructure/swagger/login.swagger';
 import { ApiTags } from '@nestjs/swagger';
+import { RefreshTokenUseCase } from '@application/use-cases/refresh-token.use-case';
 
 /**
  * Controller de autenticación
@@ -31,8 +33,9 @@ export class AuthController {
   constructor(
     private readonly registerUserUseCase: RegisterUserUseCase,
     private readonly loginUserUseCase: LoginUserUseCase,
+    private readonly refreshTokenUseCase: RefreshTokenUseCase,
     private readonly i18n: I18nService,
-  ) {}
+  ) { }
 
   /**
    * Registro de usuario
@@ -72,18 +75,55 @@ export class AuthController {
   async login(
     @Body() dto: LoginUserDto,
     @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
   ) {
+
     const context = LoginContext.create({
       ip: this.resolveClientIp(req),
       country: this.getHeader(req, 'x-country'),
       deviceFingerprint: this.getHeader(req, 'x-device-fingerprint'),
     });
 
-    return this.loginUserUseCase.execute(
+    const result = await this.loginUserUseCase.execute(
       dto.email,
       dto.password,
       context,
     );
+
+    res.cookie('refreshToken', result.refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
+      path: '/v1/auth/refresh',
+    });
+
+    return {
+      message: this.i18n.translate('LOGIN_SUCCESS', this.resolveLanguage(req)),
+    };
+  }
+
+  @Post('refresh')
+  async refresh(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+
+    const refreshToken = req.cookies?.refreshToken;
+
+    const result = await this.refreshTokenUseCase.execute(
+      refreshToken,
+    );
+
+    res.cookie('refreshToken', result.refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
+      path: '/v1/auth/refresh',
+    });
+
+    return {
+      token: result.token,
+    };
   }
 
   /**
