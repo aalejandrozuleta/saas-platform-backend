@@ -26,6 +26,14 @@ export interface SecurityRepository {
   ): Promise<void>;
 
   /**
+   * Libera un bloqueo temporal expirado y reactiva la cuenta.
+   */
+  releaseTemporaryBlock(
+    userId: string,
+    tx?: Prisma.TransactionClient,
+  ): Promise<void>;
+
+  /**
    * Obtiene información de seguridad adicional.
    */
   findByUserId(

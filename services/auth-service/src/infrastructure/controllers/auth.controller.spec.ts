@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { RegisterUserUseCase } from '@application/use-cases/register-user.use-case';
 import { LoginUserUseCase } from '@application/use-cases/login-user.use-case';
+import { RefreshTokenUseCase } from '@application/use-cases/refresh-token.use-case';
 import { I18nService } from '@saas/shared';
 import { RegisterUserDto } from '@application/dto/register/register-user.dto';
 import { User } from '@domain/entities/user/user.entity';
@@ -19,6 +20,7 @@ describe('AuthController', () => {
   let controller: AuthController;
   let registerUserUseCase: jest.Mocked<RegisterUserUseCase>;
   let loginUserUseCase: jest.Mocked<LoginUserUseCase>;
+  let refreshTokenUseCase: jest.Mocked<RefreshTokenUseCase>;
   let i18n: jest.Mocked<I18nService>;
 
   beforeEach(async () => {
@@ -38,6 +40,12 @@ describe('AuthController', () => {
           },
         },
         {
+          provide: RefreshTokenUseCase,
+          useValue: {
+            execute: jest.fn(),
+          },
+        },
+        {
           provide: I18nService,
           useValue: {
             translate: jest.fn(),
@@ -49,10 +57,14 @@ describe('AuthController', () => {
     controller = module.get(AuthController);
     registerUserUseCase = module.get(RegisterUserUseCase);
     loginUserUseCase = module.get(LoginUserUseCase);
+    refreshTokenUseCase = module.get(RefreshTokenUseCase);
     i18n = module.get(I18nService);
   });
 
   it('debe registrar usuario y devolver respuesta en español', async () => {
+    expect(loginUserUseCase).toBeDefined();
+    expect(refreshTokenUseCase).toBeDefined();
+
     const user = User.create({
       id: 'uuid-test',
       email: EmailVO.create('test@example.com'),

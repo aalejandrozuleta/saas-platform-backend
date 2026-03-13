@@ -62,7 +62,6 @@ export class SecurityPrismaRepository implements SecurityRepository {
           blockedUntil: new Date(
             now.getTime() + lockDurationMinutes * 60_000,
           ),
-          status: 'BLOCKED',
         },
       });
     }
@@ -70,6 +69,20 @@ export class SecurityPrismaRepository implements SecurityRepository {
 
 
   async resetFailedLoginAttempts(
+    userId: string,
+    tx?: PrismaClient
+  ): Promise<void> {
+
+    await this.client(tx).user.update({
+      where: { id: userId },
+      data: {
+        failedLoginAttempts: 0,
+        blockedUntil: null,
+      },
+    });
+  }
+
+  async releaseTemporaryBlock(
     userId: string,
     tx?: PrismaClient
   ): Promise<void> {

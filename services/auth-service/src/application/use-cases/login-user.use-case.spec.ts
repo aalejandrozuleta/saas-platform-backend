@@ -17,6 +17,9 @@ import { TokenService } from '@application/ports/token.service.token';
 import { UnitOfWork } from '@application/ports/unit-of-work.port';
 import { DomainEventBus } from '@application/events/domain-event.bus';
 import { Clock } from '@application/ports/clock.port';
+import { SessionCache } from '@application/ports/session-cache.port';
+import { EnvService } from '@config/env/env.service';
+import { UserStatus } from '@domain/enums/user-status.enum';
 
 import { LoginUserUseCase } from './login-user.use-case';
 
@@ -36,6 +39,8 @@ describe('LoginUserUseCase', () => {
   let eventBus: jest.Mocked<DomainEventBus>;
   let policy: jest.Mocked<LoginPolicy>;
   let clock: jest.Mocked<Clock>;
+  let sessionCache: jest.Mocked<SessionCache>;
+  let envService: jest.Mocked<EnvService>;
 
   const context = LoginContext.create({
     ip: '127.0.0.1',
@@ -48,7 +53,7 @@ describe('LoginUserUseCase', () => {
       id: 'user-1',
       email: EmailVO.create('test@test.com'),
       passwordHash: 'hash',
-      status: 'ACTIVE' as any,
+      status: UserStatus.ACTIVE,
       emailVerified: true,
       failedLoginAttempts: 0,
       blockedUntil: undefined,
@@ -89,6 +94,8 @@ describe('LoginUserUseCase', () => {
     });
 
     passwordHasher.hash.mockResolvedValue('hash');
+    sessionCache.storeSession.mockResolvedValue();
+    refreshTokenRepository.create.mockResolvedValue(undefined as any);
 
     uow.execute.mockImplementation(async (fn: any) => fn({}));
 
@@ -106,6 +113,7 @@ describe('LoginUserUseCase', () => {
     securityRepository = {
       registerFailedAttempt: jest.fn(),
       resetFailedLoginAttempts: jest.fn(),
+      releaseTemporaryBlock: jest.fn(),
       findByUserId: jest.fn(),
     } as any;
 
@@ -156,6 +164,22 @@ describe('LoginUserUseCase', () => {
       now: jest.fn().mockReturnValue(new Date()),
     } as any;
 
+    sessionCache = {
+      storeSession: jest.fn(),
+      revokeSession: jest.fn(),
+      getSession: jest.fn(),
+    } as any;
+
+    envService = {
+      get: jest.fn().mockImplementation((key: string) => {
+        if (key === 'REDIS_SESSION_TTL') {
+          return 900;
+        }
+
+        return undefined;
+      }),
+    } as any;
+
     useCase = new LoginUserUseCase(
       userRepository,
       securityRepository,
@@ -168,6 +192,8 @@ describe('LoginUserUseCase', () => {
       eventBus,
       policy,
       clock,
+      sessionCache,
+      envService,
     );
   });
 
@@ -221,6 +247,8 @@ describe('LoginUserUseCase', () => {
 
     expect(securityRepository.registerFailedAttempt)
       .toHaveBeenCalled();
+    expect(securityRepository.resetFailedLoginAttempts)
+      .not.toHaveBeenCalled();
   });
 
   it('debe emitir LoginBlockedEvent si usuario está bloqueado', async () => {
@@ -282,6 +310,59 @@ describe('LoginUserUseCase', () => {
 
     expect(sessionRepository.revokeOldestActiveSession)
       .toHaveBeenCalled();
+  });
+
+  it('debe liberar un bloqueo temporal expirado antes de validar estado', async () => {
+
+    const expiredDate = new Date(Date.now() - 60_000);
+    const user = createUser({
+      status: UserStatus.BLOCKED,
+      failedLoginAttempts: 3,
+      blockedUntil: expiredDate,
+    });
+
+    userRepository.findByEmail.mockResolvedValue(user);
+    passwordHasher.verify.mockResolvedValue(false);
+
+    await expect(
+      useCase.execute('test@test.com', 'Password123!', context),
+    ).rejects.toThrow(DomainErrorFactory.invalidCredentials());
+
+    expect(securityRepository.releaseTemporaryBlock)
+      .toHaveBeenCalledWith(user.id);
+    expect(policy.validateUserStatus)
+      .toHaveBeenCalledWith(UserStatus.ACTIVE);
+  });
+
+  it('debe resetear intentos cuando la contraseña es correcta aunque luego falle el dispositivo', async () => {
+
+    const user = createUser({
+      failedLoginAttempts: 2,
+    });
+
+    userRepository.findByEmail.mockResolvedValue(user);
+    passwordHasher.verify.mockResolvedValue(true);
+    deviceRepository.getByUserIdAndFingerprint.mockResolvedValue({
+      id: 'device-1',
+      isTrusted: false,
+      updateLastUsed: () => ({
+        id: 'device-1',
+        isTrusted: false,
+      }),
+    } as any);
+    securityRepository.findByUserId.mockResolvedValue(null);
+    uow.execute.mockImplementation(async (fn: any) => fn({}));
+
+    policy.validateDevice.mockImplementation(() => {
+      throw DomainErrorFactory.deviceNotTrusted();
+    });
+
+    await expect(
+      useCase.execute('test@test.com', 'Password123!', context),
+    ).rejects.toThrow(DomainErrorFactory.deviceNotTrusted());
+
+    expect(securityRepository.resetFailedLoginAttempts)
+      .toHaveBeenCalledWith(user.id);
   });
 
 });

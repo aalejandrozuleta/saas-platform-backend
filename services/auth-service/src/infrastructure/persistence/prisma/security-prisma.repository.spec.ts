@@ -84,14 +84,28 @@ describe('SecurityPrismaRepository', () => {
 
       const args = prisma.user.update.mock.calls[0][0];
 
-      expect(args.data.status).toBe('BLOCKED');
       expect(args.data.blockedUntil).toBeInstanceOf(Date);
+      expect(args.data.status).toBeUndefined();
     });
   });
 
   describe('resetFailedLoginAttempts', () => {
     it('debe resetear intentos fallidos', async () => {
       await repository.resetFailedLoginAttempts('user-1');
+
+      expect(prisma.user.update).toHaveBeenCalledWith({
+        where: { id: 'user-1' },
+        data: {
+          failedLoginAttempts: 0,
+          blockedUntil: null,
+        },
+      });
+    });
+  });
+
+  describe('releaseTemporaryBlock', () => {
+    it('debe liberar un bloqueo temporal heredado', async () => {
+      await repository.releaseTemporaryBlock('user-1');
 
       expect(prisma.user.update).toHaveBeenCalledWith({
         where: { id: 'user-1' },

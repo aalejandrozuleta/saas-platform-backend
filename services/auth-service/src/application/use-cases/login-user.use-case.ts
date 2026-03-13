@@ -38,6 +38,7 @@ import { Clock } from '@application/ports/clock.port';
 import { DomainErrorFactory } from '@domain/errors/domain-error.factory';
 import { SessionCache } from '@application/ports/session-cache.port';
 import { EnvService } from '@config/env/env.service';
+import { ErrorCode } from '@saas/shared';
 
 /**
  * Caso de uso encargado de autenticar un usuario en el sistema.
@@ -144,22 +145,29 @@ export class LoginUserUseCase {
       throw DomainErrorFactory.invalidCredentials();
     }
 
-    this.policy.validateUserStatus(user.status);
+    const normalizedUser =
+      await this.releaseExpiredTemporaryBlock(user);
+
+    this.policy.validateUserStatus(normalizedUser.status);
 
     try {
       this.policy.validateAttempts(
-        user.failedLoginAttempts,
-        user.blockedUntil,
+        normalizedUser.failedLoginAttempts,
+        normalizedUser.blockedUntil,
         this.clock.now(),
       );
     } catch (error) {
 
-      if (error instanceof DomainErrorFactory.userBlocked().constructor) {
+      if (
+        error instanceof Error &&
+        'code' in error &&
+        error.code === ErrorCode.USER_BLOCKED
+      ) {
         this.eventBus.publish(
           new LoginBlockedEvent(
-            user.id,
+            normalizedUser.id,
             context,
-            user.blockedUntil,
+            normalizedUser.blockedUntil,
           ),
         );
       }
@@ -167,7 +175,7 @@ export class LoginUserUseCase {
       throw error;
     }
 
-    return user;
+    return normalizedUser;
   }
 
   /**
@@ -205,6 +213,25 @@ export class LoginUserUseCase {
 
       throw DomainErrorFactory.invalidCredentials();
     }
+
+    await this.securityRepository.resetFailedLoginAttempts(
+      user.id,
+    );
+  }
+
+  /**
+   * Libera bloqueos temporales expirados para no dejar cuentas atrapadas.
+   */
+  private async releaseExpiredTemporaryBlock(
+    user: User,
+  ): Promise<User> {
+    if (!user.hasExpiredTemporaryBlock(this.clock.now())) {
+      return user;
+    }
+
+    await this.securityRepository.releaseTemporaryBlock(user.id);
+
+    return user.releaseTemporaryBlock();
   }
 
   /**
@@ -216,15 +243,12 @@ export class LoginUserUseCase {
   ) {
 
     return this.uow.execute(async (tx) => {
-
-      await this.securityRepository.resetFailedLoginAttempts(
-        user.id,
-        tx,
-      );
-
+      if (!context.deviceFingerprint) {
+        throw DomainErrorFactory.invalidCredentials();
+      }
       let device = await this.deviceRepository.getByUserIdAndFingerprint(
         user.id,
-        context.deviceFingerprint!,
+        context.deviceFingerprint,
         tx,
       );
 
@@ -233,7 +257,7 @@ export class LoginUserUseCase {
         device = Device.create({
           id: randomUUID(),
           userId: user.id,
-          fingerprint: context.deviceFingerprint!,
+          fingerprint: context.deviceFingerprint,
           ipAddress: context.ip,
           country: context.country,
           isTrusted: true,

@@ -17,6 +17,8 @@ describe('JwtTokenService', () => {
       get: jest.fn((key: string) => {
         if (key === 'JWT_ACCESS_SECRET') return 'access-secret';
         if (key === 'JWT_REFRESH_SECRET') return 'refresh-secret';
+        if (key === 'ACCESS_TOKEN_TTL') return 900;
+        if (key === 'REFRESH_TOKEN_TTL') return 604800;
         return undefined;
       }),
     } as unknown as jest.Mocked<EnvService>;
@@ -44,11 +46,15 @@ describe('JwtTokenService', () => {
 
       expect(sign).toHaveBeenCalledWith(
         {
-          userId: 'user-1',
-          sessionId: 'session-1',
+          sub: 'user-1',
+          sid: 'session-1',
         },
         'access-secret',
-        { expiresIn: '15m' },
+        {
+          expiresIn: 900,
+          issuer: 'auth-service',
+          audience: 'api-gateway',
+        },
       );
 
       expect(result).toBe('access-token');
@@ -69,14 +75,17 @@ describe('JwtTokenService', () => {
       expect(sign).toHaveBeenCalledWith(
         { jti: 'uuid-123' },
         'refresh-secret',
-        { expiresIn: '7d' },
+        {
+          expiresIn: 604800,
+          issuer: 'auth-service',
+        },
       );
 
       expect(result.token).toBe('refresh-token');
       expect(result.jti).toBe('uuid-123');
 
       expect(result.expiresAt.getTime()).toBe(
-        now + 1000 * 60 * 60 * 24 * 7,
+        now + 604800 * 1000,
       );
     });
   });

@@ -101,4 +101,26 @@ export class User {
       blockedUntil: undefined,
     });
   }
+
+  /**
+   * Indica si un bloqueo temporal ya expiró.
+   */
+  hasExpiredTemporaryBlock(now: Date): boolean {
+    return (
+      this.props.blockedUntil !== undefined &&
+      this.props.blockedUntil <= now
+    );
+  }
+
+  /**
+   * Libera un bloqueo temporal heredado y restaura el acceso.
+   */
+  releaseTemporaryBlock(): User {
+    return new User({
+      ...this.props,
+      status: UserStatus.ACTIVE,
+      failedLoginAttempts: 0,
+      blockedUntil: undefined,
+    });
+  }
 }
