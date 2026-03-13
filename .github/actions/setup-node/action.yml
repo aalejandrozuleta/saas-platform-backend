@@ -42,3 +42,7 @@ runs:
       if: steps.cache-prisma.outputs.cache-hit != 'true'
       shell: bash
       run: pnpm --filter auth-service exec prisma generate
+
+    - name: Generate Build Artifacts
+      shell: bash
+      run: pnpm build
