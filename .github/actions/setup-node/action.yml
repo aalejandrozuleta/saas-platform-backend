@@ -5,25 +5,17 @@ runs:
   using: composite
   steps:
     - name: Setup pnpm
-      uses: pnpm/action-setup@v4
+      uses: pnpm/action-setup@v4.3.0
       with:
         run_install: false
 
     - name: Setup Node
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v6.3.0
       with:
         node-version: 24
+        check-latest: true
         cache: pnpm
-
-    - name: Get pnpm store
-      shell: bash
-      run: echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_ENV
-
-    - name: Cache pnpm store
-      uses: actions/cache@v4
-      with:
-        path: ${{ env.STORE_PATH }}
-        key: pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+        cache-dependency-path: pnpm-lock.yaml
 
     - name: Install dependencies
       shell: bash
@@ -31,18 +23,14 @@ runs:
 
     - name: Cache Prisma
       id: cache-prisma
-      uses: actions/cache@v4
+      uses: actions/cache@v5.0.3
       with:
         path: |
           node_modules/.prisma
           services/**/generated/prisma
-        key: prisma-${{ hashFiles('**/schema.prisma') }}
+        key: prisma-${{ runner.os }}-${{ hashFiles('**/schema.prisma') }}-${{ hashFiles('pnpm-lock.yaml') }}
 
     - name: Generate Prisma Client
       if: steps.cache-prisma.outputs.cache-hit != 'true'
       shell: bash
       run: pnpm --filter auth-service exec prisma generate
-
-    - name: Generate Build Artifacts
-      shell: bash
-      run: pnpm build

@@ -233,7 +233,7 @@ http://localhost:5050  (si expones puerto)
 
 Credenciales:
 
-admin@local.dev
+admin@admin.dev
 admin
 
 Host interno al crear conexión:

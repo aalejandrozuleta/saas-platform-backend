@@ -1,0 +1,207 @@
+name: saas-platform-prod
+
+services:
+  nginx:
+    image: nginx:1.29.6-alpine
+    container_name: nginx-prod
+    entrypoint: ["nginx", "-g", "daemon off;"]
+    restart: unless-stopped
+    ports:
+      - "${NGINX_PORT:-80}:80"
+    volumes:
+      - ./nginx/sites/prod.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      api-gateway:
+        condition: service_healthy
+    networks:
+      - saas-prod
+
+  api-gateway:
+    container_name: api-gateway-prod
+    build:
+      context: ..
+      dockerfile: services/api-gateway/Dockerfile.prod
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      AUTH_SERVICE_URL: http://auth-service:3001
+      AUTH_SERVICE_TIMEOUT: ${AUTH_SERVICE_TIMEOUT:-5000}
+      AUTH_SERVICE_RETRIES: ${AUTH_SERVICE_RETRIES:-2}
+      AUTH_SERVICE_CIRCUIT_TIMEOUT: ${AUTH_SERVICE_CIRCUIT_TIMEOUT:-10000}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:?JWT_ACCESS_SECRET is required}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost}
+      TRUST_PROXY: ${TRUST_PROXY:-1}
+      SMTP_HOST: ${SMTP_HOST:?SMTP_HOST is required}
+      SMTP_PORT: ${SMTP_PORT:?SMTP_PORT is required}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      SMTP_SECURE: ${SMTP_SECURE:-true}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+    depends_on:
+      auth-service:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3000/health >/dev/null"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks:
+      - saas-prod
+
+  auth-service:
+    container_name: auth-service-prod
+    build:
+      context: ..
+      dockerfile: services/auth-service/Dockerfile.prod
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DATABASE_URL: postgresql://${POSTGRES_USER:-auth_user}:${POSTGRES_PASSWORD:-auth_pass}@auth-postgres:5432/${POSTGRES_DB:-auth_db}
+      MONGO_URL: mongodb://mongo:27017/${MONGO_DB:-auth_audit}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:?JWT_ACCESS_SECRET is required}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?JWT_REFRESH_SECRET is required}
+      ACCESS_TOKEN_TTL: ${ACCESS_TOKEN_TTL:-900}
+      REFRESH_TOKEN_TTL: ${REFRESH_TOKEN_TTL:-604800}
+      REDIS_SESSION_TTL: ${REDIS_SESSION_TTL:-900}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+    depends_on:
+      auth-postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3001/metrics >/dev/null"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - saas-prod
+
+  auth-postgres:
+    image: postgres:17-alpine
+    container_name: auth-postgres-prod
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-auth_db}
+      POSTGRES_USER: ${POSTGRES_USER:-auth_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-auth_pass}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-auth_user} -d ${POSTGRES_DB:-auth_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - auth-postgres-prod-data:/var/lib/postgresql/data
+    networks:
+      - saas-prod
+
+  redis:
+    image: redis:8.0.6-alpine
+    container_name: redis-prod
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - redis-prod-data:/data
+    networks:
+      - saas-prod
+
+  mongo:
+    image: mongo:8.2
+    container_name: mongo-prod
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "mongosh --quiet --eval 'db.adminCommand({ ping: 1 }).ok' | grep 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - mongo-prod-data:/data/db
+    networks:
+      - saas-prod
+
+  prometheus:
+    image: prom/prometheus:v3.10.0
+    container_name: prometheus-prod
+    restart: unless-stopped
+    profiles: ["observability"]
+    ports:
+      - "${PROMETHEUS_PORT:-9090}:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-prod-data:/prometheus
+    networks:
+      - saas-prod
+
+  loki:
+    image: grafana/loki:3.5.12
+    container_name: loki-prod
+    restart: unless-stopped
+    profiles: ["observability"]
+    ports:
+      - "${LOKI_PORT:-3100}:3100"
+    volumes:
+      - ./loki/loki.yml:/etc/loki/loki.yml:ro
+      - loki-prod-data:/loki
+    command: -config.file=/etc/loki/loki.yml
+    networks:
+      - saas-prod
+
+  promtail:
+    image: grafana/promtail:3.5.12
+    container_name: promtail-prod
+    restart: unless-stopped
+    profiles: ["observability"]
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./promtail/promtail.yml:/etc/promtail/promtail.yml:ro
+    command: -config.file=/etc/promtail/promtail.yml
+    depends_on:
+      - loki
+    networks:
+      - saas-prod
+
+  grafana:
+    image: grafana/grafana:12.4.1
+    container_name: grafana-prod
+    restart: unless-stopped
+    profiles: ["observability"]
+    ports:
+      - "${GRAFANA_PORT:-3005}:3000"
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/provisioning/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana-prod-data:/var/lib/grafana
+    depends_on:
+      - prometheus
+      - loki
+    networks:
+      - saas-prod
+
+networks:
+  saas-prod:
+    driver: bridge
+
+volumes:
+  auth-postgres-prod-data:
+  redis-prod-data:
+  mongo-prod-data:
+  prometheus-prod-data:
+  loki-prod-data:
+  grafana-prod-data:

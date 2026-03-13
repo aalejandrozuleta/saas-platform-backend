@@ -2,11 +2,12 @@ FROM node:24-alpine
 
 WORKDIR /app
 
-RUN npm install -g pnpm
 ENV PNPM_STORE_PATH=/pnpm-store
+RUN corepack enable
 
 # Copiar workspace completo (necesario para pnpm workspaces)
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY .npmrc ./
 COPY tsconfig.base.json ./
 
 # Copiar solo lo necesario
@@ -14,7 +15,7 @@ COPY services ./services
 COPY shared ./shared
 
 # NOSONAR: pnpm install scripts required for prisma
-RUN pnpm install
+RUN pnpm install --frozen-lockfile
 
 WORKDIR /app/services/api-gateway
 

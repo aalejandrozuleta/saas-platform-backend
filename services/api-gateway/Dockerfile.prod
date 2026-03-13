@@ -1,10 +1,33 @@
-FROM node:24-alpine
+FROM node:24-alpine AS base
+
+ENV PNPM_HOME=/pnpm
+ENV PATH=$PNPM_HOME:$PATH
+
+RUN corepack enable
 
 WORKDIR /app
 
-COPY deploy/api-gateway .
+FROM base AS build
 
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml nest-cli.json ./
+COPY .npmrc ./
+COPY tsconfig.base.json ./
+COPY services ./services
+COPY shared ./shared
+
+RUN pnpm install --frozen-lockfile
+RUN pnpm --filter @saas/shared build
+RUN pnpm --filter api-gateway build
+RUN pnpm deploy --filter api-gateway --prod /prod/api-gateway
+
+FROM node:24-alpine AS runtime
+
+WORKDIR /app
 ENV NODE_ENV=production
+
+COPY --from=build --chown=node:node /prod/api-gateway ./
+
+USER node
 
 EXPOSE 3000
 

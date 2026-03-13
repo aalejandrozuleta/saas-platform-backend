@@ -15,7 +15,9 @@ export class EnvService {
     const parsed = envSchema.safeParse(process.env);
 
     if (!parsed.success) {
-      throw new Error(`Error en variables de entorno`);
+      const error = new Error(`Error en variables de entorno`);
+      (error as any).cause = parsed.error;
+      throw error;
     }
 
     this.env = parsed.data;
