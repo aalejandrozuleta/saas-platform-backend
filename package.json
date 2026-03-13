@@ -42,7 +42,7 @@
     "typedoc": "^0.28.17"
   },
   "engines": {
-    "node": ">=20",
+    "node": ">=22",
     "pnpm": ">=9"
   },
   "lint-staged": {

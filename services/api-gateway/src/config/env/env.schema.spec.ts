@@ -5,21 +5,29 @@ describe('envSchema', () => {
    * Helper para generar un conjunto de variables válidas
    */
   const createValidEnv = () => ({
-    NODE_ENV: 'development',
-    PORT: '3000',
+   NODE_ENV: 'development',
+      PORT: '3000',
 
-    AUTH_SERVICE_URL: 'http://localhost:3001',
-    AUTH_SERVICE_TIMEOUT: '5000',
+      AUTH_SERVICE_URL: 'http://localhost:3001',
+      AUTH_SERVICE_TIMEOUT: '5000',
+      AUTH_SERVICE_RETRIES: '2',
+      AUTH_SERVICE_CIRCUIT_TIMEOUT: '10000',
 
-    CORS_ORIGINS: 'http://localhost:3000,http://localhost:4200',
+      JWT_ACCESS_SECRET: 'super-secret-jwt-key',
 
-    TRUST_PROXY: '1',
+      CORS_ORIGINS: 'http://localhost:3000,http://localhost:4200',
 
-    SMTP_HOST: 'smtp.mail.com',
-    SMTP_PORT: '587',
-    SMTP_USER: 'user',
-    SMTP_PASS: 'pass',
-    SMTP_SECURE: 'false',
+      TRUST_PROXY: '1',
+
+      SMTP_HOST: 'smtp.mail.com',
+      SMTP_PORT: '587',
+      SMTP_USER: 'user',
+      SMTP_PASS: 'pass',
+      SMTP_SECURE: 'false',
+
+      REDIS_HOST: 'localhost',
+      REDIS_PORT: '6379',
+      REDIS_PASSWORD: '',
   });
 
   it('debe parsear correctamente un entorno válido', () => {
