@@ -6,3 +6,5 @@ export * from './i18n';
 export * from './shared.module';
 export * from './filters';
 export * from './swagger';
+export * from './redis';
+export * from './decorators';

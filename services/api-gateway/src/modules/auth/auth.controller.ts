@@ -7,7 +7,7 @@ import {
   Res,
 } from '@nestjs/common';
 import type { Request, Response } from 'express';
-import { successResponse } from '@saas/shared';
+import { PublicRoute, successResponse } from '@saas/shared';
 import { AuthProxy } from '@infrastructure/http/proxies/auth.proxy';
 
 /**
@@ -26,6 +26,7 @@ export class AuthController {
   /**
    * Registro de usuario
    */
+  @PublicRoute()
   @Post('register')
   async register(@Req() req: Request) {
     this.prepareRequest(req);
@@ -36,6 +37,7 @@ export class AuthController {
   /**
    * Login de usuario
    */
+  @PublicRoute()
   @Post('login')
   async login(
     @Req() req: Request,
@@ -56,12 +58,12 @@ export class AuthController {
   /**
    * Refresh de sesión
    */
+  @PublicRoute()
   @Post('refresh')
   async refresh(
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
-
     this.prepareRequest(req);
 
     const result = await this.authProxy.forward(req, '/refresh');

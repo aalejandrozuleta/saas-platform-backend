@@ -34,6 +34,9 @@ importers:
       '@prisma/client':
         specifier: ^7.3.0
         version: 7.3.0(prisma@7.3.0(@types/react@19.2.13)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.9.3))(typescript@5.9.3)
+      ioredis:
+        specifier: ^5.10.0
+        version: 5.10.0
       mongoose:
         specifier: ^9.1.5
         version: 9.1.6
@@ -113,6 +116,9 @@ importers:
       axios:
         specifier: ^1.13.4
         version: 1.13.4
+      cookie-parser:
+        specifier: ^1.4.7
+        version: 1.4.7
       express:
         specifier: ^5.2.1
         version: 5.2.1
@@ -125,6 +131,9 @@ importers:
       jest:
         specifier: ^30.2.0
         version: 30.2.0(@types/node@22.19.9)(ts-node@10.9.2(@swc/core@1.15.18)(@types/node@22.19.9)(typescript@5.9.3))
+      jsonwebtoken:
+        specifier: ^9.0.3
+        version: 9.0.3
       opossum:
         specifier: ^9.0.0
         version: 9.0.0
@@ -141,9 +150,15 @@ importers:
       '@nestjs/testing':
         specifier: 11.1.13
         version: 11.1.13(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.13)(@nestjs/platform-express@11.1.13)
+      '@types/cookie-parser':
+        specifier: ^1.4.10
+        version: 1.4.10(@types/express@5.0.6)
       '@types/express':
         specifier: ^5.0.6
         version: 5.0.6
+      '@types/jsonwebtoken':
+        specifier: ^9.0.10
+        version: 9.0.10
       '@types/opossum':
         specifier: ^8.1.9
         version: 8.1.9
@@ -198,9 +213,6 @@ importers:
       helmet:
         specifier: ^8.1.0
         version: 8.1.0
-      ioredis:
-        specifier: ^5.10.0
-        version: 5.10.0
       jsonwebtoken:
         specifier: ^9.0.3
         version: 9.0.3

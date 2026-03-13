@@ -3,6 +3,7 @@ import { NestFactory } from '@nestjs/core';
 import helmet from 'helmet';
 import express from 'express';
 import { VersioningType } from '@nestjs/common';
+import cookieParser from 'cookie-parser';
 
 import { AppModule } from './app.module';
 import { methodGuardMiddleware } from './infrastructure/security/method-guard.middleware';
@@ -15,6 +16,7 @@ import { EnvService } from './config/env/env.service';
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
   const envService = app.get(EnvService);
+  app.use(cookieParser());
 
   app.enableVersioning({
     type: VersioningType.URI,

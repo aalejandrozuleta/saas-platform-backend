@@ -14,6 +14,8 @@ export const envSchema = z.object({
   AUTH_SERVICE_TIMEOUT: z.coerce.number().default(5000),
   AUTH_SERVICE_RETRIES: z.coerce.number().default(2),
   AUTH_SERVICE_CIRCUIT_TIMEOUT: z.coerce.number().default(10000),
+  JWT_ACCESS_SECRET: z.string().min(10),
+
 
   CORS_ORIGINS: z
     .string()
@@ -31,6 +33,10 @@ export const envSchema = z.object({
   SMTP_USER: z.string().optional(),
   SMTP_PASS: z.string().optional(),
   SMTP_SECURE: z.coerce.boolean(),
+
+  REDIS_HOST: z.string(),
+  REDIS_PORT: z.coerce.number(),
+  REDIS_PASSWORD: z.string().optional(),
 });
 
 export type EnvVars = z.infer<typeof envSchema>;

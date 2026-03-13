@@ -2,11 +2,9 @@ import { Inject } from '@nestjs/common';
 import { TokenService } from '@application/ports/token.service.token';
 import { RefreshTokenRepository } from '@application/ports/refresh-token.repository';
 import { PasswordHasher } from '@application/ports/password-hasher.port';
-import { SessionCache } from '@application/ports/session-cache.port';
 import {
   TOKEN_SERVICE,
   PASSWORD_HASHER,
-  SESSION_CACHE
 } from '@domain/token/services.tokens';
 import { REFRESH_TOKEN_REPOSITORY } from '@domain/token/repositories.tokens';
 
@@ -21,9 +19,6 @@ export class RefreshTokenUseCase {
 
     @Inject(PASSWORD_HASHER)
     private readonly passwordHasher: PasswordHasher,
-
-    @Inject(SESSION_CACHE)
-    private readonly sessionCache: SessionCache,
   ) { }
 
   async execute(refreshToken: string) {
