@@ -1,9 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Redis } from 'ioredis';
 import { SessionCache } from '@application/ports/session-cache.port';
-import { REDIS_CLIENT } from '@saas/shared';
 
-
+import { REDIS_CLIENT } from './redis.provider';
 
 /**
  * Implementación Redis del cache de sesiones.

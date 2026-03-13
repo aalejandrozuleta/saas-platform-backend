@@ -4,14 +4,16 @@ import { PlatformLogger } from '@saas/shared';
 import { UserRepository } from '@domain/repositories/user.repository';
 import { AuditLogger } from '@application/ports/audit-logger.port';
 import { PasswordHasher } from '@application/ports/password-hasher.port';
+import { DeviceRepository } from '@domain/repositories/device.repository';
 
 import { RegisterUserUseCase } from './register-user.use-case';
 
 describe('RegisterUserUseCase', () => {
-    let useCase: RegisterUserUseCase;
+  let useCase: RegisterUserUseCase;
 
   let userRepository: jest.Mocked<UserRepository>;
   let passwordHasher: jest.Mocked<PasswordHasher>;
+  let deviceRepository: jest.Mocked<DeviceRepository>;
   let auditLogger: jest.Mocked<AuditLogger>;
   let logger: jest.Mocked<PlatformLogger>;
 
@@ -25,16 +27,21 @@ describe('RegisterUserUseCase', () => {
     userRepository = {
       findByEmail: jest.fn(),
       save: jest.fn(),
-    };
+    } as any;
 
     passwordHasher = {
       hash: jest.fn(),
       verify: jest.fn(),
-    };
+    } as any;
+
+    deviceRepository = {
+      save: jest.fn(),
+      getByUserIdAndFingerprint: jest.fn(),
+    } as any;
 
     auditLogger = {
       log: jest.fn(),
-    };
+    } as any;
 
     logger = {
       info: jest.fn(),
@@ -46,17 +53,19 @@ describe('RegisterUserUseCase', () => {
     useCase = new RegisterUserUseCase(
       userRepository,
       passwordHasher,
+      deviceRepository,
       auditLogger,
       logger,
     );
   });
 
-  it('debe registrar un usuario correctamente (happy path)', async () => {
+  it('debe registrar un usuario correctamente y confiar el dispositivo actual', async () => {
     const email = 'test@example.com';
     const password = 'Str0ng-P@ssword';
 
     userRepository.findByEmail.mockResolvedValue(null);
     passwordHasher.hash.mockResolvedValue('hashed-password');
+    deviceRepository.save.mockResolvedValue({} as any);
 
     const result = await useCase.execute(email, password, context);
 
@@ -68,19 +77,34 @@ describe('RegisterUserUseCase', () => {
       (userRepository.findByEmail as jest.Mock).mock.calls[0][0];
 
     expect(calledEmailVO.getValue()).toBe(email);
-
     expect(passwordHasher.hash).toHaveBeenCalledWith(password);
-
     expect(userRepository.save).toHaveBeenCalledWith(result);
-
+    expect(deviceRepository.save).toHaveBeenCalledWith(
+      expect.objectContaining({
+        userId: result.id,
+        fingerprint: context.deviceFingerprint,
+        isTrusted: true,
+      }),
+    );
     expect(auditLogger.log).toHaveBeenCalledWith(
       expect.objectContaining({
         event: AuthAuditEvent.REGISTER_SUCCESS,
         ip: context.ip,
       }),
     );
-
     expect(logger.info).toHaveBeenCalled();
+  });
+
+  it('no debe crear dispositivo si el registro no trae fingerprint', async () => {
+    userRepository.findByEmail.mockResolvedValue(null);
+    passwordHasher.hash.mockResolvedValue('hashed-password');
+
+    await useCase.execute('test@example.com', 'Str0ng-P@ssword', {
+      ...context,
+      deviceFingerprint: undefined,
+    });
+
+    expect(deviceRepository.save).not.toHaveBeenCalled();
   });
 
   it('debe lanzar error si el email ya existe', async () => {
@@ -99,7 +123,7 @@ describe('RegisterUserUseCase', () => {
 
     expect(userRepository.save).not.toHaveBeenCalled();
     expect(passwordHasher.hash).not.toHaveBeenCalled();
-
+    expect(deviceRepository.save).not.toHaveBeenCalled();
     expect(auditLogger.log).toHaveBeenCalledWith(
       expect.objectContaining({
         userId: 'user-id',
@@ -107,7 +131,6 @@ describe('RegisterUserUseCase', () => {
         reason: 'EMAIL_ALREADY_EXISTS',
       }),
     );
-
     expect(logger.warn).toHaveBeenCalled();
   });
 });

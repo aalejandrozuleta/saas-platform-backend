@@ -15,9 +15,6 @@ describe('SecurityPrismaRepository', () => {
         findUnique: jest.fn(),
         update: jest.fn(),
       },
-      userSecurity: {
-        findUnique: jest.fn(),
-      },
     };
 
     repository = new SecurityPrismaRepository(
@@ -32,7 +29,6 @@ describe('SecurityPrismaRepository', () => {
   describe('registerFailedAttempt', () => {
     it('debe incrementar intentos fallidos', async () => {
       prisma.user.updateMany.mockResolvedValue({ count: 1 });
-
       prisma.user.findUnique.mockResolvedValue({
         failedLoginAttempts: 1,
       });
@@ -68,7 +64,6 @@ describe('SecurityPrismaRepository', () => {
 
     it('debe bloquear usuario al alcanzar el máximo de intentos', async () => {
       prisma.user.updateMany.mockResolvedValue({ count: 1 });
-
       prisma.user.findUnique.mockResolvedValue({
         failedLoginAttempts: 5,
       });
@@ -83,7 +78,6 @@ describe('SecurityPrismaRepository', () => {
       expect(prisma.user.update).toHaveBeenCalled();
 
       const args = prisma.user.update.mock.calls[0][0];
-
       expect(args.data.blockedUntil).toBeInstanceOf(Date);
       expect(args.data.status).toBeUndefined();
     });
@@ -119,20 +113,40 @@ describe('SecurityPrismaRepository', () => {
   });
 
   describe('findByUserId', () => {
-    it('debe consultar userSecurity por userId', async () => {
-      prisma.userSecurity.findUnique.mockResolvedValue({
-        trustedCountries: ['CO'],
+    it('debe consultar el perfil de seguridad del usuario', async () => {
+      prisma.user.findUnique.mockResolvedValue({
+        security: {
+          trustedCountries: ['CO'],
+          twoFactorEnabled: true,
+          twoFactorMethod: 'TOTP',
+        },
+        recoveryCodes: [{ id: 'rc-1' }],
       });
 
       const result = await repository.findByUserId('user-1');
 
-      expect(prisma.userSecurity.findUnique).toHaveBeenCalledWith({
-        where: { userId: 'user-1' },
-        select: { trustedCountries: true },
+      expect(prisma.user.findUnique).toHaveBeenCalledWith({
+        where: { id: 'user-1' },
+        select: {
+          security: {
+            select: {
+              trustedCountries: true,
+              twoFactorEnabled: true,
+              twoFactorMethod: true,
+            },
+          },
+          recoveryCodes: {
+            take: 1,
+            select: { id: true },
+          },
+        },
       });
 
       expect(result).toEqual({
         trustedCountries: ['CO'],
+        twoFactorEnabled: true,
+        twoFactorMethod: 'TOTP',
+        hasRecoveryCodes: true,
       });
     });
   });

@@ -1,3 +1,4 @@
+import { ErrorCode } from '@saas/shared';
 import { LoginContext } from '@domain/value-objects/login-context.vo';
 import { User } from '@domain/entities/user/user.entity';
 import { EmailVO } from '@domain/value-objects/email.vo';
@@ -8,7 +9,10 @@ import { LoginSucceededEvent } from '@application/events/login/login-succeeded.e
 import { LoginFailedEvent } from '@application/events/login/login-failed.event';
 import { LoginBlockedEvent } from '@application/events/login/login-blocked.event';
 import { UserRepository } from '@domain/repositories/user.repository';
-import { SecurityRepository } from '@domain/repositories/security.repository';
+import {
+  LoginSecurityProfile,
+  SecurityRepository,
+} from '@domain/repositories/security.repository';
 import { DeviceRepository } from '@domain/repositories/device.repository';
 import { SessionRepository } from '@application/ports/session.repository';
 import { RefreshTokenRepository } from '@application/ports/refresh-token.repository';
@@ -20,12 +24,12 @@ import { Clock } from '@application/ports/clock.port';
 import { SessionCache } from '@application/ports/session-cache.port';
 import { EnvService } from '@config/env/env.service';
 import { UserStatus } from '@domain/enums/user-status.enum';
+import { LoginSecurityChallengeService } from '@application/security/login-security-challenge.service';
+import { LoginChallengeReason } from '@application/security/login-challenge.types';
 
 import { LoginUserUseCase } from './login-user.use-case';
 
-
 describe('LoginUserUseCase', () => {
-
   let useCase: LoginUserUseCase;
 
   let userRepository: jest.Mocked<UserRepository>;
@@ -41,6 +45,7 @@ describe('LoginUserUseCase', () => {
   let clock: jest.Mocked<Clock>;
   let sessionCache: jest.Mocked<SessionCache>;
   let envService: jest.Mocked<EnvService>;
+  let loginSecurityChallengeService: LoginSecurityChallengeService;
 
   const context = LoginContext.create({
     ip: '127.0.0.1',
@@ -61,13 +66,21 @@ describe('LoginUserUseCase', () => {
       ...overrides,
     });
 
-  const setupSuccessfulLogin = () => {
+  const createSecurityProfile = (
+    overrides?: Partial<LoginSecurityProfile>,
+  ): LoginSecurityProfile => ({
+    trustedCountries: [],
+    twoFactorEnabled: false,
+    twoFactorMethod: undefined,
+    hasRecoveryCodes: false,
+    ...overrides,
+  });
 
+  const setupSuccessfulLogin = () => {
     const user = createUser();
 
     userRepository.findByEmail.mockResolvedValue(user);
     passwordHasher.verify.mockResolvedValue(true);
-
     deviceRepository.getByUserIdAndFingerprint.mockResolvedValue({
       id: 'device-1',
       isTrusted: true,
@@ -76,34 +89,28 @@ describe('LoginUserUseCase', () => {
         isTrusted: true,
       }),
     } as any);
-
-    securityRepository.findByUserId.mockResolvedValue(null);
-
+    securityRepository.findByUserId.mockResolvedValue(
+      createSecurityProfile(),
+    );
     sessionRepository.countActiveSessions.mockResolvedValue(0);
-
     sessionRepository.create.mockResolvedValue({
       id: 'session-1',
     });
-
     tokenService.generateAccessToken.mockReturnValue('access-token');
-
     tokenService.generateRefreshToken.mockReturnValue({
       token: 'refresh-token',
       jti: 'jti',
       expiresAt: new Date(),
     });
-
     passwordHasher.hash.mockResolvedValue('hash');
     sessionCache.storeSession.mockResolvedValue();
     refreshTokenRepository.create.mockResolvedValue(undefined as any);
-
     uow.execute.mockImplementation(async (fn: any) => fn({}));
 
     return user;
   };
 
   beforeEach(() => {
-
     jest.resetAllMocks();
 
     userRepository = {
@@ -166,8 +173,8 @@ describe('LoginUserUseCase', () => {
 
     sessionCache = {
       storeSession: jest.fn(),
+      isSessionActive: jest.fn(),
       revokeSession: jest.fn(),
-      getSession: jest.fn(),
     } as any;
 
     envService = {
@@ -179,6 +186,9 @@ describe('LoginUserUseCase', () => {
         return undefined;
       }),
     } as any;
+
+    loginSecurityChallengeService =
+      new LoginSecurityChallengeService();
 
     useCase = new LoginUserUseCase(
       userRepository,
@@ -194,11 +204,11 @@ describe('LoginUserUseCase', () => {
       clock,
       sessionCache,
       envService,
+      loginSecurityChallengeService,
     );
   });
 
   it('debe autenticar correctamente', async () => {
-
     setupSuccessfulLogin();
 
     const result = await useCase.execute(
@@ -215,19 +225,19 @@ describe('LoginUserUseCase', () => {
     expect(eventBus.publish).toHaveBeenCalledWith(
       expect.any(LoginAttemptedEvent),
     );
-
     expect(eventBus.publish).toHaveBeenCalledWith(
       expect.any(LoginSucceededEvent),
     );
   });
 
   it('debe lanzar error si usuario no existe', async () => {
-
     userRepository.findByEmail.mockResolvedValue(null);
 
     await expect(
       useCase.execute('test@test.com', 'Password123!', context),
-    ).rejects.toThrow(DomainErrorFactory.invalidCredentials());
+    ).rejects.toMatchObject({
+      code: ErrorCode.INVALID_CREDENTIALS,
+    });
 
     expect(eventBus.publish).toHaveBeenCalledWith(
       expect.any(LoginFailedEvent),
@@ -235,7 +245,6 @@ describe('LoginUserUseCase', () => {
   });
 
   it('debe registrar intento fallido si contraseña es incorrecta', async () => {
-
     const user = createUser();
 
     userRepository.findByEmail.mockResolvedValue(user);
@@ -243,7 +252,9 @@ describe('LoginUserUseCase', () => {
 
     await expect(
       useCase.execute('test@test.com', 'Password123!', context),
-    ).rejects.toThrow(DomainErrorFactory.invalidCredentials());
+    ).rejects.toMatchObject({
+      code: ErrorCode.INVALID_CREDENTIALS,
+    });
 
     expect(securityRepository.registerFailedAttempt)
       .toHaveBeenCalled();
@@ -252,13 +263,11 @@ describe('LoginUserUseCase', () => {
   });
 
   it('debe emitir LoginBlockedEvent si usuario está bloqueado', async () => {
-
     const user = createUser({
       blockedUntil: new Date(),
     });
 
     userRepository.findByEmail.mockResolvedValue(user);
-
     policy.validateAttempts.mockImplementation(() => {
       throw DomainErrorFactory.userBlocked();
     });
@@ -272,34 +281,31 @@ describe('LoginUserUseCase', () => {
     );
   });
 
-  it('debe crear dispositivo si no existe', async () => {
+  it('debe exigir challenge si el dispositivo es nuevo', async () => {
+    const user = createUser();
 
-    setupSuccessfulLogin();
-
+    userRepository.findByEmail.mockResolvedValue(user);
+    passwordHasher.verify.mockResolvedValue(true);
+    securityRepository.findByUserId.mockResolvedValue(
+      createSecurityProfile({
+        twoFactorEnabled: true,
+        twoFactorMethod: 'TOTP',
+      }),
+    );
     deviceRepository.getByUserIdAndFingerprint.mockResolvedValue(null);
 
-    deviceRepository.save.mockResolvedValue({
-      id: 'device-new',
-      isTrusted: true,
-      updateLastUsed: () => ({
-        id: 'device-new',
-        isTrusted: true,
+    await expect(
+      useCase.execute('test@test.com', 'Password123!', context),
+    ).rejects.toMatchObject({
+      code: ErrorCode.SECURITY_CHALLENGE_REQUIRED,
+      metadata: expect.objectContaining({
+        reason: LoginChallengeReason.NEW_DEVICE,
       }),
-    } as any);
-
-    await useCase.execute(
-      'test@test.com',
-      'Password123!',
-      context,
-    );
-
-    expect(deviceRepository.save).toHaveBeenCalled();
+    });
   });
 
   it('debe revocar sesión más antigua si hay demasiadas sesiones', async () => {
-
     setupSuccessfulLogin();
-
     sessionRepository.countActiveSessions.mockResolvedValue(3);
 
     await useCase.execute(
@@ -313,7 +319,6 @@ describe('LoginUserUseCase', () => {
   });
 
   it('debe liberar un bloqueo temporal expirado antes de validar estado', async () => {
-
     const expiredDate = new Date(Date.now() - 60_000);
     const user = createUser({
       status: UserStatus.BLOCKED,
@@ -326,7 +331,9 @@ describe('LoginUserUseCase', () => {
 
     await expect(
       useCase.execute('test@test.com', 'Password123!', context),
-    ).rejects.toThrow(DomainErrorFactory.invalidCredentials());
+    ).rejects.toMatchObject({
+      code: ErrorCode.INVALID_CREDENTIALS,
+    });
 
     expect(securityRepository.releaseTemporaryBlock)
       .toHaveBeenCalledWith(user.id);
@@ -334,8 +341,7 @@ describe('LoginUserUseCase', () => {
       .toHaveBeenCalledWith(UserStatus.ACTIVE);
   });
 
-  it('debe resetear intentos cuando la contraseña es correcta aunque luego falle el dispositivo', async () => {
-
+  it('debe resetear intentos cuando la contraseña es correcta aunque luego se exija challenge', async () => {
     const user = createUser({
       failedLoginAttempts: 2,
     });
@@ -350,19 +356,20 @@ describe('LoginUserUseCase', () => {
         isTrusted: false,
       }),
     } as any);
-    securityRepository.findByUserId.mockResolvedValue(null);
-    uow.execute.mockImplementation(async (fn: any) => fn({}));
-
-    policy.validateDevice.mockImplementation(() => {
-      throw DomainErrorFactory.deviceNotTrusted();
-    });
+    securityRepository.findByUserId.mockResolvedValue(
+      createSecurityProfile(),
+    );
 
     await expect(
       useCase.execute('test@test.com', 'Password123!', context),
-    ).rejects.toThrow(DomainErrorFactory.deviceNotTrusted());
+    ).rejects.toMatchObject({
+      code: ErrorCode.SECURITY_CHALLENGE_REQUIRED,
+      metadata: expect.objectContaining({
+        reason: LoginChallengeReason.UNTRUSTED_DEVICE,
+      }),
+    });
 
     expect(securityRepository.resetFailedLoginAttempts)
       .toHaveBeenCalledWith(user.id);
   });
-
 });

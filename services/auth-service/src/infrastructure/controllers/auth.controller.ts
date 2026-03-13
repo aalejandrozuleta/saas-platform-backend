@@ -59,7 +59,7 @@ export class AuthController {
     );
 
     return {
-      message: this.i18n.translate('REGISTER_SUCCESS', lang),
+      message: this.i18n.translate('auth.register_success', lang),
       data: {
         id: user.id,
         email: user.email.getValue(),
@@ -92,13 +92,19 @@ export class AuthController {
 
     res.cookie('refreshToken', result.refreshToken, {
       httpOnly: true,
-      secure: true,
+      secure: this.shouldUseSecureCookies(req),
       sameSite: 'strict',
       path: '/v1/auth/refresh',
     });
 
     return {
-      message: this.i18n.translate('LOGIN_SUCCESS', this.resolveLanguage(req)),
+      message: this.i18n.translate(
+        'auth.login_success',
+        this.resolveLanguage(req),
+      ),
+      data: {
+        token: result.token,
+      },
     };
   }
 
@@ -116,13 +122,19 @@ export class AuthController {
 
     res.cookie('refreshToken', result.refreshToken, {
       httpOnly: true,
-      secure: true,
+      secure: this.shouldUseSecureCookies(req),
       sameSite: 'strict',
       path: '/v1/auth/refresh',
     });
 
     return {
-      token: result.token,
+      message: this.i18n.translate(
+        'auth.refresh_success',
+        this.resolveLanguage(req),
+      ),
+      data: {
+        token: result.token,
+      },
     };
   }
 
@@ -161,5 +173,10 @@ export class AuthController {
   ): string | undefined {
     const value = req.headers[key.toLowerCase()];
     return typeof value === 'string' ? value : undefined;
+  }
+
+  private shouldUseSecureCookies(req: Request): boolean {
+    const forwardedProto = req.get('x-forwarded-proto');
+    return req.secure || forwardedProto === 'https';
   }
 }

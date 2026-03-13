@@ -85,4 +85,41 @@ describe('DomainErrorFactory', () => {
       expect(error.httpStatus).toBe(403);
     });
   });
+
+  describe('securityChallengeRequired', () => {
+    it('debe crear excepción SECURITY_CHALLENGE_REQUIRED', () => {
+      const error =
+        DomainErrorFactory.securityChallengeRequired({
+          challengeType: 'LOGIN_VERIFICATION',
+          reason: 'NEW_DEVICE',
+        });
+
+      expect(error.message).toBe(
+        'auth.security_challenge_required',
+      );
+      expect(error.code).toBe(
+        ErrorCode.SECURITY_CHALLENGE_REQUIRED,
+      );
+      expect(error.httpStatus).toBe(403);
+      expect(error.metadata).toEqual({
+        challengeType: 'LOGIN_VERIFICATION',
+        reason: 'NEW_DEVICE',
+      });
+    });
+  });
+
+  describe('invalidRefreshToken', () => {
+    it('debe crear excepción INVALID_REFRESH_TOKEN', () => {
+      const error =
+        DomainErrorFactory.invalidRefreshToken();
+
+      expect(error.message).toBe(
+        'auth.invalid_refresh_token',
+      );
+      expect(error.code).toBe(
+        ErrorCode.INVALID_REFRESH_TOKEN,
+      );
+      expect(error.httpStatus).toBe(401);
+    });
+  });
 });

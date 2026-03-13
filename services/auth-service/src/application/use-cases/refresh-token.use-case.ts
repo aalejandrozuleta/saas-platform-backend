@@ -2,11 +2,14 @@ import { Inject } from '@nestjs/common';
 import { TokenService } from '@application/ports/token.service.token';
 import { RefreshTokenRepository } from '@application/ports/refresh-token.repository';
 import { PasswordHasher } from '@application/ports/password-hasher.port';
+import { SessionCache } from '@application/ports/session-cache.port';
 import {
   TOKEN_SERVICE,
   PASSWORD_HASHER,
+  SESSION_CACHE
 } from '@domain/token/services.tokens';
 import { REFRESH_TOKEN_REPOSITORY } from '@domain/token/repositories.tokens';
+import { DomainErrorFactory } from '@domain/errors/domain-error.factory';
 
 export class RefreshTokenUseCase {
 
@@ -19,26 +22,37 @@ export class RefreshTokenUseCase {
 
     @Inject(PASSWORD_HASHER)
     private readonly passwordHasher: PasswordHasher,
+
+    @Inject(SESSION_CACHE)
+    private readonly sessionCache: SessionCache,
   ) { }
 
   async execute(refreshToken: string) {
+    if (!refreshToken) {
+      throw DomainErrorFactory.invalidRefreshToken();
+    }
 
-    const { jti } =
-      this.tokenService.verifyRefreshToken(refreshToken);
+    let jti: string;
+
+    try {
+      ({ jti } = this.tokenService.verifyRefreshToken(refreshToken));
+    } catch {
+      throw DomainErrorFactory.invalidRefreshToken();
+    }
 
     const stored =
       await this.refreshRepo.findByJti(jti);
 
     if (!stored) {
-      throw new Error('Invalid refresh token');
+      throw DomainErrorFactory.invalidRefreshToken();
     }
 
     if (stored.revokedAt) {
-      throw new Error('Refresh token revoked');
+      throw DomainErrorFactory.invalidRefreshToken();
     }
 
     if (stored.expiresAt < new Date()) {
-      throw new Error('Refresh token expired');
+      throw DomainErrorFactory.invalidRefreshToken();
     }
 
     const valid = await this.passwordHasher.verify(
@@ -47,7 +61,14 @@ export class RefreshTokenUseCase {
     );
 
     if (!valid) {
-      throw new Error('Invalid refresh token');
+      throw DomainErrorFactory.invalidRefreshToken();
+    }
+
+    const isSessionActive =
+      await this.sessionCache.isSessionActive(stored.sessionId);
+
+    if (!isSessionActive) {
+      throw DomainErrorFactory.invalidRefreshToken();
     }
 
     const accessToken =
@@ -60,7 +81,7 @@ export class RefreshTokenUseCase {
       this.tokenService.generateRefreshToken();
 
     await this.refreshRepo.revoke(
-      stored.id,
+      jti,
       newRefresh.jti,
     );
 

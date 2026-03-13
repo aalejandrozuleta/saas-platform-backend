@@ -101,10 +101,32 @@ export class SecurityPrismaRepository implements SecurityRepository {
     userId: string,
     tx?: PrismaClient
   ) {
-
-    return this.client(tx).userSecurity.findUnique({
-      where: { userId },
-      select: { trustedCountries: true },
+    const record = await this.client(tx).user.findUnique({
+      where: { id: userId },
+      select: {
+        security: {
+          select: {
+            trustedCountries: true,
+            twoFactorEnabled: true,
+            twoFactorMethod: true,
+          },
+        },
+        recoveryCodes: {
+          take: 1,
+          select: { id: true },
+        },
+      },
     });
+
+    if (!record) {
+      return null;
+    }
+
+    return {
+      trustedCountries: record.security?.trustedCountries ?? [],
+      twoFactorEnabled: record.security?.twoFactorEnabled ?? false,
+      twoFactorMethod: record.security?.twoFactorMethod ?? undefined,
+      hasRecoveryCodes: record.recoveryCodes.length > 0,
+    };
   }
 }

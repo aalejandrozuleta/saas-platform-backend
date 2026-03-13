@@ -5,14 +5,18 @@ import { ApiProperty } from '@nestjs/swagger';
  */
 export class LoginUserResponseDto {
   @ApiProperty({
-    example: 'jwt-access-token',
-    description: 'Access token JWT',
+    example: 'Inicio de sesion exitoso',
+    description: 'Mensaje de login',
   })
-  token!: string;
+  message!: string;
 
   @ApiProperty({
-    example: 'refresh-token-uuid',
-    description: 'Refresh token',
+    example: {
+      token: 'jwt-access-token',
+    },
+    description: 'Datos devueltos al iniciar sesión',
   })
-  refreshToken!: string;
+  data!: {
+    token: string;
+  };
 }

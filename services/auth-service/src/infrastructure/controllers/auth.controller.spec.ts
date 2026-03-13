@@ -9,13 +9,6 @@ import { EmailVO } from '@domain/value-objects/email.vo';
 
 import { AuthController } from './auth.controller';
 
-/**
- * Tests unitarios del AuthController.
- *
- * - No levanta servidor HTTP.
- * - No usa supertest.
- * - Aísla completamente el controller.
- */
 describe('AuthController', () => {
   let controller: AuthController;
   let registerUserUseCase: jest.Mocked<RegisterUserUseCase>;
@@ -48,7 +41,7 @@ describe('AuthController', () => {
         {
           provide: I18nService,
           useValue: {
-            translate: jest.fn(),
+            translate: jest.fn((key: string) => key),
           },
         },
       ],
@@ -62,9 +55,6 @@ describe('AuthController', () => {
   });
 
   it('debe registrar usuario y devolver respuesta en español', async () => {
-    expect(loginUserUseCase).toBeDefined();
-    expect(refreshTokenUseCase).toBeDefined();
-
     const user = User.create({
       id: 'uuid-test',
       email: EmailVO.create('test@example.com'),
@@ -104,7 +94,7 @@ describe('AuthController', () => {
     );
 
     expect(i18n.translate).toHaveBeenCalledWith(
-      'REGISTER_SUCCESS',
+      'auth.register_success',
       'es',
     );
 
@@ -113,6 +103,95 @@ describe('AuthController', () => {
       data: {
         id: 'uuid-test',
         email: 'test@example.com',
+      },
+    });
+  });
+
+  it('debe devolver access token y cookie en login', async () => {
+    loginUserUseCase.execute.mockResolvedValue({
+      token: 'access-token',
+      refreshToken: 'refresh-token',
+    });
+    i18n.translate.mockReturnValue('Inicio de sesión exitoso');
+
+    const req: any = {
+      ip: '127.0.0.1',
+      secure: false,
+      headers: {
+        'accept-language': 'es',
+        'x-country': 'CO',
+        'x-device-fingerprint': 'device-123',
+        'x-forwarded-proto': 'https',
+      },
+      get: (key: string) => req.headers[key],
+    };
+
+    const res: any = {
+      cookie: jest.fn(),
+    };
+
+    const result = await controller.login(
+      {
+        email: 'test@example.com',
+        password: 'Str0ng-P@ssword',
+      },
+      req,
+      res,
+    );
+
+    expect(res.cookie).toHaveBeenCalledWith(
+      'refreshToken',
+      'refresh-token',
+      expect.objectContaining({
+        secure: true,
+      }),
+    );
+    expect(result).toEqual({
+      message: 'Inicio de sesión exitoso',
+      data: {
+        token: 'access-token',
+      },
+    });
+  });
+
+  it('debe renovar token y devolver cookie actualizada', async () => {
+    refreshTokenUseCase.execute.mockResolvedValue({
+      token: 'new-access-token',
+      refreshToken: 'new-refresh-token',
+    });
+    i18n.translate.mockReturnValue('Token renovado correctamente');
+
+    const req: any = {
+      secure: true,
+      cookies: {
+        refreshToken: 'old-refresh-token',
+      },
+      headers: {
+        'accept-language': 'es',
+      },
+      get: (key: string) => req.headers[key],
+    };
+
+    const res: any = {
+      cookie: jest.fn(),
+    };
+
+    const result = await controller.refresh(req, res);
+
+    expect(refreshTokenUseCase.execute).toHaveBeenCalledWith(
+      'old-refresh-token',
+    );
+    expect(res.cookie).toHaveBeenCalledWith(
+      'refreshToken',
+      'new-refresh-token',
+      expect.objectContaining({
+        secure: true,
+      }),
+    );
+    expect(result).toEqual({
+      message: 'Token renovado correctamente',
+      data: {
+        token: 'new-access-token',
       },
     });
   });

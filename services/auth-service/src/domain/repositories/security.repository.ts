@@ -1,5 +1,12 @@
 import { Prisma } from '@prisma/client';
 
+export interface LoginSecurityProfile {
+  trustedCountries: string[];
+  twoFactorEnabled: boolean;
+  twoFactorMethod?: 'TOTP' | 'EMAIL' | 'SMS';
+  hasRecoveryCodes: boolean;
+}
+
 /**
  * Repositorio de seguridad del usuario.
  */
@@ -39,7 +46,5 @@ export interface SecurityRepository {
   findByUserId(
     userId: string,
     tx?: Prisma.TransactionClient,
-  ): Promise<{
-    trustedCountries: string[];
-  } | null>;
+  ): Promise<LoginSecurityProfile | null>;
 }

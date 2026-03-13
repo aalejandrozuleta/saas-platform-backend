@@ -6,11 +6,11 @@ import { I18nModule } from '@infrastructure/i18n/i18n.module';
 import { MongoModule } from '@infrastructure/persistence/mongo/mongo.module';
 import { ConfigModule } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
-import { GlobalExceptionFilter, RedisModule } from '@saas/shared';
+import { GlobalExceptionFilter } from '@saas/shared';
 import { APP_FILTER } from '@nestjs/core';
 import { ScheduleModule } from '@nestjs/schedule';
 import { MaintenanceModule } from '@infrastructure/maintenance/maintenance.module';
-import { EnvService } from '@config/env/env.service';
+import { RedisModule } from '@infrastructure/persistence/cache/redis.module';
 
 
 const APP_FILTER_TOKEN = APP_FILTER;
@@ -25,16 +25,7 @@ const APP_FILTER_TOKEN = APP_FILTER;
     MetricsModule,
     AuthModule,
     I18nModule,
-
-
-    RedisModule.forRootAsync({
-      inject: [EnvService],
-      useFactory: (envService: EnvService) => ({
-        host: envService.get('REDIS_HOST'),
-        port: envService.get('REDIS_PORT'),
-        password: envService.get('REDIS_PASSWORD'),
-      }),
-    }),
+    RedisModule
   ],
   providers: [
     {

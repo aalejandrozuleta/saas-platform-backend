@@ -22,7 +22,7 @@ import {
   SESSION_CACHE,
 } from '@domain/token/services.tokens';
 import { UserRepository } from '@domain/repositories/user.repository';
-import { SecurityRepository } from '@domain/repositories/security.repository';
+import { SecurityRepository,LoginSecurityProfile } from '@domain/repositories/security.repository';
 import { DeviceRepository } from '@domain/repositories/device.repository';
 import { SessionRepository } from '@application/ports/session.repository';
 import { RefreshTokenRepository } from '@application/ports/refresh-token.repository';
@@ -38,6 +38,8 @@ import { Clock } from '@application/ports/clock.port';
 import { DomainErrorFactory } from '@domain/errors/domain-error.factory';
 import { SessionCache } from '@application/ports/session-cache.port';
 import { EnvService } from '@config/env/env.service';
+import { LoginSecurityChallengeService } from '@application/security/login-security-challenge.service';
+import { LoginChallengeReason } from '@application/security/login-challenge.types';
 import { ErrorCode } from '@saas/shared';
 
 /**
@@ -92,6 +94,7 @@ export class LoginUserUseCase {
     private readonly sessionCache: SessionCache,
 
     private readonly envService: EnvService,
+    private readonly loginSecurityChallengeService: LoginSecurityChallengeService,
 
   ) { }
 
@@ -110,7 +113,16 @@ export class LoginUserUseCase {
 
     await this.validatePassword(user, password, context);
 
-    const result = await this.performLogin(user, context);
+    const securityProfile =
+      await this.securityRepository.findByUserId(user.id);
+
+    const device = await this.resolveLoginDevice(
+      user,
+      securityProfile,
+      context,
+    );
+
+    const result = await this.performLogin(user, device, context);
 
     this.eventBus.publish(
       new LoginSucceededEvent(
@@ -239,49 +251,14 @@ export class LoginUserUseCase {
    */
   private async performLogin(
     user: User,
+    device: Device,
     context: LoginContext,
   ) {
 
     return this.uow.execute(async (tx) => {
-      if (!context.deviceFingerprint) {
-        throw DomainErrorFactory.invalidCredentials();
-      }
-      let device = await this.deviceRepository.getByUserIdAndFingerprint(
-        user.id,
-        context.deviceFingerprint,
-        tx,
-      );
-
-      if (!device) {
-
-        device = Device.create({
-          id: randomUUID(),
-          userId: user.id,
-          fingerprint: context.deviceFingerprint,
-          ipAddress: context.ip,
-          country: context.country,
-          isTrusted: true,
-          createdAt: this.clock.now(),
-        });
-
-        device = await this.deviceRepository.save(device, tx);
-      }
-
       device = device.updateLastUsed();
 
       await this.deviceRepository.save(device, tx);
-
-      this.policy.validateDevice(device.isTrusted);
-
-      const security = await this.securityRepository.findByUserId(
-        user.id,
-        tx,
-      );
-
-      this.policy.validateCountry(
-        security?.trustedCountries,
-        context.country,
-      );
 
       const activeSessions =
         await this.sessionRepository.countActiveSessions(
@@ -339,5 +316,49 @@ export class LoginUserUseCase {
         sessionId: session.id,
       };
     });
+  }
+
+  private async resolveLoginDevice(
+    user: User,
+    securityProfile: LoginSecurityProfile | null,
+    context: LoginContext,
+  ): Promise<Device> {
+    const device = await this.deviceRepository.getByUserIdAndFingerprint(
+      user.id,
+      context.deviceFingerprint!,
+    );
+
+    if (!device) {
+      throw this.loginSecurityChallengeService.createChallenge(
+        user,
+        securityProfile,
+        context,
+        LoginChallengeReason.NEW_DEVICE,
+      );
+    }
+
+    if (!device.isTrusted) {
+      throw this.loginSecurityChallengeService.createChallenge(
+        user,
+        securityProfile,
+        context,
+        LoginChallengeReason.UNTRUSTED_DEVICE,
+      );
+    }
+
+    if (
+      securityProfile?.trustedCountries.length &&
+      context.country &&
+      !securityProfile.trustedCountries.includes(context.country)
+    ) {
+      throw this.loginSecurityChallengeService.createChallenge(
+        user,
+        securityProfile,
+        context,
+        LoginChallengeReason.UNTRUSTED_COUNTRY,
+      );
+    }
+
+    return device;
   }
 }

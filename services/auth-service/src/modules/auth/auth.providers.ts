@@ -13,6 +13,7 @@ import { LoginPolicy } from '@domain/policies/login.policy';
 import { JwtTokenService } from '@infrastructure/security/jwt-token.service';
 import { RefreshTokenPrismaRepository } from '@infrastructure/persistence/prisma/refresh-token-prisma.repository';
 import { RedisSessionCacheService } from '@infrastructure/persistence/cache/redis-session-cache.service';
+import { LoginSecurityChallengeService } from '@application/security/login-security-challenge.service';
 
 /**
  * Providers del módulo Auth
@@ -31,5 +32,5 @@ export const authProviders: Provider[] = [
   {provide: SESSION_CACHE,useClass: RedisSessionCacheService,},
 
   LoginPolicy,
+  LoginSecurityChallengeService,
 ];
-

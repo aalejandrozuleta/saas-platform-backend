@@ -54,4 +54,23 @@ export class DomainErrorFactory {
       403,
     );
   }
+
+  static securityChallengeRequired(
+    metadata: Record<string, unknown>,
+  ): DomainException {
+    return DomainException.create(
+      'auth.security_challenge_required',
+      ErrorCode.SECURITY_CHALLENGE_REQUIRED,
+      403,
+      metadata,
+    );
+  }
+
+  static invalidRefreshToken(): DomainException {
+    return DomainException.create(
+      'auth.invalid_refresh_token',
+      ErrorCode.INVALID_REFRESH_TOKEN,
+      401,
+    );
+  }
 }
