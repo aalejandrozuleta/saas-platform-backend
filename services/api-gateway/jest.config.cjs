@@ -7,7 +7,9 @@ module.exports = {
   displayName: 'api-gateway',
   rootDir: '.',
 
-    moduleNameMapper: {
+  moduleNameMapper: {
+    '^@saas/shared$': '<rootDir>/../../shared/index.ts',
+    '^@saas/shared/(.*)$': '<rootDir>/../../shared/$1',
     '^@infrastructure/(.*)$': '<rootDir>/src/infrastructure/$1',
     '^@modules/(.*)$': '<rootDir>/src/modules/$1',
     '^@config/(.*)$': '<rootDir>/src/config/$1',
