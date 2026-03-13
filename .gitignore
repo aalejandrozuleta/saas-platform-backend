@@ -102,3 +102,4 @@ nest-cli.json.bak
 #############################################
 .sonar/
 .scannerwork/
+.sonarlint
