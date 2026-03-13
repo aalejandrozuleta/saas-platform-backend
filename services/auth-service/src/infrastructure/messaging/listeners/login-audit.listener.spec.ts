@@ -1,4 +1,4 @@
-import { LoginAuditService } from '@application/audit/login-audit.service';
+import { type LoginAuditService } from '@application/audit/login-audit.service';
 import { LoginSucceededEvent } from '@application/events/login/login-succeeded.event';
 
 import { LoginSucceededAuditListener } from './login-audit.listener';

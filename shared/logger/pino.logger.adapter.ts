@@ -1,7 +1,7 @@
-import pino, { Logger as PinoLogger } from 'pino';
+import pino, { type Logger as PinoLogger } from 'pino';
 
-import { PlatformLogger } from './logger.interface';
-import { LoggerOptions } from './logger.types';
+import { type PlatformLogger } from './logger.interface';
+import { type LoggerOptions } from './logger.types';
 import { createPinoConfig } from './pino.config';
 
 /**

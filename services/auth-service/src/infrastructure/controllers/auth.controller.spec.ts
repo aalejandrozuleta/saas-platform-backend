@@ -1,9 +1,9 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { Test, type TestingModule } from '@nestjs/testing';
 import { RegisterUserUseCase } from '@application/use-cases/register-user.use-case';
 import { LoginUserUseCase } from '@application/use-cases/login-user.use-case';
 import { RefreshTokenUseCase } from '@application/use-cases/refresh-token.use-case';
 import { I18nService } from '@saas/shared';
-import { RegisterUserDto } from '@application/dto/register/register-user.dto';
+import { type RegisterUserDto } from '@application/dto/register/register-user.dto';
 import { User } from '@domain/entities/user/user.entity';
 import { EmailVO } from '@domain/value-objects/email.vo';
 

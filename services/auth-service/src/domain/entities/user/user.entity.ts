@@ -1,7 +1,7 @@
-import { EmailVO } from '@domain/value-objects/email.vo';
+import { type EmailVO } from '@domain/value-objects/email.vo';
 import { UserStatus } from '@domain/enums/user-status.enum';
 
-import { UserProps } from './user.props';
+import { type UserProps } from './user.props';
 
 /**
  * Entidad de dominio Usuario

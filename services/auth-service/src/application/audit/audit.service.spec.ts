@@ -1,4 +1,4 @@
-import { AuditEventRepository } from '@domain/audit/audit-event.repository';
+import { type AuditEventRepository } from '@domain/audit/audit-event.repository';
 import { AuditCategory } from '@domain/audit/audit-category.enum';
 
 import { AuditService } from './audit.service';

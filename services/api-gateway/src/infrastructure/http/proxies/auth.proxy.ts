@@ -6,7 +6,6 @@ import { EnvService } from '@config/env/env.service';
 import { ResilientHttpClient } from '../client/resilient-http.client';
 import { forwardHeaders } from '../utils/header-forwarder.util';
 
-
 @Injectable()
 export class AuthProxy {
 
@@ -43,15 +42,23 @@ export class AuthProxy {
         data: response.data,
         cookies: response.headers['set-cookie'],
       };
-    } catch (error: any) {
 
-      if (error?.code === 'EOPENBREAKER') {
+    } catch (error: unknown) {
+
+      // Manejo del circuit breaker
+      if (
+        typeof error === 'object' &&
+        error !== null &&
+        'code' in error &&
+        (error as { code?: string }).code === 'EOPENBREAKER'
+      ) {
         throw new HttpException(
           'Auth service temporarily unavailable',
           HttpStatus.SERVICE_UNAVAILABLE,
         );
       }
 
+      // Manejo de errores Axios
       if (error instanceof AxiosError) {
 
         if (error.response) {

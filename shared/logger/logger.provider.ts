@@ -1,4 +1,4 @@
-import { Provider } from '@nestjs/common';
+import { type Provider } from '@nestjs/common';
 
 import { PLATFORM_LOGGER } from './logger.token';
 import { PinoLoggerAdapter } from './pino.logger.adapter';

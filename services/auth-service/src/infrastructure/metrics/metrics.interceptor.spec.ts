@@ -1,8 +1,8 @@
 import { of, lastValueFrom } from 'rxjs';
-import { ExecutionContext, CallHandler } from '@nestjs/common';
+import { type ExecutionContext, type CallHandler } from '@nestjs/common';
 
 import { MetricsInterceptor } from './metrics.interceptor';
-import { MetricsService } from './metrics.service';
+import { type MetricsService } from './metrics.service';
 
 describe('MetricsInterceptor', () => {
   let interceptor: MetricsInterceptor;

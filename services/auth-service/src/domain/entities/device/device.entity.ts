@@ -1,4 +1,4 @@
-import { DeviceProps } from './device.props';
+import type { DeviceProps } from './device.props';
 
 /**
  * Entidad de dominio Device

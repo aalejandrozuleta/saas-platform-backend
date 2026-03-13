@@ -1,10 +1,10 @@
-import { Model } from 'mongoose';
+import { type Model } from 'mongoose';
 import { AuditCategory } from '@domain/audit/audit-category.enum';
-import { AuditEvent } from '@domain/audit/audit-event.type';
+import { type AuditEvent } from '@domain/audit/audit-event.type';
 import { AuthAuditEvent } from '@application/audit/auth-events.enum';
 
 import { AuditEventMongoRepository } from './audit-event-mongo.repository';
-import { AuditEventDocument } from './mongo.service';
+import { type AuditEventDocument } from './mongo.service';
 
 /**
  * Tests unitarios del AuditEventMongoRepository.

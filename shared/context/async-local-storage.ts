@@ -1,6 +1,6 @@
 import { AsyncLocalStorage } from 'node:async_hooks';
 
-import { RequestContext } from './request-context.interface';
+import { type RequestContext } from './request-context.interface';
 
 /**
  * Almacenamiento de contexto por request usando AsyncLocalStorage.

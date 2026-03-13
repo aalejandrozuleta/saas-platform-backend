@@ -1,7 +1,7 @@
-import { Prisma } from '@prisma/client';
+import { type Prisma } from '@prisma/client';
 
 import { PrismaUnitOfWork } from './prisma-unit-of-work';
-import { PrismaService } from './prisma.service';
+import { type PrismaService } from './prisma.service';
 
 describe('PrismaUnitOfWork', () => {
   let unitOfWork: PrismaUnitOfWork;

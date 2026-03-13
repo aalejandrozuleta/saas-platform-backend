@@ -1,4 +1,4 @@
-import { LoggerOptions } from './logger.types';
+import { type LoggerOptions } from './logger.types';
 
 /**
  * Configuración base para Pino.

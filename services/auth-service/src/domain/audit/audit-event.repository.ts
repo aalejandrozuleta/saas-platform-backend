@@ -1,4 +1,4 @@
-import { AuditEvent } from './audit-event.type';
+import { type AuditEvent } from './audit-event.type';
 
 /**
  * Puerto de dominio para persistencia de auditoría.

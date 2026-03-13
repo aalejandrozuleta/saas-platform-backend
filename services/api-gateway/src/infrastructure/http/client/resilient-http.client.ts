@@ -1,6 +1,7 @@
 import axios, {
   AxiosInstance,
   AxiosRequestConfig,
+  AxiosResponse,
 } from 'axios';
 import CircuitBreaker from 'opossum';
 import { Injectable } from '@nestjs/common';
@@ -9,7 +10,7 @@ import { Injectable } from '@nestjs/common';
 export class ResilientHttpClient {
 
   private readonly client: AxiosInstance;
-  private readonly breaker: CircuitBreaker<[AxiosRequestConfig], any>;
+  private readonly breaker: CircuitBreaker<[AxiosRequestConfig], AxiosResponse>;
 
   constructor(
     baseURL: string,

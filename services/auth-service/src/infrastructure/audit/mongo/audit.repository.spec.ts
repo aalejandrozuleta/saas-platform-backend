@@ -1,9 +1,9 @@
-import { Model } from 'mongoose';
-import { AuditEvent } from '@domain/audit/audit-event.type';
+import { type Model } from 'mongoose';
+import { type AuditEvent } from '@domain/audit/audit-event.type';
 import { AuditCategory } from '@domain/audit/audit-category.enum';
 
 
-import { AuditEventDocument } from './audit.schema';
+import { type AuditEventDocument } from './audit.schema';
 import { MongoAuditEventRepository } from './audit.repository';
 
 describe('MongoAuditEventRepository', () => {

@@ -1,5 +1,5 @@
-import { User } from '../entities/user/user.entity';
-import { EmailVO } from '../value-objects/email.vo';
+import { type User } from '../entities/user/user.entity';
+import { type EmailVO } from '../value-objects/email.vo';
 
 /**
  * Contrato de persistencia de usuarios

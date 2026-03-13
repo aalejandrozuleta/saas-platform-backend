@@ -1,4 +1,4 @@
-import { AuditCategory } from './audit-category.enum';
+import { type AuditCategory } from './audit-category.enum';
 
 export type AuditEvent = {
   userId?: string ;

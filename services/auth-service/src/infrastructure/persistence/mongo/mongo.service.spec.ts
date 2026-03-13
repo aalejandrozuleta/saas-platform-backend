@@ -1,7 +1,7 @@
 import { model } from "mongoose";
 import { AuditCategory } from "@domain/audit/audit-category.enum";
 
-import { AuditEventDocument, AuditEventSchema } from "./mongo.service";
+import { type AuditEventDocument, AuditEventSchema } from "./mongo.service";
 
 
 

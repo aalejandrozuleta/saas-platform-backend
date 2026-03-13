@@ -1,4 +1,4 @@
-import { PasswordHasher } from '@application/ports/password-hasher.port';
+import { type PasswordHasher } from '@application/ports/password-hasher.port';
 import * as argon2 from 'argon2';
 
 /**

@@ -1,4 +1,4 @@
-import { ApiResponse } from './response.interface';
+import { type ApiResponse } from './response.interface';
 
 /**
  * Construye una respuesta exitosa estándar.

@@ -1,4 +1,4 @@
-import { AuditLogger } from '@application/ports/audit-logger.port';
+import { type AuditLogger } from '@application/ports/audit-logger.port';
 import { AuditCategory } from '@domain/audit/audit-category.enum';
 import { LoginContext } from '@domain/value-objects/login-context.vo';
 

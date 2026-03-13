@@ -1,8 +1,8 @@
-import { HttpException, HttpStatus, ArgumentsHost } from '@nestjs/common';
+import { HttpException, HttpStatus, type ArgumentsHost } from '@nestjs/common';
 import type { Request, Response } from 'express';
 
 import { BaseException, ErrorCode } from '../errors';
-import { I18nService } from '../i18n';
+import { type I18nService } from '../i18n';
 
 import { GlobalExceptionFilter } from './global-exception.filter';
 

@@ -9,13 +9,10 @@ export default [
   {
     ignores: [
       '**/node_modules/**',
-      '**/node_modules/**/*',
       '**/dist/**',
-      '**/dist/**/*',
       '**/.turbo/**',
       '**/.next/**',
       '**/coverage/**',
-      '**/coverage/**/*',
       '**/lcov-report/**',
       '**/*.d.ts',
     ],
@@ -70,8 +67,8 @@ export default [
 
       'unused-imports/no-unused-imports': 'error',
 
-      'curly': ['error', 'all'],
-      'eqeqeq': ['error', 'always', { null: 'ignore' }],
+      curly: ['error', 'all'],
+      eqeqeq: ['error', 'always', { null: 'ignore' }],
       'no-console': ['warn', { allow: ['warn', 'error'] }],
       'no-debugger': 'error',
       'no-implicit-coercion': 'error',
@@ -109,6 +106,30 @@ export default [
           ],
         },
       ],
+    },
+  },
+
+  /*
+   TEST FILES
+   relajamos reglas para tests
+  */
+  {
+    files: ['**/*.spec.ts', '**/*.test.ts'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-unused-vars': 'off',
+      'no-console': 'off',
+    },
+  },
+
+  /*
+   SHARED PACKAGE
+   utilidades compartidas pueden usar any
+  */
+  {
+    files: ['shared/**/*.ts'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
     },
   },
 

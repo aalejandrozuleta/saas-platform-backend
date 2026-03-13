@@ -1,10 +1,10 @@
 import { User } from '@domain/entities/user/user.entity';
 import { AuthAuditEvent } from '@application/audit/auth-events.enum';
-import { PlatformLogger } from '@saas/shared';
-import { UserRepository } from '@domain/repositories/user.repository';
-import { AuditLogger } from '@application/ports/audit-logger.port';
-import { PasswordHasher } from '@application/ports/password-hasher.port';
-import { DeviceRepository } from '@domain/repositories/device.repository';
+import { type PlatformLogger } from '@saas/shared';
+import { type UserRepository } from '@domain/repositories/user.repository';
+import { type AuditLogger } from '@application/ports/audit-logger.port';
+import { type PasswordHasher } from '@application/ports/password-hasher.port';
+import { type DeviceRepository } from '@domain/repositories/device.repository';
 
 import { RegisterUserUseCase } from './register-user.use-case';
 

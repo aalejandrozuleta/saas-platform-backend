@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 
 import { sign } from 'jsonwebtoken';
-import { EnvService } from '@config/env/env.service';
+import { type EnvService } from '@config/env/env.service';
 
 import { JwtTokenService } from './jwt-token.service';
 
