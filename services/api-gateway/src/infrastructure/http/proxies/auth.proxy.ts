@@ -1,8 +1,14 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import type { Request } from 'express';
 import { Method, AxiosRequestConfig, AxiosError } from 'axios';
+import {
+  ErrorCode,
+  getErrorCodeFromHttpStatus,
+  isApiErrorResponse,
+} from '@saas/shared';
 import { EnvService } from '@config/env/env.service';
 
+import { buildGatewayErrorResponse } from '../../errors/gateway-error-response.util';
 import { ResilientHttpClient } from '../client/resilient-http.client';
 import { forwardHeaders } from '../utils/header-forwarder.util';
 
@@ -27,7 +33,7 @@ export class AuthProxy {
   async forward<T>(
     req: Request,
     path: string,
-  ): Promise<{ data: T; cookies?: string[] }> {
+  ): Promise<{ body: T; cookies?: string[] }> {
 
     try {
       const config: AxiosRequestConfig = {
@@ -40,14 +46,19 @@ export class AuthProxy {
       const response = await this.client.request(config);
 
       return {
-        data: response.data,
+        body: response.data,
         cookies: response.headers['set-cookie'],
       };
     } catch (error: any) {
 
       if (error?.code === 'EOPENBREAKER') {
         throw new HttpException(
-          'Auth service temporarily unavailable',
+          buildGatewayErrorResponse(
+            req,
+            HttpStatus.SERVICE_UNAVAILABLE,
+            ErrorCode.SERVICE_UNAVAILABLE,
+            'common.auth_service_temporarily_unavailable',
+          ),
           HttpStatus.SERVICE_UNAVAILABLE,
         );
       }
@@ -55,22 +66,47 @@ export class AuthProxy {
       if (error instanceof AxiosError) {
 
         if (error.response) {
+          if (isApiErrorResponse(error.response.data)) {
+            throw new HttpException(
+              error.response.data,
+              error.response.status,
+            );
+          }
+
           throw new HttpException(
-            error.response.data ?? { message: 'Upstream error' },
+            buildGatewayErrorResponse(
+              req,
+              error.response.status,
+              getErrorCodeFromHttpStatus(error.response.status),
+              'common.upstream_error',
+              {
+                details: error.response.data,
+              },
+            ),
             error.response.status,
           );
         }
 
         if (error.request) {
           throw new HttpException(
-            'Auth service unavailable',
+            buildGatewayErrorResponse(
+              req,
+              HttpStatus.SERVICE_UNAVAILABLE,
+              ErrorCode.SERVICE_UNAVAILABLE,
+              'common.auth_service_unavailable',
+            ),
             HttpStatus.SERVICE_UNAVAILABLE,
           );
         }
       }
 
       throw new HttpException(
-        'Gateway upstream failure',
+        buildGatewayErrorResponse(
+          req,
+          HttpStatus.BAD_GATEWAY,
+          ErrorCode.BAD_GATEWAY,
+          'common.gateway_upstream_failure',
+        ),
         HttpStatus.BAD_GATEWAY,
       );
     }

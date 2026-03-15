@@ -1,0 +1,4 @@
+{
+  "common.internal_error": "An internal error occurred. Please try again.",
+  "common.validation_error": "The request contains invalid data"
+}

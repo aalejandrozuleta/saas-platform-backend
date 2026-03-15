@@ -1,0 +1,13 @@
+{
+  "common.internal_error": "Ocurri\u00f3 un error interno. Int\u00e9ntalo de nuevo.",
+  "common.validation_error": "La solicitud contiene datos inv\u00e1lidos",
+  "common.method_not_allowed": "El m\u00e9todo HTTP no est\u00e1 permitido para este recurso",
+  "common.unsupported_media_type": "El contenido debe enviarse como application/json",
+  "common.invalid_request_path": "La ruta solicitada no es v\u00e1lida",
+  "common.malformed_url": "La URL enviada no tiene un formato v\u00e1lido",
+  "common.gateway_timeout": "El gateway agot\u00f3 el tiempo de espera al procesar la solicitud",
+  "common.auth_service_temporarily_unavailable": "El servicio de autenticaci\u00f3n est\u00e1 temporalmente no disponible",
+  "common.auth_service_unavailable": "No fue posible contactar el servicio de autenticaci\u00f3n",
+  "common.gateway_upstream_failure": "Ocurri\u00f3 un error al comunicarse con un servicio interno",
+  "common.upstream_error": "El servicio interno rechaz\u00f3 la solicitud"
+}

@@ -1,0 +1,13 @@
+{
+  "common.internal_error": "An internal error occurred. Please try again.",
+  "common.validation_error": "The request contains invalid data",
+  "common.method_not_allowed": "The HTTP method is not allowed for this resource",
+  "common.unsupported_media_type": "Requests must use application/json",
+  "common.invalid_request_path": "The requested path is invalid",
+  "common.malformed_url": "The provided URL is malformed",
+  "common.gateway_timeout": "The gateway timed out while processing the request",
+  "common.auth_service_temporarily_unavailable": "The authentication service is temporarily unavailable",
+  "common.auth_service_unavailable": "The authentication service could not be reached",
+  "common.gateway_upstream_failure": "An error occurred while communicating with an internal service",
+  "common.upstream_error": "The internal service rejected the request"
+}

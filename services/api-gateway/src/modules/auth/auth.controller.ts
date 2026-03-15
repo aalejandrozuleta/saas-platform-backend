@@ -7,7 +7,7 @@ import {
   Res,
 } from '@nestjs/common';
 import type { Request, Response } from 'express';
-import { PublicRoute, successResponse } from '@saas/shared';
+import { PublicRoute } from '@saas/shared';
 import { AuthProxy } from '@infrastructure/http/proxies/auth.proxy';
 
 /**
@@ -30,8 +30,9 @@ export class AuthController {
   @Post('register')
   async register(@Req() req: Request) {
     this.prepareRequest(req);
-    const data = await this.authProxy.forward(req, '/register');
-    return successResponse(data);
+    const { body } = await this.authProxy.forward(req, '/register');
+    
+    return body;
   }
 
   /**
@@ -52,7 +53,7 @@ export class AuthController {
       res.setHeader('set-cookie', result.cookies);
     }
 
-    return successResponse(result.data);
+    return result.body;
   }
 
   /**
@@ -72,7 +73,7 @@ export class AuthController {
       res.setHeader('set-cookie', result.cookies);
     }
 
-    return successResponse(result.data);
+    return result.body;
   }
 
   /**
@@ -82,8 +83,8 @@ export class AuthController {
   async logout(@Req() req: Request) {
     this.prepareRequest(req);
 
-    const data = await this.authProxy.forward(req, '/logout');
-    return successResponse(data);
+    const { body } = await this.authProxy.forward(req, '/logout');
+    return body;
   }
 
   /**

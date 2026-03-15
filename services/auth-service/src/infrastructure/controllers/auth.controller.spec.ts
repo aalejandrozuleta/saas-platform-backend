@@ -42,6 +42,9 @@ describe('AuthController', () => {
           provide: I18nService,
           useValue: {
             translate: jest.fn((key: string) => key),
+            resolveLanguage: jest.fn((lang?: string) =>
+              lang?.startsWith('es') ? 'es' : 'en',
+            ),
           },
         },
       ],
@@ -99,6 +102,7 @@ describe('AuthController', () => {
     );
 
     expect(result).toEqual({
+      success: true,
       message: 'Usuario registrado correctamente',
       data: {
         id: 'uuid-test',
@@ -147,6 +151,7 @@ describe('AuthController', () => {
       }),
     );
     expect(result).toEqual({
+      success: true,
       message: 'Inicio de sesión exitoso',
       data: {
         token: 'access-token',
@@ -189,6 +194,7 @@ describe('AuthController', () => {
       }),
     );
     expect(result).toEqual({
+      success: true,
       message: 'Token renovado correctamente',
       data: {
         token: 'new-access-token',

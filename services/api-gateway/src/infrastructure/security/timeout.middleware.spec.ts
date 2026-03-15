@@ -1,4 +1,5 @@
 import type { Request, Response, NextFunction } from 'express';
+import { ErrorCode } from '@saas/shared';
 
 import { timeoutMiddleware } from './timeout.middleware';
 
@@ -10,7 +11,12 @@ describe('timeoutMiddleware', () => {
   let timeoutCallback: (() => void) | undefined;
 
   beforeEach(() => {
-    req = {};
+    req = {
+      url: '/auth/login',
+      headers: {
+        'accept-language': 'es',
+      },
+    };
 
     res = {
       headersSent: false,
@@ -46,9 +52,21 @@ describe('timeoutMiddleware', () => {
     timeoutCallback?.();
 
     expect(res.status).toHaveBeenCalledWith(504);
-    expect(res.json).toHaveBeenCalledWith({
-      error: 'Gateway Timeout',
-    });
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: false,
+        error: expect.objectContaining({
+          code: ErrorCode.GATEWAY_TIMEOUT,
+          message:
+            'El gateway agotó el tiempo de espera al procesar la solicitud',
+        }),
+        meta: expect.objectContaining({
+          path: '/auth/login',
+          statusCode: 504,
+          lang: 'es',
+        }),
+      }),
+    );
   });
 
   it('no debe responder si headers ya fueron enviados', () => {

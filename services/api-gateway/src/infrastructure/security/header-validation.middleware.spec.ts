@@ -1,4 +1,5 @@
 import type { Request, Response, NextFunction } from 'express';
+import { ErrorCode } from '@saas/shared';
 
 import { headerValidationMiddleware } from './header-validation.middleware';
 
@@ -8,7 +9,12 @@ describe('headerValidationMiddleware', () => {
   let next: jest.Mock;
 
   beforeEach(() => {
-    req = {};
+    req = {
+      url: '/auth/login',
+      headers: {
+        'accept-language': 'es',
+      },
+    };
     res = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
@@ -57,9 +63,21 @@ describe('headerValidationMiddleware', () => {
     );
 
     expect(res.status).toHaveBeenCalledWith(415);
-    expect(res.json).toHaveBeenCalledWith({
-      error: 'Unsupported Media Type. Expected application/json',
-    });
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: false,
+        error: expect.objectContaining({
+          code: ErrorCode.UNSUPPORTED_MEDIA_TYPE,
+          message:
+            'El contenido debe enviarse como application/json',
+        }),
+        meta: expect.objectContaining({
+          path: '/auth/login',
+          statusCode: 415,
+          lang: 'es',
+        }),
+      }),
+    );
 
     expect(next).not.toHaveBeenCalled();
   });

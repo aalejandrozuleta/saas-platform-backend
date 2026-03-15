@@ -10,7 +10,7 @@ import { LoginUserDto } from '@application/dto/login/login-user.dto';
 import { RegisterUserUseCase } from '@application/use-cases/register-user.use-case';
 import { LoginUserUseCase } from '@application/use-cases/login-user.use-case';
 import { LoginContext } from '@domain/value-objects/login-context.vo';
-import { I18nService } from '@saas/shared';
+import { I18nService, successResponse } from '@saas/shared';
 import { Request, Response } from 'express';
 import { RegisterSwagger } from '@infrastructure/swagger/register.swagger';
 import { LoginSwagger } from '@infrastructure/swagger/login.swagger';
@@ -58,13 +58,15 @@ export class AuthController {
       },
     );
 
-    return {
-      message: this.i18n.translate('auth.register_success', lang),
-      data: {
+    return successResponse(
+      {
         id: user.id,
         email: user.email.getValue(),
       },
-    };
+      {
+        message: this.i18n.translate('auth.register_success', lang),
+      },
+    );
   }
 
   /**
@@ -97,15 +99,17 @@ export class AuthController {
       path: '/v1/auth/refresh',
     });
 
-    return {
-      message: this.i18n.translate(
-        'auth.login_success',
-        this.resolveLanguage(req),
-      ),
-      data: {
+    return successResponse(
+      {
         token: result.token,
       },
-    };
+      {
+        message: this.i18n.translate(
+          'auth.login_success',
+          this.resolveLanguage(req),
+        ),
+      },
+    );
   }
 
   @Post('refresh')
@@ -127,23 +131,26 @@ export class AuthController {
       path: '/v1/auth/refresh',
     });
 
-    return {
-      message: this.i18n.translate(
-        'auth.refresh_success',
-        this.resolveLanguage(req),
-      ),
-      data: {
+    return successResponse(
+      {
         token: result.token,
       },
-    };
+      {
+        message: this.i18n.translate(
+          'auth.refresh_success',
+          this.resolveLanguage(req),
+        ),
+      },
+    );
   }
 
   /**
    * Resuelve idioma desde Accept-Language
    */
   private resolveLanguage(req: Request): 'es' | 'en' {
-    const header = req.get('accept-language');
-    return header?.startsWith('es') ? 'es' : 'en';
+    return this.i18n.resolveLanguage(
+      req.get('accept-language'),
+    ) as 'es' | 'en';
   }
 
   /**

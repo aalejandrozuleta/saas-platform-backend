@@ -1,4 +1,5 @@
 import { errorResponse } from './error-response.builder';
+import { ErrorCode } from '../errors';
 
 describe('errorResponse', () => {
   it('debe construir una respuesta de error básica', () => {
@@ -8,7 +9,10 @@ describe('errorResponse', () => {
 
     expect(result).toEqual({
       success: false,
-      error,
+      error: {
+        code: ErrorCode.INTERNAL_ERROR,
+        message: error,
+      },
     });
   });
 
@@ -30,6 +34,38 @@ describe('errorResponse', () => {
     const result = errorResponse(error);
 
     expect(result.success).toBe(false);
-    expect(result.error).toBe(error);
+    expect(result.error).toEqual({
+      code: ErrorCode.INTERNAL_ERROR,
+      message: 'Boom',
+    });
+  });
+
+  it('debe incluir meta y detalles cuando se proporcionan', () => {
+    const result = errorResponse(
+      {
+        code: ErrorCode.VALIDATION_ERROR,
+        message: 'Datos inválidos',
+      },
+      {
+        details: ['email is required'],
+        meta: {
+          path: '/v1/auth/register',
+          statusCode: 400,
+        },
+      },
+    );
+
+    expect(result).toEqual({
+      success: false,
+      error: {
+        code: ErrorCode.VALIDATION_ERROR,
+        message: 'Datos inválidos',
+        details: ['email is required'],
+      },
+      meta: {
+        path: '/v1/auth/register',
+        statusCode: 400,
+      },
+    });
   });
 });

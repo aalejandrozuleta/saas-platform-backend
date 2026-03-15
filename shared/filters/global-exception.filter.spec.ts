@@ -27,6 +27,7 @@ describe('GlobalExceptionFilter', () => {
   beforeEach(() => {
     i18n = {
       translate: jest.fn().mockReturnValue('translated message'),
+      resolveLanguage: jest.fn().mockReturnValue('es'),
     } as any;
 
     filter = new GlobalExceptionFilter(i18n);
@@ -58,7 +59,8 @@ describe('GlobalExceptionFilter', () => {
 
     expect(i18n.translate).toHaveBeenCalledWith(
       'auth.invalid_credentials',
-      'es-CL',
+      'es-CL,es;q=0.9',
+      undefined,
     );
 
     expect(response.status).toHaveBeenCalledWith(400);
@@ -70,7 +72,11 @@ describe('GlobalExceptionFilter', () => {
           code: ErrorCode.INTERNAL_ERROR,
           message: 'translated message',
         }),
-        path: '/test',
+        meta: expect.objectContaining({
+          path: '/test',
+          statusCode: 400,
+          lang: 'es',
+        }),
       }),
     );
   });
@@ -88,7 +94,13 @@ describe('GlobalExceptionFilter', () => {
     expect(response.json).toHaveBeenCalledWith(
       expect.objectContaining({
         success: false,
-        error: { message: 'Bad request' },
+        error: {
+          code: ErrorCode.VALIDATION_ERROR,
+          message: 'Bad request',
+        },
+        meta: expect.objectContaining({
+          statusCode: 400,
+        }),
       }),
     );
   });
@@ -100,7 +112,7 @@ describe('GlobalExceptionFilter', () => {
 
     expect(i18n.translate).toHaveBeenCalledWith(
       'common.internal_error',
-      'es-CL',
+      'es-CL,es;q=0.9',
     );
 
     expect(response.status).toHaveBeenCalledWith(500);
@@ -111,6 +123,33 @@ describe('GlobalExceptionFilter', () => {
         error: expect.objectContaining({
           code: ErrorCode.INTERNAL_ERROR,
           message: 'translated message',
+        }),
+        meta: expect.objectContaining({
+          statusCode: 500,
+          lang: 'es',
+        }),
+      }),
+    );
+  });
+
+  it('debe exponer detalles de validación cuando HttpException trae un arreglo de mensajes', () => {
+    const exception = new HttpException(
+      {
+        message: ['email should not be empty'],
+      },
+      HttpStatus.BAD_REQUEST,
+    );
+
+    filter.catch(exception, host);
+
+    expect(response.status).toHaveBeenCalledWith(400);
+    expect(response.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: false,
+        error: expect.objectContaining({
+          code: ErrorCode.VALIDATION_ERROR,
+          message: 'translated message',
+          details: ['email should not be empty'],
         }),
       }),
     );
