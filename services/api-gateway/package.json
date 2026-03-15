@@ -19,7 +19,7 @@
     "@nestjs/platform-express": "11.1.13",
     "@saas/shared": "workspace:*",
     "@types/jest": "^30.0.0",
-    "axios": "^1.13.4",
+    "axios": "^1.13.6",
     "cookie-parser": "^1.4.7",
     "express": "^5.2.1",
     "express-rate-limit": "^8.2.1",
