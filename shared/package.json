@@ -17,8 +17,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@nestjs/mongoose": "^11.0.4",
     "@nestjs/swagger": "^11.2.6",
     "express": "^5.2.1",
+    "mongoose": "^9.1.5",
     "pino": "^10.3.0"
   },
   "devDependencies": {

@@ -1,16 +1,22 @@
 import { Module } from '@nestjs/common';
-import { AuditService } from '@application/audit/audit.service';
 import { AUDIT_LOGGER } from '@domain/token/services.tokens';
 import { LoginAuditService } from '@application/audit/login-audit.service';
-
-import { AuditMongoModule } from './mongo/audit-mongo.module';
+import {
+  ACTIVITY_REPORTER,
+  ActivityReportMongoModule,
+} from '@saas/shared';
 
 @Module({
-  imports: [AuditMongoModule],
-  providers: [LoginAuditService,
+  imports: [
+    ActivityReportMongoModule.register({
+      collection: 'user_activity_reports',
+    }),
+  ],
+  providers: [
+    LoginAuditService,
     {
       provide: AUDIT_LOGGER,
-      useClass: AuditService,
+      useExisting: ACTIVITY_REPORTER,
     },
   ],
   exports: [AUDIT_LOGGER, LoginAuditService],

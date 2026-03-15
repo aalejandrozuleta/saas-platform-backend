@@ -1,5 +1,4 @@
 import { AuditLogger } from '@application/ports/audit-logger.port';
-import { AuditCategory } from '@domain/audit/audit-category.enum';
 import { LoginContext } from '@domain/value-objects/login-context.vo';
 
 import { AuthAuditEvent } from './auth-events.enum';
@@ -28,12 +27,20 @@ describe('LoginAuditService', () => {
 
     expect(auditLogger.log).toHaveBeenCalledWith(
       expect.objectContaining({
-        category: AuditCategory.AUTH,
-        event: AuthAuditEvent.LOGIN_ATTEMPT,
-        userId: null,
-        ip: context.ip,
-        country: context.country,
-        deviceFingerprint: context.deviceFingerprint,
+        service: 'auth-service',
+        category: 'AUTH',
+        action: AuthAuditEvent.LOGIN_ATTEMPT,
+        outcome: 'INFO',
+        summary: 'Intento de inicio de sesión',
+        actor: expect.objectContaining({
+          type: 'ANONYMOUS',
+          email: 'test@example.com',
+        }),
+        context: {
+          ip: context.ip,
+          country: context.country,
+          deviceFingerprint: context.deviceFingerprint,
+        },
         metadata: { email: 'test@example.com' },
       }),
     );
@@ -48,9 +55,12 @@ describe('LoginAuditService', () => {
 
     expect(auditLogger.log).toHaveBeenCalledWith(
       expect.objectContaining({
-        category: AuditCategory.AUTH,
-        event: AuthAuditEvent.LOGIN_SUCCESS,
-        userId: 'user-1',
+        action: AuthAuditEvent.LOGIN_SUCCESS,
+        outcome: 'SUCCESS',
+        actor: expect.objectContaining({
+          id: 'user-1',
+          type: 'USER',
+        }),
         metadata: { sessionId: 'session-1' },
       }),
     );
@@ -65,10 +75,15 @@ describe('LoginAuditService', () => {
 
     expect(auditLogger.log).toHaveBeenCalledWith(
       expect.objectContaining({
-        category: AuditCategory.AUTH,
-        event: AuthAuditEvent.LOGIN_FAILED,
-        userId: 'user-1',
+        action: AuthAuditEvent.LOGIN_FAILED,
+        outcome: 'FAILURE',
+        actor: expect.objectContaining({
+          id: 'user-1',
+          type: 'USER',
+        }),
         reason: 'INVALID_PASSWORD',
+        summary:
+          'Inicio de sesión fallido por contraseña incorrecta',
       }),
     );
   });
@@ -84,7 +99,8 @@ describe('LoginAuditService', () => {
 
     expect(auditLogger.log).toHaveBeenCalledWith(
       expect.objectContaining({
-        event: AuthAuditEvent.LOGIN_BLOCKED,
+        action: AuthAuditEvent.LOGIN_BLOCKED,
+        outcome: 'BLOCKED',
         metadata: { blockedUntil },
       }),
     );
@@ -95,9 +111,12 @@ describe('LoginAuditService', () => {
 
     expect(auditLogger.log).toHaveBeenCalledWith(
       expect.objectContaining({
-        event:
+        action:
           AuthAuditEvent.LOGIN_DEVICE_NOT_TRUSTED,
-        userId: 'user-1',
+        outcome: 'REJECTED',
+        actor: expect.objectContaining({
+          id: 'user-1',
+        }),
       }),
     );
   });
@@ -107,9 +126,12 @@ describe('LoginAuditService', () => {
 
     expect(auditLogger.log).toHaveBeenCalledWith(
       expect.objectContaining({
-        event:
+        action:
           AuthAuditEvent.LOGIN_COUNTRY_NOT_TRUSTED,
-        userId: 'user-1',
+        outcome: 'REJECTED',
+        actor: expect.objectContaining({
+          id: 'user-1',
+        }),
       }),
     );
   });

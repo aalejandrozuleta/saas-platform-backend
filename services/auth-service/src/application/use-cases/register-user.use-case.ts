@@ -7,7 +7,6 @@ import { User } from '@domain/entities/user/user.entity';
 import { Device } from '@domain/entities/device/device.entity';
 import { Inject } from '@nestjs/common';
 import { PLATFORM_LOGGER, PlatformLogger } from '@saas/shared';
-import { AuditCategory } from '@domain/audit/audit-category.enum';
 import { PasswordHasher } from '@application/ports/password-hasher.port';
 import { AuditLogger } from '@application/ports/audit-logger.port';
 import {
@@ -15,7 +14,7 @@ import {
   USER_REPOSITORY,
 } from '@domain/token/repositories.tokens';
 import { AUDIT_LOGGER, PASSWORD_HASHER } from '@domain/token/services.tokens';
-import { AuthAuditEvent } from '@application/audit/auth-events.enum';
+import { AuthActivityReportFactory } from '@application/audit/auth-activity-report.factory';
 import { DomainErrorFactory } from '@domain/errors/domain-error.factory';
 import { DeviceRepository } from '@domain/repositories/device.repository';
 
@@ -59,15 +58,16 @@ export class RegisterUserUseCase {
         ip: context.ip,
       });
 
-      await this.auditLogger.log({
-        userId: exists.id,
-        category: AuditCategory.AUTH,
-        event: AuthAuditEvent.REGISTER_FAILED,
-        reason: 'EMAIL_ALREADY_EXISTS',
-        ip: context.ip,
-        country: context.country,
-        deviceFingerprint: context.deviceFingerprint,
-      });
+      await this.auditLogger.log(
+        AuthActivityReportFactory.registerFailed({
+          userId: exists.id,
+          email,
+          reason: 'EMAIL_ALREADY_EXISTS',
+          ip: context.ip,
+          country: context.country,
+          deviceFingerprint: context.deviceFingerprint,
+        }),
+      );
       throw DomainErrorFactory.emailAlreadyExists();
     }
 
@@ -82,17 +82,15 @@ export class RegisterUserUseCase {
     await this.userRepository.save(user);
     await this.registerTrustedDevice(user, context);
 
-    await this.auditLogger.log({
-      userId: user.id,
-      category: AuditCategory.AUTH,
-      event: AuthAuditEvent.REGISTER_SUCCESS,
-      ip: context.ip,
-      country: context.country,
-      deviceFingerprint: context.deviceFingerprint,
-      metadata: {
+    await this.auditLogger.log(
+      AuthActivityReportFactory.registerSuccess({
+        userId: user.id,
         email,
-      },
-    });
+        ip: context.ip,
+        country: context.country,
+        deviceFingerprint: context.deviceFingerprint,
+      }),
+    );
 
     this.logger.info('Usuario registrado correctamente', {
       userId: user.id,

@@ -1,11 +1,11 @@
 import { User } from '@domain/entities/user/user.entity';
-import { AuthAuditEvent } from '@application/audit/auth-events.enum';
 import { PlatformLogger } from '@saas/shared';
 import { UserRepository } from '@domain/repositories/user.repository';
 import { AuditLogger } from '@application/ports/audit-logger.port';
 import { PasswordHasher } from '@application/ports/password-hasher.port';
 import { DeviceRepository } from '@domain/repositories/device.repository';
 
+import { AuthAuditEvent } from '../audit/auth-events.enum';
 import { RegisterUserUseCase } from './register-user.use-case';
 
 describe('RegisterUserUseCase', () => {
@@ -88,8 +88,16 @@ describe('RegisterUserUseCase', () => {
     );
     expect(auditLogger.log).toHaveBeenCalledWith(
       expect.objectContaining({
-        event: AuthAuditEvent.REGISTER_SUCCESS,
-        ip: context.ip,
+        service: 'auth-service',
+        action: AuthAuditEvent.REGISTER_SUCCESS,
+        outcome: 'SUCCESS',
+        actor: expect.objectContaining({
+          id: result.id,
+          email,
+        }),
+        context: expect.objectContaining({
+          ip: context.ip,
+        }),
       }),
     );
     expect(logger.info).toHaveBeenCalled();
@@ -126,8 +134,11 @@ describe('RegisterUserUseCase', () => {
     expect(deviceRepository.save).not.toHaveBeenCalled();
     expect(auditLogger.log).toHaveBeenCalledWith(
       expect.objectContaining({
-        userId: 'user-id',
-        event: AuthAuditEvent.REGISTER_FAILED,
+        action: AuthAuditEvent.REGISTER_FAILED,
+        actor: expect.objectContaining({
+          id: 'user-id',
+          email,
+        }),
         reason: 'EMAIL_ALREADY_EXISTS',
       }),
     );
