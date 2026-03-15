@@ -2,6 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { AuditLogger } from '@application/ports/audit-logger.port';
 import { LoginContext } from '@domain/value-objects/login-context.vo';
 import { AUDIT_LOGGER } from '@domain/token/services.tokens';
+import { LoginChallengeReason } from '@application/security/login-challenge.types';
 
 import { AuthActivityReportFactory } from './auth-activity-report.factory';
 
@@ -65,6 +66,45 @@ export class LoginAuditService {
         context,
         reason,
       ),
+    );
+  }
+
+  async securityChallengeRequired(input: {
+    userId?: string;
+    email?: string;
+    context: {
+      ip?: string;
+      country?: string;
+      deviceFingerprint?: string;
+      requestId?: string;
+    };
+    reason: LoginChallengeReason;
+    metadata?: Record<string, unknown>;
+  }): Promise<void> {
+    await this.auditLogger.log(
+      AuthActivityReportFactory.securityChallengeRequired(
+        input,
+      ),
+    );
+  }
+
+  async internalServerError(input: {
+    action: string;
+    summary: string;
+    actor?: {
+      id?: string | null;
+      email?: string;
+    };
+    context?: {
+      ip?: string;
+      country?: string;
+      deviceFingerprint?: string;
+      requestId?: string;
+    };
+    metadata?: Record<string, unknown>;
+  }): Promise<void> {
+    await this.auditLogger.log(
+      AuthActivityReportFactory.internalServerError(input),
     );
   }
 

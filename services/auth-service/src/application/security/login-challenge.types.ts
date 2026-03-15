@@ -23,6 +23,8 @@ export interface LoginSecurityChallengeMetadata {
   challengeType: 'LOGIN_VERIFICATION';
   reason: LoginChallengeReason;
   requiredAction: 'COMPLETE_ADDITIONAL_VERIFICATION';
+  userId?: string;
+  email?: string;
   deviceFingerprint?: string;
   country?: string;
   availableMethods: LoginVerificationMethod[];

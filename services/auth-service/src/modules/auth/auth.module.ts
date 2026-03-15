@@ -4,7 +4,7 @@ import { Module } from '@nestjs/common';
 import { I18nModule } from '@infrastructure/i18n/i18n.module';
 import { SharedModule } from '@saas/shared';
 import { AuditModule } from '@infrastructure/audit/audit.module';
-import { LoginSucceededAuditListener } from '@infrastructure/messaging/listeners/login-audit.listener';
+import { AuthActivityListener } from '@infrastructure/messaging/listeners/auth-activity.listener';
 import { LoginLoggingListener } from '@infrastructure/messaging/listeners/login-logging.listener';
 import { PrismaModule } from '@infrastructure/persistence/prisma/prisma.module';
 import { LoginUserUseCase } from '@application/use-cases/login-user.use-case';
@@ -27,7 +27,7 @@ import { authProviders } from './auth.providers';
     LoginUserUseCase,
     RefreshTokenUseCase,
     ...authProviders,
-    LoginSucceededAuditListener,
+    AuthActivityListener,
     LoginLoggingListener,
   ],
 })

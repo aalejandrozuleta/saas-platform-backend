@@ -3,14 +3,15 @@ import { EnvModule } from '@config/env/env.module';
 import { MetricsModule } from '@infrastructure/metrics/metrics.module';
 import { AuthModule } from '@modules/auth/auth.module';
 import { I18nModule } from '@infrastructure/i18n/i18n.module';
+import { AuditModule } from '@infrastructure/audit/audit.module';
 import { MongoModule } from '@infrastructure/persistence/mongo/mongo.module';
 import { ConfigModule } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
-import { GlobalExceptionFilter } from '@saas/shared';
 import { APP_FILTER } from '@nestjs/core';
 import { ScheduleModule } from '@nestjs/schedule';
 import { MaintenanceModule } from '@infrastructure/maintenance/maintenance.module';
 import { RedisModule } from '@infrastructure/persistence/cache/redis.module';
+import { AuthGlobalExceptionFilter } from '@infrastructure/filters/auth-global-exception.filter';
 
 
 const APP_FILTER_TOKEN = APP_FILTER;
@@ -23,6 +24,7 @@ const APP_FILTER_TOKEN = APP_FILTER;
     EnvModule,
     MongoModule,
     MetricsModule,
+    AuditModule,
     AuthModule,
     I18nModule,
     RedisModule
@@ -30,7 +32,7 @@ const APP_FILTER_TOKEN = APP_FILTER;
   providers: [
     {
       provide: APP_FILTER_TOKEN,
-      useClass: GlobalExceptionFilter,
+      useClass: AuthGlobalExceptionFilter,
     },
   ],
 })

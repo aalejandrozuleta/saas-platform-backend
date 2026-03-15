@@ -6,6 +6,7 @@ import {
   Gauge,
   Registry,
 } from 'prom-client';
+import type { CreateActivityReport } from '@saas/shared';
 
 /**
  * Servicio centralizado de métricas Prometheus.
@@ -27,6 +28,7 @@ export class MetricsService {
   public readonly httpRequestCounter: Counter<string>;
   public readonly httpRequestDuration: Histogram<string>;
   public readonly httpRequestsInFlight: Gauge<string>;
+  public readonly userActivityCounter: Counter<string>;
 
   constructor() {
     this.registry = new Registry();
@@ -65,6 +67,19 @@ export class MetricsService {
       help: 'Current HTTP requests being processed',
       registers: [this.registry],
     });
+
+    this.userActivityCounter = new Counter({
+      name: 'user_activity_reports_total',
+      help: 'Total user activity reports generated',
+      labelNames: [
+        'service',
+        'category',
+        'action',
+        'outcome',
+        'reason',
+      ],
+      registers: [this.registry],
+    });
   }
 
   /**
@@ -86,5 +101,20 @@ export class MetricsService {
    */
   getContentType(): string {
     return this.registry.contentType;
+  }
+
+  recordUserActivity(
+    report: Pick<
+      CreateActivityReport,
+      'service' | 'category' | 'action' | 'outcome' | 'reason'
+    >,
+  ): void {
+    this.userActivityCounter.inc({
+      service: report.service,
+      category: report.category,
+      action: report.action,
+      outcome: report.outcome,
+      reason: report.reason ?? 'NONE',
+    });
   }
 }

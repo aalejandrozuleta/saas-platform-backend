@@ -1,6 +1,7 @@
 import type { CreateActivityReport } from '@saas/shared';
 import { AuditCategory } from '@domain/audit/audit-category.enum';
 import { LoginContext } from '@domain/value-objects/login-context.vo';
+import { LoginChallengeReason } from '@application/security/login-challenge.types';
 
 import { AuthAuditEvent } from './auth-events.enum';
 
@@ -63,6 +64,70 @@ export class AuthActivityReportFactory {
       },
       context,
       reason,
+    });
+  }
+
+  static securityChallengeRequired(input: {
+    userId?: string;
+    email?: string;
+    context: {
+      ip?: string;
+      country?: string;
+      deviceFingerprint?: string;
+      requestId?: string;
+    };
+    reason: LoginChallengeReason;
+    metadata?: Record<string, unknown>;
+  }): CreateActivityReport {
+    const summary =
+      input.reason === LoginChallengeReason.UNTRUSTED_DEVICE
+        ? 'Intento de acceso desde un dispositivo no seguro'
+        : input.reason === LoginChallengeReason.UNTRUSTED_COUNTRY
+          ? 'Intento de acceso desde un país no confiable'
+          : 'Se requiere verificación adicional para iniciar sesión';
+
+    return this.createReport({
+      action: AuthAuditEvent.LOGIN_SECURITY_CHALLENGE_REQUIRED,
+      outcome: 'REJECTED',
+      summary,
+      actor: {
+        type: input.userId ? 'USER' : 'ANONYMOUS',
+        id: input.userId,
+        email: input.email,
+      },
+      context: input.context,
+      reason: input.reason,
+      metadata: input.metadata,
+    });
+  }
+
+  static internalServerError(input: {
+    action: string;
+    summary: string;
+    actor?: {
+      id?: string | null;
+      email?: string;
+    };
+    context?: {
+      ip?: string;
+      country?: string;
+      deviceFingerprint?: string;
+      requestId?: string;
+    };
+    metadata?: Record<string, unknown>;
+  }): CreateActivityReport {
+    return this.createReport({
+      action: input.action,
+      outcome: 'FAILURE',
+      summary: input.summary,
+      actor: {
+        type: input.actor?.id ? 'USER' : 'ANONYMOUS',
+        id: input.actor?.id,
+        email: input.actor?.email,
+      },
+      context: input.context,
+      reason: 'INTERNAL_ERROR',
+      metadata: input.metadata,
     });
   }
 

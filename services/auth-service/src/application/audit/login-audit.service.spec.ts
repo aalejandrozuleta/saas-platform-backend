@@ -1,5 +1,6 @@
 import { AuditLogger } from '@application/ports/audit-logger.port';
 import { LoginContext } from '@domain/value-objects/login-context.vo';
+import { LoginChallengeReason } from '@application/security/login-challenge.types';
 
 import { AuthAuditEvent } from './auth-events.enum';
 import { LoginAuditService } from './login-audit.service';
@@ -71,6 +72,7 @@ describe('LoginAuditService', () => {
       'user-1',
       context,
       'INVALID_PASSWORD',
+      'test@example.com',
     );
 
     expect(auditLogger.log).toHaveBeenCalledWith(
@@ -80,6 +82,7 @@ describe('LoginAuditService', () => {
         actor: expect.objectContaining({
           id: 'user-1',
           type: 'USER',
+          email: 'test@example.com',
         }),
         reason: 'INVALID_PASSWORD',
         summary:
@@ -144,5 +147,43 @@ describe('LoginAuditService', () => {
     await expect(
       service.loginAttempted('x', context),
     ).rejects.toThrow('audit failure');
+  });
+
+  it('debe registrar securityChallengeRequired', async () => {
+    await service.securityChallengeRequired({
+      userId: 'user-1',
+      email: 'test@example.com',
+      context: {
+        ip: '127.0.0.1',
+      },
+      reason: LoginChallengeReason.UNTRUSTED_DEVICE,
+    });
+
+    expect(auditLogger.log).toHaveBeenCalledWith(
+      expect.objectContaining({
+        action:
+          AuthAuditEvent.LOGIN_SECURITY_CHALLENGE_REQUIRED,
+        outcome: 'REJECTED',
+        reason: LoginChallengeReason.UNTRUSTED_DEVICE,
+      }),
+    );
+  });
+
+  it('debe registrar internalServerError', async () => {
+    await service.internalServerError({
+      action: AuthAuditEvent.INTERNAL_ERROR,
+      summary: 'Error interno del servidor en auth-service',
+      actor: {
+        email: 'test@example.com',
+      },
+    });
+
+    expect(auditLogger.log).toHaveBeenCalledWith(
+      expect.objectContaining({
+        action: AuthAuditEvent.INTERNAL_ERROR,
+        outcome: 'FAILURE',
+        reason: 'INTERNAL_ERROR',
+      }),
+    );
   });
 });

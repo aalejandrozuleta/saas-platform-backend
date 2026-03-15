@@ -1,6 +1,7 @@
 import axios, {
   AxiosInstance,
   AxiosRequestConfig,
+  AxiosError,
 } from 'axios';
 import CircuitBreaker from 'opossum';
 import { Injectable } from '@nestjs/common';
@@ -52,13 +53,43 @@ export class ResilientHttpClient {
       try {
         return await this.breaker.fire(config);
       } catch (error) {
-
-        attempt++;
-
-        if (attempt > retries) {
+        if (!this.shouldRetry(error, config, attempt, retries)) {
           throw error;
         }
+
+        attempt++;
       }
     }
+  }
+
+  private shouldRetry(
+    error: unknown,
+    config: AxiosRequestConfig,
+    attempt: number,
+    retries: number,
+  ): boolean {
+    if (attempt >= retries) {
+      return false;
+    }
+
+    const method = config.method?.toUpperCase();
+
+    if (!method || !['GET', 'HEAD', 'OPTIONS'].includes(method)) {
+      return false;
+    }
+
+    if (!(error instanceof AxiosError)) {
+      return true;
+    }
+
+    if (error.code === 'EOPENBREAKER') {
+      return false;
+    }
+
+    if (error.response) {
+      return error.response.status >= 500;
+    }
+
+    return true;
   }
 }

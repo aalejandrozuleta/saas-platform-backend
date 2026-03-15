@@ -242,6 +242,12 @@ describe('LoginUserUseCase', () => {
     expect(eventBus.publish).toHaveBeenCalledWith(
       expect.any(LoginFailedEvent),
     );
+
+    expect(eventBus.publish).toHaveBeenCalledWith(
+      expect.objectContaining({
+        email: 'test@test.com',
+      }),
+    );
   });
 
   it('debe registrar intento fallido si contraseña es incorrecta', async () => {

@@ -2,7 +2,7 @@
   "title": "Auth Service",
   "uid": "auth-service",
   "schemaVersion": 38,
-  "version": 2,
+  "version": 3,
   "refresh": "5s",
   "panels": [
     {
@@ -23,6 +23,42 @@
       "targets": [
         {
           "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{service=\"auth-service\",route!=\"/metrics\"}[5m])) by (le)) * 1000",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "User Activity By Outcome",
+      "gridPos": { "x": 0, "y": 6, "w": 12, "h": 7 },
+      "targets": [
+        {
+          "expr": "sum by (outcome) (rate(user_activity_reports_total{service=\"auth-service\"}[5m]))",
+          "legendFormat": "{{outcome}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "bargauge",
+      "title": "Top Auth Actions",
+      "gridPos": { "x": 12, "y": 6, "w": 12, "h": 7 },
+      "targets": [
+        {
+          "expr": "topk(10, sum by (action) (increase(user_activity_reports_total{service=\"auth-service\"}[1h])))",
+          "legendFormat": "{{action}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Failed Activity Reasons",
+      "gridPos": { "x": 0, "y": 13, "w": 24, "h": 7 },
+      "targets": [
+        {
+          "expr": "sum by (reason) (rate(user_activity_reports_total{service=\"auth-service\",outcome=~\"FAILURE|REJECTED|BLOCKED\",reason!=\"NONE\"}[5m]))",
+          "legendFormat": "{{reason}}",
           "refId": "A"
         }
       ]
