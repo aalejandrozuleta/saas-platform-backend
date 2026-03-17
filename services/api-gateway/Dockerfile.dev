@@ -2,18 +2,20 @@ FROM node:24-alpine
 
 WORKDIR /app
 
-RUN npm install -g pnpm
 ENV PNPM_STORE_PATH=/pnpm-store
 
-# Copiar workspace completo (necesario para pnpm workspaces)
+# Instalar pnpm
+RUN npm install -g pnpm
+
+# Copiar archivos del workspace
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY tsconfig.base.json ./
 
-# Copiar solo lo necesario
+# Copiar código
 COPY services ./services
 COPY shared ./shared
 
-# NOSONAR: pnpm install scripts required for prisma
+# Instalar dependencias
 RUN pnpm install
 
 WORKDIR /app/services/api-gateway
