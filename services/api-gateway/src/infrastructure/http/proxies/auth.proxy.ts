@@ -1,10 +1,12 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable,Inject } from '@nestjs/common';
 import type { Request } from 'express';
 import { Method, AxiosRequestConfig, AxiosError } from 'axios';
 import {
   ErrorCode,
   getErrorCodeFromHttpStatus,
   isApiErrorResponse,
+  PLATFORM_LOGGER,
+  PlatformLogger,
 } from '@saas/shared';
 import { EnvService } from '@config/env/env.service';
 
@@ -21,12 +23,15 @@ export class AuthProxy {
 
   constructor(
     private readonly env: EnvService,
+    @Inject(PLATFORM_LOGGER)
+    private readonly logger: PlatformLogger,
   ) {
 
     this.client = new ResilientHttpClient(
       this.env.get('AUTH_SERVICE_URL'),
       this.env.get('AUTH_SERVICE_TIMEOUT'),
       this.env.get('AUTH_SERVICE_CIRCUIT_TIMEOUT'),
+      this.logger,
     );
   }
 
@@ -50,65 +55,111 @@ export class AuthProxy {
         cookies: response.headers['set-cookie'],
       };
     } catch (error: any) {
+      this.handleForwardError(req, path, error);
+    }
+  }
 
-      if (error?.code === 'EOPENBREAKER') {
-        throw new HttpException(
-          buildGatewayErrorResponse(
-            req,
-            HttpStatus.SERVICE_UNAVAILABLE,
-            ErrorCode.SERVICE_UNAVAILABLE,
-            'common.auth_service_temporarily_unavailable',
-          ),
-          HttpStatus.SERVICE_UNAVAILABLE,
-        );
-      }
+  private handleForwardError(req: Request, path: string, error: any): never {
+    if (error?.code === 'EOPENBREAKER') {
+      this.throwCircuitOpenError(req, path);
+    }
 
-      if (error instanceof AxiosError) {
+    if (error instanceof AxiosError) {
+      this.handleAxiosError(req, path, error);
+    }
 
-        if (error.response) {
-          if (isApiErrorResponse(error.response.data)) {
-            throw new HttpException(
-              error.response.data,
-              error.response.status,
-            );
-          }
+    this.throwUnknownUpstreamError(req, path);
+  }
 
-          throw new HttpException(
-            buildGatewayErrorResponse(
-              req,
-              error.response.status,
-              getErrorCodeFromHttpStatus(error.response.status),
-              'common.upstream_error',
-              {
-                details: error.response.data,
-              },
-            ),
-            error.response.status,
-          );
-        }
+  private handleAxiosError(req: Request, path: string, error: AxiosError): never {
+    if (error.response) {
+      this.throwAxiosResponseError(req, path, error.response.status, error.response.data);
+    }
 
-        if (error.request) {
-          throw new HttpException(
-            buildGatewayErrorResponse(
-              req,
-              HttpStatus.SERVICE_UNAVAILABLE,
-              ErrorCode.SERVICE_UNAVAILABLE,
-              'common.auth_service_unavailable',
-            ),
-            HttpStatus.SERVICE_UNAVAILABLE,
-          );
-        }
-      }
-
+    if (error.request) {
+      this.logger.warn('Auth service upstream no response', {
+        event: 'auth.upstream.no_response',
+        path,
+        method: req.method,
+      });
       throw new HttpException(
         buildGatewayErrorResponse(
           req,
-          HttpStatus.BAD_GATEWAY,
-          ErrorCode.BAD_GATEWAY,
-          'common.gateway_upstream_failure',
+          HttpStatus.SERVICE_UNAVAILABLE,
+          ErrorCode.SERVICE_UNAVAILABLE,
+          'common.auth_service_unavailable',
         ),
-        HttpStatus.BAD_GATEWAY,
+        HttpStatus.SERVICE_UNAVAILABLE,
       );
     }
+
+    this.throwUnknownUpstreamError(req, path);
+  }
+
+  private throwCircuitOpenError(req: Request, path: string): never {
+    this.logger.warn('Auth service circuit open', {
+      event: 'auth.upstream.circuit_open',
+      path,
+      method: req.method,
+    });
+    throw new HttpException(
+      buildGatewayErrorResponse(
+        req,
+        HttpStatus.SERVICE_UNAVAILABLE,
+        ErrorCode.SERVICE_UNAVAILABLE,
+        'common.auth_service_temporarily_unavailable',
+      ),
+      HttpStatus.SERVICE_UNAVAILABLE,
+    );
+  }
+
+  private throwAxiosResponseError(
+    req: Request,
+    path: string,
+    status: number,
+    data: unknown,
+  ): never {
+    if (status >= 500) {
+      this.logger.warn('Auth service upstream 5xx', {
+        event: 'auth.upstream.5xx',
+        path,
+        method: req.method,
+        status,
+      });
+    }
+
+    if (isApiErrorResponse(data)) {
+      throw new HttpException(data, status);
+    }
+
+    throw new HttpException(
+      buildGatewayErrorResponse(
+        req,
+        status,
+        getErrorCodeFromHttpStatus(status),
+        'common.upstream_error',
+        {
+          details: data,
+        },
+      ),
+      status,
+    );
+  }
+
+  private throwUnknownUpstreamError(req: Request, path: string): never {
+    this.logger.error('Auth service upstream unknown failure', {
+      event: 'auth.upstream.unknown_error',
+      path,
+      method: req.method,
+    });
+    throw new HttpException(
+      buildGatewayErrorResponse(
+        req,
+        HttpStatus.BAD_GATEWAY,
+        ErrorCode.BAD_GATEWAY,
+        'common.gateway_upstream_failure',
+      ),
+      HttpStatus.BAD_GATEWAY,
+    );
   }
 }

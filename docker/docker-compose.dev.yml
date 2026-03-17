@@ -43,6 +43,7 @@ services:
       - pnpm-store:/pnpm-store
     environment:
       PNPM_STORE_PATH: /pnpm-store
+      SERVICE_NAME: api-gateway
     ports:
       - "3000:3000"
     logging: *default-logging
@@ -67,6 +68,7 @@ services:
       - pnpm-store:/pnpm-store
     environment:
       PNPM_STORE_PATH: /pnpm-store
+      SERVICE_NAME: auth-service
     ports:
       - "3001:3001"
     depends_on:

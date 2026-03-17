@@ -1,5 +1,7 @@
 import pino, { Logger as PinoLogger } from 'pino';
 
+import { requestContextStorage } from '../context/async-local-storage';
+
 import { PlatformLogger } from './logger.interface';
 import { LoggerOptions } from './logger.types';
 import { createPinoConfig } from './pino.config';
@@ -15,26 +17,69 @@ export class PinoLoggerAdapter implements PlatformLogger {
     this.logger = pino(createPinoConfig(options));
   }
 
+  private enrich(
+    meta?: Record<string, unknown>,
+  ): Record<string, unknown> | undefined {
+    const ctx = requestContextStorage.getStore();
+    if (!ctx) return meta;
+
+    const ctxMeta: Record<string, unknown> = {
+      requestId: ctx.requestId,
+      correlationId: ctx.correlationId,
+      userId: ctx.userId,
+    };
+
+    if (!meta) return ctxMeta;
+
+    return { ...ctxMeta, ...meta };
+  }
+
   info(message: string, meta?: Record<string, unknown>): void {
-    meta ? this.logger.info(meta, message) : this.logger.info(message);
+    const enriched = this.enrich(meta);
+    enriched
+      ? this.logger.info(enriched, message)
+      : this.logger.info(message);
   }
 
   warn(message: string, meta?: Record<string, unknown>): void {
-    meta ? this.logger.warn(meta, message) : this.logger.warn(message);
+    const enriched = this.enrich(meta);
+    enriched
+      ? this.logger.warn(enriched, message)
+      : this.logger.warn(message);
   }
 
   error(message: string, meta?: Record<string, unknown>): void {
+    const ctx = requestContextStorage.getStore();
+
     if (meta instanceof Error) {
+      if (ctx) {
+        this.logger.error(
+          {
+            requestId: ctx.requestId,
+            correlationId: ctx.correlationId,
+            userId: ctx.userId,
+            err: meta,
+          },
+          message,
+        );
+        return;
+      }
+
       this.logger.error(meta, message);
-    } else {
-      meta
-        ? this.logger.error(meta, message)
-        : this.logger.error(message);
+      return;
     }
+
+    const enriched = this.enrich(meta);
+    enriched
+      ? this.logger.error(enriched, message)
+      : this.logger.error(message);
   }
 
 
   debug(message: string, meta?: Record<string, unknown>): void {
-    meta ? this.logger.debug(meta, message) : this.logger.debug(message);
+    const enriched = this.enrich(meta);
+    enriched
+      ? this.logger.debug(enriched, message)
+      : this.logger.debug(message);
   }
 }
