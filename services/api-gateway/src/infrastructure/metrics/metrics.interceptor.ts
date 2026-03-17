@@ -5,18 +5,10 @@ import {
   NestInterceptor,
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
-import { tap, finalize } from 'rxjs/operators';
+import { finalize, tap } from 'rxjs/operators';
 
 import { MetricsService } from './metrics.service';
 
-/**
- * Interceptor global para capturar métricas HTTP.
- *
- * - Cuenta requests
- * - Mide latencia
- * - Normaliza rutas
- * - Incluye label "service"
- */
 @Injectable()
 export class MetricsInterceptor implements NestInterceptor {
   constructor(private readonly metricsService: MetricsService) {}
@@ -28,30 +20,20 @@ export class MetricsInterceptor implements NestInterceptor {
 
     const method: string = request.method;
 
-    /**
-     * Normalización de ruta para evitar
-     * cardinalidad innecesaria por versionado.
-     */
     const rawRoute =
-      request.route?.path ??
-      request.baseUrl ??
-      request.url ??
-      'unknown';
+      request.route?.path ?? request.baseUrl ?? request.url ?? 'unknown';
 
-    const normalizedRoute =
-      rawRoute.replace(/^\/auth\/v\d+/, '') || '/';
+    // Avoid high-cardinality labels: strip API version and query string.
+    const noQuery = String(rawRoute).split('?')[0] ?? 'unknown';
+    const normalizedRoute = noQuery.replace(/^\/v\d+/, '') || '/';
 
     const serviceName = this.metricsService.getServiceName();
 
-    /**
-     * Inicia medición de duración
-     */
-    const endTimer =
-      this.metricsService.httpRequestDuration.startTimer({
-        method,
-        route: normalizedRoute,
-        service: serviceName,
-      });
+    const endTimer = this.metricsService.httpRequestDuration.startTimer({
+      method,
+      route: normalizedRoute,
+      service: serviceName,
+    });
 
     this.metricsService.httpRequestsInFlight.inc({ service: serviceName });
 
@@ -66,12 +48,9 @@ export class MetricsInterceptor implements NestInterceptor {
       }),
       finalize(() => {
         this.metricsService.httpRequestsInFlight.dec({ service: serviceName });
-
-        endTimer({
-          status: String(response.statusCode),
-          service: serviceName,
-        });
+        endTimer({ status: String(response.statusCode), service: serviceName });
       }),
     );
   }
 }
+

@@ -8,6 +8,7 @@ import { EnvService } from '@config/env/env.service';
 import { HealthController } from './infrastructure/health/health.controller';
 import { EnvModule } from './config/env/env.module';
 import { I18nModule } from './infrastructure/i18n/i18n.module';
+import { MetricsModule } from './infrastructure/metrics/metrics.module';
 
 /**
  * Módulo raíz del API Gateway.
@@ -18,6 +19,7 @@ import { I18nModule } from './infrastructure/i18n/i18n.module';
     EnvModule,
     I18nModule,
     AuthModule,
+    MetricsModule,
 
     RedisModule.forRootAsync({
       imports: [EnvModule],
@@ -28,7 +30,6 @@ import { I18nModule } from './infrastructure/i18n/i18n.module';
         password: envService.get('REDIS_PASSWORD'),
       }),
     }),
-    
   ],
 
   providers: [

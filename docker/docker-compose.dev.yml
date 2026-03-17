@@ -152,11 +152,75 @@ services:
     image: ${PROMETHEUS_IMAGE:-prom/prometheus:v3.10.0}
     container_name: prometheus-dev
     restart: unless-stopped
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --web.enable-lifecycle
     ports:
       - "9090:9090"
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus-data:/prometheus
+    logging: *default-logging
+    networks:
+      - saas-dev
+
+  # =====================
+  # POSTGRES EXPORTER
+  # =====================
+  postgres-exporter:
+    image: ${POSTGRES_EXPORTER_IMAGE:-quay.io/prometheuscommunity/postgres-exporter:v0.18.0}
+    container_name: postgres-exporter-dev
+    restart: unless-stopped
+    environment:
+      DATA_SOURCE_URI: auth-postgres:5432/auth_db?sslmode=disable
+      DATA_SOURCE_USER: auth_user
+      DATA_SOURCE_PASS: auth_pass
+    expose:
+      - "9187"
+    depends_on:
+      auth-postgres:
+        condition: service_healthy
+    logging: *default-logging
+    networks:
+      - saas-dev
+
+  # =====================
+  # REDIS EXPORTER
+  # =====================
+  redis-exporter:
+    image: ${REDIS_EXPORTER_IMAGE:-oliver006/redis_exporter:v1.82.0-alpine}
+    container_name: redis-exporter-dev
+    restart: unless-stopped
+    environment:
+      REDIS_ADDR: redis://redis:6379
+    expose:
+      - "9121"
+    depends_on:
+      redis:
+        condition: service_healthy
+    logging: *default-logging
+    networks:
+      - saas-dev
+
+  # =====================
+  # CADVISOR (Container Metrics)
+  # =====================
+  cadvisor:
+    image: ${CADVISOR_IMAGE:-gcr.io/cadvisor/cadvisor:v0.52.0}
+    container_name: cadvisor-dev
+    restart: unless-stopped
+    privileged: true
+    expose:
+      - "8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    devices:
+      - /dev/kmsg:/dev/kmsg
     logging: *default-logging
     networks:
       - saas-dev

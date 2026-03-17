@@ -32,6 +32,7 @@ export class MetricsService {
 
   constructor() {
     this.registry = new Registry();
+    this.registry.setDefaultLabels({ service: this.serviceName });
 
     /**
      * Métricas por defecto de Node.js
@@ -65,6 +66,7 @@ export class MetricsService {
     this.httpRequestsInFlight = new Gauge({
       name: 'http_requests_in_flight',
       help: 'Current HTTP requests being processed',
+      labelNames: ['service'],
       registers: [this.registry],
     });
 

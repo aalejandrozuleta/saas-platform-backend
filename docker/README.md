@@ -57,6 +57,9 @@ Levanta el entorno completo de desarrollo:
 - prometheus
 - loki
 - alloy (reemplazo de promtail)
+- postgres-exporter
+- redis-exporter
+- cadvisor
 - grafana
 - mailpit
 - pgadmin
@@ -137,6 +140,16 @@ Recolecta métricas desde /metrics de:
 - api-gateway
 - auth-service
 
+Y métricas de infra:
+
+- postgres-exporter (PostgreSQL)
+- redis-exporter (Redis)
+- cadvisor (containers)
+
+Nota:
+
+Los exporters y cadvisor no se exponen a tu host; solo quedan en la red interna para que Prometheus los scrapee.
+
 Acceso web:
 
 http://localhost:9090
@@ -205,6 +218,12 @@ dashboards.yml:
 Declara qué dashboards cargar al iniciar Grafana.
 
 Grafana arranca con todo precargado.
+
+Dashboards incluidos:
+
+- SaaS Platform – Overview
+- Auth Service
+- SaaS Platform – Infra
 
 Acceso:
 

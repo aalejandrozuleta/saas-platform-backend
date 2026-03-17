@@ -10,6 +10,7 @@ import { MetricsService } from './metrics.service';
 
 const mockRegistryInstance = {
   metrics: jest.fn(),
+  setDefaultLabels: jest.fn(),
   contentType: 'text/plain; version=0.0.4; charset=utf-8',
 };
 

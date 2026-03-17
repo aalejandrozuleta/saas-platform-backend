@@ -43,40 +43,44 @@ describe('MetricsInterceptor', () => {
   });
 
   it('debería registrar métricas de una request HTTP', async () => {
-  const request = {
-    method: 'POST',
-    route: { path: '/auth/v1/login' },
-  };
+    const request = {
+      method: 'POST',
+      route: { path: '/auth/v1/login' },
+    };
 
-  const response = {
-    statusCode: 200,
-  };
+    const response = {
+      statusCode: 200,
+    };
 
-  const endTimer = jest.fn();
-  metricsService.httpRequestDuration.startTimer.mockReturnValue(endTimer);
+    const endTimer = jest.fn();
+    metricsService.httpRequestDuration.startTimer.mockReturnValue(endTimer);
 
-  const context = createExecutionContext(request, response);
+    const context = createExecutionContext(request, response);
 
-  const next: CallHandler = {
-    handle: () => of({ ok: true }),
-  };
+    const next: CallHandler = {
+      handle: () => of({ ok: true }),
+    };
 
-  await lastValueFrom(interceptor.intercept(context, next));
+    await lastValueFrom(interceptor.intercept(context, next));
 
-  expect(metricsService.httpRequestsInFlight.inc).toHaveBeenCalled();
+    expect(metricsService.httpRequestsInFlight.inc).toHaveBeenCalledWith({
+      service: 'auth-service',
+    });
 
-  expect(metricsService.httpRequestCounter.inc).toHaveBeenCalledWith({
-    method: 'POST',
-    route: '/login',
-    status: '200',
-    service: 'auth-service',
+    expect(metricsService.httpRequestCounter.inc).toHaveBeenCalledWith({
+      method: 'POST',
+      route: '/login',
+      status: '200',
+      service: 'auth-service',
+    });
+
+    expect(metricsService.httpRequestsInFlight.dec).toHaveBeenCalledWith({
+      service: 'auth-service',
+    });
+
+    expect(endTimer).toHaveBeenCalledWith({
+      status: '200',
+      service: 'auth-service',
+    });
   });
-
-  expect(metricsService.httpRequestsInFlight.dec).toHaveBeenCalled();
-
-  expect(endTimer).toHaveBeenCalledWith({
-    status: '200',
-    service: 'auth-service',
-  });
-});
 });

@@ -2,27 +2,117 @@
   "title": "Auth Service",
   "uid": "auth-service",
   "schemaVersion": 38,
-  "version": 3,
-  "refresh": "5s",
+  "version": 4,
+  "refresh": "10s",
   "panels": [
     {
-      "type": "timeseries",
-      "title": "Requests/sec",
-      "gridPos": { "x": 0, "y": 0, "w": 12, "h": 6 },
+      "type": "stat",
+      "title": "Requests / sec",
+      "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 },
       "targets": [
         {
-          "expr": "sum(rate(http_requests_total{service=\"auth-service\",route!=\"/metrics\"}[2m]))",
+          "expr": "sum(rate(http_requests_total{service=\"auth-service\",route!~\"/metrics|/health\"}[2m]))",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Error Rate %",
+      "gridPos": { "x": 6, "y": 0, "w": 6, "h": 4 },
+      "targets": [
+        {
+          "expr": "(sum(rate(http_requests_total{service=\"auth-service\",status=~\"5..\",route!~\"/metrics|/health\"}[2m])) / sum(rate(http_requests_total{service=\"auth-service\",route!~\"/metrics|/health\"}[2m]))) * 100 or vector(0)",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "P95 Latency (ms)",
+      "gridPos": { "x": 12, "y": 0, "w": 6, "h": 4 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{service=\"auth-service\",route!~\"/metrics|/health\"}[5m])) by (le)) * 1000",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "In Flight",
+      "gridPos": { "x": 18, "y": 0, "w": 6, "h": 4 },
+      "targets": [
+        {
+          "expr": "sum(http_requests_in_flight{service=\"auth-service\"})",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "CPU (cores)",
+      "gridPos": { "x": 0, "y": 4, "w": 6, "h": 4 },
+      "targets": [
+        {
+          "expr": "avg(rate(process_cpu_user_seconds_total{service=\"auth-service\"}[2m]) + rate(process_cpu_system_seconds_total{service=\"auth-service\"}[2m]))",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Memory (MB)",
+      "gridPos": { "x": 6, "y": 4, "w": 6, "h": 4 },
+      "targets": [
+        {
+          "expr": "avg(process_resident_memory_bytes{service=\"auth-service\"}) / 1024 / 1024",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Event Loop Lag (ms)",
+      "gridPos": { "x": 12, "y": 4, "w": 6, "h": 4 },
+      "targets": [
+        {
+          "expr": "avg(nodejs_eventloop_lag_seconds{service=\"auth-service\"}) * 1000",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "P99 Latency (ms)",
+      "gridPos": { "x": 18, "y": 4, "w": 6, "h": 4 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{service=\"auth-service\",route!~\"/metrics|/health\"}[5m])) by (le)) * 1000",
           "refId": "A"
         }
       ]
     },
     {
       "type": "timeseries",
-      "title": "Latency P95",
-      "gridPos": { "x": 12, "y": 0, "w": 12, "h": 6 },
+      "title": "Requests/sec (by status)",
+      "gridPos": { "x": 0, "y": 8, "w": 12, "h": 7 },
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{service=\"auth-service\",route!=\"/metrics\"}[5m])) by (le)) * 1000",
+          "expr": "sum by (status) (rate(http_requests_total{service=\"auth-service\",route!~\"/metrics|/health\"}[2m]))",
+          "legendFormat": "{{status}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Latency by Route (P95 ms)",
+      "gridPos": { "x": 12, "y": 8, "w": 12, "h": 7 },
+      "targets": [
+        {
+          "expr": "topk(10, histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{service=\"auth-service\",route!~\"/metrics|/health\"}[5m])) by (le, route)) * 1000)",
+          "legendFormat": "{{route}}",
           "refId": "A"
         }
       ]
@@ -30,7 +120,7 @@
     {
       "type": "timeseries",
       "title": "User Activity By Outcome",
-      "gridPos": { "x": 0, "y": 6, "w": 12, "h": 7 },
+      "gridPos": { "x": 0, "y": 15, "w": 12, "h": 7 },
       "targets": [
         {
           "expr": "sum by (outcome) (rate(user_activity_reports_total{service=\"auth-service\"}[5m]))",
@@ -41,8 +131,8 @@
     },
     {
       "type": "bargauge",
-      "title": "Top Auth Actions",
-      "gridPos": { "x": 12, "y": 6, "w": 12, "h": 7 },
+      "title": "Top Auth Actions (1h)",
+      "gridPos": { "x": 12, "y": 15, "w": 12, "h": 7 },
       "targets": [
         {
           "expr": "topk(10, sum by (action) (increase(user_activity_reports_total{service=\"auth-service\"}[1h])))",
@@ -54,7 +144,7 @@
     {
       "type": "timeseries",
       "title": "Failed Activity Reasons",
-      "gridPos": { "x": 0, "y": 13, "w": 24, "h": 7 },
+      "gridPos": { "x": 0, "y": 22, "w": 24, "h": 7 },
       "targets": [
         {
           "expr": "sum by (reason) (rate(user_activity_reports_total{service=\"auth-service\",outcome=~\"FAILURE|REJECTED|BLOCKED\",reason!=\"NONE\"}[5m]))",
