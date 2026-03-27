@@ -1,5 +1,4 @@
 import type { Request, Response, NextFunction } from 'express';
-
 import { ErrorCode } from '@saas/shared';
 import { buildGatewayErrorResponse } from '@infrastructure/errors/gateway-error-response.util';
 

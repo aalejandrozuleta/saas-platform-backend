@@ -59,5 +59,5 @@ export const isApiErrorResponse = (value: unknown): value is ApiErrorResponse =>
 
   const candidate = value as Partial<ApiErrorResponse>;
 
-  return candidate.success === false && !!candidate.error;
+  return candidate.success === false && Boolean(candidate.error);
 };

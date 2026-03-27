@@ -1,7 +1,7 @@
 import { ErrorCode } from '../errors';
 
 import { compactResponseMeta } from './response-meta.util';
-import {
+import type {
   ApiErrorPayload,
   ApiErrorResponse,
   ErrorResponseOptions,

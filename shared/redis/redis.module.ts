@@ -13,9 +13,7 @@ export interface RedisModuleAsyncOptions {
 @Global()
 @Module({})
 export class RedisModule {
-
   static forRoot(options: RedisModuleOptions): DynamicModule {
-
     const provider = {
       provide: REDIS_CLIENT,
       useFactory: () => {
@@ -37,12 +35,10 @@ export class RedisModule {
   }
 
   static forRootAsync(options: RedisModuleAsyncOptions): DynamicModule {
-
     const provider = {
       provide: REDIS_CLIENT,
       inject: options.inject ?? [],
       useFactory: (...args: any[]) => {
-
         const config = options.useFactory(...args);
 
         return new Redis({
@@ -52,7 +48,7 @@ export class RedisModule {
           lazyConnect: true,
           enableReadyCheck: true,
           maxRetriesPerRequest: 3,
-          retryStrategy: (times) => Math.min(times * 50, 2000),
+          retryStrategy: (times: number) => Math.min(times * 50, 2000),
         });
       },
     };

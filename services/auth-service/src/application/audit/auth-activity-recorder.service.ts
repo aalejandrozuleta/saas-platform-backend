@@ -4,7 +4,6 @@ import {
   ActivityReporter,
   CreateActivityReport,
 } from '@saas/shared';
-
 import { MetricsService } from '@infrastructure/metrics/metrics.service';
 import { AuditLogger } from '@application/ports/audit-logger.port';
 

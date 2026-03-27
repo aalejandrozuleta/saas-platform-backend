@@ -2,8 +2,8 @@ import pino, { type Logger as PinoLogger } from 'pino';
 
 import { requestContextStorage } from '../context/async-local-storage';
 
-import { PlatformLogger } from './logger.interface';
-import { LoggerOptions } from './logger.types';
+import type { PlatformLogger } from './logger.interface';
+import type { LoggerOptions } from './logger.types';
 import { createPinoConfig } from './pino.config';
 
 /**
@@ -74,7 +74,6 @@ export class PinoLoggerAdapter implements PlatformLogger {
       ? this.logger.error(enriched, message)
       : this.logger.error(message);
   }
-
 
   debug(message: string, meta?: Record<string, unknown>): void {
     const enriched = this.enrich(meta);

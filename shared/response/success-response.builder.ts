@@ -1,5 +1,5 @@
 import { compactResponseMeta } from './response-meta.util';
-import {
+import type {
   ApiSuccessResponse,
   SuccessResponseOptions,
 } from './response.interface';

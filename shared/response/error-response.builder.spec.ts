@@ -1,5 +1,6 @@
-import { errorResponse } from './error-response.builder';
 import { ErrorCode } from '../errors';
+
+import { errorResponse } from './error-response.builder';
 
 describe('errorResponse', () => {
   it('debe construir una respuesta de error básica', () => {

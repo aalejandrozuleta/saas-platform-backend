@@ -1,13 +1,22 @@
-import { HttpException, HttpStatus, Injectable,Inject } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
+import {
+  AxiosError,
+  type AxiosRequestConfig,
+  type Method,
+} from 'axios';
 import type { Request } from 'express';
-import { Method, AxiosRequestConfig, AxiosError } from 'axios';
 import {
   ErrorCode,
   getErrorCodeFromHttpStatus,
   isApiErrorResponse,
   PLATFORM_LOGGER,
-  PlatformLogger,
 } from '@saas/shared';
+import type { PlatformLogger } from '@saas/shared';
 import { EnvService } from '@config/env/env.service';
 
 import { buildGatewayErrorResponse } from '../../errors/gateway-error-response.util';
@@ -16,7 +25,6 @@ import { forwardHeaders } from '../utils/header-forwarder.util';
 
 @Injectable()
 export class AuthProxy {
-
   private readonly client: ResilientHttpClient;
   private readonly AUTH_BASE_PATH = '/auth/v1';
 
@@ -25,7 +33,6 @@ export class AuthProxy {
     @Inject(PLATFORM_LOGGER)
     private readonly logger: PlatformLogger,
   ) {
-
     this.client = new ResilientHttpClient(
       this.env.get('AUTH_SERVICE_URL'),
       this.env.get('AUTH_SERVICE_TIMEOUT'),
@@ -38,7 +45,6 @@ export class AuthProxy {
     req: Request,
     path: string,
   ): Promise<{ body: T; cookies?: string[] }> {
-
     try {
       const config: AxiosRequestConfig = {
         url: `${this.AUTH_BASE_PATH}${path}`,
@@ -47,19 +53,28 @@ export class AuthProxy {
         headers: forwardHeaders(req),
       };
 
-      const response = await this.client.request(config);
+      const response = await this.client.requestTyped<T>(config);
 
       return {
         body: response.data,
         cookies: response.headers['set-cookie'],
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       this.handleForwardError(req, path, error);
     }
   }
 
-  private handleForwardError(req: Request, path: string, error: any): never {
-    if (error?.code === 'EOPENBREAKER') {
+  private handleForwardError(
+    req: Request,
+    path: string,
+    error: unknown,
+  ): never {
+    if (
+      typeof error === 'object' &&
+      error !== null &&
+      'code' in error &&
+      error.code === 'EOPENBREAKER'
+    ) {
       this.throwCircuitOpenError(req, path);
     }
 
@@ -72,7 +87,12 @@ export class AuthProxy {
 
   private handleAxiosError(req: Request, path: string, error: AxiosError): never {
     if (error.response) {
-      this.throwAxiosResponseError(req, path, error.response.status, error.response.data);
+      this.throwAxiosResponseError(
+        req,
+        path,
+        error.response.status,
+        error.response.data,
+      );
     }
 
     if (error.request) {

@@ -13,7 +13,10 @@ import { MetricsService } from './metrics.service';
 export class MetricsInterceptor implements NestInterceptor {
   constructor(private readonly metricsService: MetricsService) {}
 
-  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+  intercept(
+    context: ExecutionContext,
+    next: CallHandler,
+  ): Observable<unknown> {
     const httpContext = context.switchToHttp();
     const request = httpContext.getRequest();
     const response = httpContext.getResponse();
@@ -53,4 +56,3 @@ export class MetricsInterceptor implements NestInterceptor {
     );
   }
 }
-

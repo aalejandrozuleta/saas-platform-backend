@@ -3,12 +3,10 @@ import {
   Catch,
   ExceptionFilter,
   HttpException,
-  HttpStatus,
   Inject,
 } from '@nestjs/common';
 import type { Request } from 'express';
-import { BaseException, GlobalExceptionFilter, ErrorCode } from '@saas/shared';
-import { I18nService } from '@saas/shared';
+import { BaseException, GlobalExceptionFilter, ErrorCode , I18nService } from '@saas/shared';
 import { AUDIT_LOGGER } from '@domain/token/services.tokens';
 import { AuditLogger } from '@application/ports/audit-logger.port';
 import { LoginAuditService } from '@application/audit/login-audit.service';

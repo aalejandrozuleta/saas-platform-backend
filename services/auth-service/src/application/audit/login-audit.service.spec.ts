@@ -1,4 +1,4 @@
-import { AuditLogger } from '@application/ports/audit-logger.port';
+import type { AuditLogger } from '@application/ports/audit-logger.port';
 import { LoginContext } from '@domain/value-objects/login-context.vo';
 import { LoginChallengeReason } from '@application/security/login-challenge.types';
 

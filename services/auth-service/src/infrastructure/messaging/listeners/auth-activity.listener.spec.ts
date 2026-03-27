@@ -1,4 +1,4 @@
-import { LoginAuditService } from '@application/audit/login-audit.service';
+import type { LoginAuditService } from '@application/audit/login-audit.service';
 import { LoginAttemptedEvent } from '@application/events/login/login-attempted.event';
 import { LoginBlockedEvent } from '@application/events/login/login-blocked.event';
 import { LoginFailedEvent } from '@application/events/login/login-failed.event';

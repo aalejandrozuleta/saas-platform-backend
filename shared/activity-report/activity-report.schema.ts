@@ -14,6 +14,13 @@ import type {
 
 export const DEFAULT_ACTIVITY_REPORT_COLLECTION =
   'user_activity_reports';
+const ACTIVITY_OUTCOMES = [
+  'INFO',
+  'SUCCESS',
+  'FAILURE',
+  'BLOCKED',
+  'REJECTED',
+] as const;
 
 @Schema({
   versionKey: false,
@@ -29,7 +36,12 @@ export class ActivityReportDocument extends Document {
   @Prop({ required: true, index: true })
   action!: string;
 
-  @Prop({ required: true, index: true })
+  @Prop({
+    required: true,
+    index: true,
+    type: String,
+    enum: ACTIVITY_OUTCOMES,
+  })
   outcome!: ActivityOutcome;
 
   @Prop({ required: true })

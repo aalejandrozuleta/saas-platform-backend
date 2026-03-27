@@ -2,12 +2,12 @@ import { join } from 'node:path';
 
 import type { Request } from 'express';
 import {
-  ErrorCode,
   I18nService,
   buildResponseMeta,
   errorResponse,
   loadMessagesFromDirectory,
 } from '@saas/shared';
+import type { ErrorCode } from '@saas/shared';
 
 const gatewayI18n = new I18nService(
   loadMessagesFromDirectory(

@@ -1,7 +1,8 @@
 import axios, {
   AxiosInstance,
-  AxiosRequestConfig,
   AxiosError,
+  AxiosRequestConfig,
+  AxiosResponse,
 } from 'axios';
 import CircuitBreaker from 'opossum';
 import { Injectable } from '@nestjs/common';
@@ -9,9 +10,11 @@ import type { PlatformLogger } from '@saas/shared';
 
 @Injectable()
 export class ResilientHttpClient {
-
   private readonly client: AxiosInstance;
-  private readonly breaker: CircuitBreaker<[AxiosRequestConfig], any>;
+  private readonly breaker: CircuitBreaker<
+    [AxiosRequestConfig],
+    AxiosResponse<unknown>
+  >;
   private readonly baseURL: string;
 
   constructor(
@@ -63,12 +66,26 @@ export class ResilientHttpClient {
   async request(
     config: AxiosRequestConfig,
     retries = 2,
-  ) {
+  ): Promise<AxiosResponse<unknown>> {
+    return this.executeRequest(config, retries);
+  }
 
+  async requestTyped<TResponse>(
+    config: AxiosRequestConfig,
+    retries = 2,
+  ): Promise<AxiosResponse<TResponse>> {
+    return this.executeRequest(config, retries) as Promise<
+      AxiosResponse<TResponse>
+    >;
+  }
+
+  private async executeRequest(
+    config: AxiosRequestConfig,
+    retries: number,
+  ): Promise<AxiosResponse<unknown>> {
     let attempt = 0;
 
     while (true) {
-
       try {
         return await this.breaker.fire(config);
       } catch (error) {
