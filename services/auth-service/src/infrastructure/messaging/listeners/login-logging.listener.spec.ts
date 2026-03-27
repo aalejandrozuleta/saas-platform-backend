@@ -1,4 +1,4 @@
-import { PlatformLogger } from '@saas/shared';
+import { type PlatformLogger } from '@saas/shared';
 import { LoginSucceededEvent } from '@application/events/login/login-succeeded.event';
 
 import { LoginLoggingListener } from './login-logging.listener';

@@ -14,7 +14,6 @@ import { buildGatewayErrorResponse } from '../../errors/gateway-error-response.u
 import { ResilientHttpClient } from '../client/resilient-http.client';
 import { forwardHeaders } from '../utils/header-forwarder.util';
 
-
 @Injectable()
 export class AuthProxy {
 

@@ -7,9 +7,7 @@ x-logging: &default-logging
     max-file: "3"
 
 services:
-  # =====================
-  # NGINX
-  # =====================
+
   nginx:
     image: ${NGINX_IMAGE:-nginx:stable-alpine}
     container_name: nginx-dev
@@ -25,9 +23,6 @@ services:
     networks:
       - saas-dev
 
-  # =====================
-  # API GATEWAY
-  # =====================
   api-gateway:
     container_name: api-gateway-dev
     init: true
@@ -50,9 +45,6 @@ services:
     networks:
       - saas-dev
 
-  # =====================
-  # AUTH SERVICE
-  # =====================
   auth-service:
     container_name: auth-service-dev
     init: true
@@ -81,9 +73,7 @@ services:
     logging: *default-logging
     networks:
       - saas-dev
-  # =====================
-  # POSTGRES
-  # =====================
+
   auth-postgres:
     image: ${POSTGRES_IMAGE:-postgres:18-alpine}
     container_name: auth-postgres-dev
@@ -95,7 +85,6 @@ services:
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U auth_user -d auth_db"]
       interval: 5s
-      timeout: 5s
       retries: 5
     volumes:
       - auth-postgres-data:/var/lib/postgresql/data
@@ -105,9 +94,6 @@ services:
     networks:
       - saas-dev
 
-  # =====================
-  # REDIS
-  # =====================
   redis:
     image: ${REDIS_IMAGE:-redis:8-alpine}
     container_name: redis-dev
@@ -123,9 +109,6 @@ services:
     networks:
       - saas-dev
 
-  # =====================
-  # MONGO
-  # =====================
   mongo:
     image: ${MONGO_IMAGE:-mongo:8-noble}
     container_name: mongo-dev
@@ -147,9 +130,6 @@ services:
     networks:
       - saas-dev
 
-  # =====================
-  # PROMETHEUS
-  # =====================
   prometheus:
     image: ${PROMETHEUS_IMAGE:-prom/prometheus:v3.10.0}
     container_name: prometheus-dev
@@ -227,9 +207,6 @@ services:
     networks:
       - saas-dev
 
-  # =====================
-  # LOKI
-  # =====================
   loki:
     image: ${LOKI_IMAGE:-grafana/loki:3.6.4}
     container_name: loki-dev
@@ -265,9 +242,6 @@ services:
     networks:
       - saas-dev
 
-  # =====================
-  # GRAFANA
-  # =====================
   grafana:
     image: ${GRAFANA_IMAGE:-grafana/grafana:12.3.5}
     container_name: grafana-dev
@@ -285,9 +259,6 @@ services:
     networks:
       - saas-dev
 
-  # =====================
-  # MAILPIT
-  # =====================
   mailpit:
     image: ${MAILPIT_IMAGE:-axllent/mailpit:v1.29.3}
     container_name: mailpit-dev
@@ -299,9 +270,6 @@ services:
     networks:
       - saas-dev
 
-  # =====================
-  # PGADMIN
-  # =====================
   pgadmin:
     image: ${PGADMIN_IMAGE:-dpage/pgadmin4:9.13.0}
     container_name: pgadmin-dev
@@ -336,9 +304,6 @@ services:
     networks:
       - saas-dev
 
-  # =====================
-  # MONGO EXPRESS
-  # =====================
   mongo-express:
     image: ${MONGO_EXPRESS_IMAGE:-mongo-express:1.0.2-20-alpine3.19}
     container_name: mongo-express-dev
@@ -356,22 +321,15 @@ services:
     networks:
       - saas-dev
 
-# =====================
-# NETWORK
-# =====================
 networks:
   saas-dev:
     driver: bridge
-    ipam:
-      config:
-        - subnet: 172.28.0.0/16
 
-# =====================
-# VOLUMES
-# =====================
 volumes:
   auth-postgres-data:
+  redis-data:
   mongo-data:
+  prometheus-data:
   loki-data:
   prometheus-data:
   grafana-data:

@@ -1,5 +1,5 @@
 import { Device } from '@domain/entities/device/device.entity';
-import { Device as PrismaDevice } from '@prisma/client';
+import { type Device as PrismaDevice } from '@prisma/client';
 
 
 /**

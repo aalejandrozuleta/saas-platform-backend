@@ -1,4 +1,4 @@
-import { INestApplication } from '@nestjs/common';
+import { type INestApplication } from '@nestjs/common';
 import { SwaggerModule } from '@nestjs/swagger';
 
 import { createSwaggerConfig } from './swagger.config';

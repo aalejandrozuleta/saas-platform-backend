@@ -1,4 +1,4 @@
-import { PrismaService } from '@infrastructure/persistence/prisma/prisma.service';
+import { type PrismaService } from '@infrastructure/persistence/prisma/prisma.service';
 
 import { TokenCleanupService } from './token-cleanup.service';
 

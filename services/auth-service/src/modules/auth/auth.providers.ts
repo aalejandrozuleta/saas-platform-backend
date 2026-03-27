@@ -1,4 +1,4 @@
-import { Provider } from '@nestjs/common';
+import { type Provider } from '@nestjs/common';
 import { PasswordHasherService } from '@infrastructure/crypto/password-hasher.service';
 import { DOMAIN_EVENT_BUS, PASSWORD_HASHER, SESSION_CACHE, TOKEN_SERVICE, UNIT_OF_WORK } from '@domain/token/services.tokens';
 import { NestDomainEventBus } from '@infrastructure/messaging/nest-domain-event.bus';

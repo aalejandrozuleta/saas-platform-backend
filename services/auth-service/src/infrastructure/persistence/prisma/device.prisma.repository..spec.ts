@@ -1,9 +1,9 @@
-import { Device } from '@domain/entities/device/device.entity';
+import { type Device } from '@domain/entities/device/device.entity';
 
 import { DeviceMapper } from '../mappers/device.mapper';
 
 import { DevicePrismaRepository } from './device.prisma.repository';
-import { PrismaService } from './prisma.service';
+import { type PrismaService } from './prisma.service';
 
 describe('DevicePrismaRepository', () => {
   let repository: DevicePrismaRepository;

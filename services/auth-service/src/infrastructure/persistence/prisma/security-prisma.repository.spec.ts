@@ -1,7 +1,7 @@
 import { DomainErrorFactory } from '@domain/errors/domain-error.factory';
 
 import { SecurityPrismaRepository } from './security-prisma.repository';
-import { PrismaService } from './prisma.service';
+import { type PrismaService } from './prisma.service';
 
 describe('SecurityPrismaRepository', () => {
   let repository: SecurityPrismaRepository;

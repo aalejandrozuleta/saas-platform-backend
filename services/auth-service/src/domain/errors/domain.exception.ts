@@ -1,4 +1,4 @@
-import { BaseException, ErrorCode } from '@saas/shared';
+import { BaseException, type ErrorCode } from '@saas/shared';
 
 /**
  * Excepción base del dominio.

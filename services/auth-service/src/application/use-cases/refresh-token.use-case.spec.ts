@@ -1,8 +1,8 @@
 import { ErrorCode } from '@saas/shared';
-import { RefreshTokenRepository } from '@application/ports/refresh-token.repository';
-import { TokenService } from '@application/ports/token.service.token';
-import { PasswordHasher } from '@application/ports/password-hasher.port';
-import { SessionCache } from '@application/ports/session-cache.port';
+import { type RefreshTokenRepository } from '@application/ports/refresh-token.repository';
+import { type TokenService } from '@application/ports/token.service.token';
+import { type PasswordHasher } from '@application/ports/password-hasher.port';
+import { type SessionCache } from '@application/ports/session-cache.port';
 
 import { RefreshTokenUseCase } from './refresh-token.use-case';
 

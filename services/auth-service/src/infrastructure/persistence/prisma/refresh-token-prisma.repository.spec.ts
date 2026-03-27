@@ -1,5 +1,5 @@
 import { RefreshTokenPrismaRepository } from './refresh-token-prisma.repository';
-import { PrismaService } from './prisma.service';
+import { type PrismaService } from './prisma.service';
 
 describe('RefreshTokenPrismaRepository', () => {
   let repository: RefreshTokenPrismaRepository;

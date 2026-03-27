@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6.0.2
 
       - uses: ./.github/actions/setup-node
 
@@ -26,14 +26,9 @@ jobs:
         run: pnpm docs:code
 
       - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v4.0.0
         with:
           path: docs
 
-      - name: Debug docs output
-        run: |
-          echo "DOCS CONTENT:"
-          ls -R docs
-
       - name: Deploy to GitHub Pages
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v4.0.5

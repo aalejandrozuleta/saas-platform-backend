@@ -5,7 +5,7 @@ import { UserStatus as PrismaUserStatus } from '@prisma/client';
 
 import { UserMapper } from '../mappers/user.mapper';
 
-import { PrismaService } from './prisma.service';
+import { type PrismaService } from './prisma.service';
 import { UserPrismaRepository } from './user.prisma.repository';
 
 jest.mock('../mappers/user.mapper', () => ({

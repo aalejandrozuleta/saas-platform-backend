@@ -1,4 +1,4 @@
-import pino, { Logger as PinoLogger } from 'pino';
+import pino, { type Logger as PinoLogger } from 'pino';
 
 import { requestContextStorage } from '../context/async-local-storage';
 

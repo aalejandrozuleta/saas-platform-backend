@@ -1,4 +1,4 @@
-import { ErrorCode } from "./ErrorCode.enum";
+import { type ErrorCode } from "./ErrorCode.enum";
 
 /**
  * Excepción base para toda la plataforma.

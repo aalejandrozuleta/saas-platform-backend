@@ -13,7 +13,12 @@ export default [
       '**/.turbo/**',
       '**/.next/**',
       '**/coverage/**',
+      '**/lcov-report/**',
+      '**/*.d.ts',
     ],
+    linterOptions: {
+      reportUnusedDisableDirectives: 'error',
+    },
   },
 
   {
@@ -34,6 +39,14 @@ export default [
     rules: {
       '@typescript-eslint/no-unused-vars': 'off',
       '@typescript-eslint/explicit-function-return-type': 'off',
+      '@typescript-eslint/consistent-type-imports': [
+        'warn',
+        {
+          prefer: 'type-imports',
+          fixStyle: 'inline-type-imports',
+        },
+      ],
+      '@typescript-eslint/no-explicit-any': 'warn',
 
       'import/order': [
         'error',
@@ -49,11 +62,19 @@ export default [
           'newlines-between': 'always',
         },
       ],
+      'import/no-duplicates': 'error',
+      'import/newline-after-import': ['error', { count: 1 }],
 
       'unused-imports/no-unused-imports': 'error',
 
-      'no-console': 'warn',
+      curly: ['error', 'all'],
+      eqeqeq: ['error', 'always', { null: 'ignore' }],
+      'no-console': ['warn', { allow: ['warn', 'error'] }],
       'no-debugger': 'error',
+      'no-implicit-coercion': 'error',
+      'no-var': 'error',
+      'object-shorthand': ['error', 'always'],
+      'prefer-const': ['error', { destructuring: 'all' }],
     },
   },
 
@@ -85,6 +106,30 @@ export default [
           ],
         },
       ],
+    },
+  },
+
+  /*
+   TEST FILES
+   relajamos reglas para tests
+  */
+  {
+    files: ['**/*.spec.ts', '**/*.test.ts'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-unused-vars': 'off',
+      'no-console': 'off',
+    },
+  },
+
+  /*
+   SHARED PACKAGE
+   utilidades compartidas pueden usar any
+  */
+  {
+    files: ['shared/**/*.ts'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
     },
   },
 

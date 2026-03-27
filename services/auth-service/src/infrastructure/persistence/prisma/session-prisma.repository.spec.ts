@@ -1,5 +1,5 @@
 import { SessionPrismaRepository } from './session-prisma.repository';
-import { PrismaService } from './prisma.service';
+import { type PrismaService } from './prisma.service';
 
 describe('SessionPrismaRepository', () => {
   let repository: SessionPrismaRepository;

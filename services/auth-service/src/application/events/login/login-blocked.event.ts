@@ -1,4 +1,4 @@
-import { LoginContext } from "@domain/value-objects/login-context.vo";
+import { type LoginContext } from "@domain/value-objects/login-context.vo";
 
 /**
  * Evento emitido cuando el usuario está bloqueado

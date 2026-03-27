@@ -1,5 +1,5 @@
-import { UserStatus } from "@domain/enums/user-status.enum";
-import { EmailVO } from "@domain/value-objects/email.vo";
+import { type UserStatus } from "@domain/enums/user-status.enum";
+import { type EmailVO } from "@domain/value-objects/email.vo";
 
 /**
  * Propiedades internas de la entidad User
