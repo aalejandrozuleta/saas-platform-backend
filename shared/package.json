@@ -17,8 +17,15 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@nestjs/mongoose": "^11.0.4",
+    "@nestjs/axios": "^4.0.1",
+    "@nestjs/common": "11.1.17",
+    "@nestjs/config": "4.0.3",
+    "@nestjs/core": "11.1.17",
+    "@nestjs/mapped-types": "^2.1.0",
+    "@nestjs/mongoose": "11.0.4",
+    "@nestjs/platform-express": "11.1.17",
     "@nestjs/swagger": "^11.2.6",
+    "@nestjs/testing": "11.1.17",
     "express": "^5.2.1",
     "mongoose": "^9.1.5",
     "pino": "^10.3.0"

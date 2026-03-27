@@ -16,7 +16,14 @@
     "docs": "typedoc --options typedoc.json"
   },
   "dependencies": {
-    "@nestjs/platform-express": "11.1.13",
+    "@nestjs/axios": "^4.0.1",
+    "@nestjs/common": "11.1.17",
+    "@nestjs/config": "4.0.3",
+    "@nestjs/core": "11.1.17",
+    "@nestjs/mapped-types": "^2.1.0",
+    "@nestjs/mongoose": "^11.0.4",
+    "@nestjs/platform-express": "11.1.17",
+    "@nestjs/swagger": "^11.2.6",
     "@saas/shared": "workspace:*",
     "@types/jest": "^30.0.0",
     "axios": "^1.13.4",
@@ -33,7 +40,7 @@
   },
   "devDependencies": {
     "@nestjs/cli": "^11.0.16",
-    "@nestjs/testing": "11.1.13",
+    "@nestjs/testing": "11.1.17",
     "@types/cookie-parser": "^1.4.10",
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",

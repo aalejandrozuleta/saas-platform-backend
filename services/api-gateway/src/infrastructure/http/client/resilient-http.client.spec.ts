@@ -16,7 +16,7 @@ describe('ResilientHttpClient', () => {
         new AxiosError(
           'Conflict',
           'ERR_BAD_REQUEST',
-          { method: 'POST' },
+          { method: 'POST', headers: {} } as any,
           undefined,
           {
             status: 409,
@@ -47,7 +47,7 @@ describe('ResilientHttpClient', () => {
     const error503 = new AxiosError(
       'Service Unavailable',
       'ERR_BAD_RESPONSE',
-      { method: 'GET' },
+      { method: 'GET', headers: {} } as any,
       undefined,
       {
         status: 503,
