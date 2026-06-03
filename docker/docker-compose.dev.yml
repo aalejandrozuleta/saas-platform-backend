@@ -69,13 +69,13 @@ services:
       redis:
         condition: service_healthy
       mongo:
-        condition: service_started
+        condition: service_healthy
     logging: *default-logging
     networks:
       - saas-dev
 
   auth-postgres:
-    image: ${POSTGRES_IMAGE:-postgres:18-alpine}
+    image: ${POSTGRES_IMAGE:-postgres:17-alpine}
     container_name: auth-postgres-dev
     restart: unless-stopped
     environment:
@@ -100,6 +100,8 @@ services:
     restart: unless-stopped
     ports:
       - "6379:6379"
+    volumes:
+      - redis-data:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -316,7 +318,7 @@ services:
       - "8082:8081"
     depends_on:
       mongo:
-        condition: service_started
+        condition: service_healthy
     logging: *default-logging
     networks:
       - saas-dev
@@ -331,7 +333,6 @@ volumes:
   mongo-data:
   prometheus-data:
   loki-data:
-  prometheus-data:
   grafana-data:
   pgadmin-data:
   alloy-data:

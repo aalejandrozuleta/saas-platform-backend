@@ -1,0 +1,39 @@
+# Dependencias instaladas localmente (se instalan dentro del contenedor)
+**/node_modules
+
+# Artefactos de compilación
+**/dist
+**/build
+
+# Cobertura de tests
+**/coverage
+
+# Archivos de entorno sensibles (se pasan via env_file en compose)
+**/.env
+**/.env.local
+**/.env.*.local
+
+# Control de versiones
+.git
+.gitignore
+
+# Herramientas de desarrollo local
+.vscode
+.idea
+*.swp
+*.swo
+
+# Logs
+**/*.log
+**/logs
+
+# Docker (evitar recursión)
+docker/
+
+# Documentación generada
+**/docs/generated
+**/typedoc-out
+
+# OS
+.DS_Store
+Thumbs.db
