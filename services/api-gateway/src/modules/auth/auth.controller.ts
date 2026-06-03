@@ -31,7 +31,7 @@ export class AuthController {
   async register(@Req() req: Request) {
     this.prepareRequest(req);
     const { body } = await this.authProxy.forward(req, '/register');
-    
+
     return body;
   }
 
@@ -131,17 +131,6 @@ export class AuthController {
     }
 
     return result.body;
-  }
-
-  /**
-   * Logout de usuario
-   */
-  @Post('logout')
-  async logout(@Req() req: Request) {
-    this.prepareRequest(req);
-
-    const { body } = await this.authProxy.forward(req, '/logout');
-    return body;
   }
 
   /**
