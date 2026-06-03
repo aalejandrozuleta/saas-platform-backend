@@ -4,10 +4,10 @@ WORKDIR /app
 
 # Activar corepack para usar la versión de pnpm declarada en packageManager
 ENV PNPM_STORE_PATH=/pnpm-store
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+
 RUN corepack enable && corepack prepare --activate
 
-# Copiar manifiestos del workspace antes del código para aprovechar cache de capas
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY .npmrc ./
 COPY tsconfig.base.json ./
 
