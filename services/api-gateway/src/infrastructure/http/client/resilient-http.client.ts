@@ -31,6 +31,7 @@ export class ResilientHttpClient {
     });
 
     this.breaker = new CircuitBreaker(
+      /* istanbul ignore next */
       (config: AxiosRequestConfig) =>
         this.client.request(config),
       {

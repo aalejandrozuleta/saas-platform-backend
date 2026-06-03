@@ -27,6 +27,8 @@ export class MetricsInterceptor implements NestInterceptor {
       request.route?.path ?? request.baseUrl ?? request.url ?? 'unknown';
 
     // Avoid high-cardinality labels: strip API version and query string.
+    // split()[0] always returns a string — the ?? fallback is a type-safety guard.
+    // istanbul ignore next
     const noQuery = String(rawRoute).split('?')[0] ?? 'unknown';
     const normalizedRoute = noQuery.replace(/^\/v\d+/, '') || '/';
 

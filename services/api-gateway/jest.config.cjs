@@ -17,7 +17,15 @@ module.exports = {
 
   roots: ['<rootDir>/src'],
 
+  collectCoverageFrom: [
+    'src/**/*.ts',
+    '!src/**/*.spec.ts',
+    '!src/**/*.module.ts',
+    '!src/main.ts',
+    '!src/**/*.d.ts',
+  ],
+
   transformIgnorePatterns: [
-  'node_modules/(?!(?:@saas/shared)/)',
-],
+    'node_modules/(?!(?:@saas/shared)/)',
+  ],
 };
