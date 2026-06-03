@@ -1,6 +1,5 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
-
 import { LogoutEvent } from '@application/events/logout/logout.event';
 import { LogoutAllEvent } from '@application/events/logout/logout-all.event';
 import { AuditLogger } from '@application/ports/audit-logger.port';

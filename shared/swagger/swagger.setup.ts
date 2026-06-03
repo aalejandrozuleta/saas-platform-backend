@@ -12,7 +12,7 @@ import { createSwaggerConfig } from './swagger.config';
  *   de `class-validator` como peer dependency de `@nestjs/common`.
  * @param serviceName - Nombre del servicio que aparece en la UI de Swagger.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ 
 export function setupSwagger(app: any, serviceName: string): void {
   const config = createSwaggerConfig(serviceName);
 
