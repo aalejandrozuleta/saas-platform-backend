@@ -89,6 +89,51 @@ export class AuthController {
   }
 
   /**
+   * Cierra la sesión actual del usuario.
+   *
+   * @remarks
+   * Inyecta `x-user-id` y `x-session-id` como headers internos
+   * para que el auth-service identifique la sesión a revocar.
+   */
+  @Post('logout')
+  async logout(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    this.prepareRequest(req);
+    req.headers['x-user-id'] = req.user!.id;
+    req.headers['x-session-id'] = req.user!.sessionId;
+
+    const result = await this.authProxy.forward(req, '/logout');
+
+    if (result.cookies) {
+      res.setHeader('set-cookie', result.cookies);
+    }
+
+    return result.body;
+  }
+
+  /**
+   * Cierra todas las sesiones activas del usuario.
+   */
+  @Post('logout-all')
+  async logoutAll(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    this.prepareRequest(req);
+    req.headers['x-user-id'] = req.user!.id;
+
+    const result = await this.authProxy.forward(req, '/logout-all');
+
+    if (result.cookies) {
+      res.setHeader('set-cookie', result.cookies);
+    }
+
+    return result.body;
+  }
+
+  /**
    * Logout de usuario
    */
   @Post('logout')

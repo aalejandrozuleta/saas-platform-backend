@@ -20,6 +20,7 @@ export function forwardHeaders(
   copy('x-country');
   copy('x-device-fingerprint');
   copy('x-user-id');
+  copy('x-session-id');
   copy('cookie');
 
   return headers;

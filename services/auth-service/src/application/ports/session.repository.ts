@@ -27,4 +27,19 @@ export interface SessionRepository {
     userId: string,
     now: Date,
   ): Promise<string[]>;
+
+  /**
+   * Revoca una sesión específica por su ID.
+   *
+   * @remarks
+   * Si la sesión no existe o ya está revocada, la operación
+   * se completa silenciosamente (idempotente).
+   *
+   * @param sessionId - Identificador de la sesión a revocar
+   * @param now - Marca de tiempo de revocación
+   */
+  revokeById(
+    sessionId: string,
+    now: Date,
+  ): Promise<void>;
 }

@@ -252,6 +252,64 @@ export class AuthActivityReportFactory {
     });
   }
 
+  /**
+   * Genera el reporte de auditoría para un cierre de sesión individual.
+   *
+   * @param input - Datos del evento de logout
+   */
+  static logout(input: {
+    userId: string;
+    sessionId: string;
+    ip: string;
+    country?: string;
+  }): CreateActivityReport {
+    return this.createReport({
+      action: AuthAuditEvent.LOGOUT,
+      outcome: 'SUCCESS',
+      summary: 'Sesión cerrada correctamente',
+      actor: {
+        type: 'USER',
+        id: input.userId,
+      },
+      context: {
+        ip: input.ip,
+        country: input.country,
+      },
+      metadata: {
+        sessionId: input.sessionId,
+      },
+    });
+  }
+
+  /**
+   * Genera el reporte de auditoría para el cierre de todas las sesiones.
+   *
+   * @param input - Datos del evento de logout global
+   */
+  static logoutAll(input: {
+    userId: string;
+    revokedCount: number;
+    ip: string;
+    country?: string;
+  }): CreateActivityReport {
+    return this.createReport({
+      action: AuthAuditEvent.LOGOUT_ALL,
+      outcome: 'SUCCESS',
+      summary: `Todas las sesiones cerradas (${input.revokedCount})`,
+      actor: {
+        type: 'USER',
+        id: input.userId,
+      },
+      context: {
+        ip: input.ip,
+        country: input.country,
+      },
+      metadata: {
+        revokedCount: input.revokedCount,
+      },
+    });
+  }
+
   static registerFailed(input: {
     userId?: string | null;
     email: string;

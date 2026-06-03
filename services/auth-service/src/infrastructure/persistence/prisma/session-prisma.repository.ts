@@ -125,6 +125,30 @@ export class SessionPrismaRepository implements SessionRepository {
     return ids;
   }
 
+  /**
+   * Revoca una sesión específica por su ID.
+   *
+   * @remarks
+   * Operación idempotente: si la sesión ya está revocada
+   * o no existe, no genera ningún error.
+   *
+   * @param sessionId - ID de la sesión a revocar
+   * @param now - Marca de tiempo de revocación
+   */
+  async revokeById(
+    sessionId: string,
+    now: Date,
+  ): Promise<void> {
+    await this.prisma.session.updateMany({
+      where: {
+        id: sessionId,
+        revokedAt: null,
+        endedAt: null,
+      },
+      data: { revokedAt: now },
+    });
+  }
+
   async revokeOldestActiveSession(
     userId: string,
     now: Date,

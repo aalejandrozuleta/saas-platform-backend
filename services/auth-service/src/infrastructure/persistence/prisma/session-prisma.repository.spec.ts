@@ -101,6 +101,32 @@ describe('SessionPrismaRepository', () => {
     });
   });
 
+  describe('revokeById', () => {
+    it('debe revocar una sesión específica por su ID', async () => {
+      const now = new Date();
+      prisma.session.updateMany = jest.fn().mockResolvedValue({ count: 1 });
+
+      await repository.revokeById('session-xyz', now);
+
+      expect(prisma.session.updateMany).toHaveBeenCalledWith({
+        where: {
+          id: 'session-xyz',
+          revokedAt: null,
+          endedAt: null,
+        },
+        data: { revokedAt: now },
+      });
+    });
+
+    it('debe completarse sin error si la sesión ya estaba revocada (idempotente)', async () => {
+      prisma.session.updateMany = jest.fn().mockResolvedValue({ count: 0 });
+
+      await expect(
+        repository.revokeById('already-revoked', new Date()),
+      ).resolves.not.toThrow();
+    });
+  });
+
   describe('revokeAllUserSessions', () => {
     it('debe revocar todas las sesiones activas y retornar sus IDs', async () => {
       const now = new Date();

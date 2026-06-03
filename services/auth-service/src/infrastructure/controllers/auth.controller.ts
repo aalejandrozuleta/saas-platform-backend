@@ -11,12 +11,15 @@ import { ChangePasswordDto } from '@application/dto/change-password/change-passw
 import { RegisterUserUseCase } from '@application/use-cases/register-user.use-case';
 import { LoginUserUseCase } from '@application/use-cases/login-user.use-case';
 import { ChangePasswordUseCase } from '@application/use-cases/change-password.use-case';
+import { LogoutUseCase } from '@application/use-cases/logout.use-case';
+import { LogoutAllUseCase } from '@application/use-cases/logout-all.use-case';
 import { LoginContext } from '@domain/value-objects/login-context.vo';
 import { I18nService, successResponse } from '@saas/shared';
 import { Request, Response } from 'express';
 import { RegisterSwagger } from '@infrastructure/swagger/register.swagger';
 import { LoginSwagger } from '@infrastructure/swagger/login.swagger';
 import { ChangePasswordSwagger } from '@infrastructure/swagger/change-password.swagger';
+import { LogoutSwagger, LogoutAllSwagger } from '@infrastructure/swagger/logout.swagger';
 import { ApiTags } from '@nestjs/swagger';
 import { RefreshTokenUseCase } from '@application/use-cases/refresh-token.use-case';
 
@@ -38,6 +41,8 @@ export class AuthController {
     private readonly loginUserUseCase: LoginUserUseCase,
     private readonly refreshTokenUseCase: RefreshTokenUseCase,
     private readonly changePasswordUseCase: ChangePasswordUseCase,
+    private readonly logoutUseCase: LogoutUseCase,
+    private readonly logoutAllUseCase: LogoutAllUseCase,
     private readonly i18n: I18nService,
   ) { }
 
@@ -158,6 +163,77 @@ export class AuthController {
   }
 
   /**
+   * Cierra la sesión actual del usuario autenticado.
+   *
+   * @remarks
+   * Revoca la sesión indicada por `x-session-id`, invalida
+   * el refresh token asociado y elimina la entrada de Redis.
+   * Limpia las cookies `accessToken` y `refreshToken`.
+   */
+  @Post('logout')
+  @LogoutSwagger()
+  async logout(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const lang = this.resolveLanguage(req);
+    const userId = this.getHeader(req, 'x-user-id')!;
+    const sessionId = this.getHeader(req, 'x-session-id')!;
+
+    await this.logoutUseCase.execute(
+      userId,
+      sessionId,
+      {
+        ip: this.resolveClientIp(req),
+        country: this.getHeader(req, 'x-country'),
+      },
+    );
+
+    this.clearAuthCookies(res);
+
+    return successResponse(
+      {},
+      {
+        message: this.i18n.translate('auth.logout_success', lang),
+      },
+    );
+  }
+
+  /**
+   * Cierra **todas** las sesiones activas del usuario.
+   *
+   * @remarks
+   * Útil para cerrar sesión en todos los dispositivos simultáneamente.
+   * Revoca todos los refresh tokens del usuario y limpia Redis.
+   */
+  @Post('logout-all')
+  @LogoutAllSwagger()
+  async logoutAll(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const lang = this.resolveLanguage(req);
+    const userId = this.getHeader(req, 'x-user-id')!;
+
+    const { revokedCount } = await this.logoutAllUseCase.execute(
+      userId,
+      {
+        ip: this.resolveClientIp(req),
+        country: this.getHeader(req, 'x-country'),
+      },
+    );
+
+    this.clearAuthCookies(res);
+
+    return successResponse(
+      { revokedCount },
+      {
+        message: this.i18n.translate('auth.logout_all_success', lang),
+      },
+    );
+  }
+
+  /**
    * Cambio de contraseña del usuario autenticado
    */
   @Post('change-password')
@@ -228,5 +304,26 @@ export class AuthController {
   private shouldUseSecureCookies(req: Request): boolean {
     const forwardedProto = req.get('x-forwarded-proto');
     return req.secure || forwardedProto === 'https';
+  }
+
+  /**
+   * Limpia las cookies de autenticación del cliente.
+   *
+   * @remarks
+   * Invalida `accessToken` y `refreshToken` del lado del browser
+   * sobreescribiéndolas con `maxAge: 0`.
+   *
+   * @param res - Objeto de respuesta de Express
+   */
+  private clearAuthCookies(res: Response): void {
+    const cookieOptions = {
+      httpOnly: true,
+      sameSite: 'strict' as const,
+      path: '/',
+      maxAge: 0,
+    };
+
+    res.clearCookie('accessToken', cookieOptions);
+    res.clearCookie('refreshToken', cookieOptions);
   }
 }

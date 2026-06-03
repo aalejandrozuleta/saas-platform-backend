@@ -3,6 +3,8 @@ import { RegisterUserUseCase } from '@application/use-cases/register-user.use-ca
 import { LoginUserUseCase } from '@application/use-cases/login-user.use-case';
 import { RefreshTokenUseCase } from '@application/use-cases/refresh-token.use-case';
 import { ChangePasswordUseCase } from '@application/use-cases/change-password.use-case';
+import { LogoutUseCase } from '@application/use-cases/logout.use-case';
+import { LogoutAllUseCase } from '@application/use-cases/logout-all.use-case';
 import { I18nService } from '@saas/shared';
 import { type RegisterUserDto } from '@application/dto/register/register-user.dto';
 import { User } from '@domain/entities/user/user.entity';
@@ -16,6 +18,8 @@ describe('AuthController', () => {
   let loginUserUseCase: jest.Mocked<LoginUserUseCase>;
   let refreshTokenUseCase: jest.Mocked<RefreshTokenUseCase>;
   let changePasswordUseCase: jest.Mocked<ChangePasswordUseCase>;
+  let logoutUseCase: jest.Mocked<LogoutUseCase>;
+  let logoutAllUseCase: jest.Mocked<LogoutAllUseCase>;
   let i18n: jest.Mocked<I18nService>;
 
   beforeEach(async () => {
@@ -42,9 +46,15 @@ describe('AuthController', () => {
         },
         {
           provide: ChangePasswordUseCase,
-          useValue: {
-            execute: jest.fn(),
-          },
+          useValue: { execute: jest.fn() },
+        },
+        {
+          provide: LogoutUseCase,
+          useValue: { execute: jest.fn() },
+        },
+        {
+          provide: LogoutAllUseCase,
+          useValue: { execute: jest.fn() },
         },
         {
           provide: I18nService,
@@ -63,6 +73,8 @@ describe('AuthController', () => {
     loginUserUseCase = module.get(LoginUserUseCase);
     refreshTokenUseCase = module.get(RefreshTokenUseCase);
     changePasswordUseCase = module.get(ChangePasswordUseCase);
+    logoutUseCase = module.get(LogoutUseCase);
+    logoutAllUseCase = module.get(LogoutAllUseCase);
     i18n = module.get(I18nService);
   });
 
@@ -337,6 +349,72 @@ describe('AuthController', () => {
       success: true,
       message: 'Contraseña actualizada correctamente',
       data: {},
+    });
+  });
+
+  it('debe cerrar la sesión actual y limpiar cookies', async () => {
+    logoutUseCase.execute.mockResolvedValue(undefined);
+    i18n.translate.mockReturnValue('Sesión cerrada correctamente');
+
+    const req: any = {
+      secure: false,
+      headers: {
+        'accept-language': 'es',
+        'x-user-id': 'user-1',
+        'x-session-id': 'session-1',
+        'x-country': 'CO',
+        'x-forwarded-proto': 'https',
+      },
+      get: (key: string) => req.headers[key],
+    };
+
+    const clearCookie = jest.fn();
+    const res: any = { clearCookie };
+
+    const result = await controller.logout(req, res);
+
+    expect(logoutUseCase.execute).toHaveBeenCalledWith(
+      'user-1',
+      'session-1',
+      expect.objectContaining({ ip: expect.any(String) }),
+    );
+    expect(clearCookie).toHaveBeenCalledWith('accessToken', expect.any(Object));
+    expect(clearCookie).toHaveBeenCalledWith('refreshToken', expect.any(Object));
+    expect(result).toEqual({
+      success: true,
+      message: 'Sesión cerrada correctamente',
+      data: {},
+    });
+  });
+
+  it('debe cerrar todas las sesiones y retornar el número revocado', async () => {
+    logoutAllUseCase.execute.mockResolvedValue({ revokedCount: 4 });
+    i18n.translate.mockReturnValue('Todas las sesiones han sido cerradas');
+
+    const req: any = {
+      secure: true,
+      headers: {
+        'accept-language': 'es',
+        'x-user-id': 'user-1',
+        'x-country': 'CO',
+      },
+      get: (key: string) => req.headers[key],
+    };
+
+    const clearCookie = jest.fn();
+    const res: any = { clearCookie };
+
+    const result = await controller.logoutAll(req, res);
+
+    expect(logoutAllUseCase.execute).toHaveBeenCalledWith(
+      'user-1',
+      expect.objectContaining({ ip: expect.any(String) }),
+    );
+    expect(clearCookie).toHaveBeenCalledTimes(2);
+    expect(result).toEqual({
+      success: true,
+      message: 'Todas las sesiones han sido cerradas',
+      data: { revokedCount: 4 },
     });
   });
 });

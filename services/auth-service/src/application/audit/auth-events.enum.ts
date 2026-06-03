@@ -74,6 +74,16 @@ export enum AuthAuditEvent {
   PASSWORD_CHANGE_FAILED = 'AUTH.PASSWORD_CHANGE_FAILED',
 
   /**
+   * Cierre de sesión individual exitoso.
+   */
+  LOGOUT = 'AUTH.LOGOUT',
+
+  /**
+   * Cierre de todas las sesiones activas.
+   */
+  LOGOUT_ALL = 'AUTH.LOGOUT_ALL',
+
+  /**
    * Error interno durante flujo auth.
    */
   INTERNAL_ERROR = 'AUTH.INTERNAL_ERROR',
