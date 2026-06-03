@@ -1,8 +1,7 @@
 import { UnauthorizedException } from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
+import { type Reflector } from '@nestjs/core';
 import { type Redis } from 'ioredis';
 import { sign } from 'jsonwebtoken';
-
 import { type EnvService } from '@config/env/env.service';
 
 import { JwtSessionGuard } from './jwt-session.guard';

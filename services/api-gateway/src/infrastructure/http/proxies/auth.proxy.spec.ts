@@ -1,6 +1,5 @@
 import { HttpException } from '@nestjs/common';
 import { AxiosError } from 'axios';
-
 import { type EnvService } from '@config/env/env.service';
 
 import { AuthProxy } from './auth.proxy';
