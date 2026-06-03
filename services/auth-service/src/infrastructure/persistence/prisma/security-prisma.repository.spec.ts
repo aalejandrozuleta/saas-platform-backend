@@ -112,7 +112,46 @@ describe('SecurityPrismaRepository', () => {
     });
   });
 
+  describe('updateLastPasswordChange', () => {
+    it('debe hacer upsert de la fecha de último cambio de contraseña', async () => {
+      const now = new Date('2026-01-01T00:00:00Z');
+      prisma.userSecurity = { upsert: jest.fn() };
+
+      await repository.updateLastPasswordChange('user-1', now);
+
+      expect(prisma.userSecurity.upsert).toHaveBeenCalledWith({
+        where: { userId: 'user-1' },
+        update: { lastPasswordChange: now },
+        create: { userId: 'user-1', lastPasswordChange: now },
+      });
+    });
+  });
+
   describe('findByUserId', () => {
+    it('debe retornar valores por defecto si el usuario no tiene UserSecurity', async () => {
+      prisma.user.findUnique.mockResolvedValue({
+        security: null,
+        recoveryCodes: [],
+      });
+
+      const result = await repository.findByUserId('user-no-security');
+
+      expect(result).toEqual({
+        trustedCountries: [],
+        twoFactorEnabled: false,
+        twoFactorMethod: undefined,
+        hasRecoveryCodes: false,
+      });
+    });
+
+    it('debe retornar null si el usuario no existe', async () => {
+      prisma.user.findUnique.mockResolvedValue(null);
+
+      const result = await repository.findByUserId('nonexistent');
+
+      expect(result).toBeNull();
+    });
+
     it('debe consultar el perfil de seguridad del usuario', async () => {
       prisma.user.findUnique.mockResolvedValue({
         security: {

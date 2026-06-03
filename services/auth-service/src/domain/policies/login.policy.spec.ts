@@ -101,6 +101,14 @@ describe('LoginPolicy', () => {
     });
   });
 
+  describe('constructor con valores custom', () => {
+    it('debe respetar maxAttempts y lockDuration personalizados', () => {
+      const custom = new LoginPolicy(10, 30);
+      expect(custom.getMaxAttempts()).toBe(10);
+      expect(custom.lockDuration()).toBe(30);
+    });
+  });
+
   describe('validateDeviceFingerprint', () => {
     it('no lanza error si existe fingerprint', () => {
       expect(() =>

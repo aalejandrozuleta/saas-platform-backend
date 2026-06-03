@@ -103,7 +103,56 @@ describe('RefreshTokenUseCase', () => {
     });
   });
 
-  it('debe rechazar refresh token si la sesión ya no está activa', async () => {
+  it('debe rechazar si el refresh token no existe en DB', async () => {
+    tokenService.verifyRefreshToken.mockReturnValue({ jti: 'jti-ok' });
+    refreshRepo.findByJti.mockResolvedValue(null);
+
+    await expect(
+      useCase.execute('raw-refresh-token'),
+    ).rejects.toMatchObject({
+      code: ErrorCode.INVALID_REFRESH_TOKEN,
+    });
+  });
+
+  it('debe rechazar si el refresh token ya fue revocado en DB', async () => {
+    tokenService.verifyRefreshToken.mockReturnValue({ jti: 'jti-ok' });
+    refreshRepo.findByJti.mockResolvedValue({
+      id: 'db-id',
+      userId: 'user-1',
+      sessionId: 'session-1',
+      familyId: 'family-1',
+      tokenHash: 'hash',
+      expiresAt: new Date(Date.now() + 60_000),
+      revokedAt: new Date(), // ya revocado
+    });
+
+    await expect(
+      useCase.execute('raw-refresh-token'),
+    ).rejects.toMatchObject({
+      code: ErrorCode.INVALID_REFRESH_TOKEN,
+    });
+  });
+
+  it('debe rechazar si el refresh token está expirado', async () => {
+    tokenService.verifyRefreshToken.mockReturnValue({ jti: 'jti-ok' });
+    refreshRepo.findByJti.mockResolvedValue({
+      id: 'db-id',
+      userId: 'user-1',
+      sessionId: 'session-1',
+      familyId: 'family-1',
+      tokenHash: 'hash',
+      expiresAt: new Date(Date.now() - 60_000), // expirado
+      revokedAt: null,
+    });
+
+    await expect(
+      useCase.execute('raw-refresh-token'),
+    ).rejects.toMatchObject({
+      code: ErrorCode.INVALID_REFRESH_TOKEN,
+    });
+  });
+
+  it('debe rechazar si la sesión ya no está activa', async () => {
     tokenService.verifyRefreshToken.mockReturnValue({ jti: 'old-jti' });
     refreshRepo.findByJti.mockResolvedValue({
       id: 'db-id',

@@ -113,7 +113,7 @@ describe('UserMapper', () => {
     expect(user.status).toBe(DomainUserStatus.BLOCKED);
   });
 
-  it('debe mapear correctamente DomainStatus a PrismaStatus', () => {
+  it('debe mapear correctamente DomainStatus PENDING a PrismaStatus', () => {
     const user = User.fromPersistence({
       id: 'uuid-map',
       email: EmailVO.create('map@example.com'),
@@ -128,5 +128,39 @@ describe('UserMapper', () => {
     const persistence = UserMapper.toPersistence(user);
 
     expect(persistence.status).toBe(PrismaUserStatus.PENDING);
+  });
+
+  it('debe mapear correctamente DomainStatus BLOCKED a PrismaStatus', () => {
+    const user = User.fromPersistence({
+      id: 'uuid-blocked-out',
+      email: EmailVO.create('blockedout@example.com'),
+      passwordHash: 'hash',
+      status: DomainUserStatus.BLOCKED,
+      emailVerified: false,
+      failedLoginAttempts: 5,
+      blockedUntil: new Date(Date.now() + 60_000),
+      createdAt: new Date(),
+    });
+
+    const persistence = UserMapper.toPersistence(user);
+
+    expect(persistence.status).toBe(PrismaUserStatus.BLOCKED);
+  });
+
+  it('debe lanzar error si DomainStatus es inválido en toPrismaStatus', () => {
+    const user = User.fromPersistence({
+      id: 'uuid-invalid-out',
+      email: EmailVO.create('invalid@example.com'),
+      passwordHash: 'hash',
+      status: 'INVALID_STATUS' as unknown as DomainUserStatus,
+      emailVerified: false,
+      failedLoginAttempts: 0,
+      blockedUntil: undefined,
+      createdAt: new Date(),
+    });
+
+    expect(() => UserMapper.toPersistence(user)).toThrow(
+      'Estado no soportado',
+    );
   });
 });

@@ -76,6 +76,23 @@ describe('MetricsService', () => {
     expect(service.getServiceName()).toBe('auth-service');
   });
 
+  it('debe usar "NONE" como reason si no se proporciona', () => {
+    service.recordUserActivity({
+      service: 'auth-service',
+      category: 'AUTH',
+      action: 'AUTH.LOGIN_SUCCESS',
+      outcome: 'SUCCESS',
+    });
+
+    expect(mockUserActivityCounter.inc).toHaveBeenCalledWith({
+      service: 'auth-service',
+      category: 'AUTH',
+      action: 'AUTH.LOGIN_SUCCESS',
+      outcome: 'SUCCESS',
+      reason: 'NONE',
+    });
+  });
+
   it('debe registrar actividad de usuario', () => {
     service.recordUserActivity({
       service: 'auth-service',

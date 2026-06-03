@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 
-import { sign } from 'jsonwebtoken';
+import { sign, verify } from 'jsonwebtoken';
 import { type EnvService } from '@config/env/env.service';
 
 import { JwtTokenService } from './jwt-token.service';
@@ -58,6 +58,20 @@ describe('JwtTokenService', () => {
       );
 
       expect(result).toBe('access-token');
+    });
+  });
+
+  describe('verifyRefreshToken', () => {
+    it('debe verificar y retornar el payload del refresh token', () => {
+      (verify as jest.Mock).mockReturnValue({ jti: 'jti-abc' });
+
+      const result = service.verifyRefreshToken('raw-refresh-token');
+
+      expect(verify).toHaveBeenCalledWith(
+        'raw-refresh-token',
+        'refresh-secret',
+      );
+      expect(result).toEqual({ jti: 'jti-abc' });
     });
   });
 

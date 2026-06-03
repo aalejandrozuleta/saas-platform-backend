@@ -8,6 +8,8 @@ describe('RefreshTokenPrismaRepository', () => {
     refreshToken: {
       create: jest.Mock;
       updateMany: jest.Mock;
+      findUnique: jest.Mock;
+      update: jest.Mock;
     };
   };
 
@@ -16,6 +18,8 @@ describe('RefreshTokenPrismaRepository', () => {
       refreshToken: {
         create: jest.fn(),
         updateMany: jest.fn(),
+        findUnique: jest.fn(),
+        update: jest.fn(),
       },
     };
 
@@ -71,6 +75,71 @@ describe('RefreshTokenPrismaRepository', () => {
       );
 
       expect(tx.refreshToken.create).toHaveBeenCalled();
+    });
+  });
+
+  describe('findByJti', () => {
+    it('debe retornar el refresh token si existe', async () => {
+      const token = {
+        id: 'rt-1',
+        userId: 'user-1',
+        sessionId: 'session-1',
+        familyId: 'family-1',
+        tokenHash: 'hash',
+        expiresAt: new Date(),
+        revokedAt: null,
+      };
+
+      prisma.refreshToken.findUnique.mockResolvedValue(token);
+
+      const result = await repository.findByJti('jti-123');
+
+      expect(prisma.refreshToken.findUnique).toHaveBeenCalledWith({
+        where: { jti: 'jti-123' },
+      });
+      expect(result).toBe(token);
+    });
+
+    it('debe retornar null si el jti no existe', async () => {
+      prisma.refreshToken.findUnique.mockResolvedValue(null);
+
+      const result = await repository.findByJti('nonexistent');
+
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('revoke', () => {
+    it('debe revocar el token y registrar quién lo reemplazó', async () => {
+      prisma.refreshToken.update.mockResolvedValue({});
+
+      await repository.revoke('old-jti', 'new-jti');
+
+      expect(prisma.refreshToken.update).toHaveBeenCalledWith({
+        where: { jti: 'old-jti' },
+        data: {
+          revokedAt: expect.any(Date),
+          replacedBy: 'new-jti',
+        },
+      });
+    });
+  });
+
+  describe('revokeAllByUser', () => {
+    it('debe revocar todos los refresh tokens activos del usuario', async () => {
+      prisma.refreshToken.updateMany.mockResolvedValue({ count: 3 });
+
+      await repository.revokeAllByUser('user-1');
+
+      expect(prisma.refreshToken.updateMany).toHaveBeenCalledWith({
+        where: {
+          userId: 'user-1',
+          revokedAt: null,
+        },
+        data: {
+          revokedAt: expect.any(Date),
+        },
+      });
     });
   });
 

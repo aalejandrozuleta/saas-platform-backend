@@ -310,6 +310,32 @@ describe('LoginUserUseCase', () => {
     });
   });
 
+  it('debe exigir challenge si el país no está entre los de confianza', async () => {
+    const user = createUser();
+
+    userRepository.findByEmail.mockResolvedValue(user);
+    passwordHasher.verify.mockResolvedValue(true);
+    securityRepository.findByUserId.mockResolvedValue(
+      createSecurityProfile({
+        trustedCountries: ['US'],
+      }),
+    );
+    deviceRepository.getByUserIdAndFingerprint.mockResolvedValue({
+      id: 'device-1',
+      isTrusted: true,
+      updateLastUsed: () => ({ id: 'device-1', isTrusted: true }),
+    } as any);
+
+    await expect(
+      useCase.execute('test@test.com', 'Password123!', context),
+    ).rejects.toMatchObject({
+      code: ErrorCode.SECURITY_CHALLENGE_REQUIRED,
+      metadata: expect.objectContaining({
+        reason: LoginChallengeReason.UNTRUSTED_COUNTRY,
+      }),
+    });
+  });
+
   it('debe revocar sesión más antigua si hay demasiadas sesiones', async () => {
     setupSuccessfulLogin();
     sessionRepository.countActiveSessions.mockResolvedValue(3);
