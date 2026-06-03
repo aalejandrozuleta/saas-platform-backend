@@ -47,4 +47,12 @@ export interface SecurityRepository {
     userId: string,
     tx?: Prisma.TransactionClient,
   ): Promise<LoginSecurityProfile | null>;
+
+  /**
+   * Actualiza la fecha del último cambio de contraseña.
+   */
+  updateLastPasswordChange(
+    userId: string,
+    now: Date,
+  ): Promise<void>;
 }

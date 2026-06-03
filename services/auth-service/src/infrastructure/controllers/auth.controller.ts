@@ -7,13 +7,16 @@ import {
 } from '@nestjs/common';
 import { RegisterUserDto } from '@application/dto/register/register-user.dto';
 import { LoginUserDto } from '@application/dto/login/login-user.dto';
+import { ChangePasswordDto } from '@application/dto/change-password/change-password.dto';
 import { RegisterUserUseCase } from '@application/use-cases/register-user.use-case';
 import { LoginUserUseCase } from '@application/use-cases/login-user.use-case';
+import { ChangePasswordUseCase } from '@application/use-cases/change-password.use-case';
 import { LoginContext } from '@domain/value-objects/login-context.vo';
 import { I18nService, successResponse } from '@saas/shared';
 import { Request, Response } from 'express';
 import { RegisterSwagger } from '@infrastructure/swagger/register.swagger';
 import { LoginSwagger } from '@infrastructure/swagger/login.swagger';
+import { ChangePasswordSwagger } from '@infrastructure/swagger/change-password.swagger';
 import { ApiTags } from '@nestjs/swagger';
 import { RefreshTokenUseCase } from '@application/use-cases/refresh-token.use-case';
 
@@ -34,6 +37,7 @@ export class AuthController {
     private readonly registerUserUseCase: RegisterUserUseCase,
     private readonly loginUserUseCase: LoginUserUseCase,
     private readonly refreshTokenUseCase: RefreshTokenUseCase,
+    private readonly changePasswordUseCase: ChangePasswordUseCase,
     private readonly i18n: I18nService,
   ) { }
 
@@ -92,17 +96,26 @@ export class AuthController {
       context,
     );
 
-    res.cookie('refreshToken', result.refreshToken, {
+    const secure = this.shouldUseSecureCookies(req);
+
+    res.cookie('accessToken', result.token, {
       httpOnly: true,
-      secure: this.shouldUseSecureCookies(req),
+      secure,
       sameSite: 'strict',
-      path: '/v1/auth/refresh',
+      path: '/',
+      maxAge: 15 * 60 * 1000,
     });
 
+    res.cookie('refreshToken', result.refreshToken, {
+      httpOnly: true,
+      secure,
+      sameSite: 'strict',
+      path: '/',
+      maxAge: 7 * 24 * 60 * 60 * 1000, 
+    });
+
+
     return successResponse(
-      {
-        token: result.token,
-      },
       {
         message: this.i18n.translate(
           'auth.login_success',
@@ -140,6 +153,36 @@ export class AuthController {
           'auth.refresh_success',
           this.resolveLanguage(req),
         ),
+      },
+    );
+  }
+
+  /**
+   * Cambio de contraseña del usuario autenticado
+   */
+  @Post('change-password')
+  @ChangePasswordSwagger()
+  async changePassword(
+    @Body() dto: ChangePasswordDto,
+    @Req() req: Request,
+  ) {
+    const lang = this.resolveLanguage(req);
+    const userId = this.getHeader(req, 'x-user-id');
+
+    await this.changePasswordUseCase.execute(
+      userId!,
+      dto.currentPassword,
+      dto.newPassword,
+      {
+        ip: this.resolveClientIp(req),
+        country: this.getHeader(req, 'x-country'),
+      },
+    );
+
+    return successResponse(
+      {},
+      {
+        message: this.i18n.translate('auth.change_password_success', lang),
       },
     );
   }

@@ -85,6 +85,18 @@ export class RefreshTokenPrismaRepository
     });
   }
 
+  async revokeAllByUser(userId: string): Promise<void> {
+    await this.prisma.refreshToken.updateMany({
+      where: {
+        userId,
+        revokedAt: null,
+      },
+      data: {
+        revokedAt: new Date(),
+      },
+    });
+  }
+
   /**
    * Resuelve el cliente adecuado según exista o no transacción.
    */

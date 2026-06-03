@@ -37,4 +37,6 @@ export interface RefreshTokenRepository {
     replacedBy: string,
     tx?: Prisma.TransactionClient,
   ): Promise<void>;
+
+  revokeAllByUser(userId: string): Promise<void>;
 }

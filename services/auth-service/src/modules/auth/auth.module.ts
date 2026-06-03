@@ -6,9 +6,11 @@ import { SharedModule } from '@saas/shared';
 import { AuditModule } from '@infrastructure/audit/audit.module';
 import { AuthActivityListener } from '@infrastructure/messaging/listeners/auth-activity.listener';
 import { LoginLoggingListener } from '@infrastructure/messaging/listeners/login-logging.listener';
+import { PasswordChangeListener } from '@infrastructure/messaging/listeners/password-change.listener';
 import { PrismaModule } from '@infrastructure/persistence/prisma/prisma.module';
 import { LoginUserUseCase } from '@application/use-cases/login-user.use-case';
 import { RefreshTokenUseCase } from '@application/use-cases/refresh-token.use-case';
+import { ChangePasswordUseCase } from '@application/use-cases/change-password.use-case';
 
 import { authProviders } from './auth.providers';
 /**
@@ -26,9 +28,11 @@ import { authProviders } from './auth.providers';
     RegisterUserUseCase,
     LoginUserUseCase,
     RefreshTokenUseCase,
+    ChangePasswordUseCase,
     ...authProviders,
     AuthActivityListener,
     LoginLoggingListener,
+    PasswordChangeListener,
   ],
 })
 export class AuthModule { }

@@ -94,6 +94,37 @@ export class SessionPrismaRepository implements SessionRepository {
    * @param now - Fecha actual
    * @param tx - Cliente transaccional opcional
    */
+  /**
+   * Revoca todas las sesiones activas del usuario.
+   * Retorna los IDs de las sesiones revocadas para limpiar el cache.
+   */
+  async revokeAllUserSessions(
+    userId: string,
+    now: Date,
+  ): Promise<string[]> {
+    const active = await this.prisma.session.findMany({
+      where: {
+        userId,
+        revokedAt: null,
+        endedAt: null,
+      },
+      select: { id: true },
+    });
+
+    if (active.length === 0) {
+      return [];
+    }
+
+    const ids = active.map((s) => s.id);
+
+    await this.prisma.session.updateMany({
+      where: { id: { in: ids } },
+      data: { revokedAt: now },
+    });
+
+    return ids;
+  }
+
   async revokeOldestActiveSession(
     userId: string,
     now: Date,

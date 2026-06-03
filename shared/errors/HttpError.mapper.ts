@@ -26,6 +26,8 @@ export const HttpErrorMapper: Record<ErrorCode, number> = {
   [ErrorCode.COUNTRY_NOT_TRUSTED]: 403,
   [ErrorCode.SECURITY_CHALLENGE_REQUIRED]: 403,
   [ErrorCode.INVALID_REFRESH_TOKEN]: 401,
+  [ErrorCode.INVALID_CURRENT_PASSWORD]: 400,
+  [ErrorCode.SAME_PASSWORD_NOT_ALLOWED]: 422,
 };
 
 export const getErrorCodeFromHttpStatus = (status: number): ErrorCode => {

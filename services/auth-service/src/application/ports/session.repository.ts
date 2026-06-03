@@ -22,4 +22,9 @@ export interface SessionRepository {
     now: Date,
     tx?: Prisma.TransactionClient,
   ): Promise<void>;
+
+  revokeAllUserSessions(
+    userId: string,
+    now: Date,
+  ): Promise<string[]>;
 }

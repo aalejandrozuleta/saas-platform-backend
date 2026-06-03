@@ -64,6 +64,16 @@ export enum AuthAuditEvent {
   REGISTER_FAILED = 'AUTH.REGISTER_FAILED',
 
   /**
+   * Cambio de contraseña exitoso.
+   */
+  PASSWORD_CHANGED = 'AUTH.PASSWORD_CHANGED',
+
+  /**
+   * Cambio de contraseña fallido.
+   */
+  PASSWORD_CHANGE_FAILED = 'AUTH.PASSWORD_CHANGE_FAILED',
+
+  /**
    * Error interno durante flujo auth.
    */
   INTERNAL_ERROR = 'AUTH.INTERNAL_ERROR',

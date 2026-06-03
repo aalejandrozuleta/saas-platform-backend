@@ -77,6 +77,18 @@ export class AuthController {
   }
 
   /**
+   * Cambio de contraseña del usuario autenticado
+   */
+  @Post('change-password')
+  async changePassword(@Req() req: Request) {
+    this.prepareRequest(req);
+    req.headers['x-user-id'] = req.user!.id;
+
+    const { body } = await this.authProxy.forward(req, '/change-password');
+    return body;
+  }
+
+  /**
    * Logout de usuario
    */
   @Post('logout')

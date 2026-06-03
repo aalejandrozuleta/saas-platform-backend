@@ -210,6 +210,48 @@ export class AuthActivityReportFactory {
     });
   }
 
+  static passwordChanged(input: {
+    userId: string;
+    ip: string;
+    country?: string;
+  }): CreateActivityReport {
+    return this.createReport({
+      action: AuthAuditEvent.PASSWORD_CHANGED,
+      outcome: 'SUCCESS',
+      summary: 'Contraseña cambiada correctamente',
+      actor: {
+        type: 'USER',
+        id: input.userId,
+      },
+      context: {
+        ip: input.ip,
+        country: input.country,
+      },
+    });
+  }
+
+  static passwordChangeFailed(input: {
+    userId: string;
+    reason: string;
+    ip: string;
+    country?: string;
+  }): CreateActivityReport {
+    return this.createReport({
+      action: AuthAuditEvent.PASSWORD_CHANGE_FAILED,
+      outcome: 'FAILURE',
+      summary: 'Cambio de contraseña fallido',
+      actor: {
+        type: 'USER',
+        id: input.userId,
+      },
+      context: {
+        ip: input.ip,
+        country: input.country,
+      },
+      reason: input.reason,
+    });
+  }
+
   static registerFailed(input: {
     userId?: string | null;
     email: string;
