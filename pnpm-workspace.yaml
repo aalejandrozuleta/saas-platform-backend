@@ -1,3 +1,11 @@
 packages:
   - "shared"
   - "services/**"
+allowBuilds:
+  '@nestjs/core': false
+  '@prisma/engines': true
+  '@scarf/scarf': false
+  '@swc/core': true
+  argon2: true
+  prisma: true
+  unrs-resolver: false
