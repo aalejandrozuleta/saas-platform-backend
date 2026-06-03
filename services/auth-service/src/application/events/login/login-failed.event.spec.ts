@@ -3,7 +3,7 @@ import { LoginContext } from '@domain/value-objects/login-context.vo';
 import { LoginFailedEvent } from './login-failed.event';
 
 describe('LoginFailedEvent', () => {
-  it('debe crear el evento con userId, contexto y razón', () => {
+  it('debe crear el evento con userId, email, contexto y razón', () => {
     const context = LoginContext.create({
       ip: '127.0.0.1',
       country: 'CO',
@@ -12,11 +12,13 @@ describe('LoginFailedEvent', () => {
 
     const event = new LoginFailedEvent(
       'user-1',
+      'test@example.com',
       context,
       'INVALID_PASSWORD',
     );
 
     expect(event.userId).toBe('user-1');
+    expect(event.email).toBe('test@example.com');
     expect(event.reason).toBe('INVALID_PASSWORD');
     expect(event.context).toBe(context);
   });
@@ -30,11 +32,13 @@ describe('LoginFailedEvent', () => {
 
     const event = new LoginFailedEvent(
       null,
+      'unknown@example.com',
       context,
       'USER_NOT_FOUND',
     );
 
     expect(event.userId).toBeNull();
+    expect(event.email).toBe('unknown@example.com');
     expect(event.reason).toBe('USER_NOT_FOUND');
   });
 
@@ -47,6 +51,7 @@ describe('LoginFailedEvent', () => {
 
     const event = new LoginFailedEvent(
       'user-3',
+      undefined,
       context,
       'ACCOUNT_LOCKED',
     );

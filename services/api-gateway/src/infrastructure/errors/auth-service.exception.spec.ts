@@ -9,13 +9,13 @@ describe('AuthServiceUnavailableException', () => {
     expect(error).toBeInstanceOf(AuthServiceUnavailableException);
     expect(error).toBeInstanceOf(BaseException);
 
-    expect(error.message).toBe('Auth service unavailable');
+    expect(error.message).toBe('common.auth_service_unavailable');
   });
 
   it('debe tener el código de error correcto', () => {
     const error = new AuthServiceUnavailableException();
 
-    expect(error.code).toBe(ErrorCode.INTERNAL_ERROR);
+    expect(error.code).toBe(ErrorCode.SERVICE_UNAVAILABLE);
   });
 
   it('debe tener el status HTTP correcto', () => {

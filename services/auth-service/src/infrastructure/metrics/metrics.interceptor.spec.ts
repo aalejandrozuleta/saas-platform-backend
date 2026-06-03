@@ -42,41 +42,127 @@ describe('MetricsInterceptor', () => {
     );
   });
 
+  it('debe usar url si route y baseUrl no están disponibles', async () => {
+    const request = {
+      method: 'POST',
+      route: null,
+      baseUrl: null,
+      url: '/auth/v1/login',
+    };
+    const response = { statusCode: 200 };
+    const endTimer = jest.fn();
+    metricsService.httpRequestDuration.startTimer.mockReturnValue(endTimer);
+
+    const context = createExecutionContext(request, response);
+    const next: CallHandler = { handle: () => of({}) };
+
+    await lastValueFrom(interceptor.intercept(context, next));
+
+    expect(metricsService.httpRequestCounter.inc).toHaveBeenCalledWith(
+      expect.objectContaining({ route: '/login' }),
+    );
+  });
+
+  it('debe usar "unknown" cuando no hay ninguna ruta disponible', async () => {
+    const request = {
+      method: 'GET',
+      route: null,
+      baseUrl: null,
+      url: null,
+    };
+    const response = { statusCode: 404 };
+    const endTimer = jest.fn();
+    metricsService.httpRequestDuration.startTimer.mockReturnValue(endTimer);
+
+    const context = createExecutionContext(request, response);
+    const next: CallHandler = { handle: () => of({}) };
+
+    await lastValueFrom(interceptor.intercept(context, next));
+
+    expect(metricsService.httpRequestCounter.inc).toHaveBeenCalledWith(
+      expect.objectContaining({ route: 'unknown' }),
+    );
+  });
+
+  it('debe usar baseUrl si route.path no está disponible', async () => {
+    const request = {
+      method: 'GET',
+      route: null,
+      baseUrl: '/auth/v1/refresh',
+      url: '/auth/v1/refresh',
+    };
+    const response = { statusCode: 200 };
+    const endTimer = jest.fn();
+    metricsService.httpRequestDuration.startTimer.mockReturnValue(endTimer);
+
+    const context = createExecutionContext(request, response);
+    const next: CallHandler = { handle: () => of({}) };
+
+    await lastValueFrom(interceptor.intercept(context, next));
+
+    expect(metricsService.httpRequestCounter.inc).toHaveBeenCalledWith(
+      expect.objectContaining({ route: '/refresh' }),
+    );
+  });
+
+  it('debe usar "/" como ruta normalizada si la URL queda vacía tras strip', async () => {
+    const request = {
+      method: 'GET',
+      route: { path: '/auth/v1' },
+    };
+    const response = { statusCode: 200 };
+    const endTimer = jest.fn();
+    metricsService.httpRequestDuration.startTimer.mockReturnValue(endTimer);
+
+    const context = createExecutionContext(request, response);
+    const next: CallHandler = { handle: () => of({}) };
+
+    await lastValueFrom(interceptor.intercept(context, next));
+
+    expect(metricsService.httpRequestCounter.inc).toHaveBeenCalledWith(
+      expect.objectContaining({ route: '/' }),
+    );
+  });
+
   it('debería registrar métricas de una request HTTP', async () => {
-  const request = {
-    method: 'POST',
-    route: { path: '/auth/v1/login' },
-  };
+    const request = {
+      method: 'POST',
+      route: { path: '/auth/v1/login' },
+    };
 
-  const response = {
-    statusCode: 200,
-  };
+    const response = {
+      statusCode: 200,
+    };
 
-  const endTimer = jest.fn();
-  metricsService.httpRequestDuration.startTimer.mockReturnValue(endTimer);
+    const endTimer = jest.fn();
+    metricsService.httpRequestDuration.startTimer.mockReturnValue(endTimer);
 
-  const context = createExecutionContext(request, response);
+    const context = createExecutionContext(request, response);
 
-  const next: CallHandler = {
-    handle: () => of({ ok: true }),
-  };
+    const next: CallHandler = {
+      handle: () => of({ ok: true }),
+    };
 
-  await lastValueFrom(interceptor.intercept(context, next));
+    await lastValueFrom(interceptor.intercept(context, next));
 
-  expect(metricsService.httpRequestsInFlight.inc).toHaveBeenCalled();
+    expect(metricsService.httpRequestsInFlight.inc).toHaveBeenCalledWith({
+      service: 'auth-service',
+    });
 
-  expect(metricsService.httpRequestCounter.inc).toHaveBeenCalledWith({
-    method: 'POST',
-    route: '/login',
-    status: '200',
-    service: 'auth-service',
+    expect(metricsService.httpRequestCounter.inc).toHaveBeenCalledWith({
+      method: 'POST',
+      route: '/login',
+      status: '200',
+      service: 'auth-service',
+    });
+
+    expect(metricsService.httpRequestsInFlight.dec).toHaveBeenCalledWith({
+      service: 'auth-service',
+    });
+
+    expect(endTimer).toHaveBeenCalledWith({
+      status: '200',
+      service: 'auth-service',
+    });
   });
-
-  expect(metricsService.httpRequestsInFlight.dec).toHaveBeenCalled();
-
-  expect(endTimer).toHaveBeenCalledWith({
-    status: '200',
-    service: 'auth-service',
-  });
-});
 });

@@ -1,4 +1,5 @@
 import type { Request, Response, NextFunction } from 'express';
+import { ErrorCode } from '@saas/shared';
 
 import { pathSanitizerMiddleware } from './path-sanitizer.middleware';
 
@@ -8,7 +9,12 @@ describe('pathSanitizerMiddleware', () => {
   let next: jest.Mock;
 
   beforeEach(() => {
-    req = {};
+    req = {
+      url: '/auth/login',
+      headers: {
+        'accept-language': 'es',
+      },
+    };
     res = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
@@ -38,9 +44,20 @@ describe('pathSanitizerMiddleware', () => {
     );
 
     expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.json).toHaveBeenCalledWith({
-      error: 'Invalid request path',
-    });
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: false,
+        error: expect.objectContaining({
+          code: ErrorCode.INVALID_REQUEST_PATH,
+          message: 'La ruta solicitada no es válida',
+        }),
+        meta: expect.objectContaining({
+          path: '/auth/login',
+          statusCode: 400,
+          lang: 'es',
+        }),
+      }),
+    );
 
     expect(next).not.toHaveBeenCalled();
   });
@@ -55,9 +72,20 @@ describe('pathSanitizerMiddleware', () => {
     );
 
     expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.json).toHaveBeenCalledWith({
-      error: 'Malformed URL',
-    });
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: false,
+        error: expect.objectContaining({
+          code: ErrorCode.MALFORMED_URL,
+          message: 'La URL enviada no tiene un formato válido',
+        }),
+        meta: expect.objectContaining({
+          path: '/auth/login',
+          statusCode: 400,
+          lang: 'es',
+        }),
+      }),
+    );
 
     expect(next).not.toHaveBeenCalled();
   });

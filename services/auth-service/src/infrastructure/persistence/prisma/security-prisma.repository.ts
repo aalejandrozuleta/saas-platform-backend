@@ -97,6 +97,20 @@ export class SecurityPrismaRepository implements SecurityRepository {
     });
   }
 
+  async updateLastPasswordChange(
+    userId: string,
+    now: Date,
+  ): Promise<void> {
+    await this.prisma.userSecurity.upsert({
+      where: { userId },
+      update: { lastPasswordChange: now },
+      create: {
+        userId,
+        lastPasswordChange: now,
+      },
+    });
+  }
+
   async findByUserId(
     userId: string,
     tx?: PrismaClient

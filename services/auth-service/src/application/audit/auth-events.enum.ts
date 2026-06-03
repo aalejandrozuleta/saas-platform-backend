@@ -49,6 +49,11 @@ export enum AuthAuditEvent {
   LOGIN_COUNTRY_NOT_TRUSTED = 'AUTH.LOGIN_COUNTRY_NOT_TRUSTED',
 
   /**
+   * Login rechazado por challenge de seguridad.
+   */
+  LOGIN_SECURITY_CHALLENGE_REQUIRED = 'AUTH.LOGIN_SECURITY_CHALLENGE_REQUIRED',
+
+  /**
    * Registro de usuario exitoso.
    */
   REGISTER_SUCCESS = 'AUTH.REGISTER_SUCCESS',
@@ -57,6 +62,31 @@ export enum AuthAuditEvent {
    * Registro fallido.
    */
   REGISTER_FAILED = 'AUTH.REGISTER_FAILED',
+
+  /**
+   * Cambio de contraseña exitoso.
+   */
+  PASSWORD_CHANGED = 'AUTH.PASSWORD_CHANGED',
+
+  /**
+   * Cambio de contraseña fallido.
+   */
+  PASSWORD_CHANGE_FAILED = 'AUTH.PASSWORD_CHANGE_FAILED',
+
+  /**
+   * Cierre de sesión individual exitoso.
+   */
+  LOGOUT = 'AUTH.LOGOUT',
+
+  /**
+   * Cierre de todas las sesiones activas.
+   */
+  LOGOUT_ALL = 'AUTH.LOGOUT_ALL',
+
+  /**
+   * Error interno durante flujo auth.
+   */
+  INTERNAL_ERROR = 'AUTH.INTERNAL_ERROR',
 
   /**
    * Activación de 2FA.

@@ -5,8 +5,8 @@ import { BaseException, ErrorCode } from '@saas/shared';
 export class AuthServiceUnavailableException extends BaseException {
   constructor(metadata?: Record<string, unknown>) {
     super(
-      'Auth service unavailable',
-      ErrorCode.INTERNAL_ERROR,
+      'common.auth_service_unavailable',
+      ErrorCode.SERVICE_UNAVAILABLE,
       503,
       metadata
     );

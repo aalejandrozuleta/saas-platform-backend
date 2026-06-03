@@ -242,6 +242,12 @@ describe('LoginUserUseCase', () => {
     expect(eventBus.publish).toHaveBeenCalledWith(
       expect.any(LoginFailedEvent),
     );
+
+    expect(eventBus.publish).toHaveBeenCalledWith(
+      expect.objectContaining({
+        email: 'test@test.com',
+      }),
+    );
   });
 
   it('debe registrar intento fallido si contraseña es incorrecta', async () => {
@@ -300,6 +306,32 @@ describe('LoginUserUseCase', () => {
       code: ErrorCode.SECURITY_CHALLENGE_REQUIRED,
       metadata: expect.objectContaining({
         reason: LoginChallengeReason.NEW_DEVICE,
+      }),
+    });
+  });
+
+  it('debe exigir challenge si el país no está entre los de confianza', async () => {
+    const user = createUser();
+
+    userRepository.findByEmail.mockResolvedValue(user);
+    passwordHasher.verify.mockResolvedValue(true);
+    securityRepository.findByUserId.mockResolvedValue(
+      createSecurityProfile({
+        trustedCountries: ['US'],
+      }),
+    );
+    deviceRepository.getByUserIdAndFingerprint.mockResolvedValue({
+      id: 'device-1',
+      isTrusted: true,
+      updateLastUsed: () => ({ id: 'device-1', isTrusted: true }),
+    } as any);
+
+    await expect(
+      useCase.execute('test@test.com', 'Password123!', context),
+    ).rejects.toMatchObject({
+      code: ErrorCode.SECURITY_CHALLENGE_REQUIRED,
+      metadata: expect.objectContaining({
+        reason: LoginChallengeReason.UNTRUSTED_COUNTRY,
       }),
     });
   });

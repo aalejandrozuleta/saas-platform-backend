@@ -2,8 +2,8 @@
   "title": "SaaS Platform – Overview",
   "uid": "saas-overview",
   "schemaVersion": 38,
-  "version": 3,
-  "refresh": "5s",
+  "version": 4,
+  "refresh": "10s",
   "templating": {
     "list": [
       {
@@ -24,7 +24,7 @@
       "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 },
       "targets": [
         {
-          "expr": "sum(rate(http_requests_total{service=\"$service\",route!=\"/metrics\"}[2m]))",
+          "expr": "sum(rate(http_requests_total{service=\"$service\",route!~\"/metrics|/health\"}[2m]))",
           "refId": "A"
         }
       ]
@@ -35,7 +35,7 @@
       "gridPos": { "x": 6, "y": 0, "w": 6, "h": 4 },
       "targets": [
         {
-          "expr": "(sum(rate(http_requests_total{service=\"$service\",status=~\"5..\"}[2m])) / sum(rate(http_requests_total{service=\"$service\"}[2m]))) or vector(0)",
+          "expr": "(sum(rate(http_requests_total{service=\"$service\",status=~\"5..\",route!~\"/metrics|/health\"}[2m])) / sum(rate(http_requests_total{service=\"$service\",route!~\"/metrics|/health\"}[2m]))) * 100 or vector(0)",
           "refId": "A"
         }
       ]
@@ -46,7 +46,29 @@
       "gridPos": { "x": 12, "y": 0, "w": 6, "h": 4 },
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{service=\"$service\",route!=\"/metrics\"}[5m])) by (le)) * 1000",
+          "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{service=\"$service\",route!~\"/metrics|/health\"}[5m])) by (le)) * 1000",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "P99 Latency (ms)",
+      "gridPos": { "x": 18, "y": 0, "w": 6, "h": 4 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{service=\"$service\",route!~\"/metrics|/health\"}[5m])) by (le)) * 1000",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "CPU (cores)",
+      "gridPos": { "x": 0, "y": 4, "w": 6, "h": 4 },
+      "targets": [
+        {
+          "expr": "avg(rate(process_cpu_user_seconds_total{service=\"$service\"}[2m]) + rate(process_cpu_system_seconds_total{service=\"$service\"}[2m]))",
           "refId": "A"
         }
       ]
@@ -54,32 +76,79 @@
     {
       "type": "stat",
       "title": "Memory (MB)",
-      "gridPos": { "x": 18, "y": 0, "w": 6, "h": 4 },
+      "gridPos": { "x": 6, "y": 4, "w": 6, "h": 4 },
       "targets": [
         {
-          "expr": "process_resident_memory_bytes{service=\"$service\"} / 1024 / 1024",
+          "expr": "avg(process_resident_memory_bytes{service=\"$service\"}) / 1024 / 1024",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "In Flight",
+      "gridPos": { "x": 12, "y": 4, "w": 6, "h": 4 },
+      "targets": [
+        {
+          "expr": "sum(http_requests_in_flight{service=\"$service\"})",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Event Loop Lag (ms)",
+      "gridPos": { "x": 18, "y": 4, "w": 6, "h": 4 },
+      "targets": [
+        {
+          "expr": "avg(nodejs_eventloop_lag_seconds{service=\"$service\"}) * 1000",
           "refId": "A"
         }
       ]
     },
     {
       "type": "timeseries",
-      "title": "Requests by Route",
-      "gridPos": { "x": 0, "y": 4, "w": 12, "h": 6 },
+      "title": "Top Routes (Requests/sec)",
+      "gridPos": { "x": 0, "y": 8, "w": 12, "h": 7 },
       "targets": [
         {
-          "expr": "sum(rate(http_requests_total{service=\"$service\",route!=\"/metrics\"}[2m])) by (route)",
+          "expr": "topk(10, sum by (route) (rate(http_requests_total{service=\"$service\",route!~\"/metrics|/health\"}[2m])))",
+          "legendFormat": "{{route}}",
           "refId": "A"
         }
       ]
     },
     {
       "type": "timeseries",
-      "title": "Latency by Route (P95)",
-      "gridPos": { "x": 12, "y": 4, "w": 12, "h": 6 },
+      "title": "Top Routes (P95 Latency ms)",
+      "gridPos": { "x": 12, "y": 8, "w": 12, "h": 7 },
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{service=\"$service\",route!=\"/metrics\"}[5m])) by (le, route)) * 1000",
+          "expr": "topk(10, histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{service=\"$service\",route!~\"/metrics|/health\"}[5m])) by (le, route)) * 1000)",
+          "legendFormat": "{{route}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Errors by Status (4xx/5xx)",
+      "gridPos": { "x": 0, "y": 15, "w": 12, "h": 7 },
+      "targets": [
+        {
+          "expr": "sum by (status) (rate(http_requests_total{service=\"$service\",status=~\"4..|5..\",route!~\"/metrics|/health\"}[2m]))",
+          "legendFormat": "{{status}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "GC Avg Pause (ms)",
+      "gridPos": { "x": 12, "y": 15, "w": 12, "h": 7 },
+      "targets": [
+        {
+          "expr": "(rate(nodejs_gc_duration_seconds_sum{service=\"$service\"}[2m]) / rate(nodejs_gc_duration_seconds_count{service=\"$service\"}[2m])) * 1000",
           "refId": "A"
         }
       ]

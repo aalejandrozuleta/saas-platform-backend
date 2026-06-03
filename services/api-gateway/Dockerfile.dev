@@ -2,15 +2,16 @@ FROM node:24-alpine
 
 WORKDIR /app
 
+# Activar corepack para usar la versión de pnpm declarada en packageManager
 ENV PNPM_STORE_PATH=/pnpm-store
-RUN corepack enable
-
-# Copiar workspace completo (necesario para pnpm workspaces)
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+
+RUN corepack enable && corepack prepare --activate
+
 COPY .npmrc ./
 COPY tsconfig.base.json ./
 
-# Copiar solo lo necesario
+# Copiar código fuente
 COPY services ./services
 COPY shared ./shared
 

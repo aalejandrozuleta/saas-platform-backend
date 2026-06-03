@@ -23,6 +23,8 @@ export class LoginSecurityChallengeService {
       challengeType: 'LOGIN_VERIFICATION',
       reason,
       requiredAction: 'COMPLETE_ADDITIONAL_VERIFICATION',
+      userId: user.id,
+      email: user.email.getValue(),
       deviceFingerprint: context.deviceFingerprint,
       country: context.country,
       availableMethods: this.resolveMethods(user, profile),

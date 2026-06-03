@@ -53,7 +53,7 @@ export class MetricsInterceptor implements NestInterceptor {
         service: serviceName,
       });
 
-    this.metricsService.httpRequestsInFlight.inc();
+    this.metricsService.httpRequestsInFlight.inc({ service: serviceName });
 
     return next.handle().pipe(
       tap(() => {
@@ -65,7 +65,7 @@ export class MetricsInterceptor implements NestInterceptor {
         });
       }),
       finalize(() => {
-        this.metricsService.httpRequestsInFlight.dec();
+        this.metricsService.httpRequestsInFlight.dec({ service: serviceName });
 
         endTimer({
           status: String(response.statusCode),

@@ -7,8 +7,17 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 
-import { BaseException, ErrorCode } from '../errors';
+import {
+  BaseException,
+  ErrorCode,
+  getErrorCodeFromHttpStatus,
+} from '../errors';
 import { I18nService } from '../i18n';
+import {
+  buildResponseMeta,
+  errorResponse,
+  isApiErrorResponse,
+} from '../response';
 
 /**
  * Filtro global de excepciones con soporte i18n.
@@ -23,15 +32,8 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
-
-    const timestamp = new Date().toISOString();
-    const path = request.url;
-
-    const acceptLanguage = request.headers['accept-language'];
-    const lang =
-      typeof acceptLanguage === 'string'
-        ? acceptLanguage.split(',')[0]
-        : undefined;
+    const acceptLanguage = this.getRequestedLanguage(request);
+    const resolvedLang = this.i18n.resolveLanguage(acceptLanguage);
 
     /**
      * 1️⃣ Errores de dominio
@@ -39,19 +41,26 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     if (exception instanceof BaseException) {
       const translatedMessage = this.i18n.translate(
         exception.messageKey,
-        lang,
+        acceptLanguage,
+        exception.metadata,
       );
 
-      response.status(exception.httpStatus).json({
-        success: false,
-        error: {
-          code: exception.code,
-          message: translatedMessage,
-          metadata: exception.metadata ?? null,
-        },
-        path,
-        timestamp,
-      });
+      response.status(exception.httpStatus).json(
+        errorResponse(
+          {
+            code: exception.code,
+            message: translatedMessage,
+            metadata: exception.metadata,
+          },
+          {
+            meta: buildResponseMeta(
+              request,
+              exception.httpStatus,
+              resolvedLang,
+            ),
+          },
+        ),
+      );
 
       return;
     }
@@ -63,18 +72,24 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       const status = exception.getStatus();
       const body = exception.getResponse();
 
-      response.status(status).json({
-        success: false,
-        error:
-          typeof body === 'object'
-            ? body
-            : {
-                code: ErrorCode.INTERNAL_ERROR,
-                message: body,
-              },
-        path,
-        timestamp,
-      });
+      if (isApiErrorResponse(body)) {
+        response.status(status).json(
+          errorResponse(body.error, {
+            meta: buildResponseMeta(request, status, resolvedLang),
+          }),
+        );
+
+        return;
+      }
+
+      response.status(status).json(
+        errorResponse(
+          this.normalizeHttpException(body, status, acceptLanguage),
+          {
+            meta: buildResponseMeta(request, status, resolvedLang),
+          },
+        ),
+      );
 
       return;
     }
@@ -82,19 +97,107 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     /**
      * 3️⃣ Fallback
      */
-    const fallbackMessage = this.i18n.translate(
-      'common.internal_error',
-      lang,
+    response.status(HttpStatus.INTERNAL_SERVER_ERROR).json(
+      errorResponse(
+        {
+          code: ErrorCode.INTERNAL_ERROR,
+          message: this.i18n.translate(
+            'common.internal_error',
+            acceptLanguage,
+          ),
+        },
+        {
+          meta: buildResponseMeta(
+            request,
+            HttpStatus.INTERNAL_SERVER_ERROR,
+            resolvedLang,
+          ),
+        },
+      ),
     );
+  }
 
-    response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-      success: false,
-      error: {
+  private normalizeHttpException(
+    body: unknown,
+    status: number,
+    lang?: string,
+  ): {
+    code: ErrorCode | string;
+    message: string;
+    details?: unknown;
+    metadata?: Record<string, unknown>;
+  } {
+    if (typeof body === 'string') {
+      return {
+        code: getErrorCodeFromHttpStatus(status),
+        message: body,
+      };
+    }
+
+    if (!body || typeof body !== 'object') {
+      return {
         code: ErrorCode.INTERNAL_ERROR,
-        message: fallbackMessage,
-      },
-      path,
-      timestamp,
-    });
+        message: this.i18n.translate('common.internal_error', lang),
+      };
+    }
+
+    const record = body as Record<string, unknown>;
+    const rawMessage = record.message;
+    const metadata = this.asMetadata(record.metadata);
+
+    if (typeof record.messageKey === 'string') {
+      return {
+        code:
+          typeof record.code === 'string'
+            ? record.code
+            : getErrorCodeFromHttpStatus(status),
+        message: this.i18n.translate(record.messageKey, lang, metadata),
+        details: record.details,
+        metadata,
+      };
+    }
+
+    if (Array.isArray(rawMessage)) {
+      return {
+        code:
+          typeof record.code === 'string'
+            ? record.code
+            : getErrorCodeFromHttpStatus(status),
+        message: this.i18n.translate('common.validation_error', lang),
+        details: rawMessage,
+        metadata,
+      };
+    }
+
+    return {
+      code:
+        typeof record.code === 'string'
+          ? record.code
+          : getErrorCodeFromHttpStatus(status),
+      message:
+        typeof rawMessage === 'string'
+          ? rawMessage
+          : typeof record.error === 'string'
+            ? record.error
+            : this.i18n.translate('common.internal_error', lang),
+      details: record.details,
+      metadata,
+    };
+  }
+
+  private getRequestedLanguage(request: Request): string | undefined {
+    const acceptLanguage = request.headers['accept-language'];
+
+    return typeof acceptLanguage === 'string' ? acceptLanguage : undefined;
+  }
+
+  private asMetadata(
+    value: unknown,
+  ): Record<string, unknown> | undefined {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) {
+      return undefined;
+    }
+
+    return value as Record<string, unknown>;
   }
 }

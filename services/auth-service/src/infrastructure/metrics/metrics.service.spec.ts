@@ -10,10 +10,16 @@ import { MetricsService } from './metrics.service';
 
 const mockRegistryInstance = {
   metrics: jest.fn(),
+  setDefaultLabels: jest.fn(),
   contentType: 'text/plain; version=0.0.4; charset=utf-8',
 };
 
-const mockCounter = jest.fn();
+const mockHttpCounter = {
+  inc: jest.fn(),
+};
+const mockUserActivityCounter = {
+  inc: jest.fn(),
+};
 const mockHistogram = jest.fn();
 const mockGauge = jest.fn();
 
@@ -23,7 +29,7 @@ const mockGauge = jest.fn();
 jest.mock('prom-client', () => ({
   Registry: jest.fn(() => mockRegistryInstance),
   collectDefaultMetrics: jest.fn(),
-  Counter: jest.fn(() => mockCounter),
+  Counter: jest.fn(),
   Histogram: jest.fn(() => mockHistogram),
   Gauge: jest.fn(() => mockGauge),
 }));
@@ -33,6 +39,9 @@ describe('MetricsService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    (Counter as jest.Mock)
+      .mockImplementationOnce(() => mockHttpCounter)
+      .mockImplementationOnce(() => mockUserActivityCounter);
     service = new MetricsService();
   });
 
@@ -40,7 +49,7 @@ describe('MetricsService', () => {
     expect(Registry).toHaveBeenCalledTimes(1);
     expect(collectDefaultMetrics).toHaveBeenCalledTimes(1);
 
-    expect(Counter).toHaveBeenCalledTimes(1);
+    expect(Counter).toHaveBeenCalledTimes(2);
     expect(Histogram).toHaveBeenCalledTimes(1);
     expect(Gauge).toHaveBeenCalledTimes(1);
   });
@@ -65,5 +74,40 @@ describe('MetricsService', () => {
 
   it('debe retornar el nombre del servicio', () => {
     expect(service.getServiceName()).toBe('auth-service');
+  });
+
+  it('debe usar "NONE" como reason si no se proporciona', () => {
+    service.recordUserActivity({
+      service: 'auth-service',
+      category: 'AUTH',
+      action: 'AUTH.LOGIN_SUCCESS',
+      outcome: 'SUCCESS',
+    });
+
+    expect(mockUserActivityCounter.inc).toHaveBeenCalledWith({
+      service: 'auth-service',
+      category: 'AUTH',
+      action: 'AUTH.LOGIN_SUCCESS',
+      outcome: 'SUCCESS',
+      reason: 'NONE',
+    });
+  });
+
+  it('debe registrar actividad de usuario', () => {
+    service.recordUserActivity({
+      service: 'auth-service',
+      category: 'AUTH',
+      action: 'AUTH.LOGIN_FAILED',
+      outcome: 'FAILURE',
+      reason: 'INVALID_PASSWORD',
+    });
+
+    expect(mockUserActivityCounter.inc).toHaveBeenCalledWith({
+      service: 'auth-service',
+      category: 'AUTH',
+      action: 'AUTH.LOGIN_FAILED',
+      outcome: 'FAILURE',
+      reason: 'INVALID_PASSWORD',
+    });
   });
 });

@@ -7,7 +7,7 @@ import {
   Res,
 } from '@nestjs/common';
 import type { Request, Response } from 'express';
-import { PublicRoute, successResponse } from '@saas/shared';
+import { PublicRoute } from '@saas/shared';
 import { AuthProxy } from '@infrastructure/http/proxies/auth.proxy';
 
 /**
@@ -30,8 +30,9 @@ export class AuthController {
   @Post('register')
   async register(@Req() req: Request) {
     this.prepareRequest(req);
-    const data = await this.authProxy.forward(req, '/register');
-    return successResponse(data);
+    const { body } = await this.authProxy.forward(req, '/register');
+
+    return body;
   }
 
   /**
@@ -52,7 +53,7 @@ export class AuthController {
       res.setHeader('set-cookie', result.cookies);
     }
 
-    return successResponse(result.data);
+    return result.body;
   }
 
   /**
@@ -72,18 +73,64 @@ export class AuthController {
       res.setHeader('set-cookie', result.cookies);
     }
 
-    return successResponse(result.data);
+    return result.body;
   }
 
   /**
-   * Logout de usuario
+   * Cambio de contraseña del usuario autenticado
+   */
+  @Post('change-password')
+  async changePassword(@Req() req: Request) {
+    this.prepareRequest(req);
+    req.headers['x-user-id'] = req.user!.id;
+
+    const { body } = await this.authProxy.forward(req, '/change-password');
+    return body;
+  }
+
+  /**
+   * Cierra la sesión actual del usuario.
+   *
+   * @remarks
+   * Inyecta `x-user-id` y `x-session-id` como headers internos
+   * para que el auth-service identifique la sesión a revocar.
    */
   @Post('logout')
-  async logout(@Req() req: Request) {
+  async logout(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     this.prepareRequest(req);
+    req.headers['x-user-id'] = req.user!.id;
+    req.headers['x-session-id'] = req.user!.sessionId;
 
-    const data = await this.authProxy.forward(req, '/logout');
-    return successResponse(data);
+    const result = await this.authProxy.forward(req, '/logout');
+
+    if (result.cookies) {
+      res.setHeader('set-cookie', result.cookies);
+    }
+
+    return result.body;
+  }
+
+  /**
+   * Cierra todas las sesiones activas del usuario.
+   */
+  @Post('logout-all')
+  async logoutAll(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    this.prepareRequest(req);
+    req.headers['x-user-id'] = req.user!.id;
+
+    const result = await this.authProxy.forward(req, '/logout-all');
+
+    if (result.cookies) {
+      res.setHeader('set-cookie', result.cookies);
+    }
+
+    return result.body;
   }
 
   /**

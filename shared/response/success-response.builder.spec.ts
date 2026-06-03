@@ -29,4 +29,27 @@ describe('successResponse', () => {
       data: 'ok',
     });
   });
+
+  it('debe incluir mensaje y metadata cuando se proporcionan', () => {
+    const result = successResponse(
+      { id: 1 },
+      {
+        message: 'Operación completada',
+        meta: {
+          requestId: 'req-123',
+          statusCode: 201,
+        },
+      },
+    );
+
+    expect(result).toEqual({
+      success: true,
+      message: 'Operación completada',
+      data: { id: 1 },
+      meta: {
+        requestId: 'req-123',
+        statusCode: 201,
+      },
+    });
+  });
 });

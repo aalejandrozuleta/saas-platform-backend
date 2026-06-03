@@ -9,6 +9,9 @@ Incluye reverse proxy, observabilidad, logging, dashboards y orquestación de se
 ## Estructura
 
 docker/
+├── alloy/
+│   └── alloy.local.alloy
+│
 ├── grafana/
 │   └── provisioning/
 │       ├── dashboards/
@@ -31,7 +34,7 @@ docker/
 ├── prometheus/
 │   └── prometheus.yml
 │
-├── promtail/
+├── promtail/ (deprecated)
 │   └── promtail.yml
 │
 ├── docker-compose.dev.yml
@@ -53,11 +56,14 @@ Levanta el entorno completo de desarrollo:
 - mongo
 - prometheus
 - loki
-- promtail
+- alloy (reemplazo de promtail)
+- postgres-exporter
+- redis-exporter
+- cadvisor
 - grafana
 - mailpit
 - pgadmin
-- redis-commander
+- redisinsight
 - mongo-express
 
 Arranque:
@@ -134,6 +140,16 @@ Recolecta métricas desde /metrics de:
 - api-gateway
 - auth-service
 
+Y métricas de infra:
+
+- postgres-exporter (PostgreSQL)
+- redis-exporter (Redis)
+- cadvisor (containers)
+
+Nota:
+
+Los exporters y cadvisor no se exponen a tu host; solo quedan en la red interna para que Prometheus los scrapee.
+
 Acceso web:
 
 http://localhost:9090
@@ -148,17 +164,17 @@ docker/loki/loki.yml
 
 Backend de logs.
 
-Recibe logs enviados por promtail.
+Recibe logs enviados por Alloy (antes Promtail, EOL 2026-03-02).
 
 No tiene UI propia.
 
 ---
 
-# PROMTAIL
+# ALLOY (reemplazo de Promtail)
 
 Ruta:
 
-docker/promtail/promtail.yml
+docker/alloy/alloy.local.alloy
 
 Agente recolector:
 
@@ -168,7 +184,11 @@ Agente recolector:
 
 Pipeline:
 
-Containers → Promtail → Loki → Grafana
+Containers → Alloy → Loki → Grafana
+
+Nota:
+
+Promtail está EOL desde 2026-03-02. El archivo `docker/promtail/promtail.yml` queda solo como referencia.
 
 ---
 
@@ -199,6 +219,12 @@ Declara qué dashboards cargar al iniciar Grafana.
 
 Grafana arranca con todo precargado.
 
+Dashboards incluidos:
+
+- SaaS Platform – Overview
+- Auth Service
+- SaaS Platform – Infra
+
 Acceso:
 
 http://localhost:3005
@@ -216,6 +242,10 @@ Servidor SMTP falso para desarrollo.
 Todos los correos llegan aquí:
 
 http://localhost:8025
+
+SMTP:
+
+localhost:1025
 
 ---
 
@@ -244,13 +274,13 @@ Puerto:
 
 ---
 
-## Redis – Redis Commander
+## Redis – RedisInsight
 
 UI web para Redis.
 
 Acceso:
 
-http://localhost:8081
+http://localhost:5540
 
 Redis interno:
 
@@ -296,6 +326,11 @@ Persistencia real:
 
 auth-postgres-data
 mongo-data
+loki-data
+prometheus-data
+grafana-data
+pgadmin-data
+alloy-data
 
 Listar:
 
@@ -303,7 +338,7 @@ docker volume ls
 
 Eliminar:
 
-docker volume rm docker_auth-postgres-data docker_mongo-data
+docker volume rm docker_auth-postgres-data docker_mongo-data docker_loki-data docker_prometheus-data docker_grafana-data docker_pgadmin-data docker_alloy-data
 
 ---
 
@@ -311,8 +346,9 @@ docker volume rm docker_auth-postgres-data docker_mongo-data
 
 Solo se monta el código fuente:
 
-services/auth-service/src
-services/api-gateway/src
+services/auth-service
+services/api-gateway
+shared
 
 node_modules vive dentro del contenedor.
 
@@ -330,7 +366,7 @@ Este directorio representa un mini cloud local:
 - Microservicios
 - PostgreSQL + Redis + Mongo
 - Métricas (Prometheus)
-- Logs (Loki + Promtail)
+- Logs (Loki + Alloy)
 - Dashboards (Grafana)
 - Mail sandbox
 - Admin UIs

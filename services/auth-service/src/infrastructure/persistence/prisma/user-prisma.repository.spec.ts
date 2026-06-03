@@ -22,6 +22,7 @@ describe('UserPrismaRepository', () => {
     user: {
       findUnique: jest.fn(),
       create: jest.fn(),
+      update: jest.fn(),
     },
   };
 
@@ -81,6 +82,65 @@ describe('UserPrismaRepository', () => {
 
       expect(result).toBeNull();
       expect(UserMapper.toDomain).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('findById', () => {
+    it('debe retornar un User cuando existe', async () => {
+      const email = EmailVO.create('byid@example.com');
+      const prismaUser = {
+        id: 'user-99',
+        email: email.getValue(),
+        passwordHash: 'hash',
+        status: PrismaUserStatus.ACTIVE,
+        emailVerified: true,
+        failedLoginAttempts: 0,
+        blockedUntil: null,
+        createdAt: new Date(),
+      };
+
+      const domainUser = User.fromPersistence({
+        id: prismaUser.id,
+        email,
+        passwordHash: prismaUser.passwordHash,
+        status: UserStatus.ACTIVE,
+        emailVerified: true,
+        failedLoginAttempts: 0,
+        blockedUntil: undefined,
+        createdAt: prismaUser.createdAt,
+      });
+
+      prismaMock.user.findUnique.mockResolvedValue(prismaUser);
+      (UserMapper.toDomain as jest.Mock).mockReturnValue(domainUser);
+
+      const result = await repository.findById('user-99');
+
+      expect(prismaMock.user.findUnique).toHaveBeenCalledWith({
+        where: { id: 'user-99' },
+      });
+      expect(result).toBe(domainUser);
+    });
+
+    it('debe retornar null si no existe', async () => {
+      prismaMock.user.findUnique.mockResolvedValue(null);
+
+      const result = await repository.findById('nonexistent');
+
+      expect(result).toBeNull();
+      expect(UserMapper.toDomain).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('updatePasswordHash', () => {
+    it('debe actualizar el hash de contraseña del usuario', async () => {
+      prismaMock.user.update.mockResolvedValue({});
+
+      await repository.updatePasswordHash('user-1', 'new-hash');
+
+      expect(prismaMock.user.update).toHaveBeenCalledWith({
+        where: { id: 'user-1' },
+        data: { passwordHash: 'new-hash' },
+      });
     });
   });
 

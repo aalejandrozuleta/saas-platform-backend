@@ -101,6 +101,66 @@ describe('SessionPrismaRepository', () => {
     });
   });
 
+  describe('revokeById', () => {
+    it('debe revocar una sesión específica por su ID', async () => {
+      const now = new Date();
+      prisma.session.updateMany = jest.fn().mockResolvedValue({ count: 1 });
+
+      await repository.revokeById('session-xyz', now);
+
+      expect(prisma.session.updateMany).toHaveBeenCalledWith({
+        where: {
+          id: 'session-xyz',
+          revokedAt: null,
+          endedAt: null,
+        },
+        data: { revokedAt: now },
+      });
+    });
+
+    it('debe completarse sin error si la sesión ya estaba revocada (idempotente)', async () => {
+      prisma.session.updateMany = jest.fn().mockResolvedValue({ count: 0 });
+
+      await expect(
+        repository.revokeById('already-revoked', new Date()),
+      ).resolves.not.toThrow();
+    });
+  });
+
+  describe('revokeAllUserSessions', () => {
+    it('debe revocar todas las sesiones activas y retornar sus IDs', async () => {
+      const now = new Date();
+
+      prisma.session.findMany = jest.fn().mockResolvedValue([
+        { id: 'session-1' },
+        { id: 'session-2' },
+      ]);
+      prisma.session.updateMany = jest.fn().mockResolvedValue({ count: 2 });
+
+      const ids = await repository.revokeAllUserSessions('user-1', now);
+
+      expect(prisma.session.findMany).toHaveBeenCalledWith({
+        where: { userId: 'user-1', revokedAt: null, endedAt: null },
+        select: { id: true },
+      });
+      expect(prisma.session.updateMany).toHaveBeenCalledWith({
+        where: { id: { in: ['session-1', 'session-2'] } },
+        data: { revokedAt: now },
+      });
+      expect(ids).toEqual(['session-1', 'session-2']);
+    });
+
+    it('debe retornar array vacío si no hay sesiones activas', async () => {
+      prisma.session.findMany = jest.fn().mockResolvedValue([]);
+      prisma.session.updateMany = jest.fn();
+
+      const ids = await repository.revokeAllUserSessions('user-1', new Date());
+
+      expect(ids).toEqual([]);
+      expect(prisma.session.updateMany).not.toHaveBeenCalled();
+    });
+  });
+
   describe('revokeOldestActiveSession', () => {
     it('debe revocar la sesión activa más antigua', async () => {
       const now = new Date();

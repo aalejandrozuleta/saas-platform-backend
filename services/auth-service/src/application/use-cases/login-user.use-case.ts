@@ -111,7 +111,12 @@ export class LoginUserUseCase {
 
     const user = await this.validateUser(email, context);
 
-    await this.validatePassword(user, password, context);
+    await this.validatePassword(
+      user,
+      password,
+      context,
+      email,
+    );
 
     const securityProfile =
       await this.securityRepository.findByUserId(user.id);
@@ -151,7 +156,12 @@ export class LoginUserUseCase {
 
     if (!user) {
       this.eventBus.publish(
-        new LoginFailedEvent(null, context, 'INVALID_CREDENTIALS'),
+        new LoginFailedEvent(
+          null,
+          email,
+          context,
+          'INVALID_CREDENTIALS',
+        ),
       );
 
       throw DomainErrorFactory.invalidCredentials();
@@ -197,6 +207,7 @@ export class LoginUserUseCase {
     user: User,
     password: string,
     context: LoginContext,
+    email: string,
   ): Promise<void> {
 
     const passwordVO = PasswordVO.create(password);
@@ -218,6 +229,7 @@ export class LoginUserUseCase {
       this.eventBus.publish(
         new LoginFailedEvent(
           user.id,
+          email,
           context,
           'INVALID_PASSWORD',
         ),

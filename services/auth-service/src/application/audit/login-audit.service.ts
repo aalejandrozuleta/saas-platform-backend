@@ -1,10 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { AuditLogger } from '@application/ports/audit-logger.port';
-import { AuditCategory } from '@domain/audit/audit-category.enum';
 import { LoginContext } from '@domain/value-objects/login-context.vo';
 import { AUDIT_LOGGER } from '@domain/token/services.tokens';
+import { LoginChallengeReason } from '@application/security/login-challenge.types';
 
-import { AuthAuditEvent } from './auth-events.enum';
+import { AuthActivityReportFactory } from './auth-activity-report.factory';
 
 /**
  * Servicio de aplicación encargado de traducir
@@ -28,17 +28,9 @@ export class LoginAuditService {
     email: string,
     context: LoginContext,
   ): Promise<void> {
-    await this.auditLogger.log({
-      category: AuditCategory.AUTH,
-      event: AuthAuditEvent.LOGIN_ATTEMPT,
-      userId: null,
-      ip: context.ip,
-      country: context.country,
-      deviceFingerprint: context.deviceFingerprint,
-      metadata: {
-        email,
-      },
-    });
+    await this.auditLogger.log(
+      AuthActivityReportFactory.loginAttempted(email, context),
+    );
   }
 
   /**
@@ -49,17 +41,13 @@ export class LoginAuditService {
     context: LoginContext,
     sessionId: string,
   ): Promise<void> {
-    await this.auditLogger.log({
-      category: AuditCategory.AUTH,
-      event: AuthAuditEvent.LOGIN_SUCCESS,
-      userId,
-      ip: context.ip,
-      country: context.country,
-      deviceFingerprint: context.deviceFingerprint,
-      metadata: {
+    await this.auditLogger.log(
+      AuthActivityReportFactory.loginSucceeded(
+        userId,
+        context,
         sessionId,
-      },
-    });
+      ),
+    );
   }
 
   /**
@@ -69,16 +57,55 @@ export class LoginAuditService {
     userId: string | null,
     context: LoginContext,
     reason: string,
+    email?: string,
   ): Promise<void> {
-    await this.auditLogger.log({
-      category: AuditCategory.AUTH,
-      event: AuthAuditEvent.LOGIN_FAILED,
-      userId,
-      ip: context.ip,
-      country: context.country,
-      deviceFingerprint: context.deviceFingerprint,
-      reason,
-    });
+    await this.auditLogger.log(
+      AuthActivityReportFactory.loginFailed(
+        userId,
+        email,
+        context,
+        reason,
+      ),
+    );
+  }
+
+  async securityChallengeRequired(input: {
+    userId?: string;
+    email?: string;
+    context: {
+      ip?: string;
+      country?: string;
+      deviceFingerprint?: string;
+      requestId?: string;
+    };
+    reason: LoginChallengeReason;
+    metadata?: Record<string, unknown>;
+  }): Promise<void> {
+    await this.auditLogger.log(
+      AuthActivityReportFactory.securityChallengeRequired(
+        input,
+      ),
+    );
+  }
+
+  async internalServerError(input: {
+    action: string;
+    summary: string;
+    actor?: {
+      id?: string | null;
+      email?: string;
+    };
+    context?: {
+      ip?: string;
+      country?: string;
+      deviceFingerprint?: string;
+      requestId?: string;
+    };
+    metadata?: Record<string, unknown>;
+  }): Promise<void> {
+    await this.auditLogger.log(
+      AuthActivityReportFactory.internalServerError(input),
+    );
   }
 
   /**
@@ -89,17 +116,13 @@ export class LoginAuditService {
     context: LoginContext,
     blockedUntil?: Date,
   ): Promise<void> {
-    await this.auditLogger.log({
-      category: AuditCategory.AUTH,
-      event: AuthAuditEvent.LOGIN_BLOCKED,
-      userId,
-      ip: context.ip,
-      country: context.country,
-      deviceFingerprint: context.deviceFingerprint,
-      metadata: {
+    await this.auditLogger.log(
+      AuthActivityReportFactory.loginBlocked(
+        userId,
+        context,
         blockedUntil,
-      },
-    });
+      ),
+    );
   }
 
   /**
@@ -109,14 +132,12 @@ export class LoginAuditService {
     userId: string,
     context: LoginContext,
   ): Promise<void> {
-    await this.auditLogger.log({
-      category: AuditCategory.AUTH,
-      event: AuthAuditEvent.LOGIN_DEVICE_NOT_TRUSTED,
-      userId,
-      ip: context.ip,
-      country: context.country,
-      deviceFingerprint: context.deviceFingerprint,
-    });
+    await this.auditLogger.log(
+      AuthActivityReportFactory.deviceNotTrusted(
+        userId,
+        context,
+      ),
+    );
   }
 
   /**
@@ -126,13 +147,11 @@ export class LoginAuditService {
     userId: string,
     context: LoginContext,
   ): Promise<void> {
-    await this.auditLogger.log({
-      category: AuditCategory.AUTH,
-      event: AuthAuditEvent.LOGIN_COUNTRY_NOT_TRUSTED,
-      userId,
-      ip: context.ip,
-      country: context.country,
-      deviceFingerprint: context.deviceFingerprint,
-    });
+    await this.auditLogger.log(
+      AuthActivityReportFactory.countryNotTrusted(
+        userId,
+        context,
+      ),
+    );
   }
 }

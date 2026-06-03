@@ -73,4 +73,20 @@ export class DomainErrorFactory {
       401,
     );
   }
+
+  static invalidCurrentPassword(): DomainException {
+    return DomainException.create(
+      'auth.invalid_current_password',
+      ErrorCode.INVALID_CURRENT_PASSWORD,
+      401,
+    );
+  }
+
+  static samePasswordNotAllowed(): DomainException {
+    return DomainException.create(
+      'auth.same_password_not_allowed',
+      ErrorCode.SAME_PASSWORD_NOT_ALLOWED,
+      422,
+    );
+  }
 }
