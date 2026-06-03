@@ -54,6 +54,38 @@ describe('loadMessagesFromDirectory', () => {
       },
     });
   });
+
+  it('debe ignorar entradas que no sean archivos JSON ni directorios', () => {
+    (readdirSync as jest.Mock)
+      .mockReturnValueOnce([createDirent('es', true)])
+      .mockReturnValueOnce([
+        createDirent('README.md', false),
+        createDirent('auth.json', false),
+      ]);
+
+    (readFileSync as jest.Mock).mockReturnValueOnce(
+      JSON.stringify({ 'auth.login_success': 'Inicio exitoso' }),
+    );
+
+    const result = loadMessagesFromDirectory('/app/src/i18n');
+
+    expect(result.es).toEqual({ 'auth.login_success': 'Inicio exitoso' });
+  });
+
+  it('debe cargar recursivamente archivos JSON dentro de subdirectorios de locale', () => {
+    (readdirSync as jest.Mock)
+      .mockReturnValueOnce([createDirent('es', true)])
+      .mockReturnValueOnce([createDirent('auth', true)])
+      .mockReturnValueOnce([createDirent('login.json', false)]);
+
+    (readFileSync as jest.Mock).mockReturnValueOnce(
+      JSON.stringify({ 'auth.login': 'Login' }),
+    );
+
+    const result = loadMessagesFromDirectory('/app/src/i18n');
+
+    expect(result.es).toEqual({ 'auth.login': 'Login' });
+  });
 });
 
 const createDirent = (name: string, isDirectory: boolean) => ({

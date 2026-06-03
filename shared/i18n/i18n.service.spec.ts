@@ -73,4 +73,67 @@ describe('I18nService', () => {
 
     expect(result).toBe('unknown.key');
   });
+
+  describe('resolveLanguage — rutas de fallback', () => {
+    it('debe retornar el idioma base si el subtag no tiene mensajes', () => {
+      // 'es-AR' no existe → fallback a 'es' (que sí existe)
+      const resolved = service.resolveLanguage('es-AR');
+      expect(resolved).toBe('es');
+    });
+
+    it('debe retornar el defaultLang si ningún fallback existe', () => {
+      // 'fr' no existe → defaultLang 'es'
+      const resolved = service.resolveLanguage('fr');
+      expect(resolved).toBe('es');
+    });
+
+    it('debe retornar el idioma por defecto cuando lang es undefined', () => {
+      const resolved = service.resolveLanguage(undefined);
+      expect(resolved).toBe('es');
+    });
+  });
+
+  describe('interpolate — tipos de valores', () => {
+    const svc = new I18nService(
+      { es: { 'test.key': 'Valor: {{v}}' } },
+      'es',
+    );
+
+    it('debe interpolar un número', () => {
+      expect(svc.translate('test.key', 'es', { v: 42 })).toBe('Valor: 42');
+    });
+
+    it('debe interpolar un booleano', () => {
+      expect(svc.translate('test.key', 'es', { v: true })).toBe('Valor: true');
+    });
+
+    it('debe interpolar un bigint', () => {
+      expect(svc.translate('test.key', 'es', { v: BigInt(99) })).toBe('Valor: 99');
+    });
+
+    it('debe interpolar una Date con toISOString()', () => {
+      const d = new Date('2026-01-01T00:00:00.000Z');
+      expect(svc.translate('test.key', 'es', { v: d })).toBe(
+        'Valor: 2026-01-01T00:00:00.000Z',
+      );
+    });
+
+    it('debe interpolar un objeto con JSON.stringify', () => {
+      expect(
+        svc.translate('test.key', 'es', { v: { x: 1 } }),
+      ).toBe('Valor: {"x":1}');
+    });
+
+    it('debe preservar el placeholder si el parámetro es null', () => {
+      expect(svc.translate('test.key', 'es', { v: null as any })).toBe(
+        'Valor: {{v}}',
+      );
+    });
+
+    it('debe preservar el placeholder si el parámetro es undefined', () => {
+      expect(svc.translate('test.key', 'es', { v: undefined })).toBe(
+        'Valor: {{v}}',
+      );
+    });
+  });
 });

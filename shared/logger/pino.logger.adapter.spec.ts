@@ -103,6 +103,70 @@ describe('PinoLoggerAdapter', () => {
     });
   });
 
+  describe('enrich — con contexto AsyncLocalStorage', () => {
+    it('debe enriquecer metadata con el contexto de la request', () => {
+      const { requestContextStorage } = require('../context/async-local-storage');
+
+      const ctx = {
+        requestId: 'req-1',
+        correlationId: 'corr-1',
+        userId: 'user-1',
+      };
+
+      requestContextStorage.run(ctx, () => {
+        const logger = createLogger();
+        logger.info('con contexto', { extra: 'data' });
+
+        expect(mockLogger.info).toHaveBeenCalledWith(
+          expect.objectContaining({
+            requestId: 'req-1',
+            correlationId: 'corr-1',
+            userId: 'user-1',
+            extra: 'data',
+          }),
+          'con contexto',
+        );
+      });
+    });
+
+    it('debe loggear solo el contexto si no hay metadata adicional', () => {
+      const { requestContextStorage } = require('../context/async-local-storage');
+
+      const ctx = { requestId: 'req-2', correlationId: 'corr-2', userId: 'user-2' };
+
+      requestContextStorage.run(ctx, () => {
+        const logger = createLogger();
+        logger.info('solo contexto');
+
+        expect(mockLogger.info).toHaveBeenCalledWith(
+          expect.objectContaining({ requestId: 'req-2' }),
+          'solo contexto',
+        );
+      });
+    });
+
+    it('debe loggear Error con contexto en error()', () => {
+      const { requestContextStorage } = require('../context/async-local-storage');
+
+      const ctx = { requestId: 'req-3', correlationId: 'corr-3', userId: 'u-3' };
+
+      requestContextStorage.run(ctx, () => {
+        const logger = createLogger();
+        const err = new Error('boom with context');
+
+        logger.error('failed', err as any);
+
+        expect(mockLogger.error).toHaveBeenCalledWith(
+          expect.objectContaining({
+            requestId: 'req-3',
+            err,
+          }),
+          'failed',
+        );
+      });
+    });
+  });
+
   describe('debug', () => {
     it('debe loggear debug sin metadata', () => {
       const logger = createLogger();

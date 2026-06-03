@@ -8,4 +8,19 @@ module.exports = {
   rootDir: '.',
 
   roots: ['<rootDir>'],
+
+  collectCoverageFrom: [
+    '**/*.ts',
+    '!**/*.spec.ts',
+    '!**/*.d.ts',
+    '!**/dist/**',
+    '!**/node_modules/**',
+    '!**/*.module.ts',
+    '!**/index.ts',
+    '!**/*.interface.ts',
+    '!**/*.types.ts',
+    '!**/*.tokens.ts',
+    '!**/*.schema.ts',
+    '!**/*.constants.ts',
+  ],
 };

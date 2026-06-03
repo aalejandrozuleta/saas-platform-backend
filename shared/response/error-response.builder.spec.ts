@@ -41,6 +41,17 @@ describe('errorResponse', () => {
     });
   });
 
+
+  it('debe incluir metadata cuando se proporciona', () => {
+    const { errorResponse } = require('./error-response.builder');
+    const { ErrorCode } = require('../errors/ErrorCode.enum');
+    const result = errorResponse(
+      { code: ErrorCode.FORBIDDEN, message: 'Forbid' },
+      { metadata: { reason: 'blocked' } },
+    );
+    expect(result.error.metadata).toEqual({ reason: 'blocked' });
+  });
+
   it('debe incluir meta y detalles cuando se proporcionan', () => {
     const result = errorResponse(
       {
