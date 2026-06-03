@@ -226,7 +226,7 @@ describe('ResilientHttpClient', () => {
       .mockResolvedValue({ data: { token: 'abc' }, headers: {} });
     client.breaker = { fire };
 
-    const result = await client.requestTyped<{ token: string }>(
+    const result = await client.requestTyped(
       { method: 'POST', url: '/login' },
     );
 
