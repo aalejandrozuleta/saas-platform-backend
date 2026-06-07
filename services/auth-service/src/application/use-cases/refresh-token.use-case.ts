@@ -11,6 +11,16 @@ import {
 import { REFRESH_TOKEN_REPOSITORY } from '@domain/token/repositories.tokens';
 import { DomainErrorFactory } from '@domain/errors/domain-error.factory';
 
+/**
+ * Caso de uso: rotación de refresh token (token rotation).
+ *
+ * @remarks
+ * Valida el refresh token recibido, lo revoca y emite un par nuevo
+ * (accessToken + refreshToken). Si la sesión en Redis ya no existe,
+ * el refresh es rechazado aunque el token sea criptográficamente válido.
+ *
+ * Detecta reuso de tokens revocados (indicador de robo) al verificar `revokedAt`.
+ */
 export class RefreshTokenUseCase {
 
   constructor(

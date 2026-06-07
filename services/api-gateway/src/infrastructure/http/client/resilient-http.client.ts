@@ -8,6 +8,16 @@ import CircuitBreaker from 'opossum';
 import { Injectable } from '@nestjs/common';
 import type { PlatformLogger } from '@saas/shared';
 
+/**
+ * Cliente HTTP resiliente para comunicación inter-servicio.
+ *
+ * @remarks
+ * Combina reintentos automáticos con un circuit breaker (opossum) para
+ * proteger al gateway de fallos en cascada:
+ * - Reintentos: solo en métodos idempotentes (GET, HEAD, OPTIONS) y errores 5xx.
+ * - Circuit breaker: se abre al superar el 90 % de errores en una ventana de 10 llamadas,
+ *   con reset automático a los 5 segundos.
+ */
 @Injectable()
 export class ResilientHttpClient {
   private readonly client: AxiosInstance;
@@ -64,6 +74,7 @@ export class ResilientHttpClient {
     });
   }
 
+  /** Ejecuta una petición con reintentos. Respuesta tipada como `unknown`. */
   async request(
     config: AxiosRequestConfig,
     retries = 2,
@@ -71,6 +82,7 @@ export class ResilientHttpClient {
     return this.executeRequest(config, retries);
   }
 
+  /** Ejecuta una petición con reintentos con respuesta tipada por el caller. */
   async requestTyped<TResponse>(
     config: AxiosRequestConfig,
     retries = 2,

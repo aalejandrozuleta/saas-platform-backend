@@ -8,7 +8,16 @@ import {
 } from '@nestjs/common';
 import type { Request, Response } from 'express';
 import { PublicRoute } from '@saas/shared';
+import { ApiTags } from '@nestjs/swagger';
 import { AuthProxy } from '@infrastructure/http/proxies/auth.proxy';
+import {
+  RegisterGatewaySwagger,
+  LoginGatewaySwagger,
+  RefreshGatewaySwagger,
+  LogoutGatewaySwagger,
+  LogoutAllGatewaySwagger,
+  ChangePasswordGatewaySwagger,
+} from '@infrastructure/swagger/auth.swagger';
 
 /**
  * Controller de Auth en el API Gateway
@@ -19,13 +28,12 @@ import { AuthProxy } from '@infrastructure/http/proxies/auth.proxy';
  * - Reenviar requests al auth-service
  * - Normalizar respuestas
  */
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authProxy: AuthProxy) { }
 
-  /**
-   * Registro de usuario
-   */
+  @RegisterGatewaySwagger()
   @PublicRoute()
   @Post('register')
   async register(@Req() req: Request) {
@@ -35,9 +43,7 @@ export class AuthController {
     return body;
   }
 
-  /**
-   * Login de usuario
-   */
+  @LoginGatewaySwagger()
   @PublicRoute()
   @Post('login')
   async login(
@@ -56,9 +62,7 @@ export class AuthController {
     return result.body;
   }
 
-  /**
-   * Refresh de sesión
-   */
+  @RefreshGatewaySwagger()
   @PublicRoute()
   @Post('refresh')
   async refresh(
@@ -76,9 +80,7 @@ export class AuthController {
     return result.body;
   }
 
-  /**
-   * Cambio de contraseña del usuario autenticado
-   */
+  @ChangePasswordGatewaySwagger()
   @Post('change-password')
   async changePassword(@Req() req: Request) {
     this.prepareRequest(req);
@@ -89,12 +91,10 @@ export class AuthController {
   }
 
   /**
-   * Cierra la sesión actual del usuario.
-   *
-   * @remarks
    * Inyecta `x-user-id` y `x-session-id` como headers internos
    * para que el auth-service identifique la sesión a revocar.
    */
+  @LogoutGatewaySwagger()
   @Post('logout')
   async logout(
     @Req() req: Request,
@@ -113,9 +113,7 @@ export class AuthController {
     return result.body;
   }
 
-  /**
-   * Cierra todas las sesiones activas del usuario.
-   */
+  @LogoutAllGatewaySwagger()
   @Post('logout-all')
   async logoutAll(
     @Req() req: Request,

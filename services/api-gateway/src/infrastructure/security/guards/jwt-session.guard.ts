@@ -31,6 +31,17 @@ declare global {
   }
 }
 
+/**
+ * Guard global de autenticación del API Gateway.
+ *
+ * @remarks
+ * Valida el `accessToken` de la cookie en dos pasos:
+ *  1. Verifica firma y claims del JWT (issuer, audience, expiración).
+ *  2. Confirma que la sesión sigue activa en Redis (`session:<sid>`).
+ *
+ * Las rutas marcadas con `@PublicRoute()` omiten ambas validaciones.
+ * En caso de éxito, inyecta `req.user` con `{ id, sessionId }`.
+ */
 @Injectable()
 export class JwtSessionGuard implements CanActivate {
 

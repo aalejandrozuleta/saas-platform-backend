@@ -23,6 +23,13 @@ import { buildGatewayErrorResponse } from '../../errors/gateway-error-response.u
 import { ResilientHttpClient } from '../client/resilient-http.client';
 import { forwardHeaders } from '../utils/header-forwarder.util';
 
+/**
+ * Proxy que reenvía las peticiones de autenticación al auth-service.
+ *
+ * @remarks
+ * Usa `ResilientHttpClient` para manejar fallos de red y circuit breaker.
+ * Traduce los errores del upstream a respuestas HTTP estructuradas del gateway.
+ */
 @Injectable()
 export class AuthProxy {
   private readonly client: ResilientHttpClient;
@@ -41,6 +48,12 @@ export class AuthProxy {
     );
   }
 
+  /**
+   * Reenvía la petición al auth-service y devuelve body + cookies del upstream.
+   *
+   * @param req - Petición original del cliente
+   * @param path - Sub-ruta del auth-service (ej. `/login`)
+   */
   async forward<T>(
     req: Request,
     path: string,
