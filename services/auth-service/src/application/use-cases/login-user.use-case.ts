@@ -46,14 +46,12 @@ import { ErrorCode } from '@saas/shared';
  * Caso de uso encargado de autenticar un usuario en el sistema.
  *
  * Flujo:
- * 1. Buscar usuario por email
- * 2. Validar contraseña
- * 3. Evaluar políticas de login
- * 4. Registrar intento de autenticación
- * 5. Crear sesión y refresh token
+ * 1. Buscar usuario por email — dummy hash si no existe (anti-timing)
+ * 2. Validar contraseña con bloqueo progresivo (5→15→30→60 min)
+ * 3. Evaluar políticas de login (estado, intentos, dispositivo, país)
+ * 4. Crear sesión y refresh token dentro de transacción
+ * 5. Registrar lastLoginAt
  * 6. Emitir eventos de dominio
- *
- * Este caso de uso representa el punto central del proceso de autenticación.
  */
 
 export class LoginUserUseCase {
@@ -109,7 +107,7 @@ export class LoginUserUseCase {
 
     this.policy.validateDeviceFingerprint(context.deviceFingerprint);
 
-    const user = await this.validateUser(email, context);
+    const user = await this.validateUser(email, password, context);
 
     await this.validatePassword(
       user,
@@ -148,6 +146,7 @@ export class LoginUserUseCase {
    */
   private async validateUser(
     email: string,
+    password: string,
     context: LoginContext,
   ): Promise<User> {
 
@@ -155,6 +154,13 @@ export class LoginUserUseCase {
     const user = await this.userRepository.findByEmail(emailVO);
 
     if (!user) {
+      // Dummy verify para que el tiempo de respuesta sea idéntico al caso
+      // de contraseña incorrecta y no se pueda enumerar emails por timing.
+      await this.passwordHasher.verify(
+        '$argon2id$v=19$m=65536,t=3,p=4$ZHVtbXlzYWx0ZHVtbXk$dummyhashthatisnevervalid000000000000000000000',
+        password,
+      );
+
       this.eventBus.publish(
         new LoginFailedEvent(
           null,
@@ -221,7 +227,7 @@ export class LoginUserUseCase {
       await this.securityRepository.registerFailedAttempt(
         user.id,
         this.policy.getMaxAttempts(),
-        this.policy.lockDuration(),
+        this.policy.lockDuration(user.lockoutCount),
         this.clock.now(),
       );
 
@@ -321,6 +327,8 @@ export class LoginUserUseCase {
         tokenHash: await this.passwordHasher.hash(refresh.token),
         expiresAt: refresh.expiresAt,
       }, tx);
+
+      await this.userRepository.updateLastLogin(user.id, this.clock.now());
 
       return {
         token: accessToken,

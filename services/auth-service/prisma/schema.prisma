@@ -21,8 +21,10 @@ model User {
 
   failedLoginAttempts Int       @default(0)
   blockedUntil        DateTime?
+  lockoutCount        Int       @default(0)
 
-  createdAt DateTime @default(now())
+  lastLoginAt DateTime?
+  createdAt   DateTime  @default(now())
   updatedAt DateTime @updatedAt
 
   // Relaciones

@@ -24,6 +24,7 @@ export class User {
       status: UserStatus.ACTIVE,
       emailVerified: false,
       failedLoginAttempts: 0,
+      lockoutCount: 0,
       createdAt: new Date(),
     });
   }
@@ -65,15 +66,20 @@ export class User {
     return this.props.blockedUntil;
   }
 
+  get lockoutCount(): number {
+    return this.props.lockoutCount;
+  }
+
+  get lastLoginAt(): Date | undefined {
+    return this.props.lastLoginAt;
+  }
+
   get createdAt(): Date {
     return this.props.createdAt;
   }
 
   // ===== Reglas de dominio =====
 
-  /**
-   * Indica si el usuario está bloqueado actualmente
-   */
   isBlocked(): boolean {
     return (
       this.props.blockedUntil !== undefined &&
@@ -81,9 +87,6 @@ export class User {
     );
   }
 
-  /**
-   * Incrementa intentos fallidos
-   */
   increaseFailedAttempts(): User {
     return new User({
       ...this.props,
@@ -91,9 +94,6 @@ export class User {
     });
   }
 
-  /**
-   * Resetea intentos fallidos
-   */
   resetFailedAttempts(): User {
     return new User({
       ...this.props,
@@ -102,9 +102,6 @@ export class User {
     });
   }
 
-  /**
-   * Indica si un bloqueo temporal ya expiró.
-   */
   hasExpiredTemporaryBlock(now: Date): boolean {
     return (
       this.props.blockedUntil !== undefined &&
@@ -113,7 +110,8 @@ export class User {
   }
 
   /**
-   * Libera un bloqueo temporal heredado y restaura el acceso.
+   * Libera bloqueo temporal. lockoutCount se preserva intencionalmente
+   * para que el siguiente bloqueo use la duración progresiva correcta.
    */
   releaseTemporaryBlock(): User {
     return new User({

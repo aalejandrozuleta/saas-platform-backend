@@ -6,7 +6,7 @@ describe('LoginPolicy', () => {
   let policy: LoginPolicy;
 
   beforeEach(() => {
-    policy = new LoginPolicy(3, 15);
+    policy = new LoginPolicy(3);
   });
 
   describe('validateUserStatus', () => {
@@ -55,9 +55,26 @@ describe('LoginPolicy', () => {
     });
   });
 
-  describe('lockDuration', () => {
-    it('retorna la duración configurada', () => {
-      expect(policy.lockDuration()).toBe(15);
+  describe('lockDuration (progressive)', () => {
+    it('1er bloqueo: 5 minutos', () => {
+      expect(policy.lockDuration(0)).toBe(5);
+    });
+
+    it('2do bloqueo: 15 minutos', () => {
+      expect(policy.lockDuration(1)).toBe(15);
+    });
+
+    it('3er bloqueo: 30 minutos', () => {
+      expect(policy.lockDuration(2)).toBe(30);
+    });
+
+    it('4to+ bloqueo: 60 minutos', () => {
+      expect(policy.lockDuration(3)).toBe(60);
+      expect(policy.lockDuration(10)).toBe(60);
+    });
+
+    it('sin lockoutCount usa 5 minutos por defecto', () => {
+      expect(policy.lockDuration()).toBe(5);
     });
   });
 
@@ -101,11 +118,10 @@ describe('LoginPolicy', () => {
     });
   });
 
-  describe('constructor con valores custom', () => {
-    it('debe respetar maxAttempts y lockDuration personalizados', () => {
-      const custom = new LoginPolicy(10, 30);
+  describe('constructor con maxAttempts custom', () => {
+    it('debe respetar maxAttempts personalizado', () => {
+      const custom = new LoginPolicy(10);
       expect(custom.getMaxAttempts()).toBe(10);
-      expect(custom.lockDuration()).toBe(30);
     });
   });
 

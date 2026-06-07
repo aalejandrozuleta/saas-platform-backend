@@ -5,10 +5,12 @@ import { DomainErrorFactory } from '@domain/errors/domain-error.factory';
  * Política de autenticación.
  * Contiene exclusivamente reglas puras de dominio.
  */
+// Duración de bloqueo en minutos por número de lockout acumulado (0-indexed)
+const LOCKOUT_SCHEDULE_MINUTES = [5, 15, 30, 60] as const;
+
 export class LoginPolicy {
   constructor(
     private readonly maxAttempts: number = 3,
-    private readonly lockDurationMinutes: number = 15,
   ) {}
 
   /**
@@ -45,10 +47,12 @@ export class LoginPolicy {
   }
 
   /**
-   * Duración del bloqueo en minutos.
+   * Duración del próximo bloqueo en minutos según historial de lockouts.
+   * 1er bloqueo: 5min, 2do: 15min, 3ro: 30min, 4to+: 60min.
    */
-  lockDuration(): number {
-    return this.lockDurationMinutes;
+  lockDuration(lockoutCount: number = 0): number {
+    const idx = Math.min(lockoutCount, LOCKOUT_SCHEDULE_MINUTES.length - 1);
+    return LOCKOUT_SCHEDULE_MINUTES[idx];
   }
 
   /**

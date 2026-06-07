@@ -19,7 +19,9 @@ import { DomainErrorFactory } from '@domain/errors/domain-error.factory';
  * (accessToken + refreshToken). Si la sesión en Redis ya no existe,
  * el refresh es rechazado aunque el token sea criptográficamente válido.
  *
- * Detecta reuso de tokens revocados (indicador de robo) al verificar `revokedAt`.
+ * Detección de robo de sesión: si se detecta reuso de un token ya revocado,
+ * se revoca toda la familia de tokens y se invalida la sesión en Redis
+ * inmediatamente, forzando al usuario legítimo a re-autenticarse.
  */
 export class RefreshTokenUseCase {
 
@@ -58,6 +60,12 @@ export class RefreshTokenUseCase {
     }
 
     if (stored.revokedAt) {
+      // Token revocado reutilizado = posible robo de sesión.
+      // Revocamos toda la familia e invalidamos la sesión en Redis inmediatamente.
+      await Promise.all([
+        this.refreshRepo.revokeByFamily(stored.familyId),
+        this.sessionCache.revokeSession(stored.sessionId),
+      ]);
       throw DomainErrorFactory.invalidRefreshToken();
     }
 

@@ -61,6 +61,7 @@ describe('LoginUserUseCase', () => {
       status: UserStatus.ACTIVE,
       emailVerified: true,
       failedLoginAttempts: 0,
+      lockoutCount: 0,
       blockedUntil: undefined,
       createdAt: new Date(),
       ...overrides,
@@ -115,6 +116,7 @@ describe('LoginUserUseCase', () => {
 
     userRepository = {
       findByEmail: jest.fn(),
+      updateLastLogin: jest.fn().mockResolvedValue(undefined),
     } as any;
 
     securityRepository = {
@@ -355,6 +357,7 @@ describe('LoginUserUseCase', () => {
     const user = createUser({
       status: UserStatus.BLOCKED,
       failedLoginAttempts: 3,
+      lockoutCount: 0,
       blockedUntil: expiredDate,
     });
 
@@ -376,6 +379,7 @@ describe('LoginUserUseCase', () => {
   it('debe resetear intentos cuando la contraseña es correcta aunque luego se exija challenge', async () => {
     const user = createUser({
       failedLoginAttempts: 2,
+      lockoutCount: 0,
     });
 
     userRepository.findByEmail.mockResolvedValue(user);

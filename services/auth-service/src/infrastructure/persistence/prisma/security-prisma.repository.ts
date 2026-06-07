@@ -62,6 +62,7 @@ export class SecurityPrismaRepository implements SecurityRepository {
           blockedUntil: new Date(
             now.getTime() + lockDurationMinutes * 60_000,
           ),
+          lockoutCount: { increment: 1 },
         },
       });
     }

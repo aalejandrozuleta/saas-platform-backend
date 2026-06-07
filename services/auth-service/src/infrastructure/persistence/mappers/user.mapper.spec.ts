@@ -15,6 +15,8 @@ describe('UserMapper', () => {
         status: PrismaUserStatus.ACTIVE,
         emailVerified: true,
         failedLoginAttempts: 0,
+        lockoutCount: 0,
+        lastLoginAt: null,
         blockedUntil: null,
         createdAt: new Date('2026-01-01'),
       };
@@ -42,6 +44,7 @@ describe('UserMapper', () => {
         status: DomainUserStatus.ACTIVE,
         emailVerified: false,
         failedLoginAttempts: 2,
+        lockoutCount: 0,
         blockedUntil: undefined,
         createdAt: new Date(),
       });
@@ -69,6 +72,8 @@ describe('UserMapper', () => {
         status: 'INVALID_STATUS' as unknown as PrismaUserStatus,
         emailVerified: false,
         failedLoginAttempts: 0,
+        lockoutCount: 0,
+        lastLoginAt: null,
         blockedUntil: null,
         createdAt: new Date(),
       };
@@ -87,6 +92,8 @@ describe('UserMapper', () => {
       status: PrismaUserStatus.PENDING,
       emailVerified: false,
       failedLoginAttempts: 0,
+      lockoutCount: 0,
+      lastLoginAt: null,
       blockedUntil: null,
       createdAt: new Date(),
     };
@@ -104,6 +111,8 @@ describe('UserMapper', () => {
       status: PrismaUserStatus.BLOCKED,
       emailVerified: true,
       failedLoginAttempts: 5,
+      lockoutCount: 2,
+      lastLoginAt: null,
       blockedUntil: new Date(),
       createdAt: new Date(),
     };
@@ -111,6 +120,7 @@ describe('UserMapper', () => {
     const user = UserMapper.toDomain(raw);
 
     expect(user.status).toBe(DomainUserStatus.BLOCKED);
+    expect(user.lockoutCount).toBe(2);
   });
 
   it('debe mapear correctamente DomainStatus PENDING a PrismaStatus', () => {
@@ -121,6 +131,7 @@ describe('UserMapper', () => {
       status: DomainUserStatus.PENDING,
       emailVerified: false,
       failedLoginAttempts: 0,
+      lockoutCount: 0,
       blockedUntil: undefined,
       createdAt: new Date(),
     });
@@ -138,6 +149,7 @@ describe('UserMapper', () => {
       status: DomainUserStatus.BLOCKED,
       emailVerified: false,
       failedLoginAttempts: 5,
+      lockoutCount: 1,
       blockedUntil: new Date(Date.now() + 60_000),
       createdAt: new Date(),
     });
@@ -155,6 +167,7 @@ describe('UserMapper', () => {
       status: 'INVALID_STATUS' as unknown as DomainUserStatus,
       emailVerified: false,
       failedLoginAttempts: 0,
+      lockoutCount: 0,
       blockedUntil: undefined,
       createdAt: new Date(),
     });

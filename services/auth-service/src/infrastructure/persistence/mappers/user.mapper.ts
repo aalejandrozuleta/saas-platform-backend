@@ -22,6 +22,8 @@ export class UserMapper {
     emailVerified: boolean;
     failedLoginAttempts: number;
     blockedUntil: Date | null;
+    lockoutCount: number;
+    lastLoginAt: Date | null;
     createdAt: Date;
   }): User {
     const props: UserProps = {
@@ -32,6 +34,8 @@ export class UserMapper {
       emailVerified: raw.emailVerified,
       failedLoginAttempts: raw.failedLoginAttempts,
       blockedUntil: raw.blockedUntil ?? undefined,
+      lockoutCount: raw.lockoutCount,
+      lastLoginAt: raw.lastLoginAt ?? undefined,
       createdAt: raw.createdAt,
     };
 

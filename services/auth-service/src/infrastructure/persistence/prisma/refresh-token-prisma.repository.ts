@@ -85,6 +85,18 @@ export class RefreshTokenPrismaRepository
     });
   }
 
+  async revokeByFamily(familyId: string): Promise<void> {
+    await this.prisma.refreshToken.updateMany({
+      where: {
+        familyId,
+        revokedAt: null,
+      },
+      data: {
+        revokedAt: new Date(),
+      },
+    });
+  }
+
   async revokeAllByUser(userId: string): Promise<void> {
     await this.prisma.refreshToken.updateMany({
       where: {

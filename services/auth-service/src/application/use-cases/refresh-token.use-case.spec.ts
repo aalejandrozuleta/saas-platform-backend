@@ -25,6 +25,7 @@ describe('RefreshTokenUseCase', () => {
       revoke: jest.fn(),
       create: jest.fn(),
       revokeBySession: jest.fn(),
+      revokeByFamily: jest.fn(),
     } as any;
 
     passwordHasher = {

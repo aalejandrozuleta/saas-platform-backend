@@ -44,6 +44,7 @@ describe('UserPrismaRepository', () => {
         status: PrismaUserStatus.ACTIVE,
         emailVerified: false,
         failedLoginAttempts: 0,
+      lockoutCount: 0,
         blockedUntil: null,
         createdAt: new Date(),
       };
@@ -55,6 +56,7 @@ describe('UserPrismaRepository', () => {
         status: UserStatus.ACTIVE,
         emailVerified: false,
         failedLoginAttempts: 0,
+      lockoutCount: 0,
         blockedUntil: undefined,
         createdAt: prismaUser.createdAt,
       });
@@ -95,6 +97,7 @@ describe('UserPrismaRepository', () => {
         status: PrismaUserStatus.ACTIVE,
         emailVerified: true,
         failedLoginAttempts: 0,
+      lockoutCount: 0,
         blockedUntil: null,
         createdAt: new Date(),
       };
@@ -106,6 +109,7 @@ describe('UserPrismaRepository', () => {
         status: UserStatus.ACTIVE,
         emailVerified: true,
         failedLoginAttempts: 0,
+      lockoutCount: 0,
         blockedUntil: undefined,
         createdAt: prismaUser.createdAt,
       });
@@ -159,6 +163,7 @@ describe('UserPrismaRepository', () => {
         status: PrismaUserStatus.ACTIVE,
         emailVerified: false,
         failedLoginAttempts: 0,
+      lockoutCount: 0,
         blockedUntil: undefined,
       };
 

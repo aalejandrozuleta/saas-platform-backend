@@ -44,4 +44,11 @@ export class UserPrismaRepository implements UserRepository {
       data: { passwordHash },
     });
   }
+
+  async updateLastLogin(userId: string, now: Date): Promise<void> {
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { lastLoginAt: now },
+    });
+  }
 }

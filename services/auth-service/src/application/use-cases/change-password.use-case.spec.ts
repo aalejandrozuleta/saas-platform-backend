@@ -49,6 +49,7 @@ describe('ChangePasswordUseCase', () => {
       status: UserStatus.ACTIVE,
       emailVerified: true,
       failedLoginAttempts: 0,
+      lockoutCount: 0,
       blockedUntil: undefined,
       createdAt: new Date(),
       ...overrides,

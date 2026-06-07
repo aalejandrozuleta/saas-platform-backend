@@ -115,8 +115,8 @@ export class AuthController {
       httpOnly: true,
       secure,
       sameSite: 'strict',
-      path: '/',
-      maxAge: 7 * 24 * 60 * 60 * 1000, 
+      path: '/v1/auth',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
 
@@ -146,7 +146,8 @@ export class AuthController {
       httpOnly: true,
       secure: this.shouldUseSecureCookies(req),
       sameSite: 'strict',
-      path: '/v1/auth/refresh',
+      path: '/v1/auth',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     return successResponse(

@@ -8,6 +8,7 @@ describe('User entity', () => {
     status: UserStatus;
     failedLoginAttempts: number;
     blockedUntil: Date | undefined;
+    lockoutCount: number;
   }> = {}) =>
     User.fromPersistence({
       id: 'user-1',
@@ -16,6 +17,7 @@ describe('User entity', () => {
       status: UserStatus.ACTIVE,
       emailVerified: false,
       failedLoginAttempts: 0,
+      lockoutCount: 0,
       blockedUntil: undefined,
       createdAt: new Date(),
       ...overrides,
@@ -71,7 +73,8 @@ describe('User entity', () => {
   describe('resetFailedAttempts', () => {
     it('debe retornar un nuevo User con intentos en 0 y blockedUntil undefined', () => {
       const future = new Date(Date.now() + 60_000);
-      const user = makeUser({ failedLoginAttempts: 3, blockedUntil: future });
+      const user = makeUser({ failedLoginAttempts: 3,
+      lockoutCount: 0, blockedUntil: future });
       const reset = user.resetFailedAttempts();
 
       expect(reset.failedLoginAttempts).toBe(0);

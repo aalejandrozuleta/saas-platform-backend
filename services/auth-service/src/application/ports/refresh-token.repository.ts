@@ -39,4 +39,10 @@ export interface RefreshTokenRepository {
   ): Promise<void>;
 
   revokeAllByUser(userId: string): Promise<void>;
+
+  /**
+   * Revoca todos los tokens de una familia. Usado cuando se detecta
+   * reutilización de un token revocado (indicador de robo de sesión).
+   */
+  revokeByFamily(familyId: string): Promise<void>;
 }

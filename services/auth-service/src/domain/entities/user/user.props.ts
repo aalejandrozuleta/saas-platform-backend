@@ -26,6 +26,12 @@ export interface UserProps {
   /** Bloqueo temporal */
   blockedUntil?: Date;
 
+  /** Número de veces que la cuenta ha sido bloqueada (progressive lockout) */
+  lockoutCount: number;
+
+  /** Último login exitoso */
+  lastLoginAt?: Date;
+
   /** Fecha de creación */
   createdAt: Date;
 }

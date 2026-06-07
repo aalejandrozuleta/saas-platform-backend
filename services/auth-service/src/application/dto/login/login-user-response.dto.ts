@@ -1,22 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 /**
- * DTO de respuesta al login de usuario
+ * DTO de respuesta al login de usuario.
+ * Los tokens NO se incluyen en el body — se envían en cookies HttpOnly (path=/v1/auth).
  */
 export class LoginUserResponseDto {
   @ApiProperty({
-    example: 'Inicio de sesion exitoso',
-    description: 'Mensaje de login',
+    example: 'Inicio de sesión exitoso',
+    description: 'Mensaje de confirmación',
   })
   message!: string;
-
-  @ApiProperty({
-    example: {
-      token: 'jwt-access-token',
-    },
-    description: 'Datos devueltos al iniciar sesión',
-  })
-  data!: {
-    token: string;
-  };
 }

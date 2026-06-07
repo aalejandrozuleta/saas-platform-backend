@@ -24,6 +24,7 @@ describe('LoginSecurityChallengeService', () => {
       status: UserStatus.ACTIVE,
       emailVerified: true,
       failedLoginAttempts: 0,
+      lockoutCount: 0,
       createdAt: new Date(),
     });
 
@@ -132,6 +133,7 @@ describe('LoginSecurityChallengeService', () => {
         status: UserStatus.ACTIVE,
         emailVerified: false,
         failedLoginAttempts: 0,
+      lockoutCount: 0,
         createdAt: new Date(),
       });
 
