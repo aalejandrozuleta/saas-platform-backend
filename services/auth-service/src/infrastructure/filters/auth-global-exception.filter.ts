@@ -56,8 +56,7 @@ export class AuthGlobalExceptionFilter implements ExceptionFilter {
       exception instanceof BaseException &&
       exception.code === ErrorCode.SECURITY_CHALLENGE_REQUIRED
     ) {
-      const metadata = (exception.metadata ??
-        {}) as Record<string, unknown>;
+      const metadata = exception.metadata ?? {};
 
       await this.loginAuditService.securityChallengeRequired({
         userId:

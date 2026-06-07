@@ -18,6 +18,8 @@ describe('PublicRoute decorator', () => {
       testMethod() {}
     }
 
-    expect(new TestClass()).toBeDefined();
+    const metadata = Reflect.getMetadata(PUBLIC_ROUTE_KEY, TestClass.prototype, 'testMethod');
+
+    expect(metadata).toBe(true);
   });
 });

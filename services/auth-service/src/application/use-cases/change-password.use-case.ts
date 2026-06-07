@@ -73,7 +73,7 @@ export class ChangePasswordUseCase {
     // ── 1. Verificar existencia y estado del usuario ──────────────────────
     const user = await this.userRepository.findById(userId);
 
-    if (!user || user.status !== UserStatus.ACTIVE) {
+    if (user?.status !== UserStatus.ACTIVE) {
       // No revelamos si el usuario existe o no para evitar user enumeration.
       // Un usuario autenticado con estado inválido es tratado igual.
       throw DomainErrorFactory.invalidCurrentPassword();

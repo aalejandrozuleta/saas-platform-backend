@@ -169,17 +169,22 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       };
     }
 
+    let message: string;
+
+    if (typeof rawMessage === 'string') {
+      message = rawMessage;
+    } else if (typeof record.error === 'string') {
+      message = record.error;
+    } else {
+      message = this.i18n.translate('common.internal_error', lang);
+    }
+
     return {
       code:
         typeof record.code === 'string'
           ? record.code
           : getErrorCodeFromHttpStatus(status),
-      message:
-        typeof rawMessage === 'string'
-          ? rawMessage
-          : typeof record.error === 'string'
-            ? record.error
-            : this.i18n.translate('common.internal_error', lang),
+      message,
       details: record.details,
       metadata,
     };

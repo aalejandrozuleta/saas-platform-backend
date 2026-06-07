@@ -369,13 +369,9 @@ describe('ChangePasswordUseCase', () => {
     });
 
     it('debe rechazar nueva contraseña débil antes de llegar al use case (PasswordVO)', () => {
-      // PasswordVO lanza si no cumple: min 12 chars, upper, lower, digit, special
       expect(() => {
         useCase.execute('user-1', 'OldPassword123!', 'weak', context);
-      });
-      // La validación de PasswordVO ocurre en el use case — el VO lanza en create()
-      // Verificamos que passwordHasher.verify nunca es llamado con contraseña débil
-      // en el flujo normal (el DTO ya filtra, pero el VO es la última línea)
+      }).toThrow();
     });
   });
 

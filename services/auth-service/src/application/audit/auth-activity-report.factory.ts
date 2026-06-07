@@ -79,12 +79,15 @@ export class AuthActivityReportFactory {
     reason: LoginChallengeReason;
     metadata?: Record<string, unknown>;
   }): CreateActivityReport {
-    const summary =
-      input.reason === LoginChallengeReason.UNTRUSTED_DEVICE
-        ? 'Intento de acceso desde un dispositivo no seguro'
-        : input.reason === LoginChallengeReason.UNTRUSTED_COUNTRY
-          ? 'Intento de acceso desde un país no confiable'
-          : 'Se requiere verificación adicional para iniciar sesión';
+    let summary: string;
+
+    if (input.reason === LoginChallengeReason.UNTRUSTED_DEVICE) {
+      summary = 'Intento de acceso desde un dispositivo no seguro';
+    } else if (input.reason === LoginChallengeReason.UNTRUSTED_COUNTRY) {
+      summary = 'Intento de acceso desde un país no confiable';
+    } else {
+      summary = 'Se requiere verificación adicional para iniciar sesión';
+    }
 
     return this.createReport({
       action: AuthAuditEvent.LOGIN_SECURITY_CHALLENGE_REQUIRED,
