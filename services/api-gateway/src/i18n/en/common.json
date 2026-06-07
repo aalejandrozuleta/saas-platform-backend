@@ -9,5 +9,8 @@
   "common.auth_service_temporarily_unavailable": "The authentication service is temporarily unavailable",
   "common.auth_service_unavailable": "The authentication service could not be reached",
   "common.gateway_upstream_failure": "An error occurred while communicating with an internal service",
-  "common.upstream_error": "The internal service rejected the request"
+  "common.upstream_error": "The internal service rejected the request",
+  "common.missing_access_token": "Authentication required. No access token provided.",
+  "common.session_expired": "Your session has expired or been revoked. Please sign in again.",
+  "common.invalid_token": "The provided token is invalid or has expired."
 }

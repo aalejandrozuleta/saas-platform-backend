@@ -82,9 +82,9 @@ export class JwtSessionGuard implements CanActivate {
     );
 
     if (!session) {
-      throw new UnauthorizedException(
-        'Session expired or revoked',
-      );
+      throw new UnauthorizedException({
+        messageKey: 'common.session_expired',
+      });
     }
 
     req.user = {
@@ -103,9 +103,9 @@ export class JwtSessionGuard implements CanActivate {
     const token = req.cookies?.accessToken;
 
     if (!token) {
-      throw new UnauthorizedException(
-        'Missing access token',
-      );
+      throw new UnauthorizedException({
+        messageKey: 'common.missing_access_token',
+      });
     }
 
     return token;
@@ -130,17 +130,17 @@ export class JwtSessionGuard implements CanActivate {
       ) as AccessTokenPayload;
 
       if (!payload.sub || !payload.sid) {
-        throw new UnauthorizedException(
-          'Invalid token payload',
-        );
+        throw new UnauthorizedException({
+          messageKey: 'common.invalid_token',
+        });
       }
 
       return payload;
 
     } catch {
-      throw new UnauthorizedException(
-        'Invalid token',
-      );
+      throw new UnauthorizedException({
+        messageKey: 'common.invalid_token',
+      });
     }
   }
 }

@@ -26,7 +26,7 @@ export const HttpErrorMapper: Record<ErrorCode, number> = {
   [ErrorCode.COUNTRY_NOT_TRUSTED]: 403,
   [ErrorCode.SECURITY_CHALLENGE_REQUIRED]: 403,
   [ErrorCode.INVALID_REFRESH_TOKEN]: 401,
-  [ErrorCode.INVALID_CURRENT_PASSWORD]: 400,
+  [ErrorCode.INVALID_CURRENT_PASSWORD]: 401,
   [ErrorCode.SAME_PASSWORD_NOT_ALLOWED]: 422,
 };
 
@@ -44,6 +44,8 @@ export const getErrorCodeFromHttpStatus = (status: number): ErrorCode => {
       return ErrorCode.METHOD_NOT_ALLOWED;
     case 409:
       return ErrorCode.CONFLICT;
+    case 422:
+      return ErrorCode.VALIDATION_ERROR;
     case 415:
       return ErrorCode.UNSUPPORTED_MEDIA_TYPE;
     case 429:

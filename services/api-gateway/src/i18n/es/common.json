@@ -9,5 +9,8 @@
   "common.auth_service_temporarily_unavailable": "El servicio de autenticaci\u00f3n est\u00e1 temporalmente no disponible",
   "common.auth_service_unavailable": "No fue posible contactar el servicio de autenticaci\u00f3n",
   "common.gateway_upstream_failure": "Ocurri\u00f3 un error al comunicarse con un servicio interno",
-  "common.upstream_error": "El servicio interno rechaz\u00f3 la solicitud"
+  "common.upstream_error": "El servicio interno rechaz\u00f3 la solicitud",
+  "common.missing_access_token": "Autenticaci\u00f3n requerida. No se proporcion\u00f3 token de acceso.",
+  "common.session_expired": "Tu sesi\u00f3n ha expirado o fue revocada. Por favor, inicia sesi\u00f3n nuevamente.",
+  "common.invalid_token": "El token proporcionado es inv\u00e1lido o ha expirado."
 }
