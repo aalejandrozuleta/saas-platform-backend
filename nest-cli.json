@@ -10,7 +10,19 @@
       "sourceRoot": "services/auth-service/src",
       "compilerOptions": {
         "tsConfigPath": "services/auth-service/tsconfig.json",
-        "deleteOutDir": true
+        "deleteOutDir": true,
+        "webpack": true
+      }
+    },
+    "api-gateway": {
+      "type": "application",
+      "root": "services/api-gateway",
+      "entryFile": "main",
+      "sourceRoot": "services/api-gateway/src",
+      "compilerOptions": {
+        "tsConfigPath": "services/api-gateway/tsconfig.json",
+        "deleteOutDir": true,
+        "webpack": true
       }
     }
   }

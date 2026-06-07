@@ -4,7 +4,6 @@
   "scripts": {
     "build": "nest build",
     "start": "node dist/main.js",
-    "predev": "pnpm --filter @saas/shared build",
     "dev": "nest start --watch",
     "devs": "node --watch --require ts-node/register --require tsconfig-paths/register src/main.ts",
     "start:debug": "nest start --debug --watch",

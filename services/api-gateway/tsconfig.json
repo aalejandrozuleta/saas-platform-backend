@@ -2,6 +2,7 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "paths": {
+      "@saas/shared": ["../../shared/index.ts"],
       "@saas/shared/*": ["../../shared/*"],
 
       "@domain/*": ["./src/domain/*"],
