@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import { PUBLIC_ROUTE_KEY, PublicRoute } from './public-route.decorator';
 
 describe('PublicRoute decorator', () => {
@@ -18,7 +19,7 @@ describe('PublicRoute decorator', () => {
       testMethod() {}
     }
 
-    const metadata = Reflect.getMetadata(PUBLIC_ROUTE_KEY, TestClass.prototype, 'testMethod');
+    const metadata = Reflect.getMetadata(PUBLIC_ROUTE_KEY, TestClass.prototype.testMethod);
 
     expect(metadata).toBe(true);
   });

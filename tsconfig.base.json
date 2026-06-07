@@ -1,35 +1,30 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
-    /* Target estable para Nest */
-    "target": "ES2021",
-    "lib": ["ES2021"],
+    /* Target — Node 24 soporta ES2022 de forma nativa */
+    "target": "ES2022",
+    "lib": ["ES2022"],
 
-    /* Módulos */
-    "module": "CommonJS",
-    "moduleResolution": "Node",
+    /* Módulos — NodeNext resuelve CJS o ESM según el package.json de cada paquete */
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
 
-    /* 🔥 DECORATORS LEGACY (CLAVE ABSOLUTA) */
+    /* Decorators legacy requeridos por NestJS */
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "useDefineForClassFields": false,
 
-    /* Strict */
+    /* Strict — noImplicitAny y strictNullChecks ya están incluidos */
     "strict": true,
-    "noImplicitAny": true,
-    "strictNullChecks": true,
 
     /* Interop */
     "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
 
     /* Calidad */
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
 
     /* Source maps */
-    "sourceMap": true,
-
-    "baseUrl": "."
+    "sourceMap": true
   }
 }

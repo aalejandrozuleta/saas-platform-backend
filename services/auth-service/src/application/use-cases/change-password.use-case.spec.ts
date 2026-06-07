@@ -368,10 +368,13 @@ describe('ChangePasswordUseCase', () => {
       expect(sessionRepository.revokeAllUserSessions).not.toHaveBeenCalled();
     });
 
-    it('debe rechazar nueva contraseña débil antes de llegar al use case (PasswordVO)', () => {
-      expect(() => {
-        useCase.execute('user-1', 'OldPassword123!', 'weak', context);
-      }).toThrow();
+    it('debe rechazar nueva contraseña débil antes de llegar al use case (PasswordVO)', async () => {
+      userRepository.findById.mockResolvedValue(createUser());
+      passwordHasher.verify.mockResolvedValueOnce(true); // currentPassword válida
+
+      await expect(
+        useCase.execute('user-1', 'OldPassword123!', 'weak', context),
+      ).rejects.toThrow();
     });
   });
 

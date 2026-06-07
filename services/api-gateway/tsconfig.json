@@ -1,16 +1,14 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./dist",
-    "baseUrl": "./",
     "paths": {
       "@saas/shared/*": ["../../shared/*"],
 
-      "@domain/*": ["src/domain/*"],
-      "@application/*": ["src/application/*"],
-      "@infrastructure/*": ["src/infrastructure/*"],
-      "@modules/*": ["src/modules/*"],
-      "@config/*": ["src/config/*"]
+      "@domain/*": ["./src/domain/*"],
+      "@application/*": ["./src/application/*"],
+      "@infrastructure/*": ["./src/infrastructure/*"],
+      "@modules/*": ["./src/modules/*"],
+      "@config/*": ["./src/config/*"]
     }
   },
   "include": ["src/**/*.ts"],

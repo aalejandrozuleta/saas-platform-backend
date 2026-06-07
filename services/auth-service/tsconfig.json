@@ -1,17 +1,16 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "baseUrl": "./",
     "paths": {
       "@saas/shared/*": ["../../shared/*"],
 
-      "@domain/*": ["src/domain/*"],
-      "@application/*": ["src/application/*"],
-      "@infrastructure/*": ["src/infrastructure/*"],
-      "@modules/*": ["src/modules/*"],
-      "@config/*": ["src/config/*"],
-      "@prisma-client": ["src/generated/prisma"],
-      "@prisma-client/*": ["src/generated/prisma/*"]
+      "@domain/*": ["./src/domain/*"],
+      "@application/*": ["./src/application/*"],
+      "@infrastructure/*": ["./src/infrastructure/*"],
+      "@modules/*": ["./src/modules/*"],
+      "@config/*": ["./src/config/*"],
+      "@prisma-client": ["./src/generated/prisma"],
+      "@prisma-client/*": ["./src/generated/prisma/*"]
      }
   },
   "include": ["src/**/*.ts", "src/generated/prisma/**/*.ts"],
