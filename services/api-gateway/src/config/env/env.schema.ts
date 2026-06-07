@@ -14,6 +14,10 @@ export const envSchema = z.object({
   AUTH_SERVICE_TIMEOUT: z.coerce.number().default(5000),
   AUTH_SERVICE_RETRIES: z.coerce.number().default(2),
   AUTH_SERVICE_CIRCUIT_TIMEOUT: z.coerce.number().default(10000),
+
+  CONFIG_SERVICE_URL: z.string(),
+  CONFIG_SERVICE_TIMEOUT: z.coerce.number().default(5000),
+  CONFIG_SERVICE_CIRCUIT_TIMEOUT: z.coerce.number().default(10000),
   JWT_ACCESS_SECRET: z.string().min(10),
 
 

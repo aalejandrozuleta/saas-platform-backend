@@ -1,0 +1,432 @@
+{
+  "info": {
+    "_postman_id": "config-service-v1",
+    "name": "Config Service",
+    "description": "Colección completa del config-service. Cubre mantenimiento, feature flags, tenants, seguridad, rate limits y estadísticas.\n\n**Base URL:** `http://localhost:3002/config/v1`\n\nImporta el environment `config-service.postman_environment.json` para configurar las variables.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3002/config/v1", "type": "string" },
+    { "key": "gatewayUrl", "value": "http://localhost:3000/config/v1", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "🔧 Maintenance",
+      "item": [
+        {
+          "name": "GET Status de mantenimiento",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/maintenance/status", "host": ["{{baseUrl}}"], "path": ["maintenance", "status"] },
+            "description": "Retorna el estado actual: maintenance.enabled, readonly.enabled, mensaje y ventana activa."
+          },
+          "response": [
+            {
+              "name": "200 - Sistema OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"maintenanceEnabled\": false,\n    \"readOnlyEnabled\": false,\n    \"maintenanceMessage\": null,\n    \"activeWindow\": null\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "POST Activar modo mantenimiento",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"enabled\": true,\n  \"message\": \"Sistema en mantenimiento. Volvemos a las 18:00.\",\n  \"updatedBy\": \"admin-001\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/maintenance/mode", "host": ["{{baseUrl}}"], "path": ["maintenance", "mode"] }
+          },
+          "response": []
+        },
+        {
+          "name": "POST Desactivar modo mantenimiento",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"enabled\": false,\n  \"updatedBy\": \"admin-001\"\n}" },
+            "url": { "raw": "{{baseUrl}}/maintenance/mode", "host": ["{{baseUrl}}"], "path": ["maintenance", "mode"] }
+          },
+          "response": []
+        },
+        {
+          "name": "POST Activar modo solo-lectura",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"enabled\": true,\n  \"updatedBy\": \"admin-001\"\n}" },
+            "url": { "raw": "{{baseUrl}}/maintenance/readonly", "host": ["{{baseUrl}}"], "path": ["maintenance", "readonly"] }
+          },
+          "response": []
+        },
+        {
+          "name": "POST Programar ventana de mantenimiento",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Migración PostgreSQL 17\",\n  \"description\": \"Actualización de motor de base de datos\",\n  \"startAt\": \"2099-12-01T02:00:00Z\",\n  \"endAt\": \"2099-12-01T04:00:00Z\",\n  \"createdBy\": \"admin-001\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/maintenance/windows", "host": ["{{baseUrl}}"], "path": ["maintenance", "windows"] }
+          },
+          "response": []
+        },
+        {
+          "name": "GET Listar ventanas de mantenimiento",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/maintenance/windows", "host": ["{{baseUrl}}"], "path": ["maintenance", "windows"] }
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE Cancelar ventana de mantenimiento",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/maintenance/windows/:id", "host": ["{{baseUrl}}"], "path": ["maintenance", "windows", ":id"], "variable": [{ "key": "id", "value": "window-uuid-here" }] }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🚩 Feature Flags",
+      "item": [
+        {
+          "name": "POST Crear/Actualizar feature flag",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"key\": \"new_dashboard\",\n  \"enabled\": true,\n  \"tenantId\": \"tenant-abc\",\n  \"role\": \"admin\",\n  \"environment\": \"production\",\n  \"description\": \"Nuevo panel de control\",\n  \"metadata\": { \"rolloutPercentage\": 50 }\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/feature-flags", "host": ["{{baseUrl}}"], "path": ["feature-flags"] }
+          },
+          "response": []
+        },
+        {
+          "name": "POST Flag global (sin tenant)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"key\": \"dark_mode\",\n  \"enabled\": false,\n  \"description\": \"Modo oscuro global\"\n}" },
+            "url": { "raw": "{{baseUrl}}/feature-flags", "host": ["{{baseUrl}}"], "path": ["feature-flags"] }
+          },
+          "response": []
+        },
+        {
+          "name": "GET Listar todos los feature flags",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/feature-flags", "host": ["{{baseUrl}}"], "path": ["feature-flags"] }
+          },
+          "response": []
+        },
+        {
+          "name": "GET Filtrar flags por tenant",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/feature-flags?tenantId=tenant-abc",
+              "host": ["{{baseUrl}}"],
+              "path": ["feature-flags"],
+              "query": [{ "key": "tenantId", "value": "tenant-abc" }]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET Solo flags activos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/feature-flags?enabled=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["feature-flags"],
+              "query": [{ "key": "enabled", "value": "true" }]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE Eliminar feature flag",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/feature-flags/:id", "host": ["{{baseUrl}}"], "path": ["feature-flags", ":id"], "variable": [{ "key": "id", "value": "flag-uuid-here" }] }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🏢 Tenants",
+      "item": [
+        {
+          "name": "POST Crear/Actualizar config de tenant",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tenantId\": \"tenant-abc\",\n  \"name\": \"Acme Corporation\",\n  \"logoUrl\": \"https://acme.com/logo.png\",\n  \"language\": \"es\",\n  \"timezone\": \"America/Bogota\",\n  \"plan\": \"PRO\",\n  \"maxUsers\": 100,\n  \"maxStorage\": 10240,\n  \"customData\": { \"theme\": \"dark\", \"modules\": [\"billing\", \"hr\"] }\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/tenants", "host": ["{{baseUrl}}"], "path": ["tenants"] }
+          },
+          "response": []
+        },
+        {
+          "name": "POST Actualizar plan de tenant",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"tenantId\": \"tenant-abc\",\n  \"plan\": \"ENTERPRISE\",\n  \"maxUsers\": 1000,\n  \"maxStorage\": 102400\n}" },
+            "url": { "raw": "{{baseUrl}}/tenants", "host": ["{{baseUrl}}"], "path": ["tenants"] }
+          },
+          "response": []
+        },
+        {
+          "name": "GET Listar todos los tenants",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/tenants", "host": ["{{baseUrl}}"], "path": ["tenants"] }
+          },
+          "response": []
+        },
+        {
+          "name": "GET Config de tenant específico",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/tenants/:tenantId", "host": ["{{baseUrl}}"], "path": ["tenants", ":tenantId"], "variable": [{ "key": "tenantId", "value": "tenant-abc" }] }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🔒 Security",
+      "item": [
+        {
+          "name": "POST Añadir IP a blacklist",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ip\": \"192.168.100.50\",\n  \"type\": \"BLACKLIST\",\n  \"reason\": \"Intentos de fuerza bruta detectados\",\n  \"expiresAt\": \"2099-12-31T23:59:59Z\",\n  \"createdBy\": \"admin-001\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/security/ip-rules", "host": ["{{baseUrl}}"], "path": ["security", "ip-rules"] }
+          },
+          "response": []
+        },
+        {
+          "name": "POST Añadir rango CIDR a blacklist",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"ip\": \"10.0.0.0/8\",\n  \"type\": \"BLACKLIST\",\n  \"reason\": \"Rango de red interna comprometida\"\n}" },
+            "url": { "raw": "{{baseUrl}}/security/ip-rules", "host": ["{{baseUrl}}"], "path": ["security", "ip-rules"] }
+          },
+          "response": []
+        },
+        {
+          "name": "POST Añadir IP a whitelist",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"ip\": \"203.0.113.1\",\n  \"type\": \"WHITELIST\",\n  \"reason\": \"Oficina principal\"\n}" },
+            "url": { "raw": "{{baseUrl}}/security/ip-rules", "host": ["{{baseUrl}}"], "path": ["security", "ip-rules"] }
+          },
+          "response": []
+        },
+        {
+          "name": "GET Listar reglas de IP",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/security/ip-rules", "host": ["{{baseUrl}}"], "path": ["security", "ip-rules"] }
+          },
+          "response": []
+        },
+        {
+          "name": "GET Filtrar blacklist",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/security/ip-rules?type=BLACKLIST",
+              "host": ["{{baseUrl}}"],
+              "path": ["security", "ip-rules"],
+              "query": [{ "key": "type", "value": "BLACKLIST" }]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE Eliminar regla de IP",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/security/ip-rules/:id", "host": ["{{baseUrl}}"], "path": ["security", "ip-rules", ":id"], "variable": [{ "key": "id", "value": "rule-uuid-here" }] }
+          },
+          "response": []
+        },
+        {
+          "name": "POST Configurar política de contraseñas (global)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"minLength\": 10,\n  \"requireUppercase\": true,\n  \"requireLowercase\": true,\n  \"requireNumbers\": true,\n  \"requireSymbols\": true,\n  \"maxAgeDays\": 90,\n  \"historyCount\": 5,\n  \"maxConcurrentSessions\": 3\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/security/password-policy", "host": ["{{baseUrl}}"], "path": ["security", "password-policy"] }
+          },
+          "response": []
+        },
+        {
+          "name": "POST Política de contraseñas por tenant",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"tenantId\": \"tenant-abc\",\n  \"minLength\": 12,\n  \"requireSymbols\": true,\n  \"maxConcurrentSessions\": 5\n}" },
+            "url": { "raw": "{{baseUrl}}/security/password-policy", "host": ["{{baseUrl}}"], "path": ["security", "password-policy"] }
+          },
+          "response": []
+        },
+        {
+          "name": "GET Obtener política de contraseñas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/security/password-policy", "host": ["{{baseUrl}}"], "path": ["security", "password-policy"] }
+          },
+          "response": []
+        },
+        {
+          "name": "GET Política de contraseñas de tenant",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/security/password-policy?tenantId=tenant-abc",
+              "host": ["{{baseUrl}}"],
+              "path": ["security", "password-policy"],
+              "query": [{ "key": "tenantId", "value": "tenant-abc" }]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "⚡ Rate Limits",
+      "item": [
+        {
+          "name": "POST Configurar rate limit para login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"endpoint\": \"/api/auth/login\",\n  \"maxRequests\": 5,\n  \"windowSeconds\": 60\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/rate-limits", "host": ["{{baseUrl}}"], "path": ["rate-limits"] }
+          },
+          "response": []
+        },
+        {
+          "name": "POST Rate limit por tenant",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"endpoint\": \"/api/v1/reports\",\n  \"maxRequests\": 100,\n  \"windowSeconds\": 3600,\n  \"tenantId\": \"tenant-abc\"\n}" },
+            "url": { "raw": "{{baseUrl}}/rate-limits", "host": ["{{baseUrl}}"], "path": ["rate-limits"] }
+          },
+          "response": []
+        },
+        {
+          "name": "GET Listar rate limits",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/rate-limits", "host": ["{{baseUrl}}"], "path": ["rate-limits"] }
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE Eliminar rate limit",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/rate-limits/:id", "host": ["{{baseUrl}}"], "path": ["rate-limits", ":id"], "variable": [{ "key": "id", "value": "rl-uuid-here" }] }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "📊 Stats",
+      "item": [
+        {
+          "name": "GET Estadísticas del sistema",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/stats", "host": ["{{baseUrl}}"], "path": ["stats"] },
+            "description": "Retorna conteos agregados: configs, feature flags, tenants, reglas IP, ventanas de mantenimiento activas y rate limits."
+          },
+          "response": [
+            {
+              "name": "200 - Stats OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"totalConfigs\": 12,\n    \"totalFeatureFlags\": 8,\n    \"enabledFeatureFlags\": 5,\n    \"totalTenants\": 15,\n    \"activeTenants\": 14,\n    \"totalIpRules\": 3,\n    \"activeMaintenanceWindows\": 0,\n    \"totalRateLimits\": 6,\n    \"generatedAt\": \"2025-01-01T12:00:00.000Z\"\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "🌐 Via Gateway (port 3000)",
+      "item": [
+        {
+          "name": "GET Status de mantenimiento (público)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{gatewayUrl}}/maintenance/status", "host": ["{{gatewayUrl}}"], "path": ["maintenance", "status"] },
+            "description": "Endpoint público — no requiere autenticación."
+          },
+          "response": []
+        },
+        {
+          "name": "POST Activar mantenimiento (autenticado)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Cookie", "value": "access_token={{access_token}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{ \"enabled\": true, \"message\": \"Volvemos pronto\" }" },
+            "url": { "raw": "{{gatewayUrl}}/maintenance/mode", "host": ["{{gatewayUrl}}"], "path": ["maintenance", "mode"] }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

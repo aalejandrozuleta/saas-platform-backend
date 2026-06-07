@@ -24,6 +24,17 @@
         "deleteOutDir": true,
         "webpack": true
       }
+    },
+    "config-service": {
+      "type": "application",
+      "root": "services/config-service",
+      "entryFile": "main",
+      "sourceRoot": "services/config-service/src",
+      "compilerOptions": {
+        "tsConfigPath": "services/config-service/tsconfig.json",
+        "deleteOutDir": true,
+        "webpack": true
+      }
     }
   }
 }

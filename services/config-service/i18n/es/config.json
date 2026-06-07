@@ -1,0 +1,15 @@
+{
+  "maintenance_mode_enabled": "Modo mantenimiento activado",
+  "maintenance_mode_disabled": "Modo mantenimiento desactivado",
+  "readonly_mode_enabled": "Modo solo-lectura activado",
+  "readonly_mode_disabled": "Modo solo-lectura desactivado",
+  "config_key_not_found": "Clave de configuración no encontrada",
+  "feature_flag_not_found": "Feature flag no encontrado",
+  "tenant_config_not_found": "Configuración de tenant no encontrada",
+  "ip_rule_already_exists": "Ya existe una regla para esa IP",
+  "ip_rule_not_found": "Regla de IP no encontrada",
+  "maintenance_window_not_found": "Ventana de mantenimiento no encontrada",
+  "maintenance_window_overlap": "Ya existe una ventana de mantenimiento en ese rango",
+  "invalid_date_range": "La fecha de fin debe ser posterior a la de inicio",
+  "invalid_ip_address": "Formato de dirección IP inválido"
+}

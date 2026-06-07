@@ -1,0 +1,15 @@
+{
+  "maintenance_mode_enabled": "Maintenance mode enabled",
+  "maintenance_mode_disabled": "Maintenance mode disabled",
+  "readonly_mode_enabled": "Read-only mode enabled",
+  "readonly_mode_disabled": "Read-only mode disabled",
+  "config_key_not_found": "Configuration key not found",
+  "feature_flag_not_found": "Feature flag not found",
+  "tenant_config_not_found": "Tenant configuration not found",
+  "ip_rule_already_exists": "An IP rule for this address already exists",
+  "ip_rule_not_found": "IP rule not found",
+  "maintenance_window_not_found": "Maintenance window not found",
+  "maintenance_window_overlap": "A maintenance window already exists in that time range",
+  "invalid_date_range": "End date must be after start date",
+  "invalid_ip_address": "Invalid IP address format"
+}

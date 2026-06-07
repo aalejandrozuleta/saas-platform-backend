@@ -45,6 +45,55 @@ services:
     networks:
       - saas-dev
 
+  config-service:
+    container_name: config-service-dev
+    init: true
+    restart: unless-stopped
+    build:
+      context: ..
+      dockerfile: services/config-service/Dockerfile.dev
+    env_file:
+      - ../services/config-service/.env
+    volumes:
+      - ../services/config-service:/app/services/config-service
+      - ../shared:/app/shared
+      - pnpm-store:/pnpm-store
+    environment:
+      PNPM_STORE_PATH: /pnpm-store
+      SERVICE_NAME: config-service
+    ports:
+      - "3002:3002"
+    depends_on:
+      config-postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
+    logging: *default-logging
+    networks:
+      - saas-dev
+
+  config-postgres:
+    image: ${POSTGRES_IMAGE:-postgres:17-alpine}
+    container_name: config-postgres-dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: config_db
+      POSTGRES_USER: config_user
+      POSTGRES_PASSWORD: config_pass
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U config_user -d config_db"]
+      interval: 5s
+      retries: 5
+    volumes:
+      - config-postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    logging: *default-logging
+    networks:
+      - saas-dev
+
   auth-service:
     container_name: auth-service-dev
     init: true
@@ -329,6 +378,7 @@ networks:
 
 volumes:
   auth-postgres-data:
+  config-postgres-data:
   redis-data:
   mongo-data:
   prometheus-data:
