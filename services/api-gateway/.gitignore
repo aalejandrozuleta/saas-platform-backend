@@ -1,0 +1,2 @@
+# Service-level overrides — root .gitignore covers node_modules, dist, coverage, .env
+# Nothing extra needed here; kept as a marker file.

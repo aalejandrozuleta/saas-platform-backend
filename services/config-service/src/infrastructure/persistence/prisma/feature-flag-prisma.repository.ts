@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { FeatureFlag } from '@domain/entities/feature-flag/feature-flag.entity';
 import type { FeatureFlagRepository, FeatureFlagFilter } from '@domain/repositories/feature-flag.repository';
 
+import type { FeatureFlag as PrismaFeatureFlag } from '../../../generated/prisma';
+
 import { PrismaService } from './prisma.service';
 
 @Injectable()
@@ -16,7 +18,7 @@ export class FeatureFlagPrismaRepository implements FeatureFlagRepository {
       },
     });
     return row ? this.toDomain(row) : null;
-  }
+  } 
 
   async findAll(filter?: FeatureFlagFilter): Promise<FeatureFlag[]> {
     const rows = await this.prisma.featureFlag.findMany({
@@ -60,7 +62,7 @@ export class FeatureFlagPrismaRepository implements FeatureFlagRepository {
     await this.prisma.featureFlag.delete({ where: { id } });
   }
 
-  private toDomain(row: any): FeatureFlag {
+  private toDomain(row: PrismaFeatureFlag): FeatureFlag {
     return new FeatureFlag({
       id: row.id,
       key: row.key,

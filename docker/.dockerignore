@@ -1,54 +1,7 @@
-# =========================
-# Node
-# =========================
-node_modules
-**/node_modules
-dist
-**/dist
-coverage
-**/coverage
-
-# permitir deploy
-!deploy
-!deploy/**
-
-# =========================
-# Logs
-# =========================
-*.log
-npm-debug.log*
-pnpm-debug.log*
-
-# =========================
-# Git
-# =========================
-.git
-.gitignore
-.github
-
-# =========================
-# Editor
-# =========================
-.vscode
-.idea
-.DS_Store
-
-# =========================
-# Secrets
-# =========================
-.env
-.env.*
-*.pem
-*.key
-
-# =========================
-# Docs
-# =========================
-docs
-README.md
-*.md
-
-# =========================
-# Docker
-# =========================
-docker-compose*.yml
+# This directory is NOT a Docker build context.
+# All Dockerfiles in services/ use context: .. (repo root).
+# The active .dockerignore is at the repo root: /.dockerignore
+#
+# This file exists only to prevent accidental Docker builds from within
+# the docker/ directory. If you ever add a Dockerfile with context: ./docker,
+# populate this file accordingly.

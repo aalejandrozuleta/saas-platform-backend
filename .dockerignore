@@ -1,39 +1,91 @@
-# Dependencias instaladas localmente (se instalan dentro del contenedor)
+###############################################
+# Dependencies — installed inside the container
+###############################################
 **/node_modules
 
-# Artefactos de compilación
+###############################################
+# Build artifacts — regenerated inside container
+###############################################
 **/dist
 **/build
-
-# Cobertura de tests
 **/coverage
 
-# Archivos de entorno sensibles (se pasan via env_file en compose)
-**/.env
-**/.env.local
-**/.env.*.local
+# Prisma generated clients — recreated via `prisma generate` during image build
+**/generated
 
-# Control de versiones
+###############################################
+# Test files — not needed for compilation
+###############################################
+**/*.spec.ts
+**/*.test.ts
+**/__tests__/
+**/test-results/
+**/playwright-report/
+**/.jest-cache
+
+###############################################
+# Environment / Secrets
+# (injected via env_file or --env in Compose)
+###############################################
+**/.env
+**/.env.*
+!**/.env.example
+
+###############################################
+# Version control
+###############################################
 .git
 .gitignore
+.gitattributes
+.github/
 
-# Herramientas de desarrollo local
-.vscode
-.idea
-*.swp
-*.swo
+###############################################
+# CI / QA tooling
+###############################################
+sonar-project.properties
+.sonar/
+.scannerwork/
+.sonarlint
+.codex
 
-# Logs
-**/*.log
-**/logs
+###############################################
+# Documentation
+###############################################
+docs/
+README*
+CHANGELOG*
+**/*.md
 
-# Docker (evitar recursión)
+###############################################
+# Docker (avoid self-inclusion)
+###############################################
 docker/
 
-# Documentación generada
-**/docs/generated
-**/typedoc-out
-
-# OS
+###############################################
+# Editor / OS
+###############################################
+.vscode/
+.idea/
 .DS_Store
 Thumbs.db
+*.swp
+*.swo
+*.log
+**/logs/
+
+###############################################
+# Git hooks
+###############################################
+.husky/
+
+###############################################
+# TypeScript cache
+###############################################
+*.tsbuildinfo
+**/*.tsbuildinfo
+
+###############################################
+# Temporary files
+###############################################
+*.tmp
+*.temp

@@ -1,4 +1,27 @@
-dist
-node_modules
-coverage
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build artifacts
+dist/
+build/
+**/dist/
+**/build/
+
+# Test coverage
+coverage/
+**/coverage/
+
+# Prisma generated clients
+**/generated/
+
+# Lock files — machine-generated, formatting is irrelevant
 pnpm-lock.yaml
+package-lock.json
+yarn.lock
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Generated documentation
+docs/code/

@@ -35,7 +35,7 @@ export class ConfigController {
   /** Todas las demás rutas de configuración requieren autenticación. */
   @All('*path')
   async forwardAll(@Req() req: Request, @Res() res: Response) {
-    const path = '/' + (req.params as any).path;
+    const path = '/' + (req.params as Record<string, string>).path;
     const { body } = await this.proxy.forward(req, path);
     res.json(body);
   }

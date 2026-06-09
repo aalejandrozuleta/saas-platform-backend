@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { MaintenanceWindow } from '@domain/entities/maintenance-window/maintenance-window.entity';
 import type { MaintenanceWindowRepository } from '@domain/repositories/maintenance-window.repository';
 
+import type { MaintenanceWindow as PrismaMaintenanceWindow } from '../../../generated/prisma';
+
 import { PrismaService } from './prisma.service';
 
 @Injectable()
@@ -68,7 +70,7 @@ export class MaintenanceWindowPrismaRepository implements MaintenanceWindowRepos
     await this.prisma.maintenanceWindow.delete({ where: { id } });
   }
 
-  private toDomain(row: any): MaintenanceWindow {
+  private toDomain(row: PrismaMaintenanceWindow): MaintenanceWindow {
     return new MaintenanceWindow({
       id: row.id,
       title: row.title,

@@ -33,7 +33,8 @@
       "compilerOptions": {
         "tsConfigPath": "services/config-service/tsconfig.json",
         "deleteOutDir": true,
-        "webpack": true
+        "webpack": true,
+        "webpackConfigPath": "webpack.config.js"
       }
     }
   }

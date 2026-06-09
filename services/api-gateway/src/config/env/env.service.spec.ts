@@ -15,6 +15,8 @@ describe('EnvService', () => {
     AUTH_SERVICE_RETRIES: '2',
     AUTH_SERVICE_CIRCUIT_TIMEOUT: '10000',
 
+    CONFIG_SERVICE_URL: 'http://localhost:3002',
+
     JWT_ACCESS_SECRET: 'super-secret-jwt-key',
 
     CORS_ORIGINS: 'http://localhost:3000,http://localhost:4200',

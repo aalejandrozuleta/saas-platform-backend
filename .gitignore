@@ -2,6 +2,7 @@
 # Node / pnpm
 ############################################
 node_modules/
+**/node_modules/
 .pnpm-store/
 .pnpm-debug.log*
 npm-debug.log*
@@ -9,19 +10,35 @@ yarn-debug.log*
 yarn-error.log*
 
 ############################################
-# Builds
+# Build artifacts
 ############################################
 dist/
 build/
+**/dist/
+**/build/
+
+############################################
+# Test coverage
+############################################
 coverage/
-.tmp/
-.cache/
-.tsbuild/
+**/coverage/
+test-results/
+playwright-report/
+.jest-cache
 
 ############################################
 # TypeScript
 ############################################
 *.tsbuildinfo
+**/*.tsbuildinfo
+.tmp/
+.cache/
+.tsbuild/
+
+############################################
+# Prisma — generated clients (re-created via prisma generate)
+############################################
+**/generated/
 
 ############################################
 # Environment variables
@@ -62,24 +79,7 @@ docker-data/
 docker-volumes/
 
 ############################################
-# Testing
-############################################
-__tests__/
-test-results/
-playwright-report/
-.jest-cache
-
-############################################
-# Monorepo / Workspace
-############################################
-**/node_modules/
-**/dist/
-**/coverage/
-docs/code
-deploy
-
-############################################
-# NestJS specific
+# NestJS
 ############################################
 .nest/
 nest-cli.json.bak
@@ -97,10 +97,15 @@ nest-cli.json.bak
 *.tmp
 *.temp
 
-#############################################
+############################################
 # SonarCloud
-#############################################
+############################################
 .sonar/
 .scannerwork/
 .sonarlint
 .codex
+
+############################################
+# Generated documentation
+############################################
+docs/code
