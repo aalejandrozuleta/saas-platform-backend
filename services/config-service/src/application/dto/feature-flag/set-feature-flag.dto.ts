@@ -1,10 +1,13 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsBoolean, IsObject, IsOptional, IsString, MaxLength, Matches } from 'class-validator';
+import { IsBoolean, IsOptional, IsString, MaxLength, Matches } from 'class-validator';
 
 export class SetFeatureFlagDto {
-  @ApiProperty({ example: 'new_dashboard', description: 'Clave única del flag (snake_case)' })
+  @ApiProperty({
+    example: 'auth-service',
+    description: 'Nombre del servicio o módulo (snake-case o kebab-case)',
+  })
   @IsString()
-  @Matches(/^[a-z][a-z0-9_]*$/, { message: 'key must be snake_case' })
+  @Matches(/^[a-z][a-z0-9_-]*$/, { message: 'key must be lowercase letters, numbers, hyphens or underscores' })
   @MaxLength(100)
   key!: string;
 
@@ -12,42 +15,32 @@ export class SetFeatureFlagDto {
   @IsBoolean()
   enabled!: boolean;
 
-  @ApiPropertyOptional({ example: 'tenant-abc' })
-  @IsOptional()
-  @IsString()
-  tenantId?: string;
-
-  @ApiPropertyOptional({ example: 'admin' })
-  @IsOptional()
-  @IsString()
-  role?: string;
-
-  @ApiPropertyOptional({ example: 'production' })
+  @ApiPropertyOptional({
+    example: 'production',
+    description: 'Entorno al que aplica. null / omitido = todos los entornos.',
+  })
   @IsOptional()
   @IsString()
   environment?: string;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ description: 'Descripción opcional del flag' })
   @IsOptional()
   @IsString()
   @MaxLength(500)
   description?: string;
 
-  @ApiPropertyOptional({ type: Object })
+  @ApiPropertyOptional({ description: 'ID del usuario super-admin que realiza el cambio' })
   @IsOptional()
-  @IsObject()
-  metadata?: Record<string, unknown>;
+  @IsString()
+  updatedBy?: string;
 }
 
 export class FeatureFlagResponseDto {
   @ApiProperty() id!: string;
   @ApiProperty() key!: string;
   @ApiProperty() enabled!: boolean;
-  @ApiPropertyOptional() tenantId!: string | null;
-  @ApiPropertyOptional() role!: string | null;
   @ApiPropertyOptional() environment!: string | null;
   @ApiPropertyOptional() description!: string | null;
-  @ApiPropertyOptional({ type: Object }) metadata!: Record<string, unknown> | null;
   @ApiProperty() createdAt!: Date;
   @ApiProperty() updatedAt!: Date;
 }

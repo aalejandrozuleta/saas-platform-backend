@@ -1,103 +1,62 @@
-import { randomUUID } from 'node:crypto';
 import { Inject, Injectable } from '@nestjs/common';
-import { AppConfig } from '@domain/entities/app-config/app-config.entity';
-import { ConfigCategory } from '@domain/enums/config-category.enum';
-import { APP_CONFIG_REPOSITORY } from '@domain/token/repositories.tokens';
-import { CONFIG_CACHE, AUDIT_LOGGER } from '@domain/token/services.tokens';
-import type { AppConfigRepository } from '@domain/repositories/app-config.repository';
-import type { ConfigCache } from '@application/ports/config-cache.port';
+import { AUDIT_LOGGER, CONFIG_CACHE } from '@domain/token/services.tokens';
 import type { AuditLogger } from '@application/ports/audit-logger.port';
+import type { ConfigCache } from '@application/ports/config-cache.port';
 import type { SetMaintenanceModeDto, SetMaintenanceModeResponseDto } from '@application/dto/maintenance/set-maintenance-mode.dto';
+import { PrismaService } from '@infrastructure/persistence/prisma/prisma.service';
 
-export const MAINTENANCE_KEY = 'maintenance.enabled';
-export const MAINTENANCE_MESSAGE_KEY = 'maintenance.message';
+export const MAINTENANCE_SINGLETON_ID = 'singleton';
+/** Misma clave que usa el MaintenanceGuard del API Gateway */
+const GATEWAY_CACHE_KEY = 'gateway:maintenance:status';
 
 /**
- * Activa o desactiva el modo mantenimiento global.
+ * Activa o desactiva el modo mantenimiento global de la plataforma.
  *
- * @remarks
- * Persiste dos entradas en `AppConfig`:
- * - `maintenance.enabled` → `"true"` / `"false"`
- * - `maintenance.message` → mensaje personalizado o cadena vacía
- *
- * Invalida la caché de Redis tras el cambio para que todos los
- * servicios lean el nuevo estado en la próxima petición.
+ * Persiste el estado en `MaintenanceConfig` (fila única / singleton).
+ * Todos los microservicios consultan este endpoint para saber
+ * si deben rechazar peticiones o entrar en modo lectura.
  */
 @Injectable()
 export class SetMaintenanceModeUseCase {
   constructor(
-    @Inject(APP_CONFIG_REPOSITORY)
-    private readonly configRepo: AppConfigRepository,
-    @Inject(CONFIG_CACHE)
-    private readonly cache: ConfigCache,
+    private readonly prisma: PrismaService,
     @Inject(AUDIT_LOGGER)
     private readonly auditLogger: AuditLogger,
+    @Inject(CONFIG_CACHE)
+    private readonly cache: ConfigCache,
   ) {}
 
   async execute(dto: SetMaintenanceModeDto): Promise<SetMaintenanceModeResponseDto> {
-    const previous = await this.configRepo.findByKey(MAINTENANCE_KEY);
-    const previousValue = previous?.value;
+    const row = await this.prisma.maintenanceConfig.upsert({
+      where: { id: MAINTENANCE_SINGLETON_ID },
+      create: {
+        id: MAINTENANCE_SINGLETON_ID,
+        enabled: dto.enabled,
+        message: dto.message ?? null,
+        updatedBy: dto.updatedBy ?? null,
+      },
+      update: {
+        enabled: dto.enabled,
+        message: dto.message ?? null,
+        updatedBy: dto.updatedBy ?? null,
+      },
+    });
 
-    const enabledConfig = await this.upsertConfig(
-      MAINTENANCE_KEY,
-      dto.enabled ? 'true' : 'false',
-      'Modo mantenimiento global',
-      ConfigCategory.MAINTENANCE,
-      dto.updatedBy,
-    );
-
-    const message = dto.message ?? '';
-    await this.upsertConfig(
-      MAINTENANCE_MESSAGE_KEY,
-      message,
-      'Mensaje del modo mantenimiento',
-      ConfigCategory.MAINTENANCE,
-      dto.updatedBy,
-    );
-
-    await this.cache.del(`config:${MAINTENANCE_KEY}`);
-    await this.cache.del(`config:${MAINTENANCE_MESSAGE_KEY}`);
+    // Invalida el caché del gateway para efecto inmediato (sin esperar TTL de 30s)
+    await this.cache.del(GATEWAY_CACHE_KEY);
 
     await this.auditLogger.log({
       action: dto.enabled ? 'MAINTENANCE_MODE_ENABLED' : 'MAINTENANCE_MODE_DISABLED',
-      resource: 'AppConfig',
-      resourceId: MAINTENANCE_KEY,
-      previousValue,
-      newValue: dto.enabled ? 'true' : 'false',
+      resource: 'MaintenanceConfig',
+      resourceId: MAINTENANCE_SINGLETON_ID,
+      newValue: { enabled: dto.enabled, message: dto.message ?? null },
       performedBy: dto.updatedBy,
     });
 
     return {
-      enabled: enabledConfig.isEnabled(),
-      message: message || null,
-      updatedAt: enabledConfig.updatedAt,
+      enabled: row.enabled,
+      message: row.message ?? null,
+      updatedAt: row.updatedAt,
     };
-  }
-
-  private async upsertConfig(
-    key: string,
-    value: string,
-    description: string,
-    category: ConfigCategory,
-    updatedBy?: string,
-  ): Promise<AppConfig> {
-    const existing = await this.configRepo.findByKey(key);
-    if (existing) {
-      existing.setValue(value, updatedBy);
-      return this.configRepo.save(existing);
-    }
-
-    return this.configRepo.save(
-      new AppConfig({
-        id: randomUUID(),
-        key,
-        value,
-        description,
-        category,
-        updatedBy: updatedBy ?? null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      }),
-    );
   }
 }

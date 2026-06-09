@@ -1,11 +1,21 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Inject,
+  Param,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { SuccessResponseBuilder } from '@saas/shared';
+import { successResponse } from '@saas/shared';
 import { SetFeatureFlagUseCase } from '@application/use-cases/set-feature-flag.use-case';
 import { SetFeatureFlagDto } from '@application/dto/feature-flag/set-feature-flag.dto';
 import { FEATURE_FLAG_REPOSITORY } from '@domain/token/repositories.tokens';
 import type { FeatureFlagRepository } from '@domain/repositories/feature-flag.repository';
-import { Inject } from '@nestjs/common';
 import { DomainErrorFactory } from '@domain/errors/domain-error.factory';
 import {
   SetFeatureFlagSwagger,
@@ -14,10 +24,10 @@ import {
 } from '@infrastructure/swagger/feature-flag.swagger';
 
 /**
- * Controlador de feature flags.
+ * Controlador de feature flags de plataforma.
  *
- * @remarks
- * Permite gestionar activación de funcionalidades por tenant, rol y entorno.
+ * Permite a super-admins activar/desactivar servicios y módulos
+ * sin necesidad de redesplegar.
  */
 @ApiTags('Feature Flags')
 @Controller('feature-flags')
@@ -33,21 +43,20 @@ export class FeatureFlagController {
   @SetFeatureFlagSwagger()
   async setFlag(@Body() dto: SetFeatureFlagDto) {
     const data = await this.setFlagUseCase.execute(dto);
-    return SuccessResponseBuilder.build(data);
+    return successResponse(data);
   }
 
   @Get()
   @GetFeatureFlagsSwagger()
   async listFlags(
-    @Query('tenantId') tenantId?: string,
     @Query('enabled') enabled?: string,
+    @Query('environment') environment?: string,
   ) {
     const flags = await this.repo.findAll({
-      tenantId: tenantId ?? undefined,
       enabled: enabled !== undefined ? enabled === 'true' : undefined,
+      environment: environment ?? undefined,
     });
-    const data = flags.map((f) => f.toSnapshot());
-    return SuccessResponseBuilder.build(data);
+    return successResponse(flags.map((f) => f.toSnapshot()));
   }
 
   @Delete(':id')
@@ -57,6 +66,6 @@ export class FeatureFlagController {
     const flag = flags.find((f) => f.id === id);
     if (!flag) throw DomainErrorFactory.featureFlagNotFound(id);
     await this.repo.delete(id);
-    return SuccessResponseBuilder.build({ deleted: true, id });
+    return successResponse({ deleted: true, id });
   }
 }

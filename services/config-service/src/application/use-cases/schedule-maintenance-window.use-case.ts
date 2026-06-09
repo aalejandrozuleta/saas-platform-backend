@@ -9,7 +9,10 @@ import type { AuditLogger } from '@application/ports/audit-logger.port';
 import type { ScheduleMaintenanceWindowDto, MaintenanceWindowResponseDto } from '@application/dto/maintenance/schedule-maintenance-window.dto';
 
 /**
- * Programa una ventana de mantenimiento con validación de fechas y solapamiento.
+ * Programa una ventana de mantenimiento de plataforma.
+ *
+ * Valida que el rango de fechas sea válido y que no se solape
+ * con otra ventana activa.
  */
 @Injectable()
 export class ScheduleMaintenanceWindowUseCase {
@@ -28,7 +31,7 @@ export class ScheduleMaintenanceWindowUseCase {
       throw DomainErrorFactory.invalidDateRange();
     }
 
-    const overlapping = await this.repo.findOverlapping(startAt, endAt, dto.tenantId ?? null);
+    const overlapping = await this.repo.findOverlapping(startAt, endAt);
     if (overlapping.length > 0) {
       throw DomainErrorFactory.maintenanceWindowOverlap();
     }
@@ -39,7 +42,6 @@ export class ScheduleMaintenanceWindowUseCase {
       description: dto.description ?? null,
       startAt,
       endAt,
-      tenantId: dto.tenantId ?? null,
       isActive: true,
       createdBy: dto.createdBy ?? null,
       createdAt: new Date(),
@@ -54,7 +56,6 @@ export class ScheduleMaintenanceWindowUseCase {
       resourceId: saved.id,
       newValue: { title: saved.title, startAt, endAt },
       performedBy: dto.createdBy,
-      tenantId: dto.tenantId,
     });
 
     return {
@@ -63,7 +64,6 @@ export class ScheduleMaintenanceWindowUseCase {
       description: saved.description,
       startAt: saved.startAt,
       endAt: saved.endAt,
-      tenantId: saved.tenantId,
       isActive: saved.isActive,
       createdAt: saved.createdAt,
     };

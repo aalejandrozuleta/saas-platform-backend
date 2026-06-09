@@ -7,13 +7,11 @@ import { PrismaService } from './prisma.service';
 export class FeatureFlagPrismaRepository implements FeatureFlagRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findByKey(key: string, filter?: FeatureFlagFilter): Promise<FeatureFlag | null> {
+  async findByKey(key: string, environment?: string | null): Promise<FeatureFlag | null> {
     const row = await this.prisma.featureFlag.findFirst({
       where: {
         key,
-        tenantId: filter?.tenantId !== undefined ? filter.tenantId : undefined,
-        role: filter?.role !== undefined ? filter.role : undefined,
-        environment: filter?.environment !== undefined ? filter.environment : undefined,
+        environment: environment !== undefined ? environment : undefined,
       },
     });
     return row ? this.toDomain(row) : null;
@@ -22,9 +20,10 @@ export class FeatureFlagPrismaRepository implements FeatureFlagRepository {
   async findAll(filter?: FeatureFlagFilter): Promise<FeatureFlag[]> {
     const rows = await this.prisma.featureFlag.findMany({
       where: {
-        tenantId: filter?.tenantId !== undefined ? filter.tenantId : undefined,
         enabled: filter?.enabled !== undefined ? filter.enabled : undefined,
+        environment: filter?.environment !== undefined ? filter.environment : undefined,
       },
+      orderBy: { key: 'asc' },
     });
     return rows.map((r) => this.toDomain(r));
   }
@@ -32,23 +31,24 @@ export class FeatureFlagPrismaRepository implements FeatureFlagRepository {
   async save(flag: FeatureFlag): Promise<FeatureFlag> {
     const snap = flag.toSnapshot();
     const row = await this.prisma.featureFlag.upsert({
-      where: { id: snap.id },
+      where: {
+        key_environment: {
+          key: snap.key,
+          environment: snap.environment ?? '',
+        },
+      },
       create: {
         id: snap.id,
         key: snap.key,
         enabled: snap.enabled,
-        tenantId: snap.tenantId,
-        role: snap.role,
         environment: snap.environment,
         description: snap.description,
-        metadata: snap.metadata ?? undefined,
         createdAt: snap.createdAt,
         updatedAt: snap.updatedAt,
       },
       update: {
         enabled: snap.enabled,
         description: snap.description,
-        metadata: snap.metadata ?? undefined,
         updatedAt: snap.updatedAt,
       },
     });
@@ -64,11 +64,8 @@ export class FeatureFlagPrismaRepository implements FeatureFlagRepository {
       id: row.id,
       key: row.key,
       enabled: row.enabled,
-      tenantId: row.tenantId,
-      role: row.role,
       environment: row.environment,
       description: row.description,
-      metadata: row.metadata as Record<string, unknown> | null,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
     });

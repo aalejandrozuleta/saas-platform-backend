@@ -11,7 +11,6 @@ export class ConfigAuditLog {
   @Prop({ type: Object }) previousValue?: unknown;
   @Prop({ type: Object }) newValue?: unknown;
   @Prop() performedBy?: string;
-  @Prop({ default: null }) tenantId!: string | null;
   @Prop({ type: Object }) metadata?: Record<string, unknown>;
   @Prop({ default: () => new Date() }) timestamp!: Date;
 }

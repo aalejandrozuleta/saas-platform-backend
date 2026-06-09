@@ -1,6 +1,6 @@
 import { Controller, Get } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { SuccessResponseBuilder } from '@saas/shared';
+import { successResponse } from '@saas/shared';
 import { GetSystemStatsUseCase } from '@application/use-cases/get-system-stats.use-case';
 import { SystemStatsDto } from '@application/dto/stats/system-stats.dto';
 
@@ -17,6 +17,6 @@ export class StatsController {
   @ApiOkResponse({ type: SystemStatsDto })
   async getStats() {
     const data = await this.getStatsUseCase.execute();
-    return SuccessResponseBuilder.build(data);
+    return successResponse(data);
   }
 }

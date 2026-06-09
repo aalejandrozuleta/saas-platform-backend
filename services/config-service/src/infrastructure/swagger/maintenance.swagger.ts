@@ -25,13 +25,6 @@ export function SetMaintenanceModeSwagger() {
   );
 }
 
-export function SetReadOnlyModeSwagger() {
-  return applyDecorators(
-    ApiOperation({ summary: 'Activar/desactivar modo solo-lectura global' }),
-    ApiOkResponse({ type: SetMaintenanceModeResponseDto }),
-    ApiBadRequestResponse({ description: 'Datos de entrada inválidos' }),
-  );
-}
 
 export function ScheduleMaintenanceWindowSwagger() {
   return applyDecorators(

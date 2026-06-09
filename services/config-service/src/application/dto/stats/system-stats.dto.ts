@@ -1,13 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 export class SystemStatsDto {
-  @ApiProperty() totalConfigs!: number;
   @ApiProperty() totalFeatureFlags!: number;
   @ApiProperty() enabledFeatureFlags!: number;
-  @ApiProperty() totalTenants!: number;
-  @ApiProperty() activeTenants!: number;
-  @ApiProperty() totalIpRules!: number;
+  @ApiProperty() disabledFeatureFlags!: number;
   @ApiProperty() activeMaintenanceWindows!: number;
-  @ApiProperty() totalRateLimits!: number;
+  @ApiProperty() upcomingMaintenanceWindows!: number;
+  @ApiProperty() maintenanceEnabled!: boolean;
+  @ApiProperty() readOnlyEnabled!: boolean;
   @ApiProperty() generatedAt!: Date;
 }

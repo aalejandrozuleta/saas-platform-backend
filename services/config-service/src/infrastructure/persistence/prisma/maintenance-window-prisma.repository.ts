@@ -12,32 +12,26 @@ export class MaintenanceWindowPrismaRepository implements MaintenanceWindowRepos
     return row ? this.toDomain(row) : null;
   }
 
-  async findActive(tenantId?: string | null): Promise<MaintenanceWindow[]> {
+  async findActive(): Promise<MaintenanceWindow[]> {
     const now = new Date();
     const rows = await this.prisma.maintenanceWindow.findMany({
-      where: {
-        isActive: true,
-        endAt: { gte: now },
-        tenantId: tenantId !== undefined ? tenantId : undefined,
-      },
+      where: { isActive: true, endAt: { gte: now } },
       orderBy: { startAt: 'asc' },
     });
     return rows.map((r) => this.toDomain(r));
   }
 
-  async findAll(tenantId?: string | null): Promise<MaintenanceWindow[]> {
+  async findAll(): Promise<MaintenanceWindow[]> {
     const rows = await this.prisma.maintenanceWindow.findMany({
-      where: { tenantId: tenantId !== undefined ? tenantId : undefined },
       orderBy: { startAt: 'desc' },
     });
     return rows.map((r) => this.toDomain(r));
   }
 
-  async findOverlapping(startAt: Date, endAt: Date, tenantId?: string | null): Promise<MaintenanceWindow[]> {
+  async findOverlapping(startAt: Date, endAt: Date): Promise<MaintenanceWindow[]> {
     const rows = await this.prisma.maintenanceWindow.findMany({
       where: {
         isActive: true,
-        tenantId: tenantId !== undefined ? tenantId : undefined,
         AND: [{ startAt: { lt: endAt } }, { endAt: { gt: startAt } }],
       },
     });
@@ -54,7 +48,6 @@ export class MaintenanceWindowPrismaRepository implements MaintenanceWindowRepos
         description: snap.description,
         startAt: snap.startAt,
         endAt: snap.endAt,
-        tenantId: snap.tenantId,
         isActive: snap.isActive,
         notifiedAt: snap.notifiedAt,
         createdBy: snap.createdBy,
@@ -81,7 +74,6 @@ export class MaintenanceWindowPrismaRepository implements MaintenanceWindowRepos
       description: row.description,
       startAt: row.startAt,
       endAt: row.endAt,
-      tenantId: row.tenantId,
       isActive: row.isActive,
       notifiedAt: row.notifiedAt,
       createdBy: row.createdBy,

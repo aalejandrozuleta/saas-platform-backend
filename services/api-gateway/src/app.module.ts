@@ -3,6 +3,7 @@ import { AuthModule } from '@modules/auth/auth.module';
 import { ConfigGatewayModule } from '@modules/config/config.module';
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { JwtSessionGuard } from '@infrastructure/security/guards/jwt-session.guard';
+import { MaintenanceGuard } from '@infrastructure/security/guards/maintenance.guard';
 import { GlobalExceptionFilter, RedisModule } from '@saas/shared';
 import { EnvService } from '@config/env/env.service';
 
@@ -39,6 +40,12 @@ import { MetricsModule } from './infrastructure/metrics/metrics.module';
       provide: APP_FILTER,
       useClass: GlobalExceptionFilter,
     },
+    // MaintenanceGuard se ejecuta PRIMERO — bloquea antes de validar JWT
+    {
+      provide: APP_GUARD,
+      useClass: MaintenanceGuard,
+    },
+    // JwtSessionGuard se ejecuta SEGUNDO — valida autenticación
     {
       provide: APP_GUARD,
       useClass: JwtSessionGuard,
@@ -47,6 +54,4 @@ import { MetricsModule } from './infrastructure/metrics/metrics.module';
 
   controllers: [HealthController],
 })
-export class AppModule {
-
-}
+export class AppModule {}

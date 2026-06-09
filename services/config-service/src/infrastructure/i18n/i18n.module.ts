@@ -1,16 +1,19 @@
 import { Module } from '@nestjs/common';
-import { I18nModule as SharedI18nModule, FileI18nLoader } from '@saas/shared';
-import * as path from 'node:path';
+import { I18nService } from '@saas/shared';
+
+import { FileI18nLoader } from './file-i18n.loader';
 
 @Module({
-  imports: [
-    SharedI18nModule.forRoot({
-      loader: FileI18nLoader,
-      loaderOptions: {
-        path: path.join(__dirname, '../../i18n'),
+  providers: [
+    FileI18nLoader,
+    {
+      provide: I18nService,
+      useFactory: (loader: FileI18nLoader) => {
+        return new I18nService(loader.load(), 'es');
       },
-    }),
+      inject: [FileI18nLoader],
+    },
   ],
-  exports: [SharedI18nModule],
+  exports: [I18nService],
 })
 export class I18nModule {}

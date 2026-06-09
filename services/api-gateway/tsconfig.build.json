@@ -5,7 +5,16 @@
     "rootDir": "./src",
     "removeComments": true,
     "sourceMap": false,
-    "incremental": false
+    "incremental": false,
+    "paths": {
+      "@saas/shared": ["../../shared/dist/index"],
+      "@saas/shared/*": ["../../shared/dist/*"],
+      "@domain/*": ["./src/domain/*"],
+      "@application/*": ["./src/application/*"],
+      "@infrastructure/*": ["./src/infrastructure/*"],
+      "@modules/*": ["./src/modules/*"],
+      "@config/*": ["./src/config/*"]
+    }
   },
   "include": ["src/**/*"],
   "exclude": [

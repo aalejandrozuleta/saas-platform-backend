@@ -5,7 +5,6 @@ export interface ConfigAuditEntry {
   previousValue?: unknown;
   newValue?: unknown;
   performedBy?: string;
-  tenantId?: string | null;
   metadata?: Record<string, unknown>;
 }
 

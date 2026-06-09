@@ -20,6 +20,8 @@ RUN pnpm --filter @saas/shared build
 RUN pnpm --filter config-service exec prisma generate
 RUN pnpm --filter config-service build
 RUN pnpm deploy --filter config-service --prod /prod/config-service
+# i18n files are not in dist/ — copy them explicitly so the loader finds them at runtime
+COPY services/config-service/src/i18n /prod/config-service/src/i18n
 
 FROM node:24-alpine AS runtime
 

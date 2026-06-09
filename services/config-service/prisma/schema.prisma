@@ -1,96 +1,29 @@
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
 }
 
-// ─── App Config ──────────────────────────────────────────────────────────────
-
-model AppConfig {
-  id          String         @id @default(uuid())
-  key         String         @unique
-  value       String
-  description String?
-  category    ConfigCategory
-  updatedBy   String?
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
-
-  @@index([category])
+// ─── Estado de mantenimiento ────────────────────────────────────────────────
+// Fila única. Se upserta por id fijo ("singleton").
+model MaintenanceConfig {
+  id        String   @id @default(uuid())
+  enabled   Boolean  @default(false)
+  readOnly  Boolean  @default(false)
+  message   String?
+  updatedBy String?
+  updatedAt DateTime @updatedAt
 }
 
-// ─── Feature Flags ───────────────────────────────────────────────────────────
-
-model FeatureFlag {
-  id          String   @id @default(uuid())
-  key         String
-  enabled     Boolean  @default(false)
-  tenantId    String?
-  role        String?
-  environment String?
-  description String?
-  metadata    Json?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  @@unique([key, tenantId, role, environment])
-  @@index([key])
-  @@index([tenantId])
-  @@index([enabled])
-}
-
-// ─── Tenant Config ────────────────────────────────────────────────────────────
-
-model TenantConfig {
-  id         String   @id @default(uuid())
-  tenantId   String   @unique
-  name       String?
-  logoUrl    String?
-  language   String   @default("es")
-  timezone   String   @default("UTC")
-  plan       PlanType @default(FREE)
-  maxUsers   Int      @default(5)
-  maxStorage Int      @default(1024)
-  customData Json?
-  isActive   Boolean  @default(true)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
-  @@index([plan])
-  @@index([isActive])
-}
-
-// ─── IP Rules ─────────────────────────────────────────────────────────────────
-
-model IpRule {
-  id        String     @id @default(uuid())
-  ip        String
-  cidr      String?
-  type      IpRuleType
-  tenantId  String?
-  reason    String?
-  expiresAt DateTime?
-  createdBy String?
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-
-  @@unique([ip, tenantId])
-  @@index([type])
-  @@index([tenantId])
-  @@index([expiresAt])
-}
-
-// ─── Maintenance Windows ──────────────────────────────────────────────────────
-
+// ─── Ventanas de mantenimiento programadas ──────────────────────────────────
 model MaintenanceWindow {
   id          String    @id @default(uuid())
   title       String
   description String?
   startAt     DateTime
   endAt       DateTime
-  tenantId    String?
   isActive    Boolean   @default(true)
   notifiedAt  DateTime?
   createdBy   String?
@@ -100,73 +33,21 @@ model MaintenanceWindow {
   @@index([startAt])
   @@index([endAt])
   @@index([isActive])
-  @@index([tenantId])
 }
 
-// ─── Rate Limit Config ────────────────────────────────────────────────────────
+// ─── Feature flags de plataforma ─────────────────────────────────────────────
+// key = nombre del servicio / módulo (ej: "auth-service", "billing", "dashboard")
+// environment = null → aplica a todos los entornos
+model FeatureFlag {
+  id          String   @id @default(uuid())
+  key         String
+  enabled     Boolean  @default(true)
+  environment String?
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-model RateLimitConfig {
-  id            String   @id @default(uuid())
-  endpoint      String
-  maxRequests   Int
-  windowSeconds Int
-  tenantId      String?
-  isActive      Boolean  @default(true)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  @@unique([endpoint, tenantId])
-  @@index([isActive])
-  @@index([tenantId])
-}
-
-// ─── Password Policy ──────────────────────────────────────────────────────────
-
-model PasswordPolicy {
-  id                    String   @id @default(uuid())
-  tenantId              String?  @unique
-  minLength             Int      @default(8)
-  requireUppercase      Boolean  @default(true)
-  requireLowercase      Boolean  @default(true)
-  requireNumbers        Boolean  @default(true)
-  requireSymbols        Boolean  @default(false)
-  maxAgeDays            Int?
-  historyCount          Int      @default(5)
-  maxConcurrentSessions Int      @default(3)
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
-}
-
-// ─── Allowed Domains ──────────────────────────────────────────────────────────
-
-model AllowedDomain {
-  id        String   @id @default(uuid())
-  domain    String
-  tenantId  String?
-  createdAt DateTime @default(now())
-
-  @@unique([domain, tenantId])
-  @@index([tenantId])
-}
-
-// ─── Enums ────────────────────────────────────────────────────────────────────
-
-enum ConfigCategory {
-  MAINTENANCE
-  SECURITY
-  PERFORMANCE
-  NOTIFICATIONS
-  GENERAL
-}
-
-enum IpRuleType {
-  WHITELIST
-  BLACKLIST
-}
-
-enum PlanType {
-  FREE
-  BASIC
-  PRO
-  ENTERPRISE
+  @@unique([key, environment])
+  @@index([key])
+  @@index([enabled])
 }

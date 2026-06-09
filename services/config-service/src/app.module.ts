@@ -1,14 +1,13 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule as NestConfigModule } from '@nestjs/config';
-import { EventEmitterModule } from '@nestjs/event-emitter';
-import { ScheduleModule } from '@nestjs/schedule';
 import { APP_FILTER } from '@nestjs/core';
-import { RedisModule } from '@saas/shared';
-import { EnvService } from '@config/env/env.service';
 
 import { EnvModule } from '@config/env/env.module';
 import { PrismaModule } from '@infrastructure/persistence/prisma/prisma.module';
 import { MongoModule } from '@infrastructure/persistence/mongo/mongo.module';
+import { RedisModule } from '@infrastructure/persistence/cache/redis.module';
+import { MetricsModule } from '@infrastructure/metrics/metrics.module';
+import { I18nModule } from '@infrastructure/i18n/i18n.module';
 import { ConfigModule } from '@modules/config/config.module';
 import { ConfigGlobalExceptionFilter } from '@infrastructure/filters/config-global-exception.filter';
 
@@ -18,23 +17,12 @@ import { ConfigGlobalExceptionFilter } from '@infrastructure/filters/config-glob
 @Module({
   imports: [
     NestConfigModule.forRoot({ isGlobal: true }),
-    EventEmitterModule.forRoot(),
-    ScheduleModule.forRoot(),
-
     EnvModule,
-    PrismaModule,
     MongoModule,
-
-    RedisModule.forRootAsync({
-      imports: [EnvModule],
-      inject: [EnvService],
-      useFactory: (envService: EnvService) => ({
-        host: envService.get('REDIS_HOST'),
-        port: envService.get('REDIS_PORT'),
-        password: envService.get('REDIS_PASSWORD'),
-      }),
-    }),
-
+    RedisModule,
+    MetricsModule,
+    PrismaModule,
+    I18nModule,
     ConfigModule,
   ],
   providers: [

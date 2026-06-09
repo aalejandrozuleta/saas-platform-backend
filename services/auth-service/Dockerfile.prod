@@ -20,6 +20,8 @@ RUN pnpm --filter @saas/shared build
 RUN pnpm --filter auth-service exec prisma generate
 RUN pnpm --filter auth-service build
 RUN pnpm deploy --filter auth-service --prod /prod/auth-service
+# i18n files are not in dist/ — copy them explicitly so the loader finds them at runtime
+COPY services/auth-service/src/i18n /prod/auth-service/src/i18n
 
 FROM node:24-alpine AS runtime
 

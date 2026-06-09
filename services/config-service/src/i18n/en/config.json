@@ -1,0 +1,6 @@
+{
+  "config.maintenance_window_not_found": "Maintenance window not found",
+  "config.maintenance_window_overlap": "A maintenance window already exists in that time range",
+  "config.invalid_date_range": "End date must be after start date",
+  "config.feature_flag_not_found": "Feature flag not found"
+}

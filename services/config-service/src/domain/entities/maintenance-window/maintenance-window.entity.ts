@@ -4,7 +4,6 @@ export interface MaintenanceWindowProps {
   description?: string | null;
   startAt: Date;
   endAt: Date;
-  tenantId?: string | null;
   isActive: boolean;
   notifiedAt?: Date | null;
   createdBy?: string | null;
@@ -13,12 +12,7 @@ export interface MaintenanceWindowProps {
 }
 
 /**
- * Ventana de mantenimiento programada.
- *
- * @remarks
- * Permite programar períodos de inactividad con notificación anticipada.
- * Una ventana está "activa" cuando `isActive=true` y la hora actual
- * está entre `startAt` y `endAt`.
+ * Ventana de mantenimiento programada de la plataforma.
  */
 export class MaintenanceWindow {
   readonly id: string;
@@ -26,7 +20,6 @@ export class MaintenanceWindow {
   readonly description: string | null;
   readonly startAt: Date;
   readonly endAt: Date;
-  readonly tenantId: string | null;
   private _isActive: boolean;
   private _notifiedAt: Date | null;
   readonly createdBy: string | null;
@@ -39,7 +32,6 @@ export class MaintenanceWindow {
     this.description = props.description ?? null;
     this.startAt = props.startAt;
     this.endAt = props.endAt;
-    this.tenantId = props.tenantId ?? null;
     this._isActive = props.isActive;
     this._notifiedAt = props.notifiedAt ?? null;
     this.createdBy = props.createdBy ?? null;
@@ -51,12 +43,10 @@ export class MaintenanceWindow {
   get notifiedAt(): Date | null { return this._notifiedAt; }
   get updatedAt(): Date { return this._updatedAt; }
 
-  /** Devuelve `true` si la ventana está activa y en curso ahora. */
   isOngoing(now: Date = new Date()): boolean {
     return this._isActive && now >= this.startAt && now <= this.endAt;
   }
 
-  /** Devuelve `true` si la ventana está activa y aún no ha comenzado. */
   isPending(now: Date = new Date()): boolean {
     return this._isActive && now < this.startAt;
   }
@@ -78,7 +68,6 @@ export class MaintenanceWindow {
       description: this.description,
       startAt: this.startAt,
       endAt: this.endAt,
-      tenantId: this.tenantId,
       isActive: this._isActive,
       notifiedAt: this._notifiedAt,
       createdBy: this.createdBy,

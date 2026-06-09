@@ -21,12 +21,7 @@ export class ScheduleMaintenanceWindowDto {
   @IsDateString()
   endAt!: string;
 
-  @ApiPropertyOptional({ description: 'Aplica solo a este tenant; null = global' })
-  @IsOptional()
-  @IsString()
-  tenantId?: string;
-
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ description: 'ID del super-admin que programa la ventana' })
   @IsOptional()
   @IsString()
   createdBy?: string;
@@ -38,7 +33,6 @@ export class MaintenanceWindowResponseDto {
   @ApiPropertyOptional() description!: string | null;
   @ApiProperty() startAt!: Date;
   @ApiProperty() endAt!: Date;
-  @ApiPropertyOptional() tenantId!: string | null;
   @ApiProperty() isActive!: boolean;
   @ApiProperty() createdAt!: Date;
 }
