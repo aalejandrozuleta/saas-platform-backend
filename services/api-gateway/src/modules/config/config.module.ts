@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { EnvModule } from '@config/env/env.module';
 import { SharedModule } from '@saas/shared';
 import { ConfigProxy } from '@infrastructure/http/proxies/config.proxy';
+
 import { ConfigController } from './config.controller';
 
 @Module({

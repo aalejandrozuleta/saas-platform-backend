@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+
 import { envSchema, EnvVars } from './env.schema';
 
 /** Servicio centralizado de acceso a variables de entorno validadas con Zod. */

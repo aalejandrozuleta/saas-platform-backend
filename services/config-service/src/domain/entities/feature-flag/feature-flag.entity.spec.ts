@@ -5,11 +5,8 @@ function makeFlag(enabled = false): FeatureFlag {
     id: 'ff-1',
     key: 'new_dashboard',
     enabled,
-    tenantId: 'tenant-1',
-    role: 'admin',
     environment: 'production',
     description: 'New dashboard UI',
-    metadata: { rollout: 50 },
     createdAt: new Date('2024-01-01'),
     updatedAt: new Date('2024-01-01'),
   });
@@ -21,7 +18,7 @@ describe('FeatureFlag', () => {
     expect(flag.id).toBe('ff-1');
     expect(flag.key).toBe('new_dashboard');
     expect(flag.enabled).toBe(false);
-    expect(flag.tenantId).toBe('tenant-1');
+    expect(flag.environment).toBe('production');
   });
 
   it('sets optional fields to null when omitted', () => {
@@ -32,11 +29,8 @@ describe('FeatureFlag', () => {
       createdAt: new Date(),
       updatedAt: new Date(),
     });
-    expect(flag.tenantId).toBeNull();
-    expect(flag.role).toBeNull();
     expect(flag.environment).toBeNull();
     expect(flag.description).toBeNull();
-    expect(flag.metadata).toBeNull();
   });
 
   it('enable() activates the flag', () => {
@@ -71,6 +65,7 @@ describe('FeatureFlag', () => {
     const snap = flag.toSnapshot();
     expect(snap.key).toBe('new_dashboard');
     expect(snap.enabled).toBe(true);
-    expect(snap.metadata).toEqual({ rollout: 50 });
+    expect(snap.environment).toBe('production');
+    expect(snap.description).toBe('New dashboard UI');
   });
 });

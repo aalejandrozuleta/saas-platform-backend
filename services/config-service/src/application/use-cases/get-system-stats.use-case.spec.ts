@@ -1,15 +1,15 @@
-import { GetSystemStatsUseCase } from './get-system-stats.use-case';
 import type { StatsPort, SystemStats } from '@application/ports/stats.port';
 
+import { GetSystemStatsUseCase } from './get-system-stats.use-case';
+
 const mockStats: SystemStats = {
-  totalConfigs: 10,
   totalFeatureFlags: 5,
   enabledFeatureFlags: 3,
-  totalTenants: 8,
-  activeTenants: 7,
-  totalIpRules: 4,
+  disabledFeatureFlags: 2,
   activeMaintenanceWindows: 0,
-  totalRateLimits: 6,
+  upcomingMaintenanceWindows: 1,
+  maintenanceEnabled: false,
+  readOnlyEnabled: false,
   generatedAt: new Date(),
 };
 

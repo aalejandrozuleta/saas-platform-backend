@@ -1,5 +1,6 @@
-import { StatsController } from './stats.controller';
 import type { GetSystemStatsUseCase } from '@application/use-cases/get-system-stats.use-case';
+
+import { StatsController } from './stats.controller';
 
 const mockStats = {
   totalConfigs: 10, totalFeatureFlags: 5, enabledFeatureFlags: 3,

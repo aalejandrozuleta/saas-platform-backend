@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+
 import { Inject, Injectable } from '@nestjs/common';
 import { FeatureFlag } from '@domain/entities/feature-flag/feature-flag.entity';
 import { FEATURE_FLAG_REPOSITORY } from '@domain/token/repositories.tokens';

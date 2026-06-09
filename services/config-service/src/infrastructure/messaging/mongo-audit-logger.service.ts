@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import type { Model } from 'mongoose';
 import type { AuditLogger, ConfigAuditEntry } from '@application/ports/audit-logger.port';
+
 import { ConfigAuditLog, type ConfigAuditDocument } from './config-audit.schema';
 
 /**

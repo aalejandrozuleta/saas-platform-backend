@@ -1,8 +1,8 @@
-import { SetFeatureFlagUseCase } from './set-feature-flag.use-case';
 import { FeatureFlag } from '@domain/entities/feature-flag/feature-flag.entity';
 import type { FeatureFlagRepository } from '@domain/repositories/feature-flag.repository';
-import type { ConfigCache } from '@application/ports/config-cache.port';
 import type { AuditLogger } from '@application/ports/audit-logger.port';
+
+import { SetFeatureFlagUseCase } from './set-feature-flag.use-case';
 
 function makeFlag(enabled: boolean): FeatureFlag {
   return new FeatureFlag({
@@ -21,21 +21,13 @@ function makeUseCase(existing: FeatureFlag | null = null) {
     save: jest.fn().mockImplementation((f: FeatureFlag) => Promise.resolve(f)),
     delete: jest.fn().mockResolvedValue(undefined),
   };
-  const cache: ConfigCache = {
-    get: jest.fn(),
-    set: jest.fn(),
-    del: jest.fn().mockResolvedValue(undefined),
-    flush: jest.fn(),
-  };
   const audit: AuditLogger = { log: jest.fn().mockResolvedValue(undefined) };
-  return { uc: new SetFeatureFlagUseCase(repo, cache, audit), repo, cache, audit };
+  return { uc: new SetFeatureFlagUseCase(repo, audit), repo, audit };
 }
 
 const dto = {
   key: 'new_dashboard',
   enabled: true,
-  tenantId: 'tenant-1',
-  role: 'admin',
   environment: 'production',
 };
 
@@ -63,13 +55,7 @@ describe('SetFeatureFlagUseCase', () => {
     expect(result.enabled).toBe(false);
   });
 
-  it('invalidates cache after saving', async () => {
-    const { uc, cache } = makeUseCase(null);
-    await uc.execute(dto);
-    expect(cache.del).toHaveBeenCalledTimes(1);
-  });
-
-  it('logs audit entry', async () => {
+  it('logs FEATURE_FLAG_ENABLED action', async () => {
     const { uc, audit } = makeUseCase(null);
     await uc.execute(dto);
     expect(audit.log).toHaveBeenCalledWith(expect.objectContaining({ action: 'FEATURE_FLAG_ENABLED' }));
@@ -81,16 +67,10 @@ describe('SetFeatureFlagUseCase', () => {
     expect(audit.log).toHaveBeenCalledWith(expect.objectContaining({ action: 'FEATURE_FLAG_DISABLED' }));
   });
 
-  it('response includes all fields', async () => {
+  it('response includes standard fields', async () => {
     const { uc } = makeUseCase(null);
     const result = await uc.execute(dto);
-    expect(result).toMatchObject({
-      key: 'new_dashboard',
-      enabled: true,
-      tenantId: 'tenant-1',
-      role: 'admin',
-      environment: 'production',
-    });
+    expect(result).toMatchObject({ key: 'new_dashboard', enabled: true });
     expect(result.createdAt).toBeInstanceOf(Date);
     expect(result.updatedAt).toBeInstanceOf(Date);
   });

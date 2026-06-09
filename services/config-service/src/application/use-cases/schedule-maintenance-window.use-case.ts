@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+
 import { Inject, Injectable } from '@nestjs/common';
 import { MaintenanceWindow } from '@domain/entities/maintenance-window/maintenance-window.entity';
 import { MAINTENANCE_WINDOW_REPOSITORY } from '@domain/token/repositories.tokens';

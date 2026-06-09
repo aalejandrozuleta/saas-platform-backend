@@ -3,6 +3,7 @@ import { MAINTENANCE_WINDOW_REPOSITORY } from '@domain/token/repositories.tokens
 import type { MaintenanceWindowRepository } from '@domain/repositories/maintenance-window.repository';
 import type { MaintenanceStatusDto } from '@application/dto/maintenance/maintenance-status.dto';
 import { PrismaService } from '@infrastructure/persistence/prisma/prisma.service';
+
 import { MAINTENANCE_SINGLETON_ID } from './set-maintenance-mode.use-case';
 
 /**

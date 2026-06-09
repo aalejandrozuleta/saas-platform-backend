@@ -1,8 +1,9 @@
-import { ScheduleMaintenanceWindowUseCase } from './schedule-maintenance-window.use-case';
 import { MaintenanceWindow } from '@domain/entities/maintenance-window/maintenance-window.entity';
 import type { MaintenanceWindowRepository } from '@domain/repositories/maintenance-window.repository';
 import type { AuditLogger } from '@application/ports/audit-logger.port';
 import { ErrorCode } from '@saas/shared';
+
+import { ScheduleMaintenanceWindowUseCase } from './schedule-maintenance-window.use-case';
 
 function makeRepo(overlapping: MaintenanceWindow[] = []): MaintenanceWindowRepository {
   return {
@@ -44,7 +45,7 @@ describe('ScheduleMaintenanceWindowUseCase', () => {
       title: 'Bad',
       startAt: '2099-01-01T04:00:00Z',
       endAt: '2099-01-01T02:00:00Z',
-    })).rejects.toMatchObject({ errorCode: ErrorCode.VALIDATION_ERROR });
+    })).rejects.toMatchObject({ code: ErrorCode.VALIDATION_ERROR });
   });
 
   it('throws VALIDATION_ERROR when endAt === startAt', async () => {
@@ -53,7 +54,7 @@ describe('ScheduleMaintenanceWindowUseCase', () => {
       title: 'Bad',
       startAt: '2099-01-01T02:00:00Z',
       endAt: '2099-01-01T02:00:00Z',
-    })).rejects.toMatchObject({ errorCode: ErrorCode.VALIDATION_ERROR });
+    })).rejects.toMatchObject({ code: ErrorCode.VALIDATION_ERROR });
   });
 
   it('throws CONFLICT when overlapping window exists', async () => {
@@ -67,7 +68,7 @@ describe('ScheduleMaintenanceWindowUseCase', () => {
       updatedAt: new Date(),
     });
     const uc = new ScheduleMaintenanceWindowUseCase(makeRepo([existing]), makeAudit());
-    await expect(uc.execute(validDto)).rejects.toMatchObject({ errorCode: ErrorCode.CONFLICT });
+    await expect(uc.execute(validDto)).rejects.toMatchObject({ code: ErrorCode.CONFLICT });
   });
 
   it('calls audit logger with correct action', async () => {
@@ -77,14 +78,9 @@ describe('ScheduleMaintenanceWindowUseCase', () => {
     expect(audit.log).toHaveBeenCalledWith(expect.objectContaining({ action: 'MAINTENANCE_WINDOW_SCHEDULED' }));
   });
 
-  it('accepts tenantId and description', async () => {
+  it('accepts description and passes it through', async () => {
     const uc = new ScheduleMaintenanceWindowUseCase(makeRepo(), makeAudit());
-    const result = await uc.execute({
-      ...validDto,
-      description: 'Upgrading DB',
-      tenantId: 'tenant-abc',
-    });
+    const result = await uc.execute({ ...validDto, description: 'Upgrading DB' });
     expect(result.description).toBe('Upgrading DB');
-    expect(result.tenantId).toBe('tenant-abc');
   });
 });

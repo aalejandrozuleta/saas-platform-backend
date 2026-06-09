@@ -1,14 +1,7 @@
-import { Test } from '@nestjs/testing';
-import { MaintenanceController } from './maintenance.controller';
-import { SetMaintenanceModeUseCase } from '@application/use-cases/set-maintenance-mode.use-case';
-import { GetMaintenanceStatusUseCase } from '@application/use-cases/get-maintenance-status.use-case';
-import { ScheduleMaintenanceWindowUseCase } from '@application/use-cases/schedule-maintenance-window.use-case';
-import { APP_CONFIG_REPOSITORY, MAINTENANCE_WINDOW_REPOSITORY } from '@domain/token/repositories.tokens';
-import { CONFIG_CACHE, AUDIT_LOGGER } from '@domain/token/services.tokens';
 import { MaintenanceWindow } from '@domain/entities/maintenance-window/maintenance-window.entity';
-import { AppConfig } from '@domain/entities/app-config/app-config.entity';
-import { ConfigCategory } from '@domain/enums/config-category.enum';
 import { ErrorCode } from '@saas/shared';
+
+import { MaintenanceController } from './maintenance.controller';
 
 const mockStatus = {
   maintenanceEnabled: false,
@@ -30,13 +23,7 @@ const mockWindow = new MaintenanceWindow({
 function makeController() {
   const setMaintenanceModeUC = { execute: jest.fn().mockResolvedValue({ enabled: true, message: null, updatedAt: new Date() }) };
   const getMaintenanceStatusUC = { execute: jest.fn().mockResolvedValue(mockStatus) };
-  const scheduleWindowUC = { execute: jest.fn().mockResolvedValue({ id: 'w-1', title: 'Test', isActive: true, startAt: new Date(), endAt: new Date(), createdAt: new Date(), tenantId: null, description: null }) };
-  const configRepo = {
-    findByKey: jest.fn().mockResolvedValue(null),
-    save: jest.fn().mockImplementation((c: AppConfig) => Promise.resolve(c)),
-    findAll: jest.fn(),
-    delete: jest.fn(),
-  };
+  const scheduleWindowUC = { execute: jest.fn().mockResolvedValue({ id: 'w-1', title: 'Test', isActive: true, startAt: new Date(), endAt: new Date(), createdAt: new Date(), description: null }) };
   const windowRepo = {
     findById: jest.fn().mockResolvedValue(mockWindow),
     findAll: jest.fn().mockResolvedValue([mockWindow]),
@@ -45,19 +32,14 @@ function makeController() {
     findOverlapping: jest.fn().mockResolvedValue([]),
     delete: jest.fn(),
   };
-  const cache = { del: jest.fn().mockResolvedValue(undefined), get: jest.fn(), set: jest.fn(), flush: jest.fn() };
-  const audit = { log: jest.fn().mockResolvedValue(undefined) };
 
   const ctrl = new MaintenanceController(
     setMaintenanceModeUC as any,
     getMaintenanceStatusUC as any,
     scheduleWindowUC as any,
-    configRepo as any,
     windowRepo as any,
-    cache as any,
-    audit as any,
   );
-  return { ctrl, setMaintenanceModeUC, getMaintenanceStatusUC, scheduleWindowUC, configRepo, windowRepo, cache, audit };
+  return { ctrl, setMaintenanceModeUC, getMaintenanceStatusUC, scheduleWindowUC, windowRepo };
 }
 
 describe('MaintenanceController', () => {
@@ -72,21 +54,6 @@ describe('MaintenanceController', () => {
     const { ctrl, setMaintenanceModeUC } = makeController();
     await ctrl.setMode({ enabled: true });
     expect(setMaintenanceModeUC.execute).toHaveBeenCalledWith({ enabled: true });
-  });
-
-  it('setReadOnly() creates new config when not existing', async () => {
-    const { ctrl, configRepo } = makeController();
-    const result = await ctrl.setReadOnly({ enabled: true });
-    expect(configRepo.save).toHaveBeenCalled();
-    expect(result.data.enabled).toBe(true);
-  });
-
-  it('setReadOnly() updates existing config', async () => {
-    const existing = new AppConfig({ id: 'x', key: 'readonly.enabled', value: 'false', category: ConfigCategory.MAINTENANCE, createdAt: new Date(), updatedAt: new Date() });
-    const { ctrl, configRepo } = makeController();
-    configRepo.findByKey.mockResolvedValue(existing);
-    const result = await ctrl.setReadOnly({ enabled: true });
-    expect(result.data.enabled).toBe(true);
   });
 
   it('schedule() calls ScheduleMaintenanceWindowUseCase', async () => {
@@ -111,6 +78,6 @@ describe('MaintenanceController', () => {
   it('cancelWindow() throws NOT_FOUND when window missing', async () => {
     const { ctrl, windowRepo } = makeController();
     windowRepo.findById.mockResolvedValue(null);
-    await expect(ctrl.cancelWindow('missing')).rejects.toMatchObject({ errorCode: ErrorCode.NOT_FOUND });
+    await expect(ctrl.cancelWindow('missing')).rejects.toMatchObject({ code: ErrorCode.NOT_FOUND });
   });
 });

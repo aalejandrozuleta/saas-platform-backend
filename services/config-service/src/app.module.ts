@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule as NestConfigModule } from '@nestjs/config';
 import { APP_FILTER } from '@nestjs/core';
-
 import { EnvModule } from '@config/env/env.module';
 import { PrismaModule } from '@infrastructure/persistence/prisma/prisma.module';
 import { MongoModule } from '@infrastructure/persistence/mongo/mongo.module';

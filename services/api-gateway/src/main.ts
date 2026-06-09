@@ -4,9 +4,9 @@ import helmet from 'helmet';
 import express from 'express';
 import { VersioningType } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
+import { setupSwagger } from '@saas/shared';
 
 import { AppModule } from './app.module';
-import { setupSwagger } from '@saas/shared';
 import { methodGuardMiddleware } from './infrastructure/security/method-guard.middleware';
 import { pathSanitizerMiddleware } from './infrastructure/security/path-sanitizer.middleware';
 import { headerValidationMiddleware } from './infrastructure/security/header-validation.middleware';

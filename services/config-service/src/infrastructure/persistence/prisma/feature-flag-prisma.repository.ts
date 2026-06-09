@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { FeatureFlag } from '@domain/entities/feature-flag/feature-flag.entity';
 import type { FeatureFlagRepository, FeatureFlagFilter } from '@domain/repositories/feature-flag.repository';
+
 import { PrismaService } from './prisma.service';
 
 @Injectable()

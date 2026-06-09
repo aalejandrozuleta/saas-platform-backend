@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { EnvService } from '@config/env/env.service';
+import { AUDIT_LOGGER } from '@domain/token/services.tokens';
+
 import { ConfigAuditLog, ConfigAuditLogSchema } from '../../messaging/config-audit.schema';
 import { MongoAuditLoggerService } from '../../messaging/mongo-audit-logger.service';
-import { AUDIT_LOGGER } from '@domain/token/services.tokens';
 
 @Module({
   imports: [

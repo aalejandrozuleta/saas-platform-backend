@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { MaintenanceWindow } from '@domain/entities/maintenance-window/maintenance-window.entity';
 import type { MaintenanceWindowRepository } from '@domain/repositories/maintenance-window.repository';
+
 import { PrismaService } from './prisma.service';
 
 @Injectable()

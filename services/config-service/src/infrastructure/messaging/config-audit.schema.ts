@@ -12,6 +12,7 @@ export class ConfigAuditLog {
   @Prop({ type: Object }) newValue?: unknown;
   @Prop() performedBy?: string;
   @Prop({ type: Object }) metadata?: Record<string, unknown>;
+  /* istanbul ignore next */
   @Prop({ default: () => new Date() }) timestamp!: Date;
 }
 

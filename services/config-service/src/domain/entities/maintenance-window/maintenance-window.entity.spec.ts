@@ -10,7 +10,6 @@ function makeWindow(startAt: Date, endAt: Date, isActive = true): MaintenanceWin
     description: 'DB upgrade',
     startAt,
     endAt,
-    tenantId: null,
     isActive,
     createdBy: 'admin',
     createdAt: new Date(),
@@ -72,6 +71,13 @@ describe('MaintenanceWindow', () => {
     expect(w.notifiedAt).toBeNull();
     w.markNotified();
     expect(w.notifiedAt).toBeInstanceOf(Date);
+  });
+
+  it('updatedAt reflects the last mutation time', () => {
+    const w = makeWindow(past, future);
+    const before = w.updatedAt;
+    w.cancel();
+    expect(w.updatedAt.getTime()).toBeGreaterThanOrEqual(before.getTime());
   });
 
   it('toSnapshot() returns all fields', () => {

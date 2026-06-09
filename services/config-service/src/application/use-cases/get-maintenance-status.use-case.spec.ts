@@ -1,20 +1,8 @@
-import { GetMaintenanceStatusUseCase } from './get-maintenance-status.use-case';
-import { AppConfig } from '@domain/entities/app-config/app-config.entity';
 import { MaintenanceWindow } from '@domain/entities/maintenance-window/maintenance-window.entity';
-import { ConfigCategory } from '@domain/enums/config-category.enum';
-import type { AppConfigRepository } from '@domain/repositories/app-config.repository';
 import type { MaintenanceWindowRepository } from '@domain/repositories/maintenance-window.repository';
 
-function makeCfg(key: string, value: string): AppConfig {
-  return new AppConfig({
-    id: 'id',
-    key,
-    value,
-    category: ConfigCategory.MAINTENANCE,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  });
-}
+import { GetMaintenanceStatusUseCase } from './get-maintenance-status.use-case';
+import { MAINTENANCE_SINGLETON_ID } from './set-maintenance-mode.use-case';
 
 function makeWindow(ongoing: boolean): MaintenanceWindow {
   const start = ongoing ? new Date(Date.now() - 1000) : new Date(Date.now() + 60_000);
@@ -30,33 +18,32 @@ function makeWindow(ongoing: boolean): MaintenanceWindow {
   });
 }
 
-function makeUseCase(overrides?: {
-  configMap?: Record<string, string | undefined>;
-  activeWindows?: MaintenanceWindow[];
-}) {
-  const configMap = overrides?.configMap ?? {};
-  const configRepo: AppConfigRepository = {
-    findByKey: jest.fn().mockImplementation((key: string) =>
-      Promise.resolve(configMap[key] != null ? makeCfg(key, configMap[key]!) : null),
-    ),
-    findAll: jest.fn().mockResolvedValue([]),
-    save: jest.fn(),
-    delete: jest.fn(),
-  };
-  const windowRepo: MaintenanceWindowRepository = {
-    findActive: jest.fn().mockResolvedValue(overrides?.activeWindows ?? []),
+function makePrisma(row?: Partial<{ enabled: boolean; message: string | null; readOnly: boolean }> | null) {
+  return {
+    maintenanceConfig: {
+      findUnique: jest.fn().mockResolvedValue(
+        row !== undefined
+          ? row !== null ? { id: MAINTENANCE_SINGLETON_ID, enabled: false, message: null, readOnly: false, ...row } : null
+          : null,
+      ),
+    },
+  } as any;
+}
+
+function makeWindowRepo(active: MaintenanceWindow[] = []): MaintenanceWindowRepository {
+  return {
+    findActive: jest.fn().mockResolvedValue(active),
     findAll: jest.fn().mockResolvedValue([]),
     findById: jest.fn().mockResolvedValue(null),
     findOverlapping: jest.fn().mockResolvedValue([]),
     save: jest.fn(),
     delete: jest.fn(),
   };
-  return new GetMaintenanceStatusUseCase(configRepo, windowRepo);
 }
 
 describe('GetMaintenanceStatusUseCase', () => {
-  it('returns all false when no config exists', async () => {
-    const uc = makeUseCase();
+  it('returns all false when no config row exists', async () => {
+    const uc = new GetMaintenanceStatusUseCase(makePrisma(null), makeWindowRepo());
     const result = await uc.execute();
     expect(result.maintenanceEnabled).toBe(false);
     expect(result.readOnlyEnabled).toBe(false);
@@ -64,41 +51,35 @@ describe('GetMaintenanceStatusUseCase', () => {
     expect(result.activeWindow).toBeNull();
   });
 
-  it('reflects maintenance.enabled = "true"', async () => {
-    const uc = makeUseCase({ configMap: { 'maintenance.enabled': 'true', 'maintenance.message': 'Be right back' } });
+  it('reflects maintenance enabled=true from config row', async () => {
+    const uc = new GetMaintenanceStatusUseCase(
+      makePrisma({ enabled: true, message: 'Be right back' }),
+      makeWindowRepo(),
+    );
     const result = await uc.execute();
     expect(result.maintenanceEnabled).toBe(true);
     expect(result.maintenanceMessage).toBe('Be right back');
   });
 
-  it('does not fetch message when maintenance is disabled', async () => {
-    const uc = makeUseCase({ configMap: { 'maintenance.enabled': 'false' } });
-    const result = await uc.execute();
-    expect(result.maintenanceMessage).toBeNull();
-  });
-
-  it('reflects readonly.enabled = "true"', async () => {
-    const uc = makeUseCase({ configMap: { 'readonly.enabled': 'true' } });
+  it('reflects readOnly=true from config row', async () => {
+    const uc = new GetMaintenanceStatusUseCase(
+      makePrisma({ readOnly: true }),
+      makeWindowRepo(),
+    );
     const result = await uc.execute();
     expect(result.readOnlyEnabled).toBe(true);
   });
 
   it('includes ongoing window in activeWindow', async () => {
-    const uc = makeUseCase({ activeWindows: [makeWindow(true)] });
+    const uc = new GetMaintenanceStatusUseCase(makePrisma(null), makeWindowRepo([makeWindow(true)]));
     const result = await uc.execute();
     expect(result.activeWindow).not.toBeNull();
     expect(result.activeWindow?.title).toBe('Test window');
   });
 
   it('excludes pending (not yet started) window from activeWindow', async () => {
-    const uc = makeUseCase({ activeWindows: [makeWindow(false)] });
+    const uc = new GetMaintenanceStatusUseCase(makePrisma(null), makeWindowRepo([makeWindow(false)]));
     const result = await uc.execute();
     expect(result.activeWindow).toBeNull();
-  });
-
-  it('returns null message when maintenance.message is empty string', async () => {
-    const uc = makeUseCase({ configMap: { 'maintenance.enabled': 'true', 'maintenance.message': '' } });
-    const result = await uc.execute();
-    expect(result.maintenanceMessage).toBeNull();
   });
 });

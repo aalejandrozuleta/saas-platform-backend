@@ -1,7 +1,6 @@
 import { type Provider } from '@nestjs/common';
 import { FEATURE_FLAG_REPOSITORY, MAINTENANCE_WINDOW_REPOSITORY } from '@domain/token/repositories.tokens';
 import { CONFIG_CACHE, AUDIT_LOGGER, STATS_SERVICE } from '@domain/token/services.tokens';
-
 import { FeatureFlagPrismaRepository } from '@infrastructure/persistence/prisma/feature-flag-prisma.repository';
 import { MaintenanceWindowPrismaRepository } from '@infrastructure/persistence/prisma/maintenance-window-prisma.repository';
 import { RedisConfigCacheService } from '@infrastructure/persistence/cache/redis-config-cache.service';
