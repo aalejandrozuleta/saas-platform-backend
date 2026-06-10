@@ -180,4 +180,18 @@ describe('UserPrismaRepository', () => {
       });
     });
   });
+
+  describe('updateLastLogin', () => {
+    it('debe actualizar lastLoginAt del usuario', async () => {
+      prismaMock.user.update.mockResolvedValue({});
+      const now = new Date();
+
+      await repository.updateLastLogin('user-1', now);
+
+      expect(prismaMock.user.update).toHaveBeenCalledWith({
+        where: { id: 'user-1' },
+        data: { lastLoginAt: now },
+      });
+    });
+  });
 });

@@ -8,7 +8,7 @@ import { PrismaService } from './prisma.service';
  * Mock del Prisma Client generado
  * Se mockean únicamente los métodos usados por el servicio.
  */
-jest.mock('@prisma/client', () => {
+jest.mock('@auth-prisma/client', () => {
   return {
     PrismaClient: class {
       $connect = jest.fn();

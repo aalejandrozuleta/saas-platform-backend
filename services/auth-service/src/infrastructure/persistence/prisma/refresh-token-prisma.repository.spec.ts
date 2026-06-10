@@ -173,4 +173,20 @@ describe('RefreshTokenPrismaRepository', () => {
       expect(tx.refreshToken.updateMany).toHaveBeenCalled();
     });
   });
+
+  describe('revokeByFamily', () => {
+    it('debe revocar todos los tokens activos de una familia', async () => {
+      await repository.revokeByFamily('family-1');
+
+      expect(prisma.refreshToken.updateMany).toHaveBeenCalledWith({
+        where: {
+          familyId: 'family-1',
+          revokedAt: null,
+        },
+        data: {
+          revokedAt: expect.any(Date),
+        },
+      });
+    });
+  });
 });
