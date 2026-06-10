@@ -2,7 +2,7 @@ jest.mock('@prisma/adapter-pg', () => ({
   PrismaPg: jest.fn(() => ({})),
 }));
 
-jest.mock('../../../generated/prisma', () => ({
+jest.mock('@prisma/client', () => ({
   PrismaClient: class {
     constructor(_opts: unknown) {}
   },

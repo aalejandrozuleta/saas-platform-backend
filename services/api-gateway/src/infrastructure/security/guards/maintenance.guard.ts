@@ -24,6 +24,10 @@ const CACHE_TTL_SECONDS = 30;
  * Rutas siempre permitidas (bypass):
  *  - /health
  *  - /config/maintenance/*  → el super-admin puede desactivar el modo desde aquí
+ *
+ * Política de fallo: fail-open.
+ * Si el config-service no está disponible, se permite el tráfico para no
+ * bloquear la plataforma por un fallo de la capa de configuración.
  */
 @Injectable()
 export class MaintenanceGuard implements CanActivate {
@@ -80,7 +84,7 @@ export class MaintenanceGuard implements CanActivate {
         return JSON.parse(cached) as MaintenanceStatus;
       }
     } catch {
-      // Redis no disponible — continúa con llamada HTTP
+      // Redis no disponible — continúa con llamada HTTP al config-service
     }
 
     return this.fetchAndCache(req);
@@ -102,12 +106,75 @@ export class MaintenanceGuard implements CanActivate {
 
       return status;
     } catch (err) {
-      // Fail-open: si el config-service no responde, no bloqueamos
-      this.logger.warn(
-        `Could not fetch maintenance status — failing open: ${err instanceof Error ? err.message : String(err)}`,
-      );
+      this.logFetchError(err);
       return { maintenanceEnabled: false, maintenanceMessage: null };
     }
+  }
+
+  // ─── Diagnóstico de errores ───────────────────────────────────────────────────
+
+  /**
+   * Loguea el fallo de manera significativa según el tipo de error.
+   *
+   * - Circuit-breaker abierto → WARN (el servicio lleva un rato caído)
+   * - 5xx del config-service  → WARN (error remoto)
+   * - Conexión rechazada      → DEBUG (normal en dev cuando el servicio no arrancó aún)
+   * - Otros                   → WARN
+   */
+  private logFetchError(err: unknown): void {
+    // Circuit breaker abierto (código personalizado del ResilientHttpClient)
+    if (this.isCircuitOpen(err)) {
+      this.logger.warn('Failing open — config-service circuit breaker is open');
+      return;
+    }
+
+    if (err instanceof HttpException) {
+      const status = err.getStatus();
+      const response = err.getResponse();
+      const detail = typeof response === 'object' && response !== null
+        ? JSON.stringify(response)
+        : String(response);
+
+      this.logger.warn(
+        `Failing open — config-service returned HTTP ${status}: ${detail}`,
+      );
+      return;
+    }
+
+    // ECONNREFUSED / ENOTFOUND / ETIMEDOUT — servicio no iniciado (común en dev)
+    if (this.isNetworkError(err)) {
+      this.logger.debug(
+        `Failing open — config-service unreachable (${this.extractCode(err)})`,
+      );
+      return;
+    }
+
+    this.logger.warn(
+      `Failing open — unexpected error fetching maintenance status: ${err instanceof Error ? err.message : String(err)}`,
+    );
+  }
+
+  private isCircuitOpen(err: unknown): boolean {
+    return (
+      typeof err === 'object' &&
+      err !== null &&
+      'code' in err &&
+      (err as Record<string, unknown>).code === 'EOPENBREAKER'
+    );
+  }
+
+  private isNetworkError(err: unknown): boolean {
+    if (typeof err !== 'object' || err === null) return false;
+    const code = (err as Record<string, unknown>).code;
+    return typeof code === 'string' &&
+      ['ECONNREFUSED', 'ENOTFOUND', 'ETIMEDOUT', 'ECONNRESET'].includes(code);
+  }
+
+  private extractCode(err: unknown): string {
+    if (typeof err === 'object' && err !== null && 'code' in err) {
+      return String((err as Record<string, unknown>).code);
+    }
+    return 'UNKNOWN';
   }
 }
 
