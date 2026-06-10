@@ -1,4 +1,4 @@
-import { type Prisma } from '@prisma/client';
+import { type Prisma } from '@auth-prisma/client';
 
 export interface SessionRepository {
 

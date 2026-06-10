@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { MaintenanceWindow } from '@domain/entities/maintenance-window/maintenance-window.entity';
 import type { MaintenanceWindowRepository } from '@domain/repositories/maintenance-window.repository';
 
-import type { MaintenanceWindow as PrismaMaintenanceWindow } from '@prisma/client';
+import type { MaintenanceWindow as PrismaMaintenanceWindow } from '@config-prisma/client';
 
 import { PrismaService } from './prisma.service';
 

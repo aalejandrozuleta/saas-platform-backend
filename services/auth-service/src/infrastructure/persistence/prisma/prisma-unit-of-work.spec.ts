@@ -1,4 +1,4 @@
-import { type Prisma } from '@prisma/client';
+import { type Prisma } from '@auth-prisma/client';
 
 import { PrismaUnitOfWork } from './prisma-unit-of-work';
 import { type PrismaService } from './prisma.service';

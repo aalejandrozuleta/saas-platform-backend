@@ -53,7 +53,7 @@ export class FeatureFlagController {
     @Query('environment') environment?: string,
   ) {
     const flags = await this.repo.findAll({
-      enabled: enabled !== undefined ? enabled === 'true' : undefined,
+      enabled: enabled ? enabled === 'true' : undefined,
       environment: environment ?? undefined,
     });
     return successResponse(flags.map((f) => f.toSnapshot()));

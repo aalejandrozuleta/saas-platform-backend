@@ -1,7 +1,7 @@
 import { User } from '@domain/entities/user/user.entity';
 import { EmailVO } from '@domain/value-objects/email.vo';
 import { UserStatus as DomainUserStatus } from '@domain/enums/user-status.enum';
-import { UserStatus as PrismaUserStatus } from '@prisma/client';
+import { UserStatus as PrismaUserStatus } from '@auth-prisma/client';
 
 import { UserMapper } from './user.mapper';
 

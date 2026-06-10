@@ -4,7 +4,7 @@ import { type UserProps } from '@domain/entities/user/user.props';
 import { UserStatus as DomainUserStatus } from '@domain/enums/user-status.enum';
 import {
   UserStatus as PrismaUserStatus,
-} from '@prisma/client';
+} from '@auth-prisma/client';
 
 /**
  * Mapper de Usuario

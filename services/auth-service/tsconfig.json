@@ -10,10 +10,9 @@
       "@infrastructure/*": ["./src/infrastructure/*"],
       "@modules/*": ["./src/modules/*"],
       "@config/*": ["./src/config/*"],
-      "@prisma-client": ["./src/generated/prisma"],
-      "@prisma-client/*": ["./src/generated/prisma/*"]
-     }
+      "@auth-prisma/client": ["./node_modules/.prisma/auth-client"]
+    }
   },
-  "include": ["src/**/*.ts", "src/generated/prisma/**/*.ts"],
+  "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "dist"]
 }
