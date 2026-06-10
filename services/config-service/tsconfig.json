@@ -1,7 +1,6 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "baseUrl": ".",
     "paths": {
       "@saas/shared": ["../../shared/index.ts"],
       "@saas/shared/*": ["../../shared/*"],

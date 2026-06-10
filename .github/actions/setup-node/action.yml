@@ -33,4 +33,4 @@ runs:
     - name: Generate Prisma Client
       if: steps.cache-prisma.outputs.cache-hit != 'true'
       shell: bash
-      run: pnpm --filter auth-service exec prisma generate
+      run: pnpm --filter auth-service exec prisma generate && pnpm --filter config-service exec prisma generate
