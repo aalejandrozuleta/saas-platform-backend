@@ -26,8 +26,8 @@ runs:
       uses: actions/cache@v5.0.5
       with:
         path: |
-          node_modules/.prisma
-          services/**/generated/prisma
+          services/auth-service/node_modules/.prisma
+          services/config-service/node_modules/.prisma
         key: prisma-${{ runner.os }}-${{ hashFiles('**/schema.prisma') }}-${{ hashFiles('pnpm-lock.yaml') }}
 
     - name: Generate Prisma Client

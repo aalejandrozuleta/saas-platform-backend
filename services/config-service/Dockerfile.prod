@@ -10,7 +10,7 @@ WORKDIR /app
 FROM base AS build
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml nest-cli.json ./
-COPY .npmrc* ./
+COPY .npmrc ./
 COPY tsconfig.base.json ./
 COPY services ./services
 COPY shared ./shared
