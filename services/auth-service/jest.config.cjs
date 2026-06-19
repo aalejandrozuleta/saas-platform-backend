@@ -16,10 +16,14 @@ module.exports = {
     '^@infrastructure/(.*)$': '<rootDir>/src/infrastructure/$1',
     '^@modules/(.*)$': '<rootDir>/src/modules/$1',
     '^@config/(.*)$': '<rootDir>/src/config/$1',
-    '^@auth-prisma/client$': '<rootDir>/node_modules/.prisma/auth-client',
   },
 
   roots: ['<rootDir>/src'],
+
+  coveragePathIgnorePatterns: [
+    '/node_modules/',
+    '/src/generated/',
+  ],
 
   coverageThreshold: {
     global: {

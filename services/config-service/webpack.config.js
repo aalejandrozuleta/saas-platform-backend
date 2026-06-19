@@ -6,7 +6,6 @@ module.exports = (options) => ({
     ...options.resolve,
     alias: {
       ...options.resolve?.alias,
-      '@config-prisma/client': path.resolve(__dirname, 'node_modules/.prisma/config-client'),
     },
   },
 });

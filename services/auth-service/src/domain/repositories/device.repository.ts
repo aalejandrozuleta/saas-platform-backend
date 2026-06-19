@@ -1,5 +1,5 @@
 
-import { type Prisma } from '@auth-prisma/client';
+import { type Prisma } from '../../generated/prisma';
 
 import { type Device } from '../entities/device/device.entity';
 

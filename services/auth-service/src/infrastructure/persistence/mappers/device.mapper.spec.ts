@@ -1,5 +1,5 @@
 import { Device } from '@domain/entities/device/device.entity';
-import { type Device as PrismaDevice } from '@auth-prisma/client';
+import { type Device as PrismaDevice } from '../../../generated/prisma';
 
 import { DeviceMapper } from './device.mapper';
 

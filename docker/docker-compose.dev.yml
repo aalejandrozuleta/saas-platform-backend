@@ -65,6 +65,10 @@ services:
     environment:
       PNPM_STORE_PATH: /pnpm-store
       SERVICE_NAME: config-service
+      # Override .env DATABASE_URL so Prisma uses the Docker internal hostname, not localhost
+      DATABASE_URL: postgresql://config_user:config_pass@config-postgres:5432/config_db
+      MONGO_URL: mongodb://mongo:27017/config_audit
+      REDIS_HOST: redis
     ports:
       - "3002:3002"
     depends_on:
@@ -116,6 +120,10 @@ services:
     environment:
       PNPM_STORE_PATH: /pnpm-store
       SERVICE_NAME: auth-service
+      # Override .env DATABASE_URL so Prisma uses the Docker internal hostname, not localhost
+      DATABASE_URL: postgresql://auth_user:auth_pass@auth-postgres:5432/auth_db
+      MONGO_URL: mongodb://mongo:27017/auth_audit
+      REDIS_HOST: redis
     ports:
       - "3001:3001"
     depends_on:

@@ -9,8 +9,7 @@
       "@application/*": ["./src/application/*"],
       "@infrastructure/*": ["./src/infrastructure/*"],
       "@modules/*": ["./src/modules/*"],
-      "@config/*": ["./src/config/*"],
-      "@auth-prisma/client": ["./node_modules/.prisma/auth-client"]
+      "@config/*": ["./src/config/*"]
     }
   },
   "include": ["src/**/*.ts"],

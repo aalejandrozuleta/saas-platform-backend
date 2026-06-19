@@ -1,4 +1,4 @@
-import { type Prisma } from '@auth-prisma/client';
+import { type Prisma } from '../../generated/prisma';
 
 export interface LoginSecurityProfile {
   trustedCountries: string[];

@@ -1,4 +1,4 @@
-const path = require('path');
+const path = require('node:path');
 
 module.exports = (options) => ({
   ...options,
@@ -6,7 +6,6 @@ module.exports = (options) => ({
     ...options.resolve,
     alias: {
       ...options.resolve?.alias,
-      '@auth-prisma/client': path.resolve(__dirname, 'node_modules/.prisma/auth-client'),
     },
   },
 });

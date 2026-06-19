@@ -15,7 +15,6 @@ module.exports = {
     '^@infrastructure/(.*)$': '<rootDir>/src/infrastructure/$1',
     '^@modules/(.*)$': '<rootDir>/src/modules/$1',
     '^@config/(.*)$': '<rootDir>/src/config/$1',
-    '^@config-prisma/client$': '<rootDir>/node_modules/.prisma/config-client',
   },
 
   roots: ['<rootDir>/src'],

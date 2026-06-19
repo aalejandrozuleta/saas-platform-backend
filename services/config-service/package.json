@@ -6,9 +6,9 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "build": "nest build",
+    "build": "nest build && node -e \"const{cpSync}=require('fs');cpSync('src/generated','dist/generated',{recursive:true,filter:s=>!s.includes('node_modules')})\"",
     "start": "node dist/main.js",
-    "dev": "nest start --watch",
+    "dev": "prisma generate && nest start --watch",
     "start:debug": "nest start --debug --watch",
     "format": "prettier --write \"src/**/*.ts\"",
     "test:cov": "jest --config jest.config.cjs --coverage",

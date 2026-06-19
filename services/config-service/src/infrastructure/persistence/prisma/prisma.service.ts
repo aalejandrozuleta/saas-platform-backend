@@ -1,7 +1,7 @@
 import { EnvService } from '@config/env/env.service';
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { PrismaPg } from '@prisma/adapter-pg';
-import { PrismaClient } from '@config-prisma/client';
+import { PrismaClient } from '../../../generated/prisma';
 
 /**
  * Prisma Service (PostgreSQL).
