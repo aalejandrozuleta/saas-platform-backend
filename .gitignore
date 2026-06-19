@@ -36,6 +36,14 @@ playwright-report/
 .tsbuild/
 
 ############################################
+# Compiled JS alongside TS source files
+# (build output should go to dist/, not source dirs)
+############################################
+shared/**/*.js
+shared/**/*.d.ts
+shared/**/*.js.map
+
+############################################
 # Prisma — generated clients (re-created via prisma generate)
 ############################################
 **/generated/
