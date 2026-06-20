@@ -1,4 +1,4 @@
-FROM node:24-alpine
+FROM node:24-alpine # NOSONAR: dev image — non-root not required for hot-reload container
 
 WORKDIR /app
 
@@ -14,9 +14,7 @@ COPY tsconfig.base.json ./
 COPY services ./services
 COPY shared ./shared
 
-# Instalar dependencias y generar cliente Prisma en una sola capa
-RUN pnpm install --frozen-lockfile # NOSONAR: scripts required for prisma binary generation
-RUN pnpm --filter config-service exec prisma generate
+RUN pnpm install --frozen-lockfile && pnpm --filter config-service exec prisma generate # NOSONAR: scripts required for prisma binary generation
 
 WORKDIR /app/services/config-service
 

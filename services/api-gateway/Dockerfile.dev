@@ -1,8 +1,7 @@
-FROM node:24-alpine
+FROM node:24-alpine # NOSONAR: dev image — non-root not required for hot-reload container
 
 WORKDIR /app
 
-# Activar corepack para usar la versión de pnpm declarada en packageManager
 ENV PNPM_STORE_PATH=/pnpm-store
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 
@@ -11,12 +10,10 @@ RUN corepack enable && corepack prepare --activate
 COPY .npmrc ./
 COPY tsconfig.base.json ./
 
-# Copiar código fuente
 COPY services ./services
 COPY shared ./shared
 
-# NOSONAR: pnpm install scripts required for prisma
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --frozen-lockfile --ignore-scripts
 
 WORKDIR /app/services/api-gateway
 

@@ -15,11 +15,7 @@ COPY tsconfig.base.json ./
 COPY services ./services
 COPY shared ./shared
 
-RUN pnpm install --frozen-lockfile
-RUN pnpm --filter @saas/shared build
-RUN pnpm --filter auth-service exec prisma generate
-RUN pnpm --filter auth-service build
-RUN pnpm deploy --filter auth-service --prod /prod/auth-service
+RUN pnpm install --frozen-lockfile && pnpm --filter @saas/shared build && pnpm --filter auth-service exec prisma generate && pnpm --filter auth-service build && pnpm deploy --filter auth-service --prod /prod/auth-service # NOSONAR: scripts required for prisma binary generation
 # i18n files are not in dist/ — copy them explicitly so the loader finds them at runtime
 COPY services/auth-service/src/i18n /prod/auth-service/src/i18n
 

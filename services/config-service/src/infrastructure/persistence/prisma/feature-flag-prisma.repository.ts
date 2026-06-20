@@ -14,7 +14,7 @@ export class FeatureFlagPrismaRepository implements FeatureFlagRepository {
     const row = await this.prisma.featureFlag.findFirst({
       where: {
         key,
-        environment: environment === undefined ? undefined : environment,
+        environment,
       },
     });
     return row ? this.toDomain(row) : null;
@@ -23,8 +23,8 @@ export class FeatureFlagPrismaRepository implements FeatureFlagRepository {
   async findAll(filter?: FeatureFlagFilter): Promise<FeatureFlag[]> {
     const rows = await this.prisma.featureFlag.findMany({
       where: {
-        enabled: filter?.enabled === undefined ? undefined : filter.enabled,
-        environment: filter?.environment === undefined ? undefined : filter.environment,
+        enabled: filter?.enabled,
+        environment: filter?.environment,
       },
       orderBy: { key: 'asc' },
     });

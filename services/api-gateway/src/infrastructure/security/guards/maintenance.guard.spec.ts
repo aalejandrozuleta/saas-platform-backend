@@ -162,4 +162,31 @@ describe('MaintenanceGuard', () => {
     await expect(guard.canActivate(makeContext())).resolves.toBe(true);
     expect(logWarnSpy).toHaveBeenCalledWith(expect.stringContaining('raw string error'));
   });
+
+  it('fails open and logs err.message when a plain Error (non-network, non-circuit) is thrown', async () => {
+    const proxy = { forward: jest.fn().mockRejectedValue(new Error('plain-upstream-error')) } as any;
+    const guard = new MaintenanceGuard(makeRedis(null), proxy);
+
+    await expect(guard.canActivate(makeContext())).resolves.toBe(true);
+    expect(logWarnSpy).toHaveBeenCalledWith(expect.stringContaining('plain-upstream-error'));
+  });
+
+  it('fails open when HttpException response is an object (JSON-stringified in log)', async () => {
+    const proxy = {
+      forward: jest.fn().mockRejectedValue(
+        new HttpException({ error: 'service down', reason: 'db' }, HttpStatus.SERVICE_UNAVAILABLE),
+      ),
+    } as any;
+    const guard = new MaintenanceGuard(makeRedis(null), proxy);
+
+    await expect(guard.canActivate(makeContext())).resolves.toBe(true);
+    expect(logWarnSpy).toHaveBeenCalledWith(expect.stringContaining('service down'));
+  });
+
+  it('uses false as default when maintenance status body has no data fields', async () => {
+    const proxy = { forward: jest.fn().mockResolvedValue({ body: { data: {} } }) } as any;
+    const guard = new MaintenanceGuard(makeRedis(null), proxy);
+
+    await expect(guard.canActivate(makeContext())).resolves.toBe(true);
+  });
 });

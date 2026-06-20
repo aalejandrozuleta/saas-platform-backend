@@ -171,11 +171,11 @@ export class MaintenanceGuard implements CanActivate {
   }
 
   private extractCode(err: unknown): string {
-    if (typeof err === 'object' && err !== null && 'code' in err) {
-      return String((err as Record<string, unknown>).code);
-    }
     /* istanbul ignore next */
-    return 'UNKNOWN';
+    if (!(typeof err === 'object' && err !== null && 'code' in err)) {
+      return 'UNKNOWN';
+    }
+    return String((err as Record<string, unknown>).code);
   }
 }
 
