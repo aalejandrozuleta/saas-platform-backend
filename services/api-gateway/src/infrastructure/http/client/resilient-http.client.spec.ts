@@ -219,6 +219,41 @@ describe('ResilientHttpClient', () => {
   // requestTyped
   // ──────────────────────────────────────────────────────────────────────────
 
+  it('loguea debug con errorCode y status cuando el error es AxiosError con response', async () => {
+    const { client, logger } = makeClient(true);
+    const axiosErrWithResponse = makeAxiosError(503, 'GET');
+    const fire = jest
+      .fn()
+      .mockRejectedValueOnce(axiosErrWithResponse)
+      .mockResolvedValueOnce({ data: { ok: true } });
+    client.breaker = { fire };
+
+    await client.request({ method: 'GET', url: '/health' });
+
+    expect(logger!.debug).toHaveBeenCalledWith(
+      'Upstream request failed',
+      expect.objectContaining({ status: 503 }),
+    );
+  });
+
+  it('loguea debug con errorCode definido cuando AxiosError no tiene response', async () => {
+    const { client, logger } = makeClient(true);
+    const circuitError = Object.assign(new AxiosError('fail', 'EOPENBREAKER'), {
+      code: 'EOPENBREAKER',
+    });
+    const fire = jest.fn().mockRejectedValue(circuitError);
+    client.breaker = { fire };
+
+    await expect(
+      client.request({ method: 'GET', url: '/health' }),
+    ).rejects.toMatchObject({ code: 'EOPENBREAKER' });
+
+    expect(logger!.debug).toHaveBeenCalledWith(
+      'Upstream request failed',
+      expect.objectContaining({ errorCode: 'EOPENBREAKER', status: undefined }),
+    );
+  });
+
   it('requestTyped debe devolver la respuesta tipada', async () => {
     const { client } = makeClient();
     const fire = jest

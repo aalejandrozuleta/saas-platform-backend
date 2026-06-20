@@ -205,4 +205,40 @@ describe('HttpRequestLoggingInterceptor', () => {
 
     expect(res.setHeader).toHaveBeenCalledWith('x-correlation-id', 'req-fallback-id');
   });
+
+  it('usa "unknown" como path cuando originalUrl y url son undefined', async () => {
+    const req = { method: 'GET', ip: '127.0.0.1', headers: {}, originalUrl: undefined, url: undefined };
+    const res = makeRes(200);
+
+    await lastValueFrom(interceptor.intercept(makeContext(req, res), makeNext()));
+
+    expect(logger.info).toHaveBeenCalledWith(
+      'HTTP request completed',
+      expect.objectContaining({ path: 'unknown' }),
+    );
+  });
+
+  it('omite userAgent cuando el header no es string (array)', async () => {
+    const req = makeReq({ headers: { 'user-agent': ['bot/1.0', 'bot/2.0'] } });
+    const res = makeRes(200);
+
+    await lastValueFrom(interceptor.intercept(makeContext(req, res), makeNext()));
+
+    expect(logger.info).toHaveBeenCalledWith(
+      'HTTP request completed',
+      expect.not.objectContaining({ userAgent: expect.any(String) }),
+    );
+  });
+
+  it('incluye userAgent cuando el header user-agent es string', async () => {
+    const req = makeReq({ headers: { 'user-agent': 'Mozilla/5.0' } });
+    const res = makeRes(200);
+
+    await lastValueFrom(interceptor.intercept(makeContext(req, res), makeNext()));
+
+    expect(logger.info).toHaveBeenCalledWith(
+      'HTTP request completed',
+      expect.objectContaining({ userAgent: 'Mozilla/5.0' }),
+    );
+  });
 });

@@ -1,6 +1,6 @@
-const path = require('path');
+const path = require('node:path');
 
-module.exports = (options) => ({
+const webpackConfig = (options) => ({
   ...options,
   resolve: {
     ...options.resolve,
@@ -9,3 +9,5 @@ module.exports = (options) => ({
     },
   },
 });
+
+module.exports = webpackConfig;

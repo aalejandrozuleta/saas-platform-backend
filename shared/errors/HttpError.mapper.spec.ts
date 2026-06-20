@@ -37,6 +37,7 @@ describe('getErrorCodeFromHttpStatus', () => {
     [404, ErrorCode.NOT_FOUND],
     [405, ErrorCode.METHOD_NOT_ALLOWED],
     [409, ErrorCode.CONFLICT],
+    [422, ErrorCode.VALIDATION_ERROR],
     [415, ErrorCode.UNSUPPORTED_MEDIA_TYPE],
     [429, ErrorCode.TOO_MANY_REQUESTS],
     [502, ErrorCode.BAD_GATEWAY],

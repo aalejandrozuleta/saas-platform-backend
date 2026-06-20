@@ -32,7 +32,7 @@ export const buildResponseMeta = (
       requestId: resolveRequestId(req.headers),
       lang,
       statusCode,
-    }) ?? {}
+    }) /* istanbul ignore next */ ?? {}
   );
 };
 

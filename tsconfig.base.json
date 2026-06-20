@@ -25,6 +25,9 @@
     "skipLibCheck": true,
 
     /* Source maps */
-    "sourceMap": true
+    "sourceMap": true,
+
+    /* Types — jest globals available in .spec.ts files */
+    "types": ["jest", "node"]
   }
 }

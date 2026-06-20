@@ -91,6 +91,18 @@ describe('I18nService', () => {
       const resolved = service.resolveLanguage(undefined);
       expect(resolved).toBe('es');
     });
+
+    it('debe retornar defaultLang cuando normalizedDefaultLang tampoco tiene mensajes', () => {
+      const svc = new I18nService({ en: { 'k': 'v' } }, 'fr');
+      // 'zh' y 'fr' no existen en messages → L34 return this.defaultLang
+      const resolved = svc.resolveLanguage('zh');
+      expect(resolved).toBe('fr');
+    });
+
+    it('usa "es" como defaultLang cuando no se pasa segundo argumento', () => {
+      const svc = new I18nService({ es: { 'key': 'valor' } });
+      expect(svc.translate('key')).toBe('valor');
+    });
   });
 
   describe('interpolate — tipos de valores', () => {

@@ -81,4 +81,11 @@ describe('User entity', () => {
       expect(reset.blockedUntil).toBeUndefined();
     });
   });
+
+  describe('getter lastLoginAt', () => {
+    it('retorna undefined cuando no hay lastLoginAt', () => {
+      const user = makeUser();
+      expect(user.lastLoginAt).toBeUndefined();
+    });
+  });
 });

@@ -52,6 +52,13 @@ describe('errorResponse', () => {
     expect(result.error.metadata).toEqual({ reason: 'blocked' });
   });
 
+  it('usa baseCode cuando el objeto fuente no tiene code', () => {
+    const result = errorResponse({ message: 'sin código' } as any);
+
+    expect(result.error.code).toBe(ErrorCode.INTERNAL_ERROR);
+    expect(result.error.message).toBe('sin código');
+  });
+
   it('debe incluir meta y detalles cuando se proporcionan', () => {
     const result = errorResponse(
       {

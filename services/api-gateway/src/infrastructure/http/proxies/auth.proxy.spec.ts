@@ -148,6 +148,14 @@ describe('AuthProxy', () => {
       );
     });
 
+    it('debe lanzar HttpException cuando AxiosError no tiene ni response ni request', async () => {
+      const axiosError = new AxiosError('No response or request', 'UNKNOWN');
+      // Ensures neither response nor request is set
+      mockClient.requestTyped.mockRejectedValue(axiosError);
+
+      await expect(proxy.forward(makeReq(), '/login')).rejects.toThrow(HttpException);
+    });
+
     it('debe loggear warn en 5xx del upstream', async () => {
       const axiosError = new AxiosError(
         'Internal Server Error',

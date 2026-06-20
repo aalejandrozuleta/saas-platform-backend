@@ -15,9 +15,8 @@ COPY services ./services
 COPY shared ./shared
 
 # Instalar dependencias y generar cliente Prisma en una sola capa
-# NOSONAR: pnpm install scripts required for prisma
-RUN pnpm install --frozen-lockfile && \
-    pnpm --filter config-service exec prisma generate
+RUN pnpm install --frozen-lockfile # NOSONAR: scripts required for prisma binary generation
+RUN pnpm --filter config-service exec prisma generate
 
 WORKDIR /app/services/config-service
 

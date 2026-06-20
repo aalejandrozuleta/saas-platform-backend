@@ -184,4 +184,46 @@ describe('GlobalExceptionFilter', () => {
       expect.objectContaining({ error: expect.objectContaining({ code: 'VALIDATION_ERROR' }) }),
     );
   });
+
+  it('debe usar code string cuando rawMessage es array y code es string', () => {
+    const exception = new HttpException(
+      { message: ['field is required'], code: 'CUSTOM_ARRAY_CODE' },
+      HttpStatus.BAD_REQUEST,
+    );
+    filter.catch(exception, host);
+
+    expect(response.json).toHaveBeenCalledWith(
+      expect.objectContaining({ error: expect.objectContaining({ code: 'CUSTOM_ARRAY_CODE' }) }),
+    );
+  });
+
+  it('debe usar code string cuando rawMessage es string y code es string', () => {
+    const exception = new HttpException(
+      { message: 'bad input', code: 'CUSTOM_MSG_CODE' },
+      HttpStatus.BAD_REQUEST,
+    );
+    filter.catch(exception, host);
+
+    expect(response.json).toHaveBeenCalledWith(
+      expect.objectContaining({ error: expect.objectContaining({ code: 'CUSTOM_MSG_CODE' }) }),
+    );
+  });
+
+  it('retorna undefined lang cuando accept-language no es string (array)', () => {
+    const arrayLangRequest = {
+      url: '/test',
+      headers: { 'accept-language': ['es', 'en'] },
+    };
+    const arrayHost = {
+      switchToHttp: () => ({
+        getResponse: () => response,
+        getRequest: () => arrayLangRequest,
+      }),
+    } as ArgumentsHost;
+
+    const exception = new Error('test');
+    filter.catch(exception, arrayHost);
+
+    expect(response.status).toHaveBeenCalledWith(500);
+  });
 });

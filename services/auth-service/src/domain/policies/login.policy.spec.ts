@@ -123,6 +123,11 @@ describe('LoginPolicy', () => {
       const custom = new LoginPolicy(10);
       expect(custom.getMaxAttempts()).toBe(10);
     });
+
+    it('usa maxAttempts=3 por defecto cuando no se pasa argumento', () => {
+      const defaultPolicy = new LoginPolicy();
+      expect(defaultPolicy.getMaxAttempts()).toBe(3);
+    });
   });
 
   describe('validateDeviceFingerprint', () => {

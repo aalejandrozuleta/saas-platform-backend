@@ -153,6 +153,26 @@ describe('RefreshTokenUseCase', () => {
     });
   });
 
+  it('debe rechazar si el hash del token no coincide', async () => {
+    tokenService.verifyRefreshToken.mockReturnValue({ jti: 'jti-ok' });
+    refreshRepo.findByJti.mockResolvedValue({
+      id: 'db-id',
+      userId: 'user-1',
+      sessionId: 'session-1',
+      familyId: 'family-1',
+      tokenHash: 'stored-hash',
+      expiresAt: new Date(Date.now() + 60_000),
+      revokedAt: null,
+    });
+    passwordHasher.verify.mockResolvedValue(false);
+
+    await expect(
+      useCase.execute('raw-refresh-token'),
+    ).rejects.toMatchObject({
+      code: ErrorCode.INVALID_REFRESH_TOKEN,
+    });
+  });
+
   it('debe rechazar si la sesión ya no está activa', async () => {
     tokenService.verifyRefreshToken.mockReturnValue({ jti: 'old-jti' });
     refreshRepo.findByJti.mockResolvedValue({

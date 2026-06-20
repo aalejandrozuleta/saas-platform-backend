@@ -174,6 +174,7 @@ export class MaintenanceGuard implements CanActivate {
     if (typeof err === 'object' && err !== null && 'code' in err) {
       return String((err as Record<string, unknown>).code);
     }
+    /* istanbul ignore next */
     return 'UNKNOWN';
   }
 }

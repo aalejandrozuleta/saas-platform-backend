@@ -146,4 +146,20 @@ describe('MaintenanceGuard', () => {
     const body = (err as HttpException).getResponse() as any;
     expect(body.error.message).toContain('maintenance');
   });
+
+  it('fails open when config-service throws an HttpException with string response (logFetchError branch)', async () => {
+    const proxy = { forward: jest.fn().mockRejectedValue(new HttpException('Service Down', HttpStatus.SERVICE_UNAVAILABLE)) } as any;
+    const guard = new MaintenanceGuard(makeRedis(null), proxy);
+
+    await expect(guard.canActivate(makeContext())).resolves.toBe(true);
+    expect(logWarnSpy).toHaveBeenCalledWith(expect.stringContaining('503'));
+  });
+
+  it('fails open when a non-Error object is thrown (String(err) branch)', async () => {
+    const proxy = { forward: jest.fn().mockRejectedValue('raw string error') } as any;
+    const guard = new MaintenanceGuard(makeRedis(null), proxy);
+
+    await expect(guard.canActivate(makeContext())).resolves.toBe(true);
+    expect(logWarnSpy).toHaveBeenCalledWith(expect.stringContaining('raw string error'));
+  });
 });
