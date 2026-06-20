@@ -87,6 +87,7 @@ describe('ScheduleMaintenanceWindowUseCase', () => {
   it('defaults createdBy to null/undefined when not provided', async () => {
     const uc = new ScheduleMaintenanceWindowUseCase(makeRepo(), makeAudit());
     const result = await uc.execute({ title: 'No Creator', startAt: '2099-02-01T00:00:00Z', endAt: '2099-02-01T02:00:00Z' });
-    expect(result.createdBy == null).toBe(true);
+    // createdBy may not be defined on the response DTO, assert via index access to avoid TS error
+    expect((result as any).createdBy == null).toBe(true);
   });
 });
