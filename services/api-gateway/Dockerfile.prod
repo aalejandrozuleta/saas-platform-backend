@@ -15,7 +15,10 @@ COPY tsconfig.base.json ./
 COPY services ./services
 COPY shared ./shared
 
-RUN pnpm install --frozen-lockfile --ignore-scripts && pnpm --filter @saas/shared build && pnpm --filter api-gateway build && pnpm deploy --filter api-gateway --prod /prod/api-gateway
+RUN pnpm install --frozen-lockfile --ignore-scripts \
+    && pnpm --filter @saas/shared build \
+    && pnpm --filter api-gateway build \
+    && pnpm deploy --filter api-gateway --prod /prod/api-gateway
 
 FROM node:24-alpine AS runtime
 

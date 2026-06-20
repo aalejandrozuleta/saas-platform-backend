@@ -15,7 +15,11 @@ COPY tsconfig.base.json ./
 COPY services ./services
 COPY shared ./shared
 
-RUN pnpm install --frozen-lockfile && pnpm --filter @saas/shared build && pnpm --filter config-service exec prisma generate && pnpm --filter config-service build && pnpm deploy --filter config-service --prod /prod/config-service # NOSONAR: scripts required for prisma binary generation
+RUN pnpm install --frozen-lockfile --ignore-scripts \
+    && pnpm --filter @saas/shared build \
+    && pnpm --filter config-service exec prisma generate \
+    && pnpm --filter config-service build \
+    && pnpm deploy --filter config-service --prod /prod/config-service
 # i18n files are not in dist/ — copy them explicitly so the loader finds them at runtime
 COPY services/config-service/src/i18n /prod/config-service/src/i18n
 

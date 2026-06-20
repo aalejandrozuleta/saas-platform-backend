@@ -14,7 +14,8 @@ COPY tsconfig.base.json ./
 COPY services ./services
 COPY shared ./shared
 
-RUN pnpm install --frozen-lockfile && pnpm --filter config-service exec prisma generate # NOSONAR: scripts required for prisma binary generation
+RUN pnpm install --frozen-lockfile --ignore-scripts \
+    && pnpm --filter config-service exec prisma generate
 
 WORKDIR /app/services/config-service
 
