@@ -289,17 +289,16 @@ describe('LoginUserUseCase', () => {
     );
   });
 
-  it('debe relanzar error sin publicar LoginBlockedEvent cuando validateAttempts lanza non-Error', async () => {
+  it('debe relanzar error sin publicar LoginBlockedEvent cuando validateAttempts lanza error', async () => {
     const user = createUser();
     userRepository.findByEmail.mockResolvedValue(user);
     policy.validateAttempts.mockImplementation(() => {
-      // eslint-disable-next-line @typescript-eslint/no-throw-literal
-      throw 'raw string error';
+      throw new Error('raw string error');
     });
 
     await expect(
       useCase.execute('test@test.com', 'Password123!', context),
-    ).rejects.toBe('raw string error');
+    ).rejects.toThrow('raw string error');
 
     expect(eventBus.publish).not.toHaveBeenCalledWith(expect.any(LoginBlockedEvent));
   });
