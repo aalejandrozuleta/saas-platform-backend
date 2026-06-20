@@ -15,7 +15,11 @@ export default [
       '**/coverage/**',
       '**/lcov-report/**',
       '**/*.d.ts',
+      '.claude/**',
     ],
+  },
+
+  {
     linterOptions: {
       reportUnusedDisableDirectives: 'error',
     },

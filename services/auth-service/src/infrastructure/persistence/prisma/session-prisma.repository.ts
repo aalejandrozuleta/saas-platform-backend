@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { SessionRepository } from '@application/ports/session.repository';
+
 import type { PrismaClient } from '../../../generated/prisma';
 
 import { PrismaService } from './prisma.service';

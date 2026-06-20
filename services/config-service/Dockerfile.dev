@@ -23,4 +23,4 @@ WORKDIR /app/services/config-service
 
 EXPOSE 3002
 
-CMD ["pnpm", "run", "dev"]
+ENTRYPOINT ["/bin/sh", "/app/services/config-service/docker-entrypoint.sh"]

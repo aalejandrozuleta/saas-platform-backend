@@ -2,6 +2,7 @@ import { EmailVO } from '@domain/value-objects/email.vo';
 import { User } from '@domain/entities/user/user.entity';
 import { type UserProps } from '@domain/entities/user/user.props';
 import { UserStatus as DomainUserStatus } from '@domain/enums/user-status.enum';
+
 import {
   UserStatus as PrismaUserStatus,
 } from '../../../generated/prisma';

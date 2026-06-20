@@ -1,0 +1,834 @@
+{
+  "info": {
+    "_postman_id": "config-service-v2",
+    "name": "Config Service — Completo",
+    "description": "# Config Service API\n\nColección **completa** del `config-service` corriendo en el puerto **3002** (o via gateway en **3000**).\n\n## Base URLs\n- **Directo:** `http://localhost:3002/config/v1`\n- **Gateway:** `http://localhost:3000/config/v1`\n\n## Módulos\n| Módulo | Base path | Descripción |\n|--------|-----------|-------------|\n| Maintenance | `/maintenance` | Modo mantenimiento, solo-lectura y ventanas programadas |\n| Feature Flags | `/feature-flags` | Activar funcionalidades por tenant/rol/entorno |\n| Tenants | `/tenants` | Planes, límites y personalización por tenant |\n| Security / IP Rules | `/security/ip-rules` | Whitelist y blacklist de IPs |\n| Security / Password Policy | `/security/password-policy` | Políticas de contraseñas y sesiones |\n| Rate Limits | `/rate-limits` | Límites dinámicos por endpoint |\n| Stats | `/stats` | Estadísticas agregadas del sistema |\n\n## Importar environment\nImporta `config-service.postman_environment.json` para tener las variables precargadas.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3002/config/v1", "type": "string" },
+    { "key": "gatewayUrl", "value": "http://localhost:3000/config/v1", "type": "string" }
+  ],
+  "item": [
+
+    {
+      "name": "🔧 Maintenance",
+      "description": "Gestión del modo mantenimiento global, modo solo-lectura y ventanas de mantenimiento programadas.",
+      "item": [
+
+        {
+          "name": "GET  /maintenance/status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/maintenance/status", "host": ["{{baseUrl}}"], "path": ["maintenance", "status"] },
+            "description": "**Público.** Estado completo: `maintenanceEnabled`, `readOnlyEnabled`, `maintenanceMessage`, `activeWindow`."
+          },
+          "response": [
+            {
+              "name": "200 — Sistema OK",
+              "status": "OK", "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"maintenanceEnabled\": false,\n    \"readOnlyEnabled\": false,\n    \"maintenanceMessage\": null,\n    \"activeWindow\": null\n  }\n}"
+            },
+            {
+              "name": "200 — En mantenimiento con ventana activa",
+              "status": "OK", "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"maintenanceEnabled\": true,\n    \"readOnlyEnabled\": false,\n    \"maintenanceMessage\": \"Actualizando base de datos. Volvemos en 2 horas.\",\n    \"activeWindow\": {\n      \"id\": \"a1b2c3d4-e5f6-7890-abcd-ef1234567890\",\n      \"title\": \"Migración PostgreSQL 17\",\n      \"startAt\": \"2099-12-01T02:00:00.000Z\",\n      \"endAt\": \"2099-12-01T04:00:00.000Z\"\n    }\n  }\n}"
+            }
+          ]
+        },
+
+        {
+          "name": "POST /maintenance/mode — Activar",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('200 + enabled=true', () => { pm.response.to.have.status(200); pm.expect(pm.response.json().data.enabled).to.be.true; });"] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"enabled\": true,\n  \"message\": \"Sistema en mantenimiento. Volvemos a las 18:00 UTC.\",\n  \"updatedBy\": \"admin-001\"\n}" },
+            "url": { "raw": "{{baseUrl}}/maintenance/mode", "host": ["{{baseUrl}}"], "path": ["maintenance", "mode"] }
+          },
+          "response": [
+            { "name": "200 — Activado", "status": "OK", "code": 200, "_postman_previewlanguage": "json", "body": "{\n  \"success\": true,\n  \"data\": {\n    \"enabled\": true,\n    \"message\": \"Sistema en mantenimiento. Volvemos a las 18:00 UTC.\",\n    \"updatedAt\": \"2025-06-07T14:30:00.000Z\"\n  }\n}" },
+            { "name": "400 — Body inválido", "status": "Bad Request", "code": 400, "_postman_previewlanguage": "json", "body": "{\n  \"success\": false,\n  \"error\": { \"code\": \"VALIDATION_ERROR\", \"message\": \"enabled must be a boolean value\" }\n}" }
+          ]
+        },
+
+        {
+          "name": "POST /maintenance/mode — Desactivar",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"enabled\": false,\n  \"updatedBy\": \"admin-001\"\n}" },
+            "url": { "raw": "{{baseUrl}}/maintenance/mode", "host": ["{{baseUrl}}"], "path": ["maintenance", "mode"] }
+          },
+          "response": [{ "name": "200 — Desactivado", "status": "OK", "code": 200, "_postman_previewlanguage": "json", "body": "{\n  \"success\": true,\n  \"data\": { \"enabled\": false, \"message\": null, \"updatedAt\": \"2025-06-07T16:00:00.000Z\" }\n}" }]
+        },
+
+        {
+          "name": "POST /maintenance/mode — Sin mensaje",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"enabled\": true\n}" },
+            "url": { "raw": "{{baseUrl}}/maintenance/mode", "host": ["{{baseUrl}}"], "path": ["maintenance", "mode"] }
+          },
+          "response": []
+        },
+
+        {
+          "name": "POST /maintenance/readonly — Activar",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('200 + enabled=true', () => { pm.response.to.have.status(200); pm.expect(pm.response.json().data.enabled).to.be.true; });"] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"enabled\": true,\n  \"updatedBy\": \"admin-001\"\n}" },
+            "url": { "raw": "{{baseUrl}}/maintenance/readonly", "host": ["{{baseUrl}}"], "path": ["maintenance", "readonly"] },
+            "description": "Activa modo solo-lectura. Los servicios deben rechazar writes (INSERT/UPDATE/DELETE) durante migraciones."
+          },
+          "response": [{ "name": "200 — Activado", "status": "OK", "code": 200, "_postman_previewlanguage": "json", "body": "{\n  \"success\": true,\n  \"data\": { \"enabled\": true, \"message\": null, \"updatedAt\": \"2025-06-07T14:30:00.000Z\" }\n}" }]
+        },
+
+        {
+          "name": "POST /maintenance/readonly — Desactivar",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"enabled\": false,\n  \"updatedBy\": \"admin-001\"\n}" },
+            "url": { "raw": "{{baseUrl}}/maintenance/readonly", "host": ["{{baseUrl}}"], "path": ["maintenance", "readonly"] }
+          },
+          "response": []
+        },
+
+        {
+          "name": "POST /maintenance/windows — Global",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 201', () => pm.response.to.have.status(201));", "const b = pm.response.json(); if(b.data && b.data.id) pm.environment.set('windowId', b.data.id);"] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"title\": \"Migración PostgreSQL 17\",\n  \"description\": \"Actualización del motor de base de datos.\",\n  \"startAt\": \"2099-12-01T02:00:00Z\",\n  \"endAt\": \"2099-12-01T04:00:00Z\",\n  \"createdBy\": \"admin-001\"\n}" },
+            "url": { "raw": "{{baseUrl}}/maintenance/windows", "host": ["{{baseUrl}}"], "path": ["maintenance", "windows"] },
+            "description": "Valida: `endAt > startAt` y sin solapamiento con ventanas activas. El ID se guarda en `windowId`."
+          },
+          "response": [
+            { "name": "201 — Programada", "status": "Created", "code": 201, "_postman_previewlanguage": "json", "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"a1b2c3d4-e5f6-7890-abcd-ef1234567890\",\n    \"title\": \"Migración PostgreSQL 17\",\n    \"description\": \"Actualización del motor de base de datos.\",\n    \"startAt\": \"2099-12-01T02:00:00.000Z\",\n    \"endAt\": \"2099-12-01T04:00:00.000Z\",\n    \"tenantId\": null,\n    \"isActive\": true,\n    \"createdAt\": \"2025-06-07T10:00:00.000Z\"\n  }\n}" },
+            { "name": "400 — endAt <= startAt", "status": "Bad Request", "code": 400, "_postman_previewlanguage": "json", "body": "{\n  \"success\": false,\n  \"error\": { \"code\": \"VALIDATION_ERROR\", \"message\": \"endAt must be after startAt\" }\n}" },
+            { "name": "409 — Solapamiento", "status": "Conflict", "code": 409, "_postman_previewlanguage": "json", "body": "{\n  \"success\": false,\n  \"error\": { \"code\": \"CONFLICT\", \"message\": \"A maintenance window already exists in that time range\" }\n}" }
+          ]
+        },
+
+        {
+          "name": "POST /maintenance/windows — Por tenant",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"title\": \"Mantenimiento exclusivo Acme\",\n  \"startAt\": \"2099-12-15T22:00:00Z\",\n  \"endAt\": \"2099-12-16T00:00:00Z\",\n  \"tenantId\": \"{{tenantId}}\",\n  \"createdBy\": \"admin-001\"\n}" },
+            "url": { "raw": "{{baseUrl}}/maintenance/windows", "host": ["{{baseUrl}}"], "path": ["maintenance", "windows"] }
+          },
+          "response": []
+        },
+
+        {
+          "name": "POST /maintenance/windows — ERROR: fechas invertidas",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"title\": \"Ventana inválida\",\n  \"startAt\": \"2099-12-01T06:00:00Z\",\n  \"endAt\": \"2099-12-01T02:00:00Z\"\n}" },
+            "url": { "raw": "{{baseUrl}}/maintenance/windows", "host": ["{{baseUrl}}"], "path": ["maintenance", "windows"] },
+            "description": "Debe retornar 400 porque `endAt < startAt`."
+          },
+          "response": [{ "name": "400 — Rango inválido", "status": "Bad Request", "code": 400, "_postman_previewlanguage": "json", "body": "{\n  \"success\": false,\n  \"error\": { \"code\": \"VALIDATION_ERROR\", \"message\": \"endAt must be after startAt\" }\n}" }]
+        },
+
+        {
+          "name": "GET  /maintenance/windows — Todas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/maintenance/windows", "host": ["{{baseUrl}}"], "path": ["maintenance", "windows"] }
+          },
+          "response": [{ "name": "200 — Lista", "status": "OK", "code": 200, "_postman_previewlanguage": "json", "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"a1b2c3d4-e5f6-7890-abcd-ef1234567890\",\n      \"title\": \"Migración PostgreSQL 17\",\n      \"description\": \"Actualización del motor de base de datos.\",\n      \"startAt\": \"2099-12-01T02:00:00.000Z\",\n      \"endAt\": \"2099-12-01T04:00:00.000Z\",\n      \"tenantId\": null,\n      \"isActive\": true,\n      \"createdAt\": \"2025-06-07T10:00:00.000Z\"\n    }\n  ]\n}" }]
+        },
+
+        {
+          "name": "GET  /maintenance/windows — Filtrar por tenant",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/maintenance/windows?tenantId={{tenantId}}", "host": ["{{baseUrl}}"], "path": ["maintenance", "windows"], "query": [{ "key": "tenantId", "value": "{{tenantId}}" }] }
+          },
+          "response": []
+        },
+
+        {
+          "name": "DELETE /maintenance/windows/:id",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('200 + isActive=false', () => { pm.response.to.have.status(200); pm.expect(pm.response.json().data.isActive).to.be.false; });"] } }],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/maintenance/windows/{{windowId}}", "host": ["{{baseUrl}}"], "path": ["maintenance", "windows", "{{windowId}}"] },
+            "description": "Cancela ventana (soft delete: `isActive=false`)."
+          },
+          "response": [
+            { "name": "200 — Cancelada", "status": "OK", "code": 200, "_postman_previewlanguage": "json", "body": "{\n  \"success\": true,\n  \"data\": { \"id\": \"a1b2c3d4-e5f6-7890-abcd-ef1234567890\", \"title\": \"Migración PostgreSQL 17\", \"isActive\": false }\n}" },
+            { "name": "404 — No encontrada", "status": "Not Found", "code": 404, "_postman_previewlanguage": "json", "body": "{\n  \"success\": false,\n  \"error\": { \"code\": \"NOT_FOUND\", \"message\": \"Maintenance window \\\"missing-id\\\" not found\" }\n}" }
+          ]
+        },
+
+        {
+          "name": "DELETE /maintenance/windows/:id — ERROR: ID inexistente",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/maintenance/windows/00000000-0000-0000-0000-000000000000", "host": ["{{baseUrl}}"], "path": ["maintenance", "windows", "00000000-0000-0000-0000-000000000000"] },
+            "description": "Debe retornar 404."
+          },
+          "response": []
+        }
+
+      ]
+    },
+
+    {
+      "name": "🚩 Feature Flags",
+      "description": "Activar/desactivar funcionalidades de forma granular. La unicidad es `(key, tenantId, role, environment)` — cada combinación es un flag independiente.",
+      "item": [
+
+        { "name": "POST /feature-flags — Global activado", "event": [{ "listen": "test", "script": { "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));", "const b = pm.response.json(); if(b.data && b.data.id) pm.environment.set('flagId', b.data.id);"] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"key\": \"dark_mode\",\n  \"enabled\": true,\n  \"description\": \"Modo oscuro para todos\"\n}" },
+            "url": { "raw": "{{baseUrl}}/feature-flags", "host": ["{{baseUrl}}"], "path": ["feature-flags"] } },
+          "response": [
+            { "name": "200 — Creado", "status": "OK", "code": 200, "_postman_previewlanguage": "json", "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"f1a2b3c4-d5e6-7890-abcd-ef1234567890\",\n    \"key\": \"dark_mode\",\n    \"enabled\": true,\n    \"tenantId\": null,\n    \"role\": null,\n    \"environment\": null,\n    \"description\": \"Modo oscuro para todos\",\n    \"metadata\": null,\n    \"createdAt\": \"2025-06-07T10:00:00.000Z\",\n    \"updatedAt\": \"2025-06-07T10:00:00.000Z\"\n  }\n}" },
+            { "name": "400 — Clave inválida (no snake_case)", "status": "Bad Request", "code": 400, "_postman_previewlanguage": "json", "body": "{\n  \"success\": false,\n  \"error\": { \"code\": \"VALIDATION_ERROR\", \"message\": \"key must be snake_case\" }\n}" }
+          ]
+        },
+
+        { "name": "POST /feature-flags — Global desactivado",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"key\": \"experimental_ui\",\n  \"enabled\": false,\n  \"description\": \"UI experimental — desactivada globalmente\"\n}" },
+            "url": { "raw": "{{baseUrl}}/feature-flags", "host": ["{{baseUrl}}"], "path": ["feature-flags"] } },
+          "response": [] },
+
+        { "name": "POST /feature-flags — Por tenant",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"key\": \"new_dashboard\",\n  \"enabled\": true,\n  \"tenantId\": \"{{tenantId}}\",\n  \"description\": \"Nuevo panel solo para este tenant\"\n}" },
+            "url": { "raw": "{{baseUrl}}/feature-flags", "host": ["{{baseUrl}}"], "path": ["feature-flags"] } },
+          "response": [] },
+
+        { "name": "POST /feature-flags — Por tenant + rol",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"key\": \"beta_reports\",\n  \"enabled\": true,\n  \"tenantId\": \"{{tenantId}}\",\n  \"role\": \"admin\",\n  \"description\": \"Reportes beta para admins del tenant\"\n}" },
+            "url": { "raw": "{{baseUrl}}/feature-flags", "host": ["{{baseUrl}}"], "path": ["feature-flags"] } },
+          "response": [] },
+
+        { "name": "POST /feature-flags — Por entorno",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"key\": \"new_payment_flow\",\n  \"enabled\": true,\n  \"environment\": \"staging\",\n  \"description\": \"Nuevo flujo de pagos en staging\",\n  \"metadata\": {\n    \"rolloutPercentage\": 25,\n    \"jiraTicket\": \"PAY-1234\",\n    \"owner\": \"payments-team\"\n  }\n}" },
+            "url": { "raw": "{{baseUrl}}/feature-flags", "host": ["{{baseUrl}}"], "path": ["feature-flags"] } },
+          "response": [] },
+
+        { "name": "POST /feature-flags — Tenant + rol + entorno (combinación completa)",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"key\": \"ai_copilot\",\n  \"enabled\": true,\n  \"tenantId\": \"{{tenantId}}\",\n  \"role\": \"premium\",\n  \"environment\": \"production\",\n  \"description\": \"AI Copilot para premium en producción\",\n  \"metadata\": {\n    \"model\": \"claude-sonnet-4-6\",\n    \"maxTokens\": 4096,\n    \"modules\": [\"code\", \"analysis\"]\n  }\n}" },
+            "url": { "raw": "{{baseUrl}}/feature-flags", "host": ["{{baseUrl}}"], "path": ["feature-flags"] } },
+          "response": [] },
+
+        { "name": "POST /feature-flags — Desactivar flag existente",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"key\": \"dark_mode\",\n  \"enabled\": false\n}" },
+            "url": { "raw": "{{baseUrl}}/feature-flags", "host": ["{{baseUrl}}"], "path": ["feature-flags"] } },
+          "response": [] },
+
+        { "name": "POST /feature-flags — ERROR: key con espacios",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"key\": \"my feature\",\n  \"enabled\": true\n}" },
+            "url": { "raw": "{{baseUrl}}/feature-flags", "host": ["{{baseUrl}}"], "path": ["feature-flags"] },
+            "description": "Debe retornar 400 — la clave debe ser snake_case." },
+          "response": [] },
+
+        { "name": "POST /feature-flags — ERROR: key con mayúsculas",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"key\": \"MyFeature\",\n  \"enabled\": true\n}" },
+            "url": { "raw": "{{baseUrl}}/feature-flags", "host": ["{{baseUrl}}"], "path": ["feature-flags"] } },
+          "response": [] },
+
+        { "name": "GET  /feature-flags — Todos",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/feature-flags", "host": ["{{baseUrl}}"], "path": ["feature-flags"] } },
+          "response": [{ "name": "200 — Lista", "status": "OK", "code": 200, "_postman_previewlanguage": "json", "body": "{\n  \"success\": true,\n  \"data\": [\n    { \"id\": \"f1\", \"key\": \"dark_mode\", \"enabled\": true, \"tenantId\": null, \"role\": null, \"environment\": null, \"metadata\": null },\n    { \"id\": \"f2\", \"key\": \"ai_copilot\", \"enabled\": true, \"tenantId\": \"tenant-abc\", \"role\": \"premium\", \"environment\": \"production\", \"metadata\": { \"model\": \"claude-sonnet-4-6\" } }\n  ]\n}" }] },
+
+        { "name": "GET  /feature-flags — Solo activos",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/feature-flags?enabled=true", "host": ["{{baseUrl}}"], "path": ["feature-flags"], "query": [{ "key": "enabled", "value": "true" }] } },
+          "response": [] },
+
+        { "name": "GET  /feature-flags — Solo desactivados",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/feature-flags?enabled=false", "host": ["{{baseUrl}}"], "path": ["feature-flags"], "query": [{ "key": "enabled", "value": "false" }] } },
+          "response": [] },
+
+        { "name": "GET  /feature-flags — Por tenant",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/feature-flags?tenantId={{tenantId}}", "host": ["{{baseUrl}}"], "path": ["feature-flags"], "query": [{ "key": "tenantId", "value": "{{tenantId}}" }] } },
+          "response": [] },
+
+        { "name": "GET  /feature-flags — Tenant + activos",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/feature-flags?tenantId={{tenantId}}&enabled=true", "host": ["{{baseUrl}}"], "path": ["feature-flags"], "query": [{ "key": "tenantId", "value": "{{tenantId}}" }, { "key": "enabled", "value": "true" }] },
+            "description": "Flags activos para un tenant específico. Uso típico: renderizar UI según features habilitadas." },
+          "response": [] },
+
+        { "name": "DELETE /feature-flags/:id",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('200 + deleted=true', () => { pm.response.to.have.status(200); pm.expect(pm.response.json().data.deleted).to.be.true; });"] } }],
+          "request": { "method": "DELETE", "header": [], "url": { "raw": "{{baseUrl}}/feature-flags/{{flagId}}", "host": ["{{baseUrl}}"], "path": ["feature-flags", "{{flagId}}"] } },
+          "response": [
+            { "name": "200 — Eliminado", "status": "OK", "code": 200, "_postman_previewlanguage": "json", "body": "{\n  \"success\": true,\n  \"data\": { \"deleted\": true, \"id\": \"f1a2b3c4-d5e6-7890-abcd-ef1234567890\" }\n}" },
+            { "name": "404 — No encontrado", "status": "Not Found", "code": 404, "_postman_previewlanguage": "json", "body": "{\n  \"success\": false,\n  \"error\": { \"code\": \"NOT_FOUND\", \"message\": \"Feature flag \\\"missing-id\\\" not found\" }\n}" }
+          ]
+        },
+
+        { "name": "DELETE /feature-flags/:id — ERROR: ID inexistente",
+          "request": { "method": "DELETE", "header": [], "url": { "raw": "{{baseUrl}}/feature-flags/00000000-0000-0000-0000-000000000000", "host": ["{{baseUrl}}"], "path": ["feature-flags", "00000000-0000-0000-0000-000000000000"] } },
+          "response": [] }
+
+      ]
+    },
+
+    {
+      "name": "🏢 Tenants",
+      "description": "Configuración por tenant: plan, límites, idioma, zona horaria, logo y datos personalizados.",
+      "item": [
+
+        { "name": "POST /tenants — Crear FREE (mínimo)",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));", "pm.test('plan FREE', () => pm.expect(pm.response.json().data.plan).to.equal('FREE'));"] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"tenantId\": \"{{tenantId}}\"\n}" },
+            "url": { "raw": "{{baseUrl}}/tenants", "host": ["{{baseUrl}}"], "path": ["tenants"] },
+            "description": "Solo `tenantId` es obligatorio. Defaults: plan=FREE, maxUsers=5, maxStorage=1024 MB, language=es, timezone=UTC." },
+          "response": [{ "name": "200 — Tenant FREE creado", "status": "OK", "code": 200, "_postman_previewlanguage": "json", "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"tc-a1b2c3d4\",\n    \"tenantId\": \"tenant-abc\",\n    \"name\": null,\n    \"logoUrl\": null,\n    \"language\": \"es\",\n    \"timezone\": \"UTC\",\n    \"plan\": \"FREE\",\n    \"maxUsers\": 5,\n    \"maxStorage\": 1024,\n    \"customData\": null,\n    \"isActive\": true,\n    \"createdAt\": \"2025-06-07T10:00:00.000Z\",\n    \"updatedAt\": \"2025-06-07T10:00:00.000Z\"\n  }\n}" }]
+        },
+
+        { "name": "POST /tenants — Crear BASIC completo",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"tenantId\": \"tenant-basic-001\",\n  \"name\": \"Small Business Inc\",\n  \"language\": \"en\",\n  \"timezone\": \"America/Chicago\",\n  \"plan\": \"BASIC\",\n  \"maxUsers\": 20,\n  \"maxStorage\": 5120\n}" },
+            "url": { "raw": "{{baseUrl}}/tenants", "host": ["{{baseUrl}}"], "path": ["tenants"] } },
+          "response": [] },
+
+        { "name": "POST /tenants — Crear PRO con logo",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"tenantId\": \"{{tenantId}}\",\n  \"name\": \"Acme Corporation\",\n  \"logoUrl\": \"https://acme.com/logo.png\",\n  \"language\": \"es\",\n  \"timezone\": \"America/Bogota\",\n  \"plan\": \"PRO\",\n  \"maxUsers\": 100,\n  \"maxStorage\": 20480\n}" },
+            "url": { "raw": "{{baseUrl}}/tenants", "host": ["{{baseUrl}}"], "path": ["tenants"] } },
+          "response": [] },
+
+        { "name": "POST /tenants — Crear ENTERPRISE con customData",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"tenantId\": \"tenant-enterprise-001\",\n  \"name\": \"MegaCorp International\",\n  \"plan\": \"ENTERPRISE\",\n  \"maxUsers\": 10000,\n  \"maxStorage\": 1048576,\n  \"customData\": {\n    \"ssoEnabled\": true,\n    \"ssoProvider\": \"okta\",\n    \"ssoMetadataUrl\": \"https://okta.megacorp.io/metadata\",\n    \"dedicatedSupport\": true,\n    \"slaHours\": 4,\n    \"enabledModules\": [\"billing\", \"hr\", \"crm\", \"analytics\"],\n    \"apiRateLimit\": 100000\n  }\n}" },
+            "url": { "raw": "{{baseUrl}}/tenants", "host": ["{{baseUrl}}"], "path": ["tenants"] } },
+          "response": [] },
+
+        { "name": "POST /tenants — Upgrade a PRO",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"tenantId\": \"{{tenantId}}\",\n  \"plan\": \"PRO\",\n  \"maxUsers\": 100,\n  \"maxStorage\": 20480\n}" },
+            "url": { "raw": "{{baseUrl}}/tenants", "host": ["{{baseUrl}}"], "path": ["tenants"] } },
+          "response": [] },
+
+        { "name": "POST /tenants — Upgrade a ENTERPRISE",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"tenantId\": \"{{tenantId}}\",\n  \"plan\": \"ENTERPRISE\",\n  \"maxUsers\": 10000,\n  \"maxStorage\": 1048576\n}" },
+            "url": { "raw": "{{baseUrl}}/tenants", "host": ["{{baseUrl}}"], "path": ["tenants"] } },
+          "response": [] },
+
+        { "name": "POST /tenants — Cambiar idioma y zona horaria",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"tenantId\": \"{{tenantId}}\",\n  \"language\": \"en\",\n  \"timezone\": \"America/New_York\"\n}" },
+            "url": { "raw": "{{baseUrl}}/tenants", "host": ["{{baseUrl}}"], "path": ["tenants"] } },
+          "response": [] },
+
+        { "name": "POST /tenants — Actualizar logo",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"tenantId\": \"{{tenantId}}\",\n  \"logoUrl\": \"https://cdn.acme.com/logos/v2-dark.png\"\n}" },
+            "url": { "raw": "{{baseUrl}}/tenants", "host": ["{{baseUrl}}"], "path": ["tenants"] } },
+          "response": [] },
+
+        { "name": "POST /tenants — Desactivar",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"tenantId\": \"{{tenantId}}\",\n  \"isActive\": false\n}" },
+            "url": { "raw": "{{baseUrl}}/tenants", "host": ["{{baseUrl}}"], "path": ["tenants"] },
+            "description": "El tenant queda inactivo. El auth-service debería verificar este flag antes de permitir login." },
+          "response": [{ "name": "200 — Desactivado", "status": "OK", "code": 200, "_postman_previewlanguage": "json", "body": "{\n  \"success\": true,\n  \"data\": { \"tenantId\": \"tenant-abc\", \"isActive\": false }\n}" }]
+        },
+
+        { "name": "POST /tenants — Reactivar",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"tenantId\": \"{{tenantId}}\",\n  \"isActive\": true\n}" },
+            "url": { "raw": "{{baseUrl}}/tenants", "host": ["{{baseUrl}}"], "path": ["tenants"] } },
+          "response": [] },
+
+        { "name": "POST /tenants — ERROR: URL inválida para logoUrl",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"tenantId\": \"tenant-x\",\n  \"logoUrl\": \"not-a-url\"\n}" },
+            "url": { "raw": "{{baseUrl}}/tenants", "host": ["{{baseUrl}}"], "path": ["tenants"] },
+            "description": "Debe retornar 400." },
+          "response": [] },
+
+        { "name": "POST /tenants — ERROR: plan inválido",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"tenantId\": \"tenant-x\",\n  \"plan\": \"ULTRA\"\n}" },
+            "url": { "raw": "{{baseUrl}}/tenants", "host": ["{{baseUrl}}"], "path": ["tenants"] } },
+          "response": [] },
+
+        { "name": "GET  /tenants — Todos",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/tenants", "host": ["{{baseUrl}}"], "path": ["tenants"] } },
+          "response": [{ "name": "200 — Lista", "status": "OK", "code": 200, "_postman_previewlanguage": "json", "body": "{\n  \"success\": true,\n  \"data\": [\n    { \"tenantId\": \"tenant-abc\", \"name\": \"Acme\", \"plan\": \"PRO\", \"isActive\": true },\n    { \"tenantId\": \"tenant-xyz\", \"name\": \"XYZ\", \"plan\": \"BASIC\", \"isActive\": true }\n  ]\n}" }]
+        },
+
+        { "name": "GET  /tenants/:tenantId — Encontrado",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('200 o 404', () => pm.expect(pm.response.code).to.be.oneOf([200, 404]));"] } }],
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/tenants/{{tenantId}}", "host": ["{{baseUrl}}"], "path": ["tenants", "{{tenantId}}"] } },
+          "response": [
+            { "name": "200 — Tenant encontrado", "status": "OK", "code": 200, "_postman_previewlanguage": "json", "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"tc-a1b2c3d4\",\n    \"tenantId\": \"tenant-abc\",\n    \"name\": \"Acme Corporation\",\n    \"logoUrl\": \"https://acme.com/logo.png\",\n    \"language\": \"es\",\n    \"timezone\": \"America/Bogota\",\n    \"plan\": \"PRO\",\n    \"maxUsers\": 100,\n    \"maxStorage\": 20480,\n    \"customData\": null,\n    \"isActive\": true,\n    \"createdAt\": \"2025-06-07T10:00:00.000Z\",\n    \"updatedAt\": \"2025-06-07T12:00:00.000Z\"\n  }\n}" },
+            { "name": "404 — No encontrado", "status": "Not Found", "code": 404, "_postman_previewlanguage": "json", "body": "{\n  \"success\": false,\n  \"error\": { \"code\": \"NOT_FOUND\", \"message\": \"Tenant config for \\\"tenant-abc\\\" not found\" }\n}" }
+          ]
+        },
+
+        { "name": "GET  /tenants/:tenantId — ERROR: ID no registrado",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/tenants/tenant-inexistente", "host": ["{{baseUrl}}"], "path": ["tenants", "tenant-inexistente"] } },
+          "response": [] }
+
+      ]
+    },
+
+    {
+      "name": "🔒 Security — IP Rules",
+      "description": "Whitelist y blacklist de IPs. Soporta IPv4, IPv6 y rangos CIDR. Las reglas pueden tener expiración automática.",
+      "item": [
+
+        { "name": "POST /security/ip-rules — Blacklist IPv4 permanente",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('201', () => pm.response.to.have.status(201));", "const b = pm.response.json(); if(b.data && b.data.id) pm.environment.set('ipRuleId', b.data.id);"] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"ip\": \"192.168.100.50\",\n  \"type\": \"BLACKLIST\",\n  \"reason\": \"847 intentos de fuerza bruta en 10 minutos\",\n  \"createdBy\": \"security-bot\"\n}" },
+            "url": { "raw": "{{baseUrl}}/security/ip-rules", "host": ["{{baseUrl}}"], "path": ["security", "ip-rules"] } },
+          "response": [
+            { "name": "201 — Regla creada", "status": "Created", "code": 201, "_postman_previewlanguage": "json", "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"ir-a1b2c3d4\",\n    \"ip\": \"192.168.100.50\",\n    \"cidr\": null,\n    \"type\": \"BLACKLIST\",\n    \"tenantId\": null,\n    \"reason\": \"847 intentos de fuerza bruta en 10 minutos\",\n    \"expiresAt\": null,\n    \"isActive\": true,\n    \"createdAt\": \"2025-06-07T10:00:00.000Z\"\n  }\n}" },
+            { "name": "400 — IP inválida", "status": "Bad Request", "code": 400, "_postman_previewlanguage": "json", "body": "{\n  \"success\": false,\n  \"error\": { \"code\": \"VALIDATION_ERROR\", \"message\": \"\\\"not-an-ip\\\" is not a valid IP address or CIDR\" }\n}" },
+            { "name": "409 — IP ya tiene regla activa", "status": "Conflict", "code": 409, "_postman_previewlanguage": "json", "body": "{\n  \"success\": false,\n  \"error\": { \"code\": \"CONFLICT\", \"message\": \"IP rule for \\\"192.168.100.50\\\" already exists\" }\n}" }
+          ]
+        },
+
+        { "name": "POST /security/ip-rules — Blacklist IPv4 temporal",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"ip\": \"203.0.113.42\",\n  \"type\": \"BLACKLIST\",\n  \"reason\": \"Comportamiento sospechoso — bloqueo 30 días\",\n  \"expiresAt\": \"2099-07-07T00:00:00Z\",\n  \"createdBy\": \"admin-001\"\n}" },
+            "url": { "raw": "{{baseUrl}}/security/ip-rules", "host": ["{{baseUrl}}"], "path": ["security", "ip-rules"] },
+            "description": "Con `expiresAt`: cuando la fecha llegue, `isExpired()=true` y permite crear una nueva regla para la misma IP." },
+          "response": [] },
+
+        { "name": "POST /security/ip-rules — Whitelist IPv4",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"ip\": \"203.0.113.1\",\n  \"type\": \"WHITELIST\",\n  \"reason\": \"Oficina central — IP fija corporativa\",\n  \"createdBy\": \"admin-001\"\n}" },
+            "url": { "raw": "{{baseUrl}}/security/ip-rules", "host": ["{{baseUrl}}"], "path": ["security", "ip-rules"] } },
+          "response": [] },
+
+        { "name": "POST /security/ip-rules — Blacklist rango CIDR /24",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"ip\": \"198.51.100.0/24\",\n  \"cidr\": \"198.51.100.0/24\",\n  \"type\": \"BLACKLIST\",\n  \"reason\": \"Rango de proveedor de proxies anónimos\",\n  \"createdBy\": \"security-team\"\n}" },
+            "url": { "raw": "{{baseUrl}}/security/ip-rules", "host": ["{{baseUrl}}"], "path": ["security", "ip-rules"] } },
+          "response": [] },
+
+        { "name": "POST /security/ip-rules — Blacklist CIDR /16",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"ip\": \"10.0.0.0/16\",\n  \"cidr\": \"10.0.0.0/16\",\n  \"type\": \"BLACKLIST\",\n  \"reason\": \"Red interna comprometida\"\n}" },
+            "url": { "raw": "{{baseUrl}}/security/ip-rules", "host": ["{{baseUrl}}"], "path": ["security", "ip-rules"] } },
+          "response": [] },
+
+        { "name": "POST /security/ip-rules — Whitelist IPv6",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"ip\": \"2001:db8::1\",\n  \"type\": \"WHITELIST\",\n  \"reason\": \"Servidor CI/CD — IPv6\",\n  \"createdBy\": \"devops\"\n}" },
+            "url": { "raw": "{{baseUrl}}/security/ip-rules", "host": ["{{baseUrl}}"], "path": ["security", "ip-rules"] } },
+          "response": [] },
+
+        { "name": "POST /security/ip-rules — Blacklist por tenant",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"ip\": \"10.20.30.40\",\n  \"type\": \"BLACKLIST\",\n  \"tenantId\": \"{{tenantId}}\",\n  \"reason\": \"Bloqueo solicitado por el tenant\"\n}" },
+            "url": { "raw": "{{baseUrl}}/security/ip-rules", "host": ["{{baseUrl}}"], "path": ["security", "ip-rules"] },
+            "description": "Regla específica de un tenant. Solo aplica cuando el request viene de ese tenant." },
+          "response": [] },
+
+        { "name": "POST /security/ip-rules — ERROR: IP inválida",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"ip\": \"not-a-valid-ip\",\n  \"type\": \"BLACKLIST\"\n}" },
+            "url": { "raw": "{{baseUrl}}/security/ip-rules", "host": ["{{baseUrl}}"], "path": ["security", "ip-rules"] } },
+          "response": [] },
+
+        { "name": "POST /security/ip-rules — ERROR: type inválido",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"ip\": \"1.2.3.4\",\n  \"type\": \"GRAYLIST\"\n}" },
+            "url": { "raw": "{{baseUrl}}/security/ip-rules", "host": ["{{baseUrl}}"], "path": ["security", "ip-rules"] } },
+          "response": [] },
+
+        { "name": "GET  /security/ip-rules — Todas",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/security/ip-rules", "host": ["{{baseUrl}}"], "path": ["security", "ip-rules"] } },
+          "response": [{ "name": "200", "status": "OK", "code": 200, "_postman_previewlanguage": "json", "body": "{\n  \"success\": true,\n  \"data\": [\n    { \"id\": \"ir-1\", \"ip\": \"192.168.100.50\", \"type\": \"BLACKLIST\", \"tenantId\": null, \"isActive\": true },\n    { \"id\": \"ir-2\", \"ip\": \"203.0.113.1\", \"type\": \"WHITELIST\", \"tenantId\": null, \"isActive\": true }\n  ]\n}" }]
+        },
+
+        { "name": "GET  /security/ip-rules — Solo BLACKLIST",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/security/ip-rules?type=BLACKLIST", "host": ["{{baseUrl}}"], "path": ["security", "ip-rules"], "query": [{ "key": "type", "value": "BLACKLIST" }] } },
+          "response": [] },
+
+        { "name": "GET  /security/ip-rules — Solo WHITELIST",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/security/ip-rules?type=WHITELIST", "host": ["{{baseUrl}}"], "path": ["security", "ip-rules"], "query": [{ "key": "type", "value": "WHITELIST" }] } },
+          "response": [] },
+
+        { "name": "GET  /security/ip-rules — Por tenant",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/security/ip-rules?tenantId={{tenantId}}", "host": ["{{baseUrl}}"], "path": ["security", "ip-rules"], "query": [{ "key": "tenantId", "value": "{{tenantId}}" }] } },
+          "response": [] },
+
+        { "name": "GET  /security/ip-rules — BLACKLIST de tenant",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/security/ip-rules?type=BLACKLIST&tenantId={{tenantId}}", "host": ["{{baseUrl}}"], "path": ["security", "ip-rules"], "query": [{ "key": "type", "value": "BLACKLIST" }, { "key": "tenantId", "value": "{{tenantId}}" }] } },
+          "response": [] },
+
+        { "name": "DELETE /security/ip-rules/:id",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('200 + deleted=true', () => { pm.response.to.have.status(200); pm.expect(pm.response.json().data.deleted).to.be.true; });"] } }],
+          "request": { "method": "DELETE", "header": [], "url": { "raw": "{{baseUrl}}/security/ip-rules/{{ipRuleId}}", "host": ["{{baseUrl}}"], "path": ["security", "ip-rules", "{{ipRuleId}}"] } },
+          "response": [
+            { "name": "200 — Eliminada", "status": "OK", "code": 200, "_postman_previewlanguage": "json", "body": "{\n  \"success\": true,\n  \"data\": { \"deleted\": true, \"id\": \"ir-a1b2c3d4\" }\n}" },
+            { "name": "404 — No encontrada", "status": "Not Found", "code": 404, "_postman_previewlanguage": "json", "body": "{\n  \"success\": false,\n  \"error\": { \"code\": \"NOT_FOUND\", \"message\": \"IP rule \\\"missing-id\\\" not found\" }\n}" }
+          ]
+        },
+
+        { "name": "DELETE /security/ip-rules/:id — ERROR: ID inexistente",
+          "request": { "method": "DELETE", "header": [], "url": { "raw": "{{baseUrl}}/security/ip-rules/00000000-0000-0000-0000-000000000000", "host": ["{{baseUrl}}"], "path": ["security", "ip-rules", "00000000-0000-0000-0000-000000000000"] } },
+          "response": [] }
+
+      ]
+    },
+
+    {
+      "name": "🔐 Security — Password Policy",
+      "description": "Políticas de contraseñas y sesiones concurrentes. Una política global aplica a todos los tenants. Un tenant puede tener su propia política que la sobreescribe.",
+      "item": [
+
+        { "name": "POST /security/password-policy — Global estricta",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"minLength\": 12,\n  \"requireUppercase\": true,\n  \"requireLowercase\": true,\n  \"requireNumbers\": true,\n  \"requireSymbols\": true,\n  \"maxAgeDays\": 90,\n  \"historyCount\": 10,\n  \"maxConcurrentSessions\": 3\n}" },
+            "url": { "raw": "{{baseUrl}}/security/password-policy", "host": ["{{baseUrl}}"], "path": ["security", "password-policy"] },
+            "description": "Política global: aplica a todos los tenants que no tengan la suya propia." },
+          "response": [{ "name": "200 — Guardada", "status": "OK", "code": 200, "_postman_previewlanguage": "json", "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"pp-global-001\",\n    \"tenantId\": null,\n    \"minLength\": 12,\n    \"requireUppercase\": true,\n    \"requireLowercase\": true,\n    \"requireNumbers\": true,\n    \"requireSymbols\": true,\n    \"maxAgeDays\": 90,\n    \"historyCount\": 10,\n    \"maxConcurrentSessions\": 3,\n    \"updatedAt\": \"2025-06-07T10:00:00.000Z\"\n  }\n}" }]
+        },
+
+        { "name": "POST /security/password-policy — Global mínima",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"minLength\": 8,\n  \"requireUppercase\": true,\n  \"requireLowercase\": true,\n  \"requireNumbers\": true,\n  \"requireSymbols\": false,\n  \"historyCount\": 5,\n  \"maxConcurrentSessions\": 5\n}" },
+            "url": { "raw": "{{baseUrl}}/security/password-policy", "host": ["{{baseUrl}}"], "path": ["security", "password-policy"] } },
+          "response": [] },
+
+        { "name": "POST /security/password-policy — Por tenant (estricta)",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"tenantId\": \"{{tenantId}}\",\n  \"minLength\": 16,\n  \"requireUppercase\": true,\n  \"requireLowercase\": true,\n  \"requireNumbers\": true,\n  \"requireSymbols\": true,\n  \"maxAgeDays\": 60,\n  \"historyCount\": 15,\n  \"maxConcurrentSessions\": 1\n}" },
+            "url": { "raw": "{{baseUrl}}/security/password-policy", "host": ["{{baseUrl}}"], "path": ["security", "password-policy"] } },
+          "response": [] },
+
+        { "name": "POST /security/password-policy — Por tenant (relajada)",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"tenantId\": \"tenant-relaxed\",\n  \"minLength\": 6,\n  \"requireUppercase\": false,\n  \"requireLowercase\": true,\n  \"requireNumbers\": true,\n  \"requireSymbols\": false,\n  \"maxConcurrentSessions\": 10\n}" },
+            "url": { "raw": "{{baseUrl}}/security/password-policy", "host": ["{{baseUrl}}"], "path": ["security", "password-policy"] } },
+          "response": [] },
+
+        { "name": "POST /security/password-policy — Sin expiración",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"minLength\": 10,\n  \"requireSymbols\": true,\n  \"maxConcurrentSessions\": 2\n}" },
+            "url": { "raw": "{{baseUrl}}/security/password-policy", "host": ["{{baseUrl}}"], "path": ["security", "password-policy"] },
+            "description": "Sin `maxAgeDays` → las contraseñas no expiran nunca." },
+          "response": [] },
+
+        { "name": "POST /security/password-policy — Solo actualizar sesiones",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"maxConcurrentSessions\": 1\n}" },
+            "url": { "raw": "{{baseUrl}}/security/password-policy", "host": ["{{baseUrl}}"], "path": ["security", "password-policy"] },
+            "description": "Solo actualiza el campo enviado. Los demás conservan su valor actual." },
+          "response": [] },
+
+        { "name": "POST /security/password-policy — ERROR: minLength < 6",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"minLength\": 3\n}" },
+            "url": { "raw": "{{baseUrl}}/security/password-policy", "host": ["{{baseUrl}}"], "path": ["security", "password-policy"] } },
+          "response": [] },
+
+        { "name": "POST /security/password-policy — ERROR: maxConcurrentSessions > 50",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"maxConcurrentSessions\": 100\n}" },
+            "url": { "raw": "{{baseUrl}}/security/password-policy", "host": ["{{baseUrl}}"], "path": ["security", "password-policy"] } },
+          "response": [] },
+
+        { "name": "GET  /security/password-policy — Global",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/security/password-policy", "host": ["{{baseUrl}}"], "path": ["security", "password-policy"] } },
+          "response": [
+            { "name": "200 — Política global", "status": "OK", "code": 200, "_postman_previewlanguage": "json", "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"pp-global-001\",\n    \"tenantId\": null,\n    \"minLength\": 12,\n    \"requireUppercase\": true,\n    \"requireLowercase\": true,\n    \"requireNumbers\": true,\n    \"requireSymbols\": true,\n    \"maxAgeDays\": 90,\n    \"historyCount\": 10,\n    \"maxConcurrentSessions\": 3,\n    \"updatedAt\": \"2025-06-07T10:00:00.000Z\"\n  }\n}" },
+            { "name": "200 — Sin política configurada", "status": "OK", "code": 200, "_postman_previewlanguage": "json", "body": "{\n  \"success\": true,\n  \"data\": null\n}" }
+          ]
+        },
+
+        { "name": "GET  /security/password-policy — Por tenant",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/security/password-policy?tenantId={{tenantId}}", "host": ["{{baseUrl}}"], "path": ["security", "password-policy"], "query": [{ "key": "tenantId", "value": "{{tenantId}}" }] } },
+          "response": [] }
+
+      ]
+    },
+
+    {
+      "name": "⚡ Rate Limits",
+      "description": "Límites de peticiones dinámicos por endpoint y tenant. Upsert por `(endpoint, tenantId)`.",
+      "item": [
+
+        { "name": "POST /rate-limits — Login 5/min global",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));", "const b = pm.response.json(); if(b.data && b.data.id) pm.environment.set('rateLimitId', b.data.id);"] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"endpoint\": \"/api/auth/login\",\n  \"maxRequests\": 5,\n  \"windowSeconds\": 60\n}" },
+            "url": { "raw": "{{baseUrl}}/rate-limits", "host": ["{{baseUrl}}"], "path": ["rate-limits"] } },
+          "response": [{ "name": "200 — Configurado", "status": "OK", "code": 200, "_postman_previewlanguage": "json", "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"rl-a1b2c3d4\",\n    \"endpoint\": \"/api/auth/login\",\n    \"maxRequests\": 5,\n    \"windowSeconds\": 60,\n    \"tenantId\": null,\n    \"isActive\": true,\n    \"updatedAt\": \"2025-06-07T10:00:00.000Z\"\n  }\n}" }]
+        },
+
+        { "name": "POST /rate-limits — Register 3/hora global",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"endpoint\": \"/api/auth/register\",\n  \"maxRequests\": 3,\n  \"windowSeconds\": 3600\n}" },
+            "url": { "raw": "{{baseUrl}}/rate-limits", "host": ["{{baseUrl}}"], "path": ["rate-limits"] } },
+          "response": [] },
+
+        { "name": "POST /rate-limits — API global 1000/hora",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"endpoint\": \"/api/*\",\n  \"maxRequests\": 1000,\n  \"windowSeconds\": 3600\n}" },
+            "url": { "raw": "{{baseUrl}}/rate-limits", "host": ["{{baseUrl}}"], "path": ["rate-limits"] } },
+          "response": [] },
+
+        { "name": "POST /rate-limits — Endpoint pesado por tenant",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"endpoint\": \"/api/v1/reports/generate\",\n  \"maxRequests\": 10,\n  \"windowSeconds\": 3600,\n  \"tenantId\": \"{{tenantId}}\"\n}" },
+            "url": { "raw": "{{baseUrl}}/rate-limits", "host": ["{{baseUrl}}"], "path": ["rate-limits"] } },
+          "response": [] },
+
+        { "name": "POST /rate-limits — Bulk import Enterprise 50/día",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"endpoint\": \"/api/v1/bulk-import\",\n  \"maxRequests\": 50,\n  \"windowSeconds\": 86400,\n  \"tenantId\": \"tenant-enterprise\"\n}" },
+            "url": { "raw": "{{baseUrl}}/rate-limits", "host": ["{{baseUrl}}"], "path": ["rate-limits"] } },
+          "response": [] },
+
+        { "name": "POST /rate-limits — Actualizar login a 10/min (upsert)",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"endpoint\": \"/api/auth/login\",\n  \"maxRequests\": 10,\n  \"windowSeconds\": 60\n}" },
+            "url": { "raw": "{{baseUrl}}/rate-limits", "host": ["{{baseUrl}}"], "path": ["rate-limits"] },
+            "description": "Misma combinación `(endpoint, tenantId)` → actualiza el existente." },
+          "response": [] },
+
+        { "name": "POST /rate-limits — ERROR: maxRequests = 0",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"endpoint\": \"/api/test\",\n  \"maxRequests\": 0,\n  \"windowSeconds\": 60\n}" },
+            "url": { "raw": "{{baseUrl}}/rate-limits", "host": ["{{baseUrl}}"], "path": ["rate-limits"] } },
+          "response": [] },
+
+        { "name": "POST /rate-limits — ERROR: windowSeconds negativo",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"endpoint\": \"/api/test\",\n  \"maxRequests\": 10,\n  \"windowSeconds\": -60\n}" },
+            "url": { "raw": "{{baseUrl}}/rate-limits", "host": ["{{baseUrl}}"], "path": ["rate-limits"] } },
+          "response": [] },
+
+        { "name": "GET  /rate-limits — Todos",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/rate-limits", "host": ["{{baseUrl}}"], "path": ["rate-limits"] } },
+          "response": [{ "name": "200", "status": "OK", "code": 200, "_postman_previewlanguage": "json", "body": "{\n  \"success\": true,\n  \"data\": [\n    { \"id\": \"rl-1\", \"endpoint\": \"/api/auth/login\", \"maxRequests\": 10, \"windowSeconds\": 60, \"tenantId\": null, \"isActive\": true },\n    { \"id\": \"rl-2\", \"endpoint\": \"/api/auth/register\", \"maxRequests\": 3, \"windowSeconds\": 3600, \"tenantId\": null, \"isActive\": true }\n  ]\n}" }]
+        },
+
+        { "name": "GET  /rate-limits — Por tenant",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/rate-limits?tenantId={{tenantId}}", "host": ["{{baseUrl}}"], "path": ["rate-limits"], "query": [{ "key": "tenantId", "value": "{{tenantId}}" }] } },
+          "response": [] },
+
+        { "name": "DELETE /rate-limits/:id",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('200 + deleted=true', () => { pm.response.to.have.status(200); pm.expect(pm.response.json().data.deleted).to.be.true; });"] } }],
+          "request": { "method": "DELETE", "header": [], "url": { "raw": "{{baseUrl}}/rate-limits/{{rateLimitId}}", "host": ["{{baseUrl}}"], "path": ["rate-limits", "{{rateLimitId}}"] } },
+          "response": [
+            { "name": "200 — Eliminado", "status": "OK", "code": 200, "_postman_previewlanguage": "json", "body": "{\n  \"success\": true,\n  \"data\": { \"deleted\": true, \"id\": \"rl-a1b2c3d4\" }\n}" },
+            { "name": "404 — No encontrado", "status": "Not Found", "code": 404, "_postman_previewlanguage": "json", "body": "{\n  \"success\": false,\n  \"error\": { \"code\": \"NOT_FOUND\", \"message\": \"Rate limit config \\\"missing-id\\\" not found\" }\n}" }
+          ]
+        },
+
+        { "name": "DELETE /rate-limits/:id — ERROR: ID inexistente",
+          "request": { "method": "DELETE", "header": [], "url": { "raw": "{{baseUrl}}/rate-limits/00000000-0000-0000-0000-000000000000", "host": ["{{baseUrl}}"], "path": ["rate-limits", "00000000-0000-0000-0000-000000000000"] } },
+          "response": [] }
+
+      ]
+    },
+
+    {
+      "name": "📊 Stats",
+      "item": [
+        { "name": "GET  /stats",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));", "pm.test('generatedAt válido', () => pm.expect(new Date(pm.response.json().data.generatedAt).toString()).to.not.equal('Invalid Date'));", "pm.test('todos los campos numéricos >= 0', () => {\n  const d = pm.response.json().data;\n  ['totalConfigs','totalFeatureFlags','enabledFeatureFlags','totalTenants','activeTenants','totalIpRules','activeMaintenanceWindows','totalRateLimits'].forEach(k => pm.expect(d[k]).to.be.at.least(0));\n});"] } }],
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/stats", "host": ["{{baseUrl}}"], "path": ["stats"] },
+            "description": "8 conteos en paralelo (`Promise.all`). Campos: `totalConfigs`, `totalFeatureFlags`, `enabledFeatureFlags`, `totalTenants`, `activeTenants`, `totalIpRules`, `activeMaintenanceWindows`, `totalRateLimits`, `generatedAt`." },
+          "response": [
+            { "name": "200 — Con datos", "status": "OK", "code": 200, "_postman_previewlanguage": "json", "body": "{\n  \"success\": true,\n  \"data\": {\n    \"totalConfigs\": 4,\n    \"totalFeatureFlags\": 8,\n    \"enabledFeatureFlags\": 5,\n    \"totalTenants\": 12,\n    \"activeTenants\": 11,\n    \"totalIpRules\": 7,\n    \"activeMaintenanceWindows\": 0,\n    \"totalRateLimits\": 3,\n    \"generatedAt\": \"2025-06-07T15:30:00.000Z\"\n  }\n}" },
+            { "name": "200 — Sistema vacío", "status": "OK", "code": 200, "_postman_previewlanguage": "json", "body": "{\n  \"success\": true,\n  \"data\": {\n    \"totalConfigs\": 0,\n    \"totalFeatureFlags\": 0,\n    \"enabledFeatureFlags\": 0,\n    \"totalTenants\": 0,\n    \"activeTenants\": 0,\n    \"totalIpRules\": 0,\n    \"activeMaintenanceWindows\": 0,\n    \"totalRateLimits\": 0,\n    \"generatedAt\": \"2025-06-07T15:30:00.000Z\"\n  }\n}" }
+          ]
+        }
+      ]
+    },
+
+    {
+      "name": "🌐 Via Gateway (puerto 3000)",
+      "description": "Mismos endpoints a través del API Gateway. Rutas públicas: `GET /maintenance/status` y `GET /feature-flags`. El resto requiere JWT en cookie `access_token`.",
+      "item": [
+
+        { "name": "GET  /maintenance/status — Público",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{gatewayUrl}}/maintenance/status", "host": ["{{gatewayUrl}}"], "path": ["maintenance", "status"] } },
+          "response": [] },
+
+        { "name": "GET  /feature-flags — Público",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{gatewayUrl}}/feature-flags?tenantId={{tenantId}}&enabled=true", "host": ["{{gatewayUrl}}"], "path": ["feature-flags"], "query": [{ "key": "tenantId", "value": "{{tenantId}}" }, { "key": "enabled", "value": "true" }] } },
+          "response": [] },
+
+        { "name": "POST /maintenance/mode — Autenticado",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Cookie", "value": "access_token={{access_token}}" }],
+            "body": { "mode": "raw", "raw": "{\n  \"enabled\": true,\n  \"message\": \"Mantenimiento programado\"\n}" },
+            "url": { "raw": "{{gatewayUrl}}/maintenance/mode", "host": ["{{gatewayUrl}}"], "path": ["maintenance", "mode"] } },
+          "response": [{ "name": "401 — Sin token", "status": "Unauthorized", "code": 401, "_postman_previewlanguage": "json", "body": "{\n  \"success\": false,\n  \"error\": { \"code\": \"UNAUTHORIZED\", \"message\": \"Missing or invalid authentication token\" }\n}" }]
+        },
+
+        { "name": "POST /maintenance/readonly — Autenticado",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Cookie", "value": "access_token={{access_token}}" }],
+            "body": { "mode": "raw", "raw": "{\n  \"enabled\": true\n}" },
+            "url": { "raw": "{{gatewayUrl}}/maintenance/readonly", "host": ["{{gatewayUrl}}"], "path": ["maintenance", "readonly"] } },
+          "response": [] },
+
+        { "name": "POST /maintenance/windows — Autenticado",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Cookie", "value": "access_token={{access_token}}" }],
+            "body": { "mode": "raw", "raw": "{\n  \"title\": \"Ventana via gateway\",\n  \"startAt\": \"2099-12-01T02:00:00Z\",\n  \"endAt\": \"2099-12-01T04:00:00Z\"\n}" },
+            "url": { "raw": "{{gatewayUrl}}/maintenance/windows", "host": ["{{gatewayUrl}}"], "path": ["maintenance", "windows"] } },
+          "response": [] },
+
+        { "name": "POST /feature-flags — Autenticado",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Cookie", "value": "access_token={{access_token}}" }],
+            "body": { "mode": "raw", "raw": "{\n  \"key\": \"test_flag\",\n  \"enabled\": true\n}" },
+            "url": { "raw": "{{gatewayUrl}}/feature-flags", "host": ["{{gatewayUrl}}"], "path": ["feature-flags"] } },
+          "response": [] },
+
+        { "name": "POST /tenants — Autenticado",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Cookie", "value": "access_token={{access_token}}" }],
+            "body": { "mode": "raw", "raw": "{\n  \"tenantId\": \"tenant-new\",\n  \"name\": \"Nuevo Tenant\",\n  \"plan\": \"BASIC\"\n}" },
+            "url": { "raw": "{{gatewayUrl}}/tenants", "host": ["{{gatewayUrl}}"], "path": ["tenants"] } },
+          "response": [] },
+
+        { "name": "GET  /tenants — Autenticado",
+          "request": { "method": "GET", "header": [{ "key": "Cookie", "value": "access_token={{access_token}}" }],
+            "url": { "raw": "{{gatewayUrl}}/tenants", "host": ["{{gatewayUrl}}"], "path": ["tenants"] } },
+          "response": [] },
+
+        { "name": "POST /security/ip-rules — Autenticado",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Cookie", "value": "access_token={{access_token}}" }],
+            "body": { "mode": "raw", "raw": "{\n  \"ip\": \"1.2.3.4\",\n  \"type\": \"BLACKLIST\",\n  \"reason\": \"Test via gateway\"\n}" },
+            "url": { "raw": "{{gatewayUrl}}/security/ip-rules", "host": ["{{gatewayUrl}}"], "path": ["security", "ip-rules"] } },
+          "response": [] },
+
+        { "name": "POST /security/password-policy — Autenticado",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Cookie", "value": "access_token={{access_token}}" }],
+            "body": { "mode": "raw", "raw": "{\n  \"minLength\": 10\n}" },
+            "url": { "raw": "{{gatewayUrl}}/security/password-policy", "host": ["{{gatewayUrl}}"], "path": ["security", "password-policy"] } },
+          "response": [] },
+
+        { "name": "POST /rate-limits — Autenticado",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Cookie", "value": "access_token={{access_token}}" }],
+            "body": { "mode": "raw", "raw": "{\n  \"endpoint\": \"/api/auth/login\",\n  \"maxRequests\": 5,\n  \"windowSeconds\": 60\n}" },
+            "url": { "raw": "{{gatewayUrl}}/rate-limits", "host": ["{{gatewayUrl}}"], "path": ["rate-limits"] } },
+          "response": [] },
+
+        { "name": "GET  /stats — Autenticado",
+          "request": { "method": "GET", "header": [{ "key": "Cookie", "value": "access_token={{access_token}}" }],
+            "url": { "raw": "{{gatewayUrl}}/stats", "host": ["{{gatewayUrl}}"], "path": ["stats"] } },
+          "response": [] }
+
+      ]
+    },
+
+    {
+      "name": "🧪 Flujos de Prueba",
+      "description": "Secuencias de peticiones que simulan escenarios reales. Ejecutar **en orden**.",
+      "item": [
+
+        {
+          "name": "Flujo 1: Setup inicial completo",
+          "item": [
+            { "name": "1a. Activar mantenimiento",
+              "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "raw": "{ \"enabled\": true, \"message\": \"Setup inicial en progreso\" }" },
+                "url": { "raw": "{{baseUrl}}/maintenance/mode", "host": ["{{baseUrl}}"], "path": ["maintenance", "mode"] } }, "response": [] },
+            { "name": "1b. Crear tenant base",
+              "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "raw": "{ \"tenantId\": \"{{tenantId}}\", \"name\": \"Test Corp\", \"plan\": \"PRO\", \"maxUsers\": 50 }" },
+                "url": { "raw": "{{baseUrl}}/tenants", "host": ["{{baseUrl}}"], "path": ["tenants"] } }, "response": [] },
+            { "name": "1c. Política de contraseñas global",
+              "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "raw": "{ \"minLength\": 10, \"requireSymbols\": true, \"maxAgeDays\": 90, \"maxConcurrentSessions\": 3 }" },
+                "url": { "raw": "{{baseUrl}}/security/password-policy", "host": ["{{baseUrl}}"], "path": ["security", "password-policy"] } }, "response": [] },
+            { "name": "1d. Rate limit en login",
+              "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "raw": "{ \"endpoint\": \"/api/auth/login\", \"maxRequests\": 5, \"windowSeconds\": 60 }" },
+                "url": { "raw": "{{baseUrl}}/rate-limits", "host": ["{{baseUrl}}"], "path": ["rate-limits"] } }, "response": [] },
+            { "name": "1e. Feature flag onboarding",
+              "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "raw": "{ \"key\": \"onboarding_v2\", \"enabled\": true, \"tenantId\": \"{{tenantId}}\" }" },
+                "url": { "raw": "{{baseUrl}}/feature-flags", "host": ["{{baseUrl}}"], "path": ["feature-flags"] } }, "response": [] },
+            { "name": "1f. Desactivar mantenimiento",
+              "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "raw": "{ \"enabled\": false }" },
+                "url": { "raw": "{{baseUrl}}/maintenance/mode", "host": ["{{baseUrl}}"], "path": ["maintenance", "mode"] } }, "response": [] },
+            { "name": "1g. Verificar estado final",
+              "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/maintenance/status", "host": ["{{baseUrl}}"], "path": ["maintenance", "status"] } }, "response": [] },
+            { "name": "1h. Ver stats",
+              "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/stats", "host": ["{{baseUrl}}"], "path": ["stats"] } }, "response": [] }
+          ]
+        },
+
+        {
+          "name": "Flujo 2: Incidente de seguridad",
+          "item": [
+            { "name": "2a. Blacklist IP atacante",
+              "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "raw": "{ \"ip\": \"185.220.101.1\", \"type\": \"BLACKLIST\", \"reason\": \"Nodo Tor malicioso — 2000 intentos\", \"createdBy\": \"security-team\" }" },
+                "url": { "raw": "{{baseUrl}}/security/ip-rules", "host": ["{{baseUrl}}"], "path": ["security", "ip-rules"] } }, "response": [] },
+            { "name": "2b. Reducir rate limit login a 3/min",
+              "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "raw": "{ \"endpoint\": \"/api/auth/login\", \"maxRequests\": 3, \"windowSeconds\": 60 }" },
+                "url": { "raw": "{{baseUrl}}/rate-limits", "host": ["{{baseUrl}}"], "path": ["rate-limits"] } }, "response": [] },
+            { "name": "2c. Activar solo-lectura durante análisis",
+              "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "raw": "{ \"enabled\": true, \"updatedBy\": \"security-team\" }" },
+                "url": { "raw": "{{baseUrl}}/maintenance/readonly", "host": ["{{baseUrl}}"], "path": ["maintenance", "readonly"] } }, "response": [] },
+            { "name": "2d. Verificar reglas de IP activas",
+              "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/security/ip-rules?type=BLACKLIST", "host": ["{{baseUrl}}"], "path": ["security", "ip-rules"], "query": [{ "key": "type", "value": "BLACKLIST" }] } }, "response": [] },
+            { "name": "2e. Desactivar solo-lectura (incidente resuelto)",
+              "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "raw": "{ \"enabled\": false, \"updatedBy\": \"security-team\" }" },
+                "url": { "raw": "{{baseUrl}}/maintenance/readonly", "host": ["{{baseUrl}}"], "path": ["maintenance", "readonly"] } }, "response": [] }
+          ]
+        },
+
+        {
+          "name": "Flujo 3: Upgrade de tenant a ENTERPRISE",
+          "item": [
+            { "name": "3a. Consultar config actual",
+              "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/tenants/{{tenantId}}", "host": ["{{baseUrl}}"], "path": ["tenants", "{{tenantId}}"] } }, "response": [] },
+            { "name": "3b. Upgrade a ENTERPRISE",
+              "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "raw": "{ \"tenantId\": \"{{tenantId}}\", \"plan\": \"ENTERPRISE\", \"maxUsers\": 10000, \"maxStorage\": 1048576, \"customData\": { \"ssoEnabled\": true } }" },
+                "url": { "raw": "{{baseUrl}}/tenants", "host": ["{{baseUrl}}"], "path": ["tenants"] } }, "response": [] },
+            { "name": "3c. Rate limit API generoso para Enterprise",
+              "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "raw": "{ \"endpoint\": \"/api/*\", \"maxRequests\": 10000, \"windowSeconds\": 3600, \"tenantId\": \"{{tenantId}}\" }" },
+                "url": { "raw": "{{baseUrl}}/rate-limits", "host": ["{{baseUrl}}"], "path": ["rate-limits"] } }, "response": [] },
+            { "name": "3d. Activar flag AI Copilot para Enterprise",
+              "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "raw": "{ \"key\": \"ai_copilot\", \"enabled\": true, \"tenantId\": \"{{tenantId}}\", \"environment\": \"production\" }" },
+                "url": { "raw": "{{baseUrl}}/feature-flags", "host": ["{{baseUrl}}"], "path": ["feature-flags"] } }, "response": [] },
+            { "name": "3e. Verificar stats finales",
+              "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/stats", "host": ["{{baseUrl}}"], "path": ["stats"] } }, "response": [] }
+          ]
+        }
+
+      ]
+    }
+
+  ]
+}

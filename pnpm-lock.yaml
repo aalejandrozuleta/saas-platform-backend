@@ -390,6 +390,12 @@ importers:
         specifier: 7.6.0
         version: 7.6.0
 
+  services/config-service/generated/prisma:
+    dependencies:
+      '@prisma/client-runtime-utils':
+        specifier: 7.6.0
+        version: 7.6.0
+
   services/config-service/src/generated/prisma:
     dependencies:
       '@prisma/client-runtime-utils':
