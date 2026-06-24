@@ -23,7 +23,7 @@ export class User {
       id: params.id,
       email: params.email,
       passwordHash: params.passwordHash,
-      role: params.role ?? UserRole.USER,
+      role: params.role ?? UserRole.CUSTOMER,
       status: UserStatus.ACTIVE,
       emailVerified: false,
       failedLoginAttempts: 0,

@@ -59,23 +59,23 @@ describe('JwtSessionGuard', () => {
       const token = makeValidToken({ sub: 'user-1', sid: 'session-1', role: 'USER' });
       const { ctx, req } = makeContext({ cookies: { accessToken: token } });
 
-      redis.get.mockResolvedValue(JSON.stringify({ userId: 'user-1' }));
+      redis.get.mockResolvedValue(JSON.stringify({ userId: 'user-1', permissions: ['invoice:create'] }));
 
       const result = await guard.canActivate(ctx);
 
       expect(result).toBe(true);
-      expect(req.user).toEqual({ id: 'user-1', sessionId: 'session-1', role: 'USER' });
+      expect(req.user).toEqual({ id: 'user-1', sessionId: 'session-1', role: 'USER', permissions: ['invoice:create'] });
     });
 
     it('debe inyectar role SUPER_ADMIN cuando corresponde', async () => {
       const token = makeValidToken({ sub: 'admin-1', sid: 'session-admin', role: 'SUPER_ADMIN' });
       const { ctx, req } = makeContext({ cookies: { accessToken: token } });
 
-      redis.get.mockResolvedValue(JSON.stringify({ userId: 'admin-1' }));
+      redis.get.mockResolvedValue(JSON.stringify({ userId: 'admin-1', permissions: ['platform:maintenance'] }));
 
       await guard.canActivate(ctx);
 
-      expect(req.user).toEqual({ id: 'admin-1', sessionId: 'session-admin', role: 'SUPER_ADMIN' });
+      expect(req.user).toEqual({ id: 'admin-1', sessionId: 'session-admin', role: 'SUPER_ADMIN', permissions: ['platform:maintenance'] });
     });
 
     it('debe lanzar UnauthorizedException si no hay cookie accessToken', async () => {

@@ -5,6 +5,7 @@ import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { JwtSessionGuard } from '@infrastructure/security/guards/jwt-session.guard';
 import { MaintenanceGuard } from '@infrastructure/security/guards/maintenance.guard';
 import { RolesGuard } from '@infrastructure/security/guards/roles.guard';
+import { PermissionGuard } from '@infrastructure/security/guards/permission.guard';
 import { GlobalExceptionFilter, RedisModule } from '@saas/shared';
 import { EnvService } from '@config/env/env.service';
 
@@ -55,6 +56,11 @@ import { MetricsModule } from './infrastructure/metrics/metrics.module';
     {
       provide: APP_GUARD,
       useClass: RolesGuard,
+    },
+    // PermissionGuard se ejecuta CUARTO — autorización por permiso fino
+    {
+      provide: APP_GUARD,
+      useClass: PermissionGuard,
     },
   ],
 

@@ -1,4 +1,5 @@
 import { RegisterUserUseCase } from '@application/use-cases/register-user.use-case';
+import { UserPermissionService } from '@application/services/user-permission.service';
 import { AuthController } from '@infrastructure/controllers/auth.controller';
 import { Module } from '@nestjs/common';
 import { I18nModule } from '@infrastructure/i18n/i18n.module';

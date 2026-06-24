@@ -18,7 +18,7 @@ model User {
   email         String     @unique
   emailVerified Boolean    @default(false)
   passwordHash  String
-  role          UserRole   @default(USER)
+  role          UserRole   @default(CUSTOMER)
   status        UserStatus @default(ACTIVE)
 
   failedLoginAttempts Int       @default(0)
@@ -30,11 +30,12 @@ model User {
   updatedAt DateTime @updatedAt
 
   // Relaciones
-  security      UserSecurity?
-  devices       Device[]
-  sessions      Session[]
-  refreshTokens RefreshToken[]
-  recoveryCodes RecoveryCode[]
+  security         UserSecurity?
+  devices          Device[]
+  sessions         Session[]
+  refreshTokens    RefreshToken[]
+  recoveryCodes    RecoveryCode[]
+  userPermissions  UserPermission[]
 }
 
 model UserSecurity {
@@ -113,6 +114,45 @@ model RefreshToken {
 }
 
 
+// ─── Sistema de permisos ─────────────────────────────────────────────────────
+
+/** Catálogo de todos los permisos disponibles en el sistema */
+model Permission {
+  code        String  @id          // "invoice:delete"
+  description String
+  module      String               // "invoice" | "sale" | "finance" | "platform" …
+
+  rolePermissions RolePermission[]
+  userPermissions UserPermission[]
+}
+
+/** Permisos predeterminados de cada rol (seed automático en migración) */
+model RolePermission {
+  role           UserRole
+  permissionCode String
+  permission     Permission @relation(fields: [permissionCode], references: [code], onDelete: Cascade)
+
+  @@id([role, permissionCode])
+  @@index([role])
+}
+
+/** Overrides por usuario: concede permisos extra o revoca permisos del rol */
+model UserPermission {
+  userId         String
+  permissionCode String
+  granted        Boolean  // true = conceder extra, false = revocar
+  grantedBy      String   // userId de quien hizo el cambio
+  createdAt      DateTime @default(now())
+
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionCode], references: [code], onDelete: Cascade)
+
+  @@id([userId, permissionCode])
+  @@index([userId])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 model RecoveryCode {
   id        String    @id @default(uuid())
   userId    String
@@ -125,8 +165,10 @@ model RecoveryCode {
 
 enum UserRole {
   SUPER_ADMIN
-  ADMIN
-  USER
+  BUSINESS_OWNER
+  ACCOUNTANT
+  EMPLOYEE
+  CUSTOMER
 }
 
 enum UserStatus {

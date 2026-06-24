@@ -27,46 +27,40 @@ describe('User entity', () => {
     });
 
   describe('create', () => {
-    it('debe crear un usuario con rol USER por defecto, estado ACTIVE y failedLoginAttempts en 0', () => {
+    it('debe crear usuario con rol CUSTOMER por defecto', () => {
       const user = User.create({
         id: 'new-id',
         email: EmailVO.create('new@example.com'),
         passwordHash: 'hash',
       });
 
-      expect(user.role).toBe(UserRole.USER);
+      expect(user.role).toBe(UserRole.CUSTOMER);
       expect(user.status).toBe(UserStatus.ACTIVE);
       expect(user.failedLoginAttempts).toBe(0);
       expect(user.emailVerified).toBe(false);
     });
 
-    it('debe crear un usuario con rol SUPER_ADMIN cuando se especifica', () => {
+    it.each([
+      UserRole.SUPER_ADMIN,
+      UserRole.BUSINESS_OWNER,
+      UserRole.ACCOUNTANT,
+      UserRole.EMPLOYEE,
+      UserRole.CUSTOMER,
+    ])('debe respetar el rol %s cuando se especifica', (role) => {
       const user = User.create({
-        id: 'admin-id',
-        email: EmailVO.create('admin@example.com'),
+        id: `id-${role}`,
+        email: EmailVO.create(`${role.toLowerCase()}@example.com`),
         passwordHash: 'hash',
-        role: UserRole.SUPER_ADMIN,
+        role,
       });
-
-      expect(user.role).toBe(UserRole.SUPER_ADMIN);
-    });
-
-    it('debe crear un usuario con rol ADMIN cuando se especifica', () => {
-      const user = User.create({
-        id: 'admin-id',
-        email: EmailVO.create('admin@example.com'),
-        passwordHash: 'hash',
-        role: UserRole.ADMIN,
-      });
-
-      expect(user.role).toBe(UserRole.ADMIN);
+      expect(user.role).toBe(role);
     });
   });
 
   describe('getter role', () => {
     it('debe devolver el rol asignado al usuario', () => {
-      const user = makeUser({ role: UserRole.ADMIN });
-      expect(user.role).toBe(UserRole.ADMIN);
+      const user = makeUser({ role: UserRole.BUSINESS_OWNER });
+      expect(user.role).toBe(UserRole.BUSINESS_OWNER);
     });
   });
 

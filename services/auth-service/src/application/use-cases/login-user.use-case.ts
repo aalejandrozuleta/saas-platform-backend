@@ -41,6 +41,7 @@ import { EnvService } from '@config/env/env.service';
 import { LoginSecurityChallengeService } from '@application/security/login-security-challenge.service';
 import { LoginChallengeReason } from '@application/security/login-challenge.types';
 import { ErrorCode } from '@saas/shared';
+import { UserPermissionService } from '@application/services/user-permission.service';
 
 /**
  * Caso de uso encargado de autenticar un usuario en el sistema.
@@ -93,7 +94,7 @@ export class LoginUserUseCase {
 
     private readonly envService: EnvService,
     private readonly loginSecurityChallengeService: LoginSecurityChallengeService,
-
+    private readonly userPermissionService: UserPermissionService,
   ) { }
 
   async execute(
@@ -309,11 +310,17 @@ export class LoginUserUseCase {
         role: user.role,
       });
 
+      const permissions = await this.userPermissionService.getEffectivePermissions(
+        user.id,
+        user.role,
+      );
+
       await this.sessionCache.storeSession(
         session.id,
         user.id,
         device.id,
-        this.envService.get('REDIS_SESSION_TTL')
+        this.envService.get('REDIS_SESSION_TTL'),
+        permissions,
       );
 
       const refresh = this.tokenService.generateRefreshToken();

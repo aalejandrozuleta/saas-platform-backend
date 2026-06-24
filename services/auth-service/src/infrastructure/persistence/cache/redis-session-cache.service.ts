@@ -26,16 +26,13 @@ export class RedisSessionCacheService implements SessionCache {
     userId: string,
     deviceId: string | null,
     ttl: number,
+    permissions: string[] = [],
   ): Promise<void> {
     const key = this.buildKey(sessionId);
 
     await this.redis.set(
       key,
-      JSON.stringify({
-        userId,
-        deviceId,
-        revoked: false,
-      }),
+      JSON.stringify({ userId, deviceId, revoked: false, permissions }),
       'EX',
       ttl,
     );

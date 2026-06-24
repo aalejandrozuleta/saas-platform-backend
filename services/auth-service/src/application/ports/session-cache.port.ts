@@ -6,13 +6,16 @@
  */
 export interface SessionCache {
   /**
-   * Guarda una sesión activa en cache.
+   * Guarda una sesión activa en cache junto a los permisos efectivos del usuario.
+   * Los permisos se guardan en el valor de Redis para que el gateway los lea sin
+   * necesitar una consulta adicional a la BD en cada request.
    */
   storeSession(
     sessionId: string,
     userId: string,
     deviceId: string | null,
     ttl: number,
+    permissions?: string[],
   ): Promise<void>;
 
   /**

@@ -14,7 +14,7 @@ const makeRaw = (overrides: Partial<{
   id: 'uuid-1',
   email: 'user@example.com',
   passwordHash: 'hash',
-  role: PrismaUserRole.USER,
+  role: PrismaUserRole.CUSTOMER,
   status: PrismaUserStatus.ACTIVE,
   emailVerified: false,
   failedLoginAttempts: 0,
@@ -33,7 +33,7 @@ const makeUserEntity = (overrides: Partial<{
     id: 'uuid-new',
     email: EmailVO.create('new@example.com'),
     passwordHash: 'hashed-password',
-    role: DomainUserRole.USER,
+    role: DomainUserRole.CUSTOMER,
     status: DomainUserStatus.ACTIVE,
     emailVerified: false,
     failedLoginAttempts: 2,
@@ -45,7 +45,7 @@ const makeUserEntity = (overrides: Partial<{
 
 describe('UserMapper', () => {
   describe('toDomain', () => {
-    it('debe mapear correctamente desde persistencia a dominio (ACTIVE / USER)', () => {
+    it('debe mapear correctamente desde persistencia a dominio (ACTIVE / CUSTOMER)', () => {
       const raw = makeRaw();
       const user = UserMapper.toDomain(raw);
 
@@ -53,7 +53,7 @@ describe('UserMapper', () => {
       expect(user.id).toBe(raw.id);
       expect(user.email.getValue()).toBe(raw.email);
       expect(user.passwordHash).toBe(raw.passwordHash);
-      expect(user.role).toBe(DomainUserRole.USER);
+      expect(user.role).toBe(DomainUserRole.CUSTOMER);
       expect(user.status).toBe(DomainUserStatus.ACTIVE);
       expect(user.emailVerified).toBe(false);
       expect(user.failedLoginAttempts).toBe(0);
@@ -61,14 +61,15 @@ describe('UserMapper', () => {
       expect(user.createdAt).toEqual(raw.createdAt);
     });
 
-    it('debe mapear rol SUPER_ADMIN desde Prisma', () => {
-      const user = UserMapper.toDomain(makeRaw({ role: PrismaUserRole.SUPER_ADMIN }));
-      expect(user.role).toBe(DomainUserRole.SUPER_ADMIN);
-    });
-
-    it('debe mapear rol ADMIN desde Prisma', () => {
-      const user = UserMapper.toDomain(makeRaw({ role: PrismaUserRole.ADMIN }));
-      expect(user.role).toBe(DomainUserRole.ADMIN);
+    it.each([
+      [PrismaUserRole.SUPER_ADMIN,    DomainUserRole.SUPER_ADMIN],
+      [PrismaUserRole.BUSINESS_OWNER, DomainUserRole.BUSINESS_OWNER],
+      [PrismaUserRole.ACCOUNTANT,     DomainUserRole.ACCOUNTANT],
+      [PrismaUserRole.EMPLOYEE,       DomainUserRole.EMPLOYEE],
+      [PrismaUserRole.CUSTOMER,       DomainUserRole.CUSTOMER],
+    ])('debe mapear rol %s desde Prisma a dominio', (prismaRole, domainRole) => {
+      const user = UserMapper.toDomain(makeRaw({ role: prismaRole }));
+      expect(user.role).toBe(domainRole);
     });
 
     it('debe mapear estado PENDING', () => {
@@ -103,7 +104,7 @@ describe('UserMapper', () => {
         id: user.id,
         email: 'new@example.com',
         passwordHash: 'hashed-password',
-        role: PrismaUserRole.USER,
+        role: PrismaUserRole.CUSTOMER,
         status: PrismaUserStatus.ACTIVE,
         emailVerified: false,
         failedLoginAttempts: 2,
@@ -111,14 +112,15 @@ describe('UserMapper', () => {
       });
     });
 
-    it('debe mapear rol SUPER_ADMIN a Prisma', () => {
-      const user = makeUserEntity({ role: DomainUserRole.SUPER_ADMIN });
-      expect(UserMapper.toPersistence(user).role).toBe(PrismaUserRole.SUPER_ADMIN);
-    });
-
-    it('debe mapear rol ADMIN a Prisma', () => {
-      const user = makeUserEntity({ role: DomainUserRole.ADMIN });
-      expect(UserMapper.toPersistence(user).role).toBe(PrismaUserRole.ADMIN);
+    it.each([
+      [DomainUserRole.SUPER_ADMIN,    PrismaUserRole.SUPER_ADMIN],
+      [DomainUserRole.BUSINESS_OWNER, PrismaUserRole.BUSINESS_OWNER],
+      [DomainUserRole.ACCOUNTANT,     PrismaUserRole.ACCOUNTANT],
+      [DomainUserRole.EMPLOYEE,       PrismaUserRole.EMPLOYEE],
+      [DomainUserRole.CUSTOMER,       PrismaUserRole.CUSTOMER],
+    ])('debe mapear rol %s de dominio a Prisma', (domainRole, prismaRole) => {
+      const user = makeUserEntity({ role: domainRole });
+      expect(UserMapper.toPersistence(user).role).toBe(prismaRole);
     });
 
     it('debe mapear DomainStatus PENDING a PrismaStatus', () => {

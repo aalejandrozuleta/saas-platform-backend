@@ -42,14 +42,14 @@ describe('JwtTokenService', () => {
       const result = service.generateAccessToken({
         userId: 'user-1',
         sessionId: 'session-1',
-        role: 'USER' as any,
+        role: 'CUSTOMER' as any,
       });
 
       expect(sign).toHaveBeenCalledWith(
         {
           sub: 'user-1',
           sid: 'session-1',
-          role: 'USER',
+          role: 'CUSTOMER',
         },
         'access-secret',
         {

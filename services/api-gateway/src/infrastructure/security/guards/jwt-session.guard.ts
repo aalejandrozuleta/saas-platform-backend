@@ -28,6 +28,7 @@ declare global {
         id: string;
         sessionId: string;
         role: string;
+        permissions: string[];
       };
     }
   }
@@ -79,20 +80,27 @@ export class JwtSessionGuard implements CanActivate {
 
     const payload = this.verifyToken(token);
 
-    const session = await this.redis.get(
-      `session:${payload.sid}`,
-    );
+    const sessionRaw = await this.redis.get(`session:${payload.sid}`);
 
-    if (!session) {
+    if (!sessionRaw) {
       throw new UnauthorizedException({
         messageKey: 'common.session_expired',
       });
+    }
+
+    let permissions: string[] = [];
+    try {
+      const sessionData = JSON.parse(sessionRaw) as { permissions?: string[] };
+      permissions = Array.isArray(sessionData.permissions) ? sessionData.permissions : [];
+    } catch {
+      // valor Redis corrupto: sesión válida pero sin permisos
     }
 
     req.user = {
       id: payload.sub,
       sessionId: payload.sid,
       role: payload.role,
+      permissions,
     };
 
     return true;

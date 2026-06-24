@@ -76,27 +76,23 @@ export class UserMapper {
 
   private static toDomainRole(role: PrismaUserRole): DomainUserRole {
     switch (role) {
-      case PrismaUserRole.SUPER_ADMIN:
-        return DomainUserRole.SUPER_ADMIN;
-      case PrismaUserRole.ADMIN:
-        return DomainUserRole.ADMIN;
-      case PrismaUserRole.USER:
-        return DomainUserRole.USER;
-      default:
-        return UserMapper.assertUnreachable(role);
+      case PrismaUserRole.SUPER_ADMIN:    return DomainUserRole.SUPER_ADMIN;
+      case PrismaUserRole.BUSINESS_OWNER: return DomainUserRole.BUSINESS_OWNER;
+      case PrismaUserRole.ACCOUNTANT:     return DomainUserRole.ACCOUNTANT;
+      case PrismaUserRole.EMPLOYEE:       return DomainUserRole.EMPLOYEE;
+      case PrismaUserRole.CUSTOMER:       return DomainUserRole.CUSTOMER;
+      default:                            return UserMapper.assertUnreachable(role);
     }
   }
 
   private static toPrismaRole(role: DomainUserRole): PrismaUserRole {
     switch (role) {
-      case DomainUserRole.SUPER_ADMIN:
-        return PrismaUserRole.SUPER_ADMIN;
-      case DomainUserRole.ADMIN:
-        return PrismaUserRole.ADMIN;
-      case DomainUserRole.USER:
-        return PrismaUserRole.USER;
-      default:
-        return UserMapper.assertUnreachable(role);
+      case DomainUserRole.SUPER_ADMIN:    return PrismaUserRole.SUPER_ADMIN;
+      case DomainUserRole.BUSINESS_OWNER: return PrismaUserRole.BUSINESS_OWNER;
+      case DomainUserRole.ACCOUNTANT:     return PrismaUserRole.ACCOUNTANT;
+      case DomainUserRole.EMPLOYEE:       return PrismaUserRole.EMPLOYEE;
+      case DomainUserRole.CUSTOMER:       return PrismaUserRole.CUSTOMER;
+      default:                            return UserMapper.assertUnreachable(role);
     }
   }
 

@@ -26,6 +26,7 @@ import { type EnvService } from '@config/env/env.service';
 import { UserStatus } from '@domain/enums/user-status.enum';
 import { LoginSecurityChallengeService } from '@application/security/login-security-challenge.service';
 import { LoginChallengeReason } from '@application/security/login-challenge.types';
+import { UserPermissionService } from '@application/services/user-permission.service';
 
 import { LoginUserUseCase } from './login-user.use-case';
 
@@ -46,6 +47,7 @@ describe('LoginUserUseCase', () => {
   let sessionCache: jest.Mocked<SessionCache>;
   let envService: jest.Mocked<EnvService>;
   let loginSecurityChallengeService: LoginSecurityChallengeService;
+  let userPermissionService: jest.Mocked<UserPermissionService>;
 
   const context = LoginContext.create({
     ip: '127.0.0.1',
@@ -189,8 +191,11 @@ describe('LoginUserUseCase', () => {
       }),
     } as any;
 
-    loginSecurityChallengeService =
-      new LoginSecurityChallengeService();
+    loginSecurityChallengeService = new LoginSecurityChallengeService();
+
+    userPermissionService = {
+      getEffectivePermissions: jest.fn().mockResolvedValue([]),
+    } as any;
 
     useCase = new LoginUserUseCase(
       userRepository,
@@ -207,6 +212,7 @@ describe('LoginUserUseCase', () => {
       sessionCache,
       envService,
       loginSecurityChallengeService,
+      userPermissionService,
     );
   });
 

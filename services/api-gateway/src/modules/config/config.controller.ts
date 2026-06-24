@@ -1,6 +1,6 @@
 import { All, Controller, Req, Res } from '@nestjs/common';
 import type { Request, Response } from 'express';
-import { PublicRoute, Roles } from '@saas/shared';
+import { Permission, PublicRoute, RequirePermission, Roles } from '@saas/shared';
 import { ConfigProxy } from '@infrastructure/http/proxies/config.proxy';
 
 /**
@@ -32,9 +32,10 @@ export class ConfigController {
     res.json(body);
   }
 
-  /** Rutas de mutación: requieren JWT válido + rol SUPER_ADMIN. */
+  /** Rutas de mutación: requieren JWT válido + rol SUPER_ADMIN + permiso platform:maintenance. */
   @All('*path')
   @Roles('SUPER_ADMIN')
+  @RequirePermission(Permission.PLATFORM_MAINTENANCE)
   async forwardAll(@Req() req: Request, @Res() res: Response) {
     const path = '/' + (req.params as Record<string, string>).path;
     const { body } = await this.proxy.forward(req, path);
