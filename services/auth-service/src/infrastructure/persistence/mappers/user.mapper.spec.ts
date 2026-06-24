@@ -1,180 +1,144 @@
 import { User } from '@domain/entities/user/user.entity';
 import { EmailVO } from '@domain/value-objects/email.vo';
+import { UserRole as DomainUserRole } from '@domain/enums/user-role.enum';
 import { UserStatus as DomainUserStatus } from '@domain/enums/user-status.enum';
 
-import { UserStatus as PrismaUserStatus } from '../../../generated/prisma';
+import { UserRole as PrismaUserRole, UserStatus as PrismaUserStatus } from '../../../generated/prisma';
 
 import { UserMapper } from './user.mapper';
 
+const makeRaw = (overrides: Partial<{
+  status: PrismaUserStatus;
+  role: PrismaUserRole;
+}> = {}) => ({
+  id: 'uuid-1',
+  email: 'user@example.com',
+  passwordHash: 'hash',
+  role: PrismaUserRole.USER,
+  status: PrismaUserStatus.ACTIVE,
+  emailVerified: false,
+  failedLoginAttempts: 0,
+  lockoutCount: 0,
+  lastLoginAt: null,
+  blockedUntil: null,
+  createdAt: new Date('2026-01-01'),
+  ...overrides,
+});
+
+const makeUserEntity = (overrides: Partial<{
+  status: DomainUserStatus;
+  role: DomainUserRole;
+}> = {}) =>
+  User.fromPersistence({
+    id: 'uuid-new',
+    email: EmailVO.create('new@example.com'),
+    passwordHash: 'hashed-password',
+    role: DomainUserRole.USER,
+    status: DomainUserStatus.ACTIVE,
+    emailVerified: false,
+    failedLoginAttempts: 2,
+    lockoutCount: 0,
+    blockedUntil: undefined,
+    createdAt: new Date(),
+    ...overrides,
+  });
+
 describe('UserMapper', () => {
   describe('toDomain', () => {
-    it('debe mapear correctamente desde persistencia a dominio (ACTIVE)', () => {
-      const raw = {
-        id: 'uuid-active',
-        email: 'active@example.com',
-        passwordHash: 'hashed-password',
-        status: PrismaUserStatus.ACTIVE,
-        emailVerified: true,
-        failedLoginAttempts: 0,
-        lockoutCount: 0,
-        lastLoginAt: null,
-        blockedUntil: null,
-        createdAt: new Date('2026-01-01'),
-      };
-
+    it('debe mapear correctamente desde persistencia a dominio (ACTIVE / USER)', () => {
+      const raw = makeRaw();
       const user = UserMapper.toDomain(raw);
 
       expect(user).toBeInstanceOf(User);
       expect(user.id).toBe(raw.id);
       expect(user.email.getValue()).toBe(raw.email);
       expect(user.passwordHash).toBe(raw.passwordHash);
+      expect(user.role).toBe(DomainUserRole.USER);
       expect(user.status).toBe(DomainUserStatus.ACTIVE);
-      expect(user.emailVerified).toBe(true);
+      expect(user.emailVerified).toBe(false);
       expect(user.failedLoginAttempts).toBe(0);
       expect(user.blockedUntil).toBeUndefined();
       expect(user.createdAt).toEqual(raw.createdAt);
     });
+
+    it('debe mapear rol SUPER_ADMIN desde Prisma', () => {
+      const user = UserMapper.toDomain(makeRaw({ role: PrismaUserRole.SUPER_ADMIN }));
+      expect(user.role).toBe(DomainUserRole.SUPER_ADMIN);
+    });
+
+    it('debe mapear rol ADMIN desde Prisma', () => {
+      const user = UserMapper.toDomain(makeRaw({ role: PrismaUserRole.ADMIN }));
+      expect(user.role).toBe(DomainUserRole.ADMIN);
+    });
+
+    it('debe mapear estado PENDING', () => {
+      const user = UserMapper.toDomain(makeRaw({ status: PrismaUserStatus.PENDING }));
+      expect(user.status).toBe(DomainUserStatus.PENDING);
+    });
+
+    it('debe mapear estado BLOCKED', () => {
+      const raw = { ...makeRaw({ status: PrismaUserStatus.BLOCKED }), lockoutCount: 2 };
+      const user = UserMapper.toDomain(raw);
+      expect(user.status).toBe(DomainUserStatus.BLOCKED);
+      expect(user.lockoutCount).toBe(2);
+    });
+
+    it('debe lanzar error si recibe estado Prisma no soportado', () => {
+      const raw = makeRaw({ status: 'INVALID_STATUS' as unknown as PrismaUserStatus });
+      expect(() => UserMapper.toDomain(raw)).toThrow('Estado no soportado');
+    });
+
+    it('debe lanzar error si recibe rol Prisma no soportado', () => {
+      const raw = makeRaw({ role: 'INVALID_ROLE' as unknown as PrismaUserRole });
+      expect(() => UserMapper.toDomain(raw)).toThrow('Estado no soportado');
+    });
   });
 
   describe('toPersistence', () => {
-    it('debe mapear correctamente desde dominio a persistencia', () => {
-      const user = User.fromPersistence({
-        id: 'uuid-new',
-        email: EmailVO.create('new@example.com'),
-        passwordHash: 'hashed-password',
-        status: DomainUserStatus.ACTIVE,
-        emailVerified: false,
-        failedLoginAttempts: 2,
-        lockoutCount: 0,
-        blockedUntil: undefined,
-        createdAt: new Date(),
-      });
-
+    it('debe mapear correctamente desde dominio a persistencia (USER/ACTIVE)', () => {
+      const user = makeUserEntity();
       const persistence = UserMapper.toPersistence(user);
 
       expect(persistence).toEqual({
         id: user.id,
         email: 'new@example.com',
         passwordHash: 'hashed-password',
+        role: PrismaUserRole.USER,
         status: PrismaUserStatus.ACTIVE,
         emailVerified: false,
         failedLoginAttempts: 2,
         blockedUntil: undefined,
       });
     });
-  });
 
-  describe('casos inválidos', () => {
-    it('debe lanzar error si recibe estado Prisma no soportado', () => {
-      const raw = {
-        id: 'uuid-invalid',
-        email: 'invalid@example.com',
-        passwordHash: 'hash',
-        status: 'INVALID_STATUS' as unknown as PrismaUserStatus,
-        emailVerified: false,
-        failedLoginAttempts: 0,
-        lockoutCount: 0,
-        lastLoginAt: null,
-        blockedUntil: null,
-        createdAt: new Date(),
-      };
-
-      expect(() => UserMapper.toDomain(raw)).toThrow(
-        'Estado no soportado',
-      );
-    });
-  });
-
-  it('debe mapear correctamente estado PENDING', () => {
-    const raw = {
-      id: 'uuid-pending',
-      email: 'pending@example.com',
-      passwordHash: 'hash',
-      status: PrismaUserStatus.PENDING,
-      emailVerified: false,
-      failedLoginAttempts: 0,
-      lockoutCount: 0,
-      lastLoginAt: null,
-      blockedUntil: null,
-      createdAt: new Date(),
-    };
-
-    const user = UserMapper.toDomain(raw);
-
-    expect(user.status).toBe(DomainUserStatus.PENDING);
-  });
-
-  it('debe mapear correctamente estado BLOCKED', () => {
-    const raw = {
-      id: 'uuid-blocked',
-      email: 'blocked@example.com',
-      passwordHash: 'hash',
-      status: PrismaUserStatus.BLOCKED,
-      emailVerified: true,
-      failedLoginAttempts: 5,
-      lockoutCount: 2,
-      lastLoginAt: null,
-      blockedUntil: new Date(),
-      createdAt: new Date(),
-    };
-
-    const user = UserMapper.toDomain(raw);
-
-    expect(user.status).toBe(DomainUserStatus.BLOCKED);
-    expect(user.lockoutCount).toBe(2);
-  });
-
-  it('debe mapear correctamente DomainStatus PENDING a PrismaStatus', () => {
-    const user = User.fromPersistence({
-      id: 'uuid-map',
-      email: EmailVO.create('map@example.com'),
-      passwordHash: 'hash',
-      status: DomainUserStatus.PENDING,
-      emailVerified: false,
-      failedLoginAttempts: 0,
-      lockoutCount: 0,
-      blockedUntil: undefined,
-      createdAt: new Date(),
+    it('debe mapear rol SUPER_ADMIN a Prisma', () => {
+      const user = makeUserEntity({ role: DomainUserRole.SUPER_ADMIN });
+      expect(UserMapper.toPersistence(user).role).toBe(PrismaUserRole.SUPER_ADMIN);
     });
 
-    const persistence = UserMapper.toPersistence(user);
-
-    expect(persistence.status).toBe(PrismaUserStatus.PENDING);
-  });
-
-  it('debe mapear correctamente DomainStatus BLOCKED a PrismaStatus', () => {
-    const user = User.fromPersistence({
-      id: 'uuid-blocked-out',
-      email: EmailVO.create('blockedout@example.com'),
-      passwordHash: 'hash',
-      status: DomainUserStatus.BLOCKED,
-      emailVerified: false,
-      failedLoginAttempts: 5,
-      lockoutCount: 1,
-      blockedUntil: new Date(Date.now() + 60_000),
-      createdAt: new Date(),
+    it('debe mapear rol ADMIN a Prisma', () => {
+      const user = makeUserEntity({ role: DomainUserRole.ADMIN });
+      expect(UserMapper.toPersistence(user).role).toBe(PrismaUserRole.ADMIN);
     });
 
-    const persistence = UserMapper.toPersistence(user);
-
-    expect(persistence.status).toBe(PrismaUserStatus.BLOCKED);
-  });
-
-  it('debe lanzar error si DomainStatus es inválido en toPrismaStatus', () => {
-    const user = User.fromPersistence({
-      id: 'uuid-invalid-out',
-      email: EmailVO.create('invalid@example.com'),
-      passwordHash: 'hash',
-      status: 'INVALID_STATUS' as unknown as DomainUserStatus,
-      emailVerified: false,
-      failedLoginAttempts: 0,
-      lockoutCount: 0,
-      blockedUntil: undefined,
-      createdAt: new Date(),
+    it('debe mapear DomainStatus PENDING a PrismaStatus', () => {
+      const user = makeUserEntity({ status: DomainUserStatus.PENDING });
+      expect(UserMapper.toPersistence(user).status).toBe(PrismaUserStatus.PENDING);
     });
 
-    expect(() => UserMapper.toPersistence(user)).toThrow(
-      'Estado no soportado',
-    );
+    it('debe mapear DomainStatus BLOCKED a PrismaStatus', () => {
+      const user = makeUserEntity({ status: DomainUserStatus.BLOCKED });
+      expect(UserMapper.toPersistence(user).status).toBe(PrismaUserStatus.BLOCKED);
+    });
+
+    it('debe lanzar error si DomainStatus es inválido en toPrismaStatus', () => {
+      const user = makeUserEntity({ status: 'INVALID_STATUS' as unknown as DomainUserStatus });
+      expect(() => UserMapper.toPersistence(user)).toThrow('Estado no soportado');
+    });
+
+    it('debe lanzar error si DomainRole es inválido en toPrismaRole', () => {
+      const user = makeUserEntity({ role: 'INVALID_ROLE' as unknown as DomainUserRole });
+      expect(() => UserMapper.toPersistence(user)).toThrow('Estado no soportado');
+    });
   });
 });

@@ -306,6 +306,7 @@ export class LoginUserUseCase {
       const accessToken = this.tokenService.generateAccessToken({
         userId: user.id,
         sessionId: session.id,
+        role: user.role,
       });
 
       await this.sessionCache.storeSession(

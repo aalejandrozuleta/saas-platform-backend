@@ -1,9 +1,11 @@
 import { EmailVO } from '@domain/value-objects/email.vo';
 import { User } from '@domain/entities/user/user.entity';
 import { type UserProps } from '@domain/entities/user/user.props';
+import { UserRole as DomainUserRole } from '@domain/enums/user-role.enum';
 import { UserStatus as DomainUserStatus } from '@domain/enums/user-status.enum';
 
 import {
+  UserRole as PrismaUserRole,
   UserStatus as PrismaUserStatus,
 } from '../../../generated/prisma';
 
@@ -19,6 +21,7 @@ export class UserMapper {
     id: string;
     email: string;
     passwordHash: string;
+    role: PrismaUserRole;
     status: PrismaUserStatus;
     emailVerified: boolean;
     failedLoginAttempts: number;
@@ -31,6 +34,7 @@ export class UserMapper {
       id: raw.id,
       email: EmailVO.create(raw.email),
       passwordHash: raw.passwordHash,
+      role: UserMapper.toDomainRole(raw.role),
       status: UserMapper.toDomainStatus(raw.status),
       emailVerified: raw.emailVerified,
       failedLoginAttempts: raw.failedLoginAttempts,
@@ -50,6 +54,7 @@ export class UserMapper {
     id: string;
     email: string;
     passwordHash: string;
+    role: PrismaUserRole;
     status: PrismaUserStatus;
     emailVerified: boolean;
     failedLoginAttempts: number;
@@ -59,11 +64,40 @@ export class UserMapper {
       id: user.id,
       email: user.email.getValue(),
       passwordHash: user.passwordHash,
+      role: UserMapper.toPrismaRole(user.role),
       status: UserMapper.toPrismaStatus(user.status),
       emailVerified: user.emailVerified,
       failedLoginAttempts: user.failedLoginAttempts,
       blockedUntil: user.blockedUntil,
     };
+  }
+
+  // ===== Role mapping =====
+
+  private static toDomainRole(role: PrismaUserRole): DomainUserRole {
+    switch (role) {
+      case PrismaUserRole.SUPER_ADMIN:
+        return DomainUserRole.SUPER_ADMIN;
+      case PrismaUserRole.ADMIN:
+        return DomainUserRole.ADMIN;
+      case PrismaUserRole.USER:
+        return DomainUserRole.USER;
+      default:
+        return UserMapper.assertUnreachable(role);
+    }
+  }
+
+  private static toPrismaRole(role: DomainUserRole): PrismaUserRole {
+    switch (role) {
+      case DomainUserRole.SUPER_ADMIN:
+        return PrismaUserRole.SUPER_ADMIN;
+      case DomainUserRole.ADMIN:
+        return PrismaUserRole.ADMIN;
+      case DomainUserRole.USER:
+        return PrismaUserRole.USER;
+      default:
+        return UserMapper.assertUnreachable(role);
+    }
   }
 
   // ===== Status mapping =====

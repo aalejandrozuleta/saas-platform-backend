@@ -1,4 +1,5 @@
 import { EmailVO } from '@domain/value-objects/email.vo';
+import { UserRole } from '@domain/enums/user-role.enum';
 import { UserStatus } from '@domain/enums/user-status.enum';
 
 import { User } from './user.entity';
@@ -6,6 +7,7 @@ import { User } from './user.entity';
 describe('User entity', () => {
   const makeUser = (overrides: Partial<{
     status: UserStatus;
+    role: UserRole;
     failedLoginAttempts: number;
     blockedUntil: Date | undefined;
     lockoutCount: number;
@@ -14,6 +16,7 @@ describe('User entity', () => {
       id: 'user-1',
       email: EmailVO.create('test@example.com'),
       passwordHash: 'hash',
+      role: UserRole.USER,
       status: UserStatus.ACTIVE,
       emailVerified: false,
       failedLoginAttempts: 0,
@@ -24,16 +27,46 @@ describe('User entity', () => {
     });
 
   describe('create', () => {
-    it('debe crear un usuario con estado ACTIVE y failedLoginAttempts en 0', () => {
+    it('debe crear un usuario con rol USER por defecto, estado ACTIVE y failedLoginAttempts en 0', () => {
       const user = User.create({
         id: 'new-id',
         email: EmailVO.create('new@example.com'),
         passwordHash: 'hash',
       });
 
+      expect(user.role).toBe(UserRole.USER);
       expect(user.status).toBe(UserStatus.ACTIVE);
       expect(user.failedLoginAttempts).toBe(0);
       expect(user.emailVerified).toBe(false);
+    });
+
+    it('debe crear un usuario con rol SUPER_ADMIN cuando se especifica', () => {
+      const user = User.create({
+        id: 'admin-id',
+        email: EmailVO.create('admin@example.com'),
+        passwordHash: 'hash',
+        role: UserRole.SUPER_ADMIN,
+      });
+
+      expect(user.role).toBe(UserRole.SUPER_ADMIN);
+    });
+
+    it('debe crear un usuario con rol ADMIN cuando se especifica', () => {
+      const user = User.create({
+        id: 'admin-id',
+        email: EmailVO.create('admin@example.com'),
+        passwordHash: 'hash',
+        role: UserRole.ADMIN,
+      });
+
+      expect(user.role).toBe(UserRole.ADMIN);
+    });
+  });
+
+  describe('getter role', () => {
+    it('debe devolver el rol asignado al usuario', () => {
+      const user = makeUser({ role: UserRole.ADMIN });
+      expect(user.role).toBe(UserRole.ADMIN);
     });
   });
 

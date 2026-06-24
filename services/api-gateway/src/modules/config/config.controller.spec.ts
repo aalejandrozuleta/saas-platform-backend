@@ -1,3 +1,6 @@
+import { ROLES_KEY } from '@saas/shared';
+import { Reflector } from '@nestjs/core';
+
 import { ConfigController } from './config.controller';
 
 describe('ConfigController', () => {
@@ -71,6 +74,29 @@ describe('ConfigController', () => {
       await controller.forwardAll(req, res);
 
       expect(mockProxy.forward).toHaveBeenCalledWith(req, '/feature-flags/my-flag');
+    });
+
+    it('tiene metadata @Roles(SUPER_ADMIN) en el handler forwardAll', () => {
+      const reflector = new Reflector();
+      const roles = reflector.get<string[]>(
+        ROLES_KEY,
+        controller.forwardAll,
+      );
+      expect(roles).toEqual(['SUPER_ADMIN']);
+    });
+  });
+
+  describe('metadata de seguridad', () => {
+    it('maintenanceStatus es ruta pública (sin roles requeridos)', () => {
+      const reflector = new Reflector();
+      const roles = reflector.get<string[]>(ROLES_KEY, controller.maintenanceStatus);
+      expect(roles).toBeUndefined();
+    });
+
+    it('featureFlags es ruta pública (sin roles requeridos)', () => {
+      const reflector = new Reflector();
+      const roles = reflector.get<string[]>(ROLES_KEY, controller.featureFlags);
+      expect(roles).toBeUndefined();
     });
   });
 });

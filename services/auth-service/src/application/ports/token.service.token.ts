@@ -1,3 +1,5 @@
+import { UserRole } from '@domain/enums/user-role.enum';
+
 /**
  * Servicio de generación de tokens.
  */
@@ -9,6 +11,7 @@ export interface TokenService {
   generateAccessToken(payload: {
     userId: string;
     sessionId: string;
+    role: UserRole;
   }): string;
 
   /**

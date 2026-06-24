@@ -36,18 +36,20 @@ describe('JwtTokenService', () => {
 });
 
   describe('generateAccessToken', () => {
-    it('debe generar un access token con el payload correcto', () => {
+    it('debe generar un access token con sub, sid y role en el payload', () => {
       (sign as jest.Mock).mockReturnValue('access-token');
 
       const result = service.generateAccessToken({
         userId: 'user-1',
         sessionId: 'session-1',
+        role: 'USER' as any,
       });
 
       expect(sign).toHaveBeenCalledWith(
         {
           sub: 'user-1',
           sid: 'session-1',
+          role: 'USER',
         },
         'access-secret',
         {
@@ -58,6 +60,22 @@ describe('JwtTokenService', () => {
       );
 
       expect(result).toBe('access-token');
+    });
+
+    it('debe incluir rol SUPER_ADMIN cuando se proporciona', () => {
+      (sign as jest.Mock).mockReturnValue('admin-token');
+
+      service.generateAccessToken({
+        userId: 'admin-1',
+        sessionId: 'session-admin',
+        role: 'SUPER_ADMIN' as any,
+      });
+
+      expect(sign).toHaveBeenCalledWith(
+        expect.objectContaining({ role: 'SUPER_ADMIN' }),
+        expect.any(String),
+        expect.any(Object),
+      );
     });
   });
 

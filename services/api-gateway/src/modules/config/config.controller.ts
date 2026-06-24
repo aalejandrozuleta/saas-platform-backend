@@ -1,6 +1,6 @@
 import { All, Controller, Req, Res } from '@nestjs/common';
 import type { Request, Response } from 'express';
-import { PublicRoute } from '@saas/shared';
+import { PublicRoute, Roles } from '@saas/shared';
 import { ConfigProxy } from '@infrastructure/http/proxies/config.proxy';
 
 /**
@@ -32,8 +32,9 @@ export class ConfigController {
     res.json(body);
   }
 
-  /** Todas las demás rutas de configuración requieren autenticación. */
+  /** Rutas de mutación: requieren JWT válido + rol SUPER_ADMIN. */
   @All('*path')
+  @Roles('SUPER_ADMIN')
   async forwardAll(@Req() req: Request, @Res() res: Response) {
     const path = '/' + (req.params as Record<string, string>).path;
     const { body } = await this.proxy.forward(req, path);

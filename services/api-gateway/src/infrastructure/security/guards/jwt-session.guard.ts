@@ -18,6 +18,7 @@ import {
 interface AccessTokenPayload extends JwtPayload {
   sub: string;
   sid: string;
+  role: string;
 }
 
 declare global {
@@ -26,6 +27,7 @@ declare global {
       user?: {
         id: string;
         sessionId: string;
+        role: string;
       };
     }
   }
@@ -90,6 +92,7 @@ export class JwtSessionGuard implements CanActivate {
     req.user = {
       id: payload.sub,
       sessionId: payload.sid,
+      role: payload.role,
     };
 
     return true;
@@ -129,7 +132,7 @@ export class JwtSessionGuard implements CanActivate {
         },
       ) as AccessTokenPayload;
 
-      if (!payload.sub || !payload.sid) {
+      if (!payload.sub || !payload.sid || !payload.role) {
         throw new UnauthorizedException({
           messageKey: 'common.invalid_token',
         });

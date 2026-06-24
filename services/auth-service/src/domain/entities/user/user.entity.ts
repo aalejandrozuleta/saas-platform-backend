@@ -1,4 +1,5 @@
 import { type EmailVO } from '@domain/value-objects/email.vo';
+import { UserRole } from '@domain/enums/user-role.enum';
 import { UserStatus } from '@domain/enums/user-status.enum';
 
 import { type UserProps } from './user.props';
@@ -16,11 +17,13 @@ export class User {
     id: string;
     email: EmailVO;
     passwordHash: string;
+    role?: UserRole;
   }): User {
     return new User({
       id: params.id,
       email: params.email,
       passwordHash: params.passwordHash,
+      role: params.role ?? UserRole.USER,
       status: UserStatus.ACTIVE,
       emailVerified: false,
       failedLoginAttempts: 0,
@@ -40,6 +43,10 @@ export class User {
 
   get id(): string {
     return this.props.id;
+  }
+
+  get role(): UserRole {
+    return this.props.role;
   }
 
   get email(): EmailVO {

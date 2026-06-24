@@ -1,3 +1,4 @@
+import { type UserRole } from "@domain/enums/user-role.enum";
 import { type UserStatus } from "@domain/enums/user-status.enum";
 import { type EmailVO } from "@domain/value-objects/email.vo";
 
@@ -13,6 +14,9 @@ export interface UserProps {
 
   /** Hash de contraseña */
   passwordHash: string;
+
+  /** Rol del usuario */
+  role: UserRole;
 
   /** Estado del usuario */
   status: UserStatus;

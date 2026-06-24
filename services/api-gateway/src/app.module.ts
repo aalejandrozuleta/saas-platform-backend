@@ -4,6 +4,7 @@ import { ConfigGatewayModule } from '@modules/config/config.module';
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { JwtSessionGuard } from '@infrastructure/security/guards/jwt-session.guard';
 import { MaintenanceGuard } from '@infrastructure/security/guards/maintenance.guard';
+import { RolesGuard } from '@infrastructure/security/guards/roles.guard';
 import { GlobalExceptionFilter, RedisModule } from '@saas/shared';
 import { EnvService } from '@config/env/env.service';
 
@@ -49,6 +50,11 @@ import { MetricsModule } from './infrastructure/metrics/metrics.module';
     {
       provide: APP_GUARD,
       useClass: JwtSessionGuard,
+    },
+    // RolesGuard se ejecuta TERCERO — autorización por rol
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
     },
   ],
 

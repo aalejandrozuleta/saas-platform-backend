@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { sign, verify } from 'jsonwebtoken';
 import { Injectable } from '@nestjs/common';
 import { TokenService } from '@application/ports/token.service.token';
+import { UserRole } from '@domain/enums/user-role.enum';
 import { EnvService } from '@config/env/env.service';
 
 /**
@@ -26,6 +27,7 @@ export class JwtTokenService implements TokenService {
   generateAccessToken(payload: {
     userId: string;
     sessionId: string;
+    role: UserRole;
   }): string {
 
     const ttl = Number(this.envService.get('ACCESS_TOKEN_TTL'));
@@ -34,6 +36,7 @@ export class JwtTokenService implements TokenService {
       {
         sub: payload.userId,
         sid: payload.sessionId,
+        role: payload.role,
       },
       this.envService.get('JWT_ACCESS_SECRET'),
       {

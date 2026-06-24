@@ -52,11 +52,11 @@ describe('JwtSessionGuard', () => {
   });
 
   describe('ruta protegida', () => {
-    const makeValidToken = (payload = { sub: 'user-1', sid: 'session-1' }) =>
+    const makeValidToken = (payload = { sub: 'user-1', sid: 'session-1', role: 'USER' }) =>
       sign(payload, SECRET, { issuer: 'auth-service', audience: 'api-gateway' });
 
-    it('debe permitir acceso con token y sesión válidos', async () => {
-      const token = makeValidToken();
+    it('debe permitir acceso con token y sesión válidos e inyectar role en req.user', async () => {
+      const token = makeValidToken({ sub: 'user-1', sid: 'session-1', role: 'USER' });
       const { ctx, req } = makeContext({ cookies: { accessToken: token } });
 
       redis.get.mockResolvedValue(JSON.stringify({ userId: 'user-1' }));
@@ -64,7 +64,18 @@ describe('JwtSessionGuard', () => {
       const result = await guard.canActivate(ctx);
 
       expect(result).toBe(true);
-      expect(req.user).toEqual({ id: 'user-1', sessionId: 'session-1' });
+      expect(req.user).toEqual({ id: 'user-1', sessionId: 'session-1', role: 'USER' });
+    });
+
+    it('debe inyectar role SUPER_ADMIN cuando corresponde', async () => {
+      const token = makeValidToken({ sub: 'admin-1', sid: 'session-admin', role: 'SUPER_ADMIN' });
+      const { ctx, req } = makeContext({ cookies: { accessToken: token } });
+
+      redis.get.mockResolvedValue(JSON.stringify({ userId: 'admin-1' }));
+
+      await guard.canActivate(ctx);
+
+      expect(req.user).toEqual({ id: 'admin-1', sessionId: 'session-admin', role: 'SUPER_ADMIN' });
     });
 
     it('debe lanzar UnauthorizedException si no hay cookie accessToken', async () => {
@@ -95,8 +106,19 @@ describe('JwtSessionGuard', () => {
     });
 
     it('debe lanzar UnauthorizedException si el payload no tiene sub o sid', async () => {
-      // Token válido pero con payload incompleto (sin sub/sid)
       const token = sign({ data: 'no-sub-no-sid' }, SECRET, {
+        issuer: 'auth-service',
+        audience: 'api-gateway',
+      });
+      const { ctx } = makeContext({ cookies: { accessToken: token } });
+
+      await expect(guard.canActivate(ctx)).rejects.toThrow(
+        UnauthorizedException,
+      );
+    });
+
+    it('debe lanzar UnauthorizedException si el payload no tiene role', async () => {
+      const token = sign({ sub: 'user-1', sid: 'session-1' }, SECRET, {
         issuer: 'auth-service',
         audience: 'api-gateway',
       });

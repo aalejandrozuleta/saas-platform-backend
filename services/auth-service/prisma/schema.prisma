@@ -18,6 +18,7 @@ model User {
   email         String     @unique
   emailVerified Boolean    @default(false)
   passwordHash  String
+  role          UserRole   @default(USER)
   status        UserStatus @default(ACTIVE)
 
   failedLoginAttempts Int       @default(0)
@@ -120,6 +121,12 @@ model RecoveryCode {
   createdAt DateTime  @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  ADMIN
+  USER
 }
 
 enum UserStatus {
