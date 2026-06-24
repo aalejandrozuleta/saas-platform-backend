@@ -34,9 +34,10 @@ describe('RefreshTokenUseCase', () => {
     } as any;
 
     sessionCache = {
-      storeSession: jest.fn(),
+      storeSession:    jest.fn(),
+      getSession:      jest.fn(),
       isSessionActive: jest.fn(),
-      revokeSession: jest.fn(),
+      revokeSession:   jest.fn(),
     } as any;
 
     useCase = new RefreshTokenUseCase(
@@ -59,7 +60,7 @@ describe('RefreshTokenUseCase', () => {
       revokedAt: null,
     });
     passwordHasher.verify.mockResolvedValue(true);
-    sessionCache.isSessionActive.mockResolvedValue(true);
+    sessionCache.getSession.mockResolvedValue({ userId: 'user-1', role: 'EMPLOYEE', permissions: [] });
     tokenService.generateAccessToken.mockReturnValue('access-token');
     tokenService.generateRefreshToken.mockReturnValue({
       token: 'new-refresh-token',
@@ -185,7 +186,7 @@ describe('RefreshTokenUseCase', () => {
       revokedAt: null,
     });
     passwordHasher.verify.mockResolvedValue(true);
-    sessionCache.isSessionActive.mockResolvedValue(false);
+    sessionCache.getSession.mockResolvedValue(null);
 
     await expect(
       useCase.execute('raw-refresh-token'),

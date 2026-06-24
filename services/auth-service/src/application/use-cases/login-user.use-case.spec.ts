@@ -176,9 +176,10 @@ describe('LoginUserUseCase', () => {
     } as any;
 
     sessionCache = {
-      storeSession: jest.fn(),
+      storeSession:    jest.fn(),
+      getSession:      jest.fn(),
       isSessionActive: jest.fn(),
-      revokeSession: jest.fn(),
+      revokeSession:   jest.fn(),
     } as any;
 
     envService = {

@@ -320,6 +320,7 @@ export class LoginUserUseCase {
         user.id,
         device.id,
         this.envService.get('REDIS_SESSION_TTL'),
+        user.role,
         permissions,
       );
 

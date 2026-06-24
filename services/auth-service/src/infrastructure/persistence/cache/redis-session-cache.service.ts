@@ -1,15 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Redis } from 'ioredis';
-import { SessionCache } from '@application/ports/session-cache.port';
+import { SessionCache, SessionData } from '@application/ports/session-cache.port';
 
 import { REDIS_CLIENT } from './redis.provider';
 
-/**
- * Implementación Redis del cache de sesiones.
- *
- * Permite validar sesiones rápidamente
- * sin consultar PostgreSQL.
- */
 @Injectable()
 export class RedisSessionCacheService implements SessionCache {
   constructor(
@@ -22,33 +16,41 @@ export class RedisSessionCacheService implements SessionCache {
   }
 
   async storeSession(
-    sessionId: string,
-    userId: string,
-    deviceId: string | null,
-    ttl: number,
+    sessionId:   string,
+    userId:      string,
+    deviceId:    string | null,
+    ttl:         number,
+    role:        string = '',
     permissions: string[] = [],
   ): Promise<void> {
-    const key = this.buildKey(sessionId);
-
     await this.redis.set(
-      key,
-      JSON.stringify({ userId, deviceId, revoked: false, permissions }),
+      this.buildKey(sessionId),
+      JSON.stringify({ userId, deviceId, role, permissions }),
       'EX',
       ttl,
     );
   }
 
+  async getSession(sessionId: string): Promise<SessionData | null> {
+    const raw = await this.redis.get(this.buildKey(sessionId));
+    if (!raw) return null;
+    try {
+      const parsed = JSON.parse(raw) as Partial<SessionData & { deviceId?: string }>;
+      return {
+        userId:      parsed.userId      ?? '',
+        role:        parsed.role        ?? '',
+        permissions: Array.isArray(parsed.permissions) ? parsed.permissions : [],
+      };
+    } catch {
+      return null;
+    }
+  }
+
   async isSessionActive(sessionId: string): Promise<boolean> {
-    const key = this.buildKey(sessionId);
-
-    const value = await this.redis.get(key);
-
-    return value !== null;
+    return (await this.redis.get(this.buildKey(sessionId))) !== null;
   }
 
   async revokeSession(sessionId: string): Promise<void> {
-    const key = this.buildKey(sessionId);
-
-    await this.redis.del(key);
+    await this.redis.del(this.buildKey(sessionId));
   }
 }

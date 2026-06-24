@@ -10,6 +10,7 @@ import {
 } from '@domain/token/services.tokens';
 import { REFRESH_TOKEN_REPOSITORY } from '@domain/token/repositories.tokens';
 import { DomainErrorFactory } from '@domain/errors/domain-error.factory';
+import { UserRole } from '@domain/enums/user-role.enum';
 
 /**
  * Caso de uso: rotación de refresh token (token rotation).
@@ -82,17 +83,17 @@ export class RefreshTokenUseCase {
       throw DomainErrorFactory.invalidRefreshToken();
     }
 
-    const isSessionActive =
-      await this.sessionCache.isSessionActive(stored.sessionId);
+    const sessionData = await this.sessionCache.getSession(stored.sessionId);
 
-    if (!isSessionActive) {
+    if (!sessionData) {
       throw DomainErrorFactory.invalidRefreshToken();
     }
 
     const accessToken =
       this.tokenService.generateAccessToken({
-        userId: stored.userId,
+        userId:    stored.userId,
         sessionId: stored.sessionId,
+        role:      (sessionData.role as UserRole) || UserRole.CUSTOMER,
       });
 
     const newRefresh =
