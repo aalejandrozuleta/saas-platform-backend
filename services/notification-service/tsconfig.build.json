@@ -9,9 +9,12 @@
     "paths": {
       "@saas/shared": ["../../shared/dist/index"],
       "@saas/shared/*": ["../../shared/dist/*"],
-      "@config/*": ["./src/config/*"],
+      "@domain/*": ["./src/domain/*"],
+      "@application/*": ["./src/application/*"],
+      "@infrastructure/*": ["./src/infrastructure/*"],
       "@modules/*": ["./src/modules/*"],
-      "@infrastructure/*": ["./src/infrastructure/*"]
+      "@config/*": ["./src/config/*"],
+      "@auth-prisma/client": ["./node_modules/.prisma/auth-client"]
     }
   },
   "include": ["src/**/*"],

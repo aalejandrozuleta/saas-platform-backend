@@ -39,7 +39,7 @@
       "entryFile": "main",
       "sourceRoot": "services/notification-service/src",
       "compilerOptions": {
-        "tsConfigPath": "services/notification-service/tsconfig.build.json",
+        "tsConfigPath": "services/notification-service/tsconfig.json",
         "deleteOutDir": true
       }
     }

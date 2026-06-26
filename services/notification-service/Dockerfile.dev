@@ -21,4 +21,4 @@ WORKDIR /app/services/notification-service
 
 EXPOSE 3003
 
-CMD ["node_modules/.bin/nest", "start", "notification-service", "--watch"]
+ENTRYPOINT ["/bin/sh", "/app/services/notification-service/docker-entrypoint.sh"]
