@@ -41,15 +41,19 @@ export class LoginSecurityChallengeService {
   ): LoginVerificationMethod[] {
     const methods: LoginVerificationMethod[] = [];
 
-    methods.push({
-      type: LoginVerificationMethodType.EMAIL,
-      ready: true,
-      isRecommended: !profile?.twoFactorEnabled,
-      destination: this.maskEmail(user.email.getValue()),
-      metadata: {
-        emailVerified: user.emailVerified,
-      },
-    });
+    // Solo ofrecemos el método EMAIL si el correo está verificado.
+    // Un email no verificado no puede recibir códigos de verificación.
+    if (user.emailVerified) {
+      methods.push({
+        type: LoginVerificationMethodType.EMAIL,
+        ready: true,
+        isRecommended: !profile?.twoFactorEnabled,
+        destination: this.maskEmail(user.email.getValue()),
+        metadata: {
+          emailVerified: true,
+        },
+      });
+    }
 
     if (profile?.twoFactorEnabled && profile.twoFactorMethod === 'TOTP') {
       methods.push({

@@ -11,9 +11,11 @@ import { PasswordHasher } from '@application/ports/password-hasher.port';
 import { AuditLogger } from '@application/ports/audit-logger.port';
 import {
   DEVICE_REPOSITORY,
+  SECURITY_REPOSITORY,
   USER_REPOSITORY,
 } from '@domain/token/repositories.tokens';
 import { AUDIT_LOGGER, PASSWORD_HASHER } from '@domain/token/services.tokens';
+import { SecurityRepository } from '@domain/repositories/security.repository';
 import { AuthActivityReportFactory } from '@application/audit/auth-activity-report.factory';
 import { DomainErrorFactory } from '@domain/errors/domain-error.factory';
 import { DeviceRepository } from '@domain/repositories/device.repository';
@@ -31,6 +33,9 @@ export class RegisterUserUseCase {
 
     @Inject(DEVICE_REPOSITORY)
     private readonly deviceRepository: DeviceRepository,
+
+    @Inject(SECURITY_REPOSITORY)
+    private readonly securityRepository: SecurityRepository,
 
     @Inject(AUDIT_LOGGER)
     private readonly auditLogger: AuditLogger,
@@ -81,6 +86,7 @@ export class RegisterUserUseCase {
 
     await this.userRepository.save(user);
     await this.registerTrustedDevice(user, context);
+    await this.registerTrustedCountry(user.id, context.country);
 
     await this.auditLogger.log(
       AuthActivityReportFactory.registerSuccess({
@@ -98,6 +104,14 @@ export class RegisterUserUseCase {
     });
 
     return user;
+  }
+
+  private async registerTrustedCountry(
+    userId: string,
+    country?: string,
+  ): Promise<void> {
+    if (!country) return;
+    await this.securityRepository.addTrustedCountry(userId, country);
   }
 
   private async registerTrustedDevice(
