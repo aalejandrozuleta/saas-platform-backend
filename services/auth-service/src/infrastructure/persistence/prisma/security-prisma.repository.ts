@@ -113,6 +113,59 @@ export class SecurityPrismaRepository implements SecurityRepository {
     });
   }
 
+  async saveTotpPendingSecret(userId: string, secret: string): Promise<void> {
+    await this.prisma.userSecurity.upsert({
+      where: { userId },
+      update: { totpPendingSecret: secret },
+      create: { userId, totpPendingSecret: secret },
+    });
+  }
+
+  async activateTwoFactor(userId: string): Promise<void> {
+    const security = await this.prisma.userSecurity.findUnique({
+      where: { userId },
+      select: { totpPendingSecret: true },
+    });
+
+    await this.prisma.userSecurity.update({
+      where: { userId },
+      data: {
+        twoFactorEnabled: true,
+        twoFactorMethod: 'TOTP',
+        totpSecret: security?.totpPendingSecret,
+        totpPendingSecret: null,
+      },
+    });
+  }
+
+  async disableTwoFactor(userId: string): Promise<void> {
+    await this.prisma.userSecurity.update({
+      where: { userId },
+      data: {
+        twoFactorEnabled: false,
+        twoFactorMethod: null,
+        totpSecret: null,
+        totpPendingSecret: null,
+      },
+    });
+  }
+
+  async getTotpSecret(userId: string): Promise<string | null> {
+    const record = await this.prisma.userSecurity.findUnique({
+      where: { userId },
+      select: { totpSecret: true },
+    });
+    return record?.totpSecret ?? null;
+  }
+
+  async getTotpPendingSecret(userId: string): Promise<string | null> {
+    const record = await this.prisma.userSecurity.findUnique({
+      where: { userId },
+      select: { totpPendingSecret: true },
+    });
+    return record?.totpPendingSecret ?? null;
+  }
+
   async findByUserId(
     userId: string,
     tx?: PrismaClient

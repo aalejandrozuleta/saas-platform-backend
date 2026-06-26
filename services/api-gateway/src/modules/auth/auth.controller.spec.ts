@@ -179,6 +179,40 @@ describe('AuthController (api-gateway)', () => {
   });
 
   // ──────────────────────────────────────────────────
+  // 2FA
+  // ──────────────────────────────────────────────────
+
+  it('debe inyectar x-user-id y reenviar a /2fa/enable', async () => {
+    mockForward({ data: { secret: 'JBSWY3D', qrCode: 'data:...' } });
+    const req = makeReq();
+
+    await controller.enable2fa(req);
+
+    expect(req.headers['x-user-id']).toBe('user-1');
+    expect(authProxy.forward).toHaveBeenCalledWith(req, '/2fa/enable');
+  });
+
+  it('debe inyectar x-user-id y reenviar a /2fa/verify', async () => {
+    mockForward({ data: { recoveryCodes: ['AAAA-BBBB'] } });
+    const req = makeReq();
+
+    await controller.verify2fa(req);
+
+    expect(req.headers['x-user-id']).toBe('user-1');
+    expect(authProxy.forward).toHaveBeenCalledWith(req, '/2fa/verify');
+  });
+
+  it('debe inyectar x-user-id y reenviar a /2fa/disable', async () => {
+    mockForward({ data: {} });
+    const req = makeReq();
+
+    await controller.disable2fa(req);
+
+    expect(req.headers['x-user-id']).toBe('user-1');
+    expect(authProxy.forward).toHaveBeenCalledWith(req, '/2fa/disable');
+  });
+
+  // ──────────────────────────────────────────────────
   // prepareRequest (implícito)
   // ──────────────────────────────────────────────────
 

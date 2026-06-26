@@ -9,12 +9,16 @@ import { AuthActivityListener } from '@infrastructure/messaging/listeners/auth-a
 import { LoginLoggingListener } from '@infrastructure/messaging/listeners/login-logging.listener';
 import { PasswordChangeListener } from '@infrastructure/messaging/listeners/password-change.listener';
 import { LogoutListener } from '@infrastructure/messaging/listeners/logout.listener';
+import { TwoFactorListener } from '@infrastructure/messaging/listeners/two-factor.listener';
 import { PrismaModule } from '@infrastructure/persistence/prisma/prisma.module';
 import { LoginUserUseCase } from '@application/use-cases/login-user.use-case';
 import { RefreshTokenUseCase } from '@application/use-cases/refresh-token.use-case';
 import { ChangePasswordUseCase } from '@application/use-cases/change-password.use-case';
 import { LogoutUseCase } from '@application/use-cases/logout.use-case';
 import { LogoutAllUseCase } from '@application/use-cases/logout-all.use-case';
+import { Enable2faUseCase } from '@application/use-cases/enable-2fa.use-case';
+import { Verify2faUseCase } from '@application/use-cases/verify-2fa.use-case';
+import { Disable2faUseCase } from '@application/use-cases/disable-2fa.use-case';
 
 import { authProviders } from './auth.providers';
 
@@ -36,11 +40,15 @@ import { authProviders } from './auth.providers';
     ChangePasswordUseCase,
     LogoutUseCase,
     LogoutAllUseCase,
+    Enable2faUseCase,
+    Verify2faUseCase,
+    Disable2faUseCase,
     ...authProviders,
     AuthActivityListener,
     LoginLoggingListener,
     PasswordChangeListener,
     LogoutListener,
+    TwoFactorListener,
   ],
 })
 export class AuthModule {}
