@@ -19,8 +19,6 @@ export function forwardHeaders(
   copy('x-correlation-id');
   copy('x-country');
   copy('x-device-fingerprint');
-  copy('x-user-id');
-  copy('x-session-id');
   copy('cookie');
 
   return headers;

@@ -115,13 +115,13 @@ describe('AuthController (api-gateway)', () => {
   // Change Password
   // ──────────────────────────────────────────────────
 
-  it('debe inyectar x-user-id y reenviar a /change-password', async () => {
+  it('debe reenviar a /change-password sin inyectar x-user-id', async () => {
     mockForward({ success: true });
     const req = makeReq();
 
     await controller.changePassword(req);
 
-    expect(req.headers['x-user-id']).toBe('user-1');
+    expect(req.headers['x-user-id']).toBeUndefined();
     expect(authProxy.forward).toHaveBeenCalledWith(req, '/change-password');
   });
 
@@ -129,15 +129,15 @@ describe('AuthController (api-gateway)', () => {
   // Logout
   // ──────────────────────────────────────────────────
 
-  it('debe inyectar x-user-id + x-session-id y reenviar a /logout', async () => {
+  it('debe reenviar a /logout sin inyectar x-user-id ni x-session-id', async () => {
     mockForward({}, ['accessToken=; Max-Age=0']);
     const req = makeReq();
     const res = makeRes();
 
     await controller.logout(req, res as any);
 
-    expect(req.headers['x-user-id']).toBe('user-1');
-    expect(req.headers['x-session-id']).toBe('session-1');
+    expect(req.headers['x-user-id']).toBeUndefined();
+    expect(req.headers['x-session-id']).toBeUndefined();
     expect(authProxy.forward).toHaveBeenCalledWith(req, '/logout');
     expect(res.setHeader).toHaveBeenCalled();
   });
@@ -156,14 +156,14 @@ describe('AuthController (api-gateway)', () => {
   // Logout All
   // ──────────────────────────────────────────────────
 
-  it('debe inyectar x-user-id y reenviar a /logout-all', async () => {
+  it('debe reenviar a /logout-all sin inyectar x-user-id', async () => {
     mockForward({ data: { revokedCount: 3 } }, ['accessToken=; Max-Age=0']);
     const req = makeReq();
     const res = makeRes();
 
     await controller.logoutAll(req, res as any);
 
-    expect(req.headers['x-user-id']).toBe('user-1');
+    expect(req.headers['x-user-id']).toBeUndefined();
     expect(authProxy.forward).toHaveBeenCalledWith(req, '/logout-all');
     expect(res.setHeader).toHaveBeenCalled();
   });
@@ -182,33 +182,33 @@ describe('AuthController (api-gateway)', () => {
   // 2FA
   // ──────────────────────────────────────────────────
 
-  it('debe inyectar x-user-id y reenviar a /2fa/enable', async () => {
+  it('debe reenviar a /2fa/enable sin inyectar x-user-id', async () => {
     mockForward({ data: { secret: 'JBSWY3D', qrCode: 'data:...' } });
     const req = makeReq();
 
     await controller.enable2fa(req);
 
-    expect(req.headers['x-user-id']).toBe('user-1');
+    expect(req.headers['x-user-id']).toBeUndefined();
     expect(authProxy.forward).toHaveBeenCalledWith(req, '/2fa/enable');
   });
 
-  it('debe inyectar x-user-id y reenviar a /2fa/verify', async () => {
+  it('debe reenviar a /2fa/verify sin inyectar x-user-id', async () => {
     mockForward({ data: { recoveryCodes: ['AAAA-BBBB'] } });
     const req = makeReq();
 
     await controller.verify2fa(req);
 
-    expect(req.headers['x-user-id']).toBe('user-1');
+    expect(req.headers['x-user-id']).toBeUndefined();
     expect(authProxy.forward).toHaveBeenCalledWith(req, '/2fa/verify');
   });
 
-  it('debe inyectar x-user-id y reenviar a /2fa/disable', async () => {
+  it('debe reenviar a /2fa/disable sin inyectar x-user-id', async () => {
     mockForward({ data: {} });
     const req = makeReq();
 
     await controller.disable2fa(req);
 
-    expect(req.headers['x-user-id']).toBe('user-1');
+    expect(req.headers['x-user-id']).toBeUndefined();
     expect(authProxy.forward).toHaveBeenCalledWith(req, '/2fa/disable');
   });
 

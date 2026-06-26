@@ -12,6 +12,7 @@ import { I18nService } from '@saas/shared';
 import { type RegisterUserDto } from '@application/dto/register/register-user.dto';
 import { User } from '@domain/entities/user/user.entity';
 import { EmailVO } from '@domain/value-objects/email.vo';
+import { JwtAuthGuard } from '@infrastructure/security/jwt-auth.guard';
 
 import { AuthController } from './auth.controller';
 
@@ -84,7 +85,10 @@ describe('AuthController', () => {
           },
         },
       ],
-    }).compile();
+    })
+    .overrideGuard(JwtAuthGuard)
+    .useValue({ canActivate: () => true })
+    .compile();
 
     controller = module.get(AuthController);
     registerUserUseCase = module.get(RegisterUserUseCase);
@@ -335,10 +339,10 @@ describe('AuthController', () => {
 
     const req: any = {
       ip: '127.0.0.1',
+      user: { id: 'user-1', sessionId: 'session-1', role: 'USER' },
       headers: {
         'accept-language': 'es',
         'x-country': 'CO',
-        'x-user-id': 'user-1',
       },
       get: (key: string) => req.headers[key],
     };
@@ -379,10 +383,9 @@ describe('AuthController', () => {
 
     const req: any = {
       secure: false,
+      user: { id: 'user-1', sessionId: 'session-1', role: 'USER' },
       headers: {
         'accept-language': 'es',
-        'x-user-id': 'user-1',
-        'x-session-id': 'session-1',
         'x-country': 'CO',
         'x-forwarded-proto': 'https',
       },
@@ -423,9 +426,9 @@ describe('AuthController', () => {
 
     const req: any = {
       ip: '127.0.0.1',
+      user: { id: 'user-1', sessionId: 'session-1', role: 'USER' },
       headers: {
         'accept-language': 'es',
-        'x-user-id': 'user-1',
         'x-country': 'CO',
       },
       get: (key: string) => req.headers[key],
@@ -452,9 +455,9 @@ describe('AuthController', () => {
 
     const req: any = {
       ip: '127.0.0.1',
+      user: { id: 'user-1', sessionId: 'session-1', role: 'USER' },
       headers: {
         'accept-language': 'es',
-        'x-user-id': 'user-1',
         'x-country': 'CO',
       },
       get: (key: string) => req.headers[key],
@@ -480,9 +483,9 @@ describe('AuthController', () => {
 
     const req: any = {
       ip: '127.0.0.1',
+      user: { id: 'user-1', sessionId: 'session-1', role: 'USER' },
       headers: {
         'accept-language': 'es',
-        'x-user-id': 'user-1',
         'x-country': 'CO',
       },
       get: (key: string) => req.headers[key],
@@ -512,9 +515,9 @@ describe('AuthController', () => {
 
     const req: any = {
       secure: true,
+      user: { id: 'user-1', sessionId: 'session-1', role: 'USER' },
       headers: {
         'accept-language': 'es',
-        'x-user-id': 'user-1',
         'x-country': 'CO',
       },
       get: (key: string) => req.headers[key],

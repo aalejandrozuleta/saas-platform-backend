@@ -11,8 +11,6 @@ describe('forwardHeaders', () => {
       'x-correlation-id': 'uuid-123',
       'x-country': 'CO',
       'x-device-fingerprint': 'fp-abc',
-      'x-user-id': 'user-1',
-      'x-session-id': 'session-1',
       authorization: 'Bearer token',
       cookie: 'accessToken=abc',
     });
@@ -24,10 +22,11 @@ describe('forwardHeaders', () => {
     expect(result['x-correlation-id']).toBe('uuid-123');
     expect(result['x-country']).toBe('CO');
     expect(result['x-device-fingerprint']).toBe('fp-abc');
-    expect(result['x-user-id']).toBe('user-1');
-    expect(result['x-session-id']).toBe('session-1');
     expect(result['authorization']).toBe('Bearer token');
     expect(result['cookie']).toBe('accessToken=abc');
+    // x-user-id y x-session-id NO se reenvían: la identidad viene del JWT de la cookie
+    expect(result['x-user-id']).toBeUndefined();
+    expect(result['x-session-id']).toBeUndefined();
   });
 
   it('debe omitir headers ausentes', () => {

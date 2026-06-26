@@ -20,6 +20,7 @@ import { Enable2faUseCase } from '@application/use-cases/enable-2fa.use-case';
 import { Verify2faUseCase } from '@application/use-cases/verify-2fa.use-case';
 import { Disable2faUseCase } from '@application/use-cases/disable-2fa.use-case';
 
+import { JwtAuthGuard } from '@infrastructure/security/jwt-auth.guard';
 import { authProviders } from './auth.providers';
 
 /**
@@ -44,6 +45,7 @@ import { authProviders } from './auth.providers';
     Verify2faUseCase,
     Disable2faUseCase,
     ...authProviders,
+    JwtAuthGuard,
     AuthActivityListener,
     LoginLoggingListener,
     PasswordChangeListener,

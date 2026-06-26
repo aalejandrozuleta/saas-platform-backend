@@ -3,8 +3,10 @@ import {
   Controller,
   Post,
   Req,
-  Res
+  Res,
+  UseGuards,
 } from '@nestjs/common';
+import { JwtAuthGuard } from '@infrastructure/security/jwt-auth.guard';
 import { RegisterUserDto } from '@application/dto/register/register-user.dto';
 import { LoginUserDto } from '@application/dto/login/login-user.dto';
 import { ChangePasswordDto } from '@application/dto/change-password/change-password.dto';
@@ -177,19 +179,20 @@ export class AuthController {
    * Cierra la sesión actual del usuario autenticado.
    *
    * @remarks
-   * Revoca la sesión indicada por `x-session-id`, invalida
+   * Revoca la sesión indicada por el sessionId del JWT, invalida
    * el refresh token asociado y elimina la entrada de Redis.
    * Limpia las cookies `accessToken` y `refreshToken`.
    */
   @Post('logout')
+  @UseGuards(JwtAuthGuard)
   @LogoutSwagger()
   async logout(
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
     const lang = this.resolveLanguage(req);
-    const userId = this.getHeader(req, 'x-user-id')!;
-    const sessionId = this.getHeader(req, 'x-session-id')!;
+    const userId = req.user!.id;
+    const sessionId = req.user!.sessionId;
 
     await this.logoutUseCase.execute(
       userId,
@@ -218,13 +221,14 @@ export class AuthController {
    * Revoca todos los refresh tokens del usuario y limpia Redis.
    */
   @Post('logout-all')
+  @UseGuards(JwtAuthGuard)
   @LogoutAllSwagger()
   async logoutAll(
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
     const lang = this.resolveLanguage(req);
-    const userId = this.getHeader(req, 'x-user-id')!;
+    const userId = req.user!.id;
 
     const { revokedCount } = await this.logoutAllUseCase.execute(
       userId,
@@ -248,16 +252,17 @@ export class AuthController {
    * Cambio de contraseña del usuario autenticado
    */
   @Post('change-password')
+  @UseGuards(JwtAuthGuard)
   @ChangePasswordSwagger()
   async changePassword(
     @Body() dto: ChangePasswordDto,
     @Req() req: Request,
   ) {
     const lang = this.resolveLanguage(req);
-    const userId = this.getHeader(req, 'x-user-id');
+    const userId = req.user!.id;
 
     await this.changePasswordUseCase.execute(
-      userId!,
+      userId,
       dto.currentPassword,
       dto.newPassword,
       {
@@ -275,12 +280,13 @@ export class AuthController {
   }
 
   @Post('2fa/enable')
+  @UseGuards(JwtAuthGuard)
   @Enable2faSwagger()
   async enable2fa(
     @Body() dto: Enable2faDto,
     @Req() req: Request,
   ) {
-    const userId = this.getHeader(req, 'x-user-id')!;
+    const userId = req.user!.id;
 
     const setup = await this.enable2faUseCase.execute(
       userId,
@@ -304,12 +310,13 @@ export class AuthController {
   }
 
   @Post('2fa/verify')
+  @UseGuards(JwtAuthGuard)
   @Verify2faSwagger()
   async verify2fa(
     @Body() dto: Verify2faDto,
     @Req() req: Request,
   ) {
-    const userId = this.getHeader(req, 'x-user-id')!;
+    const userId = req.user!.id;
 
     const result = await this.verify2faUseCase.execute(
       userId,
@@ -329,12 +336,13 @@ export class AuthController {
   }
 
   @Post('2fa/disable')
+  @UseGuards(JwtAuthGuard)
   @Disable2faSwagger()
   async disable2fa(
     @Body() dto: Disable2faDto,
     @Req() req: Request,
   ) {
-    const userId = this.getHeader(req, 'x-user-id')!;
+    const userId = req.user!.id;
 
     await this.disable2faUseCase.execute(
       userId,

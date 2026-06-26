@@ -87,16 +87,10 @@ export class AuthController {
   @Post('change-password')
   async changePassword(@Req() req: Request) {
     this.prepareRequest(req);
-    req.headers['x-user-id'] = req.user!.id;
-
     const { body } = await this.authProxy.forward(req, '/change-password');
     return body;
   }
 
-  /**
-   * Inyecta `x-user-id` y `x-session-id` como headers internos
-   * para que el auth-service identifique la sesión a revocar.
-   */
   @LogoutGatewaySwagger()
   @Post('logout')
   async logout(
@@ -104,9 +98,6 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     this.prepareRequest(req);
-    req.headers['x-user-id'] = req.user!.id;
-    req.headers['x-session-id'] = req.user!.sessionId;
-
     const result = await this.authProxy.forward(req, '/logout');
 
     if (result.cookies) {
@@ -123,8 +114,6 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     this.prepareRequest(req);
-    req.headers['x-user-id'] = req.user!.id;
-
     const result = await this.authProxy.forward(req, '/logout-all');
 
     if (result.cookies) {
@@ -138,8 +127,6 @@ export class AuthController {
   @Post('2fa/enable')
   async enable2fa(@Req() req: Request) {
     this.prepareRequest(req);
-    req.headers['x-user-id'] = req.user!.id;
-
     const { body } = await this.authProxy.forward(req, '/2fa/enable');
     return body;
   }
@@ -148,8 +135,6 @@ export class AuthController {
   @Post('2fa/verify')
   async verify2fa(@Req() req: Request) {
     this.prepareRequest(req);
-    req.headers['x-user-id'] = req.user!.id;
-
     const { body } = await this.authProxy.forward(req, '/2fa/verify');
     return body;
   }
@@ -158,8 +143,6 @@ export class AuthController {
   @Post('2fa/disable')
   async disable2fa(@Req() req: Request) {
     this.prepareRequest(req);
-    req.headers['x-user-id'] = req.user!.id;
-
     const { body } = await this.authProxy.forward(req, '/2fa/disable');
     return body;
   }
