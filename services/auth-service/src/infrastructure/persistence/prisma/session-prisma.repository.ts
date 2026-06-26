@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { SessionRepository } from '@application/ports/session.repository';
+import { ActiveSession, SessionRepository } from '@application/ports/session.repository';
 
 import type { PrismaClient } from '../../../generated/prisma';
 
@@ -148,6 +148,51 @@ export class SessionPrismaRepository implements SessionRepository {
       },
       data: { revokedAt: now },
     });
+  }
+
+  async findActiveSessions(userId: string): Promise<ActiveSession[]> {
+    const rows = await this.prisma.session.findMany({
+      where: { userId, revokedAt: null, endedAt: null },
+      orderBy: { startedAt: 'desc' },
+      select: {
+        id: true,
+        ipAddress: true,
+        country: true,
+        startedAt: true,
+        device: {
+          select: {
+            deviceName: true,
+            os: true,
+            browser: true,
+            isTrusted: true,
+            lastUsedAt: true,
+          },
+        },
+      },
+    });
+
+    return rows.map((r) => ({
+      id: r.id,
+      ipAddress: r.ipAddress,
+      country: r.country,
+      startedAt: r.startedAt,
+      device: r.device
+        ? {
+            name: r.device.deviceName,
+            os: r.device.os,
+            browser: r.device.browser,
+            isTrusted: r.device.isTrusted,
+            lastUsedAt: r.device.lastUsedAt,
+          }
+        : null,
+    }));
+  }
+
+  async sessionBelongsToUser(sessionId: string, userId: string): Promise<boolean> {
+    const count = await this.prisma.session.count({
+      where: { id: sessionId, userId, revokedAt: null, endedAt: null },
+    });
+    return count > 0;
   }
 
   async revokeOldestActiveSession(

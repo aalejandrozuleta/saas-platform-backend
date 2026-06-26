@@ -145,4 +145,12 @@ export class DomainErrorFactory {
       422,
     );
   }
+
+  static sessionNotFound(): DomainException {
+    return DomainException.create(
+      'auth.session_not_found',
+      ErrorCode.SESSION_NOT_FOUND,
+      404,
+    );
+  }
 }

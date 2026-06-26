@@ -23,6 +23,8 @@ import {
   Enable2faGatewaySwagger,
   Verify2faGatewaySwagger,
   Disable2faGatewaySwagger,
+  GetSessionsGatewaySwagger,
+  RevokeSessionGatewaySwagger,
   GetTrustedCountriesGatewaySwagger,
   AddTrustedCountryGatewaySwagger,
   RemoveTrustedCountryGatewaySwagger,
@@ -150,6 +152,22 @@ export class AuthController {
   async disable2fa(@Req() req: Request) {
     this.prepareRequest(req);
     const { body } = await this.authProxy.forward(req, '/2fa/disable');
+    return body;
+  }
+
+  @GetSessionsGatewaySwagger()
+  @Get('sessions')
+  async getSessions(@Req() req: Request) {
+    this.prepareRequest(req);
+    const { body } = await this.authProxy.forward(req, '/sessions');
+    return body;
+  }
+
+  @RevokeSessionGatewaySwagger()
+  @Delete('sessions/:sessionId')
+  async revokeSession(@Req() req: Request, @Param('sessionId') sessionId: string) {
+    this.prepareRequest(req);
+    const { body } = await this.authProxy.forward(req, `/sessions/${sessionId}`);
     return body;
   }
 

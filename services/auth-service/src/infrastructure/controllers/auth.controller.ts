@@ -27,6 +27,8 @@ import { Disable2faUseCase } from '@application/use-cases/disable-2fa.use-case';
 import { GetTrustedCountriesUseCase } from '@application/use-cases/get-trusted-countries.use-case';
 import { AddTrustedCountryUseCase } from '@application/use-cases/add-trusted-country.use-case';
 import { RemoveTrustedCountryUseCase } from '@application/use-cases/remove-trusted-country.use-case';
+import { GetSessionsUseCase } from '@application/use-cases/get-sessions.use-case';
+import { RevokeSessionUseCase } from '@application/use-cases/revoke-session.use-case';
 import { AddTrustedCountryDto } from '@application/dto/trusted-countries/add-trusted-country.dto';
 import { LoginContext } from '@domain/value-objects/login-context.vo';
 import { I18nService, successResponse } from '@saas/shared';
@@ -37,6 +39,7 @@ import { ChangePasswordSwagger } from '@infrastructure/swagger/change-password.s
 import { LogoutSwagger, LogoutAllSwagger } from '@infrastructure/swagger/logout.swagger';
 import { Enable2faSwagger, Verify2faSwagger, Disable2faSwagger } from '@infrastructure/swagger/2fa.swagger';
 import { GetTrustedCountriesSwagger, AddTrustedCountrySwagger, RemoveTrustedCountrySwagger } from '@infrastructure/swagger/trusted-countries.swagger';
+import { GetSessionsSwagger, RevokeSessionSwagger } from '@infrastructure/swagger/sessions.swagger';
 import { ApiTags } from '@nestjs/swagger';
 import { RefreshTokenUseCase } from '@application/use-cases/refresh-token.use-case';
 
@@ -66,6 +69,8 @@ export class AuthController {
     private readonly getTrustedCountriesUseCase: GetTrustedCountriesUseCase,
     private readonly addTrustedCountryUseCase: AddTrustedCountryUseCase,
     private readonly removeTrustedCountryUseCase: RemoveTrustedCountryUseCase,
+    private readonly getSessionsUseCase: GetSessionsUseCase,
+    private readonly revokeSessionUseCase: RevokeSessionUseCase,
     private readonly i18n: I18nService,
   ) { }
 
@@ -406,6 +411,41 @@ export class AuthController {
     return successResponse(
       {},
       { message: this.i18n.translate('auth.trusted_country_removed', this.resolveLanguage(req)) },
+    );
+  }
+
+  @Get('sessions')
+  @UseGuards(JwtAuthGuard)
+  @GetSessionsSwagger()
+  async getSessions(@Req() req: Request) {
+    const sessions = await this.getSessionsUseCase.execute(
+      req.user!.id,
+      req.user!.sessionId,
+    );
+    return successResponse(
+      { sessions },
+      { message: this.i18n.translate('auth.sessions_list_success', this.resolveLanguage(req)) },
+    );
+  }
+
+  @Delete('sessions/:sessionId')
+  @UseGuards(JwtAuthGuard)
+  @RevokeSessionSwagger()
+  async revokeSession(
+    @Param('sessionId') sessionId: string,
+    @Req() req: Request,
+  ) {
+    await this.revokeSessionUseCase.execute(
+      req.user!.id,
+      sessionId,
+      {
+        ip: this.resolveClientIp(req),
+        country: this.getHeader(req, 'x-country'),
+      },
+    );
+    return successResponse(
+      {},
+      { message: this.i18n.translate('auth.session_revoked', this.resolveLanguage(req)) },
     );
   }
 

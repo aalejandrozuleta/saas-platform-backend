@@ -186,6 +186,28 @@ export function Disable2faGatewaySwagger() {
   );
 }
 
+/** Swagger para `GET /auth/sessions` */
+export function GetSessionsGatewaySwagger() {
+  return applyDecorators(
+    ApiOperation({ summary: 'Listar sesiones activas del usuario autenticado' }),
+    ApiOkResponse({
+      description: 'Lista de sesiones activas. `isCurrent: true` indica la sesión en uso.',
+    }),
+    ApiServiceUnavailableResponse({ description: 'Auth-service no disponible.' }),
+  );
+}
+
+/** Swagger para `DELETE /auth/sessions/:sessionId` */
+export function RevokeSessionGatewaySwagger() {
+  return applyDecorators(
+    ApiOperation({ summary: 'Revocar una sesión activa por ID' }),
+    ApiParam({ name: 'sessionId', description: 'ID de la sesión a cerrar' }),
+    ApiOkResponse({ description: 'Sesión cerrada correctamente.' }),
+    ApiNotFoundResponse({ description: 'Sesión no encontrada o ya cerrada.' }),
+    ApiServiceUnavailableResponse({ description: 'Auth-service no disponible.' }),
+  );
+}
+
 /** Swagger para `GET /auth/trusted-countries` */
 export function GetTrustedCountriesGatewaySwagger() {
   return applyDecorators(

@@ -22,6 +22,8 @@ import { Disable2faUseCase } from '@application/use-cases/disable-2fa.use-case';
 import { GetTrustedCountriesUseCase } from '@application/use-cases/get-trusted-countries.use-case';
 import { AddTrustedCountryUseCase } from '@application/use-cases/add-trusted-country.use-case';
 import { RemoveTrustedCountryUseCase } from '@application/use-cases/remove-trusted-country.use-case';
+import { GetSessionsUseCase } from '@application/use-cases/get-sessions.use-case';
+import { RevokeSessionUseCase } from '@application/use-cases/revoke-session.use-case';
 
 import { JwtAuthGuard } from '@infrastructure/security/jwt-auth.guard';
 import { authProviders } from './auth.providers';
@@ -50,6 +52,8 @@ import { authProviders } from './auth.providers';
     GetTrustedCountriesUseCase,
     AddTrustedCountryUseCase,
     RemoveTrustedCountryUseCase,
+    GetSessionsUseCase,
+    RevokeSessionUseCase,
     ...authProviders,
     JwtAuthGuard,
     AuthActivityListener,

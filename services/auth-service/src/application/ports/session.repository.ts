@@ -1,5 +1,19 @@
 import { type Prisma } from '../../generated/prisma';
 
+export interface ActiveSession {
+  id: string;
+  ipAddress: string;
+  country: string | null;
+  startedAt: Date;
+  device: {
+    name: string | null;
+    os: string | null;
+    browser: string | null;
+    isTrusted: boolean;
+    lastUsedAt: Date | null;
+  } | null;
+}
+
 export interface SessionRepository {
 
   create(
@@ -42,4 +56,12 @@ export interface SessionRepository {
     sessionId: string,
     now: Date,
   ): Promise<void>;
+
+  findActiveSessions(userId: string): Promise<ActiveSession[]>;
+
+  /**
+   * Verifica que una sesión pertenece al usuario.
+   * Devuelve true si existe y está activa.
+   */
+  sessionBelongsToUser(sessionId: string, userId: string): Promise<boolean>;
 }
