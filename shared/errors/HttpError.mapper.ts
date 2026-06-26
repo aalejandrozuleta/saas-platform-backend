@@ -28,6 +28,10 @@ export const HttpErrorMapper: Record<ErrorCode, number> = {
   [ErrorCode.INVALID_REFRESH_TOKEN]: 401,
   [ErrorCode.INVALID_CURRENT_PASSWORD]: 401,
   [ErrorCode.SAME_PASSWORD_NOT_ALLOWED]: 422,
+  [ErrorCode.TWO_FACTOR_ALREADY_ENABLED]: 409,
+  [ErrorCode.TWO_FACTOR_NOT_ENABLED]: 422,
+  [ErrorCode.INVALID_TOTP_CODE]: 401,
+  [ErrorCode.TWO_FACTOR_SETUP_NOT_INITIATED]: 422,
 };
 
 export const getErrorCodeFromHttpStatus = (status: number): ErrorCode => {
