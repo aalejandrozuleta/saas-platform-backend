@@ -14,6 +14,11 @@ _stop() {
 }
 trap _stop TERM INT
 
+# shared no llega al contenedor compilado (excluido por .dockerignore).
+# Se compila aquí para que @saas/shared resuelva desde shared/dist.
+echo "[notification-service] Building @saas/shared..."
+tsc -p /app/shared/tsconfig.build.json
+
 echo "[notification-service] Starting in watch mode..."
 nest start --watch &
 NEST_PID=$!

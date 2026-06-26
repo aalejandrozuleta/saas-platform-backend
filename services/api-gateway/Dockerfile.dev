@@ -1,4 +1,5 @@
-FROM node:24-alpine # NOSONAR: dev image — non-root not required for hot-reload container
+# NOSONAR: dev image — non-root not required for hot-reload container
+FROM node:24-alpine
 
 WORKDIR /app
 

@@ -5,6 +5,7 @@ import { APP_FILTER } from '@nestjs/core';
 import { EnvModule } from '@config/env/env.module';
 import { QueueModule } from '@infrastructure/persistence/cache/redis.module';
 import { MetricsModule } from '@infrastructure/metrics/metrics.module';
+import { I18nModule } from '@infrastructure/i18n/i18n.module';
 import { NotificationGlobalExceptionFilter } from '@infrastructure/filters/notification-global-exception.filter';
 import { NotificationModule } from '@modules/notification/notification.module';
 
@@ -14,6 +15,7 @@ import { NotificationModule } from '@modules/notification/notification.module';
     EnvModule,
     QueueModule,
     MetricsModule,
+    I18nModule,
     NotificationModule,
   ],
   providers: [
