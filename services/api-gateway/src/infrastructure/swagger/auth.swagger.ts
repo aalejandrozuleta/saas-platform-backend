@@ -7,8 +7,10 @@ import {
   ApiUnauthorizedResponse,
   ApiForbiddenResponse,
   ApiConflictResponse,
+  ApiNotFoundResponse,
   ApiUnprocessableEntityResponse,
   ApiServiceUnavailableResponse,
+  ApiParam,
 } from '@nestjs/swagger';
 
 /**
@@ -181,5 +183,39 @@ export function Disable2faGatewaySwagger() {
     ApiServiceUnavailableResponse({
       description: 'Auth-service no disponible.',
     }),
+  );
+}
+
+/** Swagger para `GET /auth/trusted-countries` */
+export function GetTrustedCountriesGatewaySwagger() {
+  return applyDecorators(
+    ApiOperation({ summary: 'Listar países de confianza del usuario autenticado' }),
+    ApiOkResponse({
+      description: 'Lista de códigos ISO 3166-1 alpha-2.',
+      schema: { example: { success: true, data: { countries: ['CO', 'US'] } } },
+    }),
+    ApiServiceUnavailableResponse({ description: 'Auth-service no disponible.' }),
+  );
+}
+
+/** Swagger para `POST /auth/trusted-countries` */
+export function AddTrustedCountryGatewaySwagger() {
+  return applyDecorators(
+    ApiOperation({ summary: 'Agregar un país de confianza (máx. 2)' }),
+    ApiCreatedResponse({ description: 'País agregado correctamente.' }),
+    ApiConflictResponse({ description: 'El país ya está en la lista.' }),
+    ApiUnprocessableEntityResponse({ description: 'Límite de 2 países alcanzado.' }),
+    ApiServiceUnavailableResponse({ description: 'Auth-service no disponible.' }),
+  );
+}
+
+/** Swagger para `DELETE /auth/trusted-countries/:country` */
+export function RemoveTrustedCountryGatewaySwagger() {
+  return applyDecorators(
+    ApiOperation({ summary: 'Eliminar un país de la lista de confianza' }),
+    ApiParam({ name: 'country', example: 'CO', description: 'Código ISO 3166-1 alpha-2' }),
+    ApiOkResponse({ description: 'País eliminado correctamente.' }),
+    ApiNotFoundResponse({ description: 'El país no está en la lista.' }),
+    ApiServiceUnavailableResponse({ description: 'Auth-service no disponible.' }),
   );
 }

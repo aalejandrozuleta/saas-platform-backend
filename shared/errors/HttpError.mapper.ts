@@ -32,6 +32,9 @@ export const HttpErrorMapper: Record<ErrorCode, number> = {
   [ErrorCode.TWO_FACTOR_NOT_ENABLED]: 422,
   [ErrorCode.INVALID_TOTP_CODE]: 401,
   [ErrorCode.TWO_FACTOR_SETUP_NOT_INITIATED]: 422,
+  [ErrorCode.TRUSTED_COUNTRY_ALREADY_EXISTS]: 409,
+  [ErrorCode.TRUSTED_COUNTRY_NOT_FOUND]: 404,
+  [ErrorCode.TRUSTED_COUNTRY_LIMIT_REACHED]: 422,
 };
 
 export const getErrorCodeFromHttpStatus = (status: number): ErrorCode => {

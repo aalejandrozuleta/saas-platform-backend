@@ -175,6 +175,31 @@ export class SecurityPrismaRepository implements SecurityRepository {
     return this.totpEncryption.decrypt(record.totpPendingSecret);
   }
 
+  async getTrustedCountries(userId: string): Promise<string[]> {
+    const record = await this.prisma.userSecurity.findUnique({
+      where: { userId },
+      select: { trustedCountries: true },
+    });
+    return record?.trustedCountries ?? [];
+  }
+
+  async addTrustedCountry(userId: string, country: string): Promise<void> {
+    await this.prisma.userSecurity.upsert({
+      where: { userId },
+      update: { trustedCountries: { push: country } },
+      create: { userId, trustedCountries: [country] },
+    });
+  }
+
+  async removeTrustedCountry(userId: string, country: string): Promise<void> {
+    const current = await this.getTrustedCountries(userId);
+    const updated = current.filter(c => c !== country);
+    await this.prisma.userSecurity.update({
+      where: { userId },
+      data: { trustedCountries: updated },
+    });
+  }
+
   async findByUserId(
     userId: string,
     tx?: PrismaClient

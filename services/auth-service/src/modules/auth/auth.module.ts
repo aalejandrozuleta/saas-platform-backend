@@ -19,6 +19,9 @@ import { LogoutAllUseCase } from '@application/use-cases/logout-all.use-case';
 import { Enable2faUseCase } from '@application/use-cases/enable-2fa.use-case';
 import { Verify2faUseCase } from '@application/use-cases/verify-2fa.use-case';
 import { Disable2faUseCase } from '@application/use-cases/disable-2fa.use-case';
+import { GetTrustedCountriesUseCase } from '@application/use-cases/get-trusted-countries.use-case';
+import { AddTrustedCountryUseCase } from '@application/use-cases/add-trusted-country.use-case';
+import { RemoveTrustedCountryUseCase } from '@application/use-cases/remove-trusted-country.use-case';
 
 import { JwtAuthGuard } from '@infrastructure/security/jwt-auth.guard';
 import { authProviders } from './auth.providers';
@@ -44,6 +47,9 @@ import { authProviders } from './auth.providers';
     Enable2faUseCase,
     Verify2faUseCase,
     Disable2faUseCase,
+    GetTrustedCountriesUseCase,
+    AddTrustedCountryUseCase,
+    RemoveTrustedCountryUseCase,
     ...authProviders,
     JwtAuthGuard,
     AuthActivityListener,

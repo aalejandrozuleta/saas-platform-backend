@@ -2,6 +2,9 @@ import { randomUUID } from 'node:crypto';
 
 import {
   Controller,
+  Delete,
+  Get,
+  Param,
   Post,
   Req,
   Res,
@@ -20,6 +23,9 @@ import {
   Enable2faGatewaySwagger,
   Verify2faGatewaySwagger,
   Disable2faGatewaySwagger,
+  GetTrustedCountriesGatewaySwagger,
+  AddTrustedCountryGatewaySwagger,
+  RemoveTrustedCountryGatewaySwagger,
 } from '@infrastructure/swagger/auth.swagger';
 
 /**
@@ -144,6 +150,31 @@ export class AuthController {
   async disable2fa(@Req() req: Request) {
     this.prepareRequest(req);
     const { body } = await this.authProxy.forward(req, '/2fa/disable');
+    return body;
+  }
+
+  @GetTrustedCountriesGatewaySwagger()
+  @Get('trusted-countries')
+  async getTrustedCountries(@Req() req: Request) {
+    this.prepareRequest(req);
+    const { body } = await this.authProxy.forward(req, '/trusted-countries');
+    return body;
+  }
+
+  @AddTrustedCountryGatewaySwagger()
+  @Post('trusted-countries')
+  async addTrustedCountry(@Req() req: Request) {
+    this.prepareRequest(req);
+
+    const response = await this.authProxy.forward(req, '/trusted-countries');
+    return response.body;
+  }
+
+  @RemoveTrustedCountryGatewaySwagger()
+  @Delete('trusted-countries/:country')
+  async removeTrustedCountry(@Req() req: Request, @Param('country') country: string) {
+    this.prepareRequest(req);
+    const { body } = await this.authProxy.forward(req, `/trusted-countries/${country}`);
     return body;
   }
 

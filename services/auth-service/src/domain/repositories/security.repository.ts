@@ -80,4 +80,20 @@ export interface SecurityRepository {
    * Obtiene el secreto TOTP pendiente (setup sin confirmar).
    */
   getTotpPendingSecret(userId: string): Promise<string | null>;
+
+  /**
+   * Devuelve los países de confianza del usuario.
+   */
+  getTrustedCountries(userId: string): Promise<string[]>;
+
+  /**
+   * Agrega un país a la lista de confianza.
+   * No valida duplicados ni límites — esa lógica va en el use-case.
+   */
+  addTrustedCountry(userId: string, country: string): Promise<void>;
+
+  /**
+   * Elimina un país de la lista de confianza.
+   */
+  removeTrustedCountry(userId: string, country: string): Promise<void>;
 }

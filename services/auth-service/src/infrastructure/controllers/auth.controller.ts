@@ -1,6 +1,9 @@
 import {
   Body,
   Controller,
+  Delete,
+  Get,
+  Param,
   Post,
   Req,
   Res,
@@ -21,6 +24,10 @@ import { LogoutAllUseCase } from '@application/use-cases/logout-all.use-case';
 import { Enable2faUseCase } from '@application/use-cases/enable-2fa.use-case';
 import { Verify2faUseCase } from '@application/use-cases/verify-2fa.use-case';
 import { Disable2faUseCase } from '@application/use-cases/disable-2fa.use-case';
+import { GetTrustedCountriesUseCase } from '@application/use-cases/get-trusted-countries.use-case';
+import { AddTrustedCountryUseCase } from '@application/use-cases/add-trusted-country.use-case';
+import { RemoveTrustedCountryUseCase } from '@application/use-cases/remove-trusted-country.use-case';
+import { AddTrustedCountryDto } from '@application/dto/trusted-countries/add-trusted-country.dto';
 import { LoginContext } from '@domain/value-objects/login-context.vo';
 import { I18nService, successResponse } from '@saas/shared';
 import { Request, Response } from 'express';
@@ -29,6 +36,7 @@ import { LoginSwagger } from '@infrastructure/swagger/login.swagger';
 import { ChangePasswordSwagger } from '@infrastructure/swagger/change-password.swagger';
 import { LogoutSwagger, LogoutAllSwagger } from '@infrastructure/swagger/logout.swagger';
 import { Enable2faSwagger, Verify2faSwagger, Disable2faSwagger } from '@infrastructure/swagger/2fa.swagger';
+import { GetTrustedCountriesSwagger, AddTrustedCountrySwagger, RemoveTrustedCountrySwagger } from '@infrastructure/swagger/trusted-countries.swagger';
 import { ApiTags } from '@nestjs/swagger';
 import { RefreshTokenUseCase } from '@application/use-cases/refresh-token.use-case';
 
@@ -55,6 +63,9 @@ export class AuthController {
     private readonly enable2faUseCase: Enable2faUseCase,
     private readonly verify2faUseCase: Verify2faUseCase,
     private readonly disable2faUseCase: Disable2faUseCase,
+    private readonly getTrustedCountriesUseCase: GetTrustedCountriesUseCase,
+    private readonly addTrustedCountryUseCase: AddTrustedCountryUseCase,
+    private readonly removeTrustedCountryUseCase: RemoveTrustedCountryUseCase,
     private readonly i18n: I18nService,
   ) { }
 
@@ -359,6 +370,42 @@ export class AuthController {
       {
         message: this.i18n.translate('auth.2fa_disable_success', this.resolveLanguage(req)),
       },
+    );
+  }
+
+  @Get('trusted-countries')
+  @UseGuards(JwtAuthGuard)
+  @GetTrustedCountriesSwagger()
+  async getTrustedCountries(@Req() req: Request) {
+    const { countries } = await this.getTrustedCountriesUseCase.execute(req.user!.id);
+    return successResponse({ countries });
+  }
+
+  @Post('trusted-countries')
+  @UseGuards(JwtAuthGuard)
+  @AddTrustedCountrySwagger()
+  async addTrustedCountry(
+    @Body() dto: AddTrustedCountryDto,
+    @Req() req: Request,
+  ) {
+    await this.addTrustedCountryUseCase.execute(req.user!.id, dto.country);
+    return successResponse(
+      {},
+      { message: this.i18n.translate('auth.trusted_country_added', this.resolveLanguage(req)) },
+    );
+  }
+
+  @Delete('trusted-countries/:country')
+  @UseGuards(JwtAuthGuard)
+  @RemoveTrustedCountrySwagger()
+  async removeTrustedCountry(
+    @Param('country') country: string,
+    @Req() req: Request,
+  ) {
+    await this.removeTrustedCountryUseCase.execute(req.user!.id, country);
+    return successResponse(
+      {},
+      { message: this.i18n.translate('auth.trusted_country_removed', this.resolveLanguage(req)) },
     );
   }
 

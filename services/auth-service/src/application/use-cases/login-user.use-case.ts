@@ -128,6 +128,8 @@ export class LoginUserUseCase {
 
     const result = await this.performLogin(user, device, context);
 
+    await this.autoRegisterFirstCountry(user.id, securityProfile, context.country);
+
     this.eventBus.publish(
       new LoginSucceededEvent(
         user.id,
@@ -140,6 +142,21 @@ export class LoginUserUseCase {
       token: result.token,
       refreshToken: result.refreshToken,
     };
+  }
+
+  /**
+   * Registra automáticamente el país de origen en el primer login exitoso.
+   * Solo actúa si la lista está vacía y hay país disponible.
+   */
+  private async autoRegisterFirstCountry(
+    userId: string,
+    securityProfile: LoginSecurityProfile | null,
+    country?: string,
+  ): Promise<void> {
+    if (!country || (securityProfile?.trustedCountries.length ?? 0) > 0) {
+      return;
+    }
+    await this.securityRepository.addTrustedCountry(userId, country);
   }
 
   /**

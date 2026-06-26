@@ -121,4 +121,28 @@ export class DomainErrorFactory {
       422,
     );
   }
+
+  static trustedCountryAlreadyExists(): DomainException {
+    return DomainException.create(
+      'auth.trusted_country_already_exists',
+      ErrorCode.TRUSTED_COUNTRY_ALREADY_EXISTS,
+      409,
+    );
+  }
+
+  static trustedCountryNotFound(): DomainException {
+    return DomainException.create(
+      'auth.trusted_country_not_found',
+      ErrorCode.TRUSTED_COUNTRY_NOT_FOUND,
+      404,
+    );
+  }
+
+  static trustedCountryLimitReached(): DomainException {
+    return DomainException.create(
+      'auth.trusted_country_limit_reached',
+      ErrorCode.TRUSTED_COUNTRY_LIMIT_REACHED,
+      422,
+    );
+  }
 }
