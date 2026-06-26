@@ -12,6 +12,8 @@ export const envSchema = z.object({
   JWT_ACCESS_SECRET: z.string().min(10),
   JWT_REFRESH_SECRET: z.string().min(10),
 
+  TOTP_ENCRYPTION_KEY: z.string().length(64, 'TOTP_ENCRYPTION_KEY must be a 64-char hex string (32 bytes)'),
+
   ACCESS_TOKEN_TTL: z.coerce.number().default(900),
   REFRESH_TOKEN_TTL: z.coerce.number().default(604800),
   REDIS_SESSION_TTL: z.coerce.number().default(900),

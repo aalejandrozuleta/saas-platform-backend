@@ -5,3 +5,4 @@ export const AUDIT_LOGGER = Symbol('AUDIT_LOGGER');
 export const DOMAIN_EVENT_BUS = Symbol('DOMAIN_EVENT_BUS');
 export const SESSION_CACHE = Symbol('SESSION_CACHE');
 export const TOTP_SERVICE = Symbol('TOTP_SERVICE');
+export const TOTP_ENCRYPTION = Symbol('TOTP_ENCRYPTION');

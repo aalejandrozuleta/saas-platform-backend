@@ -1,6 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { SecurityRepository } from '@domain/repositories/security.repository';
 import { DomainErrorFactory } from '@domain/errors/domain-error.factory';
+import { TotpEncryptionPort } from '@application/ports/totp-encryption.port';
+import { TOTP_ENCRYPTION } from '@domain/token/services.tokens';
 
 import type { PrismaClient } from '../../../generated/prisma';
 
@@ -11,7 +13,11 @@ import { PrismaService } from './prisma.service';
  */
 @Injectable()
 export class SecurityPrismaRepository implements SecurityRepository {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(
+    private readonly prisma: PrismaService,
+    @Inject(TOTP_ENCRYPTION)
+    private readonly totpEncryption: TotpEncryptionPort,
+  ) { }
 
   private client(tx?: PrismaClient) {
     return tx ?? this.prisma;
@@ -114,10 +120,11 @@ export class SecurityPrismaRepository implements SecurityRepository {
   }
 
   async saveTotpPendingSecret(userId: string, secret: string): Promise<void> {
+    const encrypted = this.totpEncryption.encrypt(secret);
     await this.prisma.userSecurity.upsert({
       where: { userId },
-      update: { totpPendingSecret: secret },
-      create: { userId, totpPendingSecret: secret },
+      update: { totpPendingSecret: encrypted },
+      create: { userId, totpPendingSecret: encrypted },
     });
   }
 
@@ -132,7 +139,7 @@ export class SecurityPrismaRepository implements SecurityRepository {
       data: {
         twoFactorEnabled: true,
         twoFactorMethod: 'TOTP',
-        totpSecret: security?.totpPendingSecret,
+        totpSecret: security?.totpPendingSecret ?? null,
         totpPendingSecret: null,
       },
     });
@@ -155,7 +162,8 @@ export class SecurityPrismaRepository implements SecurityRepository {
       where: { userId },
       select: { totpSecret: true },
     });
-    return record?.totpSecret ?? null;
+    if (!record?.totpSecret) return null;
+    return this.totpEncryption.decrypt(record.totpSecret);
   }
 
   async getTotpPendingSecret(userId: string): Promise<string | null> {
@@ -163,7 +171,8 @@ export class SecurityPrismaRepository implements SecurityRepository {
       where: { userId },
       select: { totpPendingSecret: true },
     });
-    return record?.totpPendingSecret ?? null;
+    if (!record?.totpPendingSecret) return null;
+    return this.totpEncryption.decrypt(record.totpPendingSecret);
   }
 
   async findByUserId(
