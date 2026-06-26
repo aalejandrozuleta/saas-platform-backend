@@ -11,10 +11,10 @@ export function headerValidationMiddleware(
   res: Response,
   next: NextFunction,
 ): void {
-  if (
-    req.method !== 'GET' &&
-    req.headers['content-type'] !== 'application/json'
-  ) {
+  const methodRequiresBody = ['POST', 'PUT', 'PATCH'].includes(req.method);
+  const contentType = req.headers['content-type'] ?? '';
+
+  if (methodRequiresBody && !contentType.startsWith('application/json')) {
     res.status(415).json(
       buildGatewayErrorResponse(
         req,
