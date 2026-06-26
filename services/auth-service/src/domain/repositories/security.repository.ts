@@ -55,4 +55,29 @@ export interface SecurityRepository {
     userId: string,
     now: Date,
   ): Promise<void>;
+
+  /**
+   * Guarda el secreto TOTP pendiente de verificación.
+   */
+  saveTotpPendingSecret(userId: string, secret: string): Promise<void>;
+
+  /**
+   * Activa 2FA moviendo el pendingSecret a secret y habilitando el flag.
+   */
+  activateTwoFactor(userId: string): Promise<void>;
+
+  /**
+   * Desactiva 2FA y elimina el secreto almacenado.
+   */
+  disableTwoFactor(userId: string): Promise<void>;
+
+  /**
+   * Obtiene el secreto TOTP activo del usuario.
+   */
+  getTotpSecret(userId: string): Promise<string | null>;
+
+  /**
+   * Obtiene el secreto TOTP pendiente (setup sin confirmar).
+   */
+  getTotpPendingSecret(userId: string): Promise<string | null>;
 }

@@ -5,6 +5,9 @@ import { RefreshTokenUseCase } from '@application/use-cases/refresh-token.use-ca
 import { ChangePasswordUseCase } from '@application/use-cases/change-password.use-case';
 import { LogoutUseCase } from '@application/use-cases/logout.use-case';
 import { LogoutAllUseCase } from '@application/use-cases/logout-all.use-case';
+import { Enable2faUseCase } from '@application/use-cases/enable-2fa.use-case';
+import { Verify2faUseCase } from '@application/use-cases/verify-2fa.use-case';
+import { Disable2faUseCase } from '@application/use-cases/disable-2fa.use-case';
 import { I18nService } from '@saas/shared';
 import { type RegisterUserDto } from '@application/dto/register/register-user.dto';
 import { User } from '@domain/entities/user/user.entity';
@@ -20,6 +23,9 @@ describe('AuthController', () => {
   let changePasswordUseCase: jest.Mocked<ChangePasswordUseCase>;
   let logoutUseCase: jest.Mocked<LogoutUseCase>;
   let logoutAllUseCase: jest.Mocked<LogoutAllUseCase>;
+  let enable2faUseCase: jest.Mocked<Enable2faUseCase>;
+  let verify2faUseCase: jest.Mocked<Verify2faUseCase>;
+  let disable2faUseCase: jest.Mocked<Disable2faUseCase>;
   let i18n: jest.Mocked<I18nService>;
 
   beforeEach(async () => {
@@ -57,6 +63,18 @@ describe('AuthController', () => {
           useValue: { execute: jest.fn() },
         },
         {
+          provide: Enable2faUseCase,
+          useValue: { execute: jest.fn() },
+        },
+        {
+          provide: Verify2faUseCase,
+          useValue: { execute: jest.fn() },
+        },
+        {
+          provide: Disable2faUseCase,
+          useValue: { execute: jest.fn() },
+        },
+        {
           provide: I18nService,
           useValue: {
             translate: jest.fn((key: string) => key),
@@ -75,6 +93,9 @@ describe('AuthController', () => {
     changePasswordUseCase = module.get(ChangePasswordUseCase);
     logoutUseCase = module.get(LogoutUseCase);
     logoutAllUseCase = module.get(LogoutAllUseCase);
+    enable2faUseCase = module.get(Enable2faUseCase);
+    verify2faUseCase = module.get(Verify2faUseCase);
+    disable2faUseCase = module.get(Disable2faUseCase);
     i18n = module.get(I18nService);
   });
 
@@ -383,6 +404,104 @@ describe('AuthController', () => {
     expect(result).toEqual({
       success: true,
       message: 'Sesión cerrada correctamente',
+      data: {},
+    });
+  });
+
+  // ──────────────────────────────────────────────────
+  // 2FA
+  // ──────────────────────────────────────────────────
+
+  it('debe iniciar activación de 2FA y devolver setup TOTP', async () => {
+    const setup = {
+      secret: 'JBSWY3DPEHPK3PXP',
+      otpauthUrl: 'otpauth://totp/...',
+      qrCode: 'data:image/png;base64,...',
+    };
+    enable2faUseCase.execute.mockResolvedValue(setup);
+    i18n.translate.mockReturnValue('2FA iniciado correctamente');
+
+    const req: any = {
+      ip: '127.0.0.1',
+      headers: {
+        'accept-language': 'es',
+        'x-user-id': 'user-1',
+        'x-country': 'CO',
+      },
+      get: (key: string) => req.headers[key],
+    };
+
+    const result = await controller.enable2fa({ password: 'ValidPass123!' }, req);
+
+    expect(enable2faUseCase.execute).toHaveBeenCalledWith(
+      'user-1',
+      'ValidPass123!',
+      { ip: '127.0.0.1', country: 'CO' },
+    );
+    expect(result).toEqual({
+      success: true,
+      message: '2FA iniciado correctamente',
+      data: setup,
+    });
+  });
+
+  it('debe verificar código TOTP y devolver códigos de recuperación', async () => {
+    const recoveryCodes = ['AAAA-BBBB', 'CCCC-DDDD'];
+    verify2faUseCase.execute.mockResolvedValue({ recoveryCodes });
+    i18n.translate.mockReturnValue('2FA activado correctamente');
+
+    const req: any = {
+      ip: '127.0.0.1',
+      headers: {
+        'accept-language': 'es',
+        'x-user-id': 'user-1',
+        'x-country': 'CO',
+      },
+      get: (key: string) => req.headers[key],
+    };
+
+    const result = await controller.verify2fa({ totpCode: '123456' }, req);
+
+    expect(verify2faUseCase.execute).toHaveBeenCalledWith(
+      'user-1',
+      '123456',
+      { ip: '127.0.0.1', country: 'CO' },
+    );
+    expect(result).toEqual({
+      success: true,
+      message: '2FA activado correctamente',
+      data: { recoveryCodes },
+    });
+  });
+
+  it('debe desactivar 2FA correctamente', async () => {
+    disable2faUseCase.execute.mockResolvedValue(undefined);
+    i18n.translate.mockReturnValue('2FA desactivado correctamente');
+
+    const req: any = {
+      ip: '127.0.0.1',
+      headers: {
+        'accept-language': 'es',
+        'x-user-id': 'user-1',
+        'x-country': 'CO',
+      },
+      get: (key: string) => req.headers[key],
+    };
+
+    const result = await controller.disable2fa(
+      { password: 'ValidPass123!', totpCode: '123456' },
+      req,
+    );
+
+    expect(disable2faUseCase.execute).toHaveBeenCalledWith(
+      'user-1',
+      'ValidPass123!',
+      '123456',
+      { ip: '127.0.0.1', country: 'CO' },
+    );
+    expect(result).toEqual({
+      success: true,
+      message: '2FA desactivado correctamente',
       data: {},
     });
   });

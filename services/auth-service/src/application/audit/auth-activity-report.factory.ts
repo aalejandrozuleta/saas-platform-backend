@@ -313,6 +313,48 @@ export class AuthActivityReportFactory {
     });
   }
 
+  static twoFactorEnabled(input: {
+    userId: string;
+    ip: string;
+    country?: string;
+  }): CreateActivityReport {
+    return this.createReport({
+      action: AuthAuditEvent.TWO_FACTOR_ENABLED,
+      outcome: 'SUCCESS',
+      summary: 'Activación de 2FA iniciada',
+      actor: { type: 'USER', id: input.userId },
+      context: { ip: input.ip, country: input.country },
+    });
+  }
+
+  static twoFactorVerified(input: {
+    userId: string;
+    ip: string;
+    country?: string;
+  }): CreateActivityReport {
+    return this.createReport({
+      action: AuthAuditEvent.TWO_FACTOR_SUCCESS,
+      outcome: 'SUCCESS',
+      summary: '2FA activado y verificado correctamente',
+      actor: { type: 'USER', id: input.userId },
+      context: { ip: input.ip, country: input.country },
+    });
+  }
+
+  static twoFactorDisabled(input: {
+    userId: string;
+    ip: string;
+    country?: string;
+  }): CreateActivityReport {
+    return this.createReport({
+      action: AuthAuditEvent.TWO_FACTOR_DISABLED,
+      outcome: 'SUCCESS',
+      summary: '2FA desactivado correctamente',
+      actor: { type: 'USER', id: input.userId },
+      context: { ip: input.ip, country: input.country },
+    });
+  }
+
   static registerFailed(input: {
     userId?: string | null;
     email: string;

@@ -8,11 +8,17 @@ import {
 import { RegisterUserDto } from '@application/dto/register/register-user.dto';
 import { LoginUserDto } from '@application/dto/login/login-user.dto';
 import { ChangePasswordDto } from '@application/dto/change-password/change-password.dto';
+import { Enable2faDto } from '@application/dto/2fa/enable-2fa.dto';
+import { Verify2faDto } from '@application/dto/2fa/verify-2fa.dto';
+import { Disable2faDto } from '@application/dto/2fa/disable-2fa.dto';
 import { RegisterUserUseCase } from '@application/use-cases/register-user.use-case';
 import { LoginUserUseCase } from '@application/use-cases/login-user.use-case';
 import { ChangePasswordUseCase } from '@application/use-cases/change-password.use-case';
 import { LogoutUseCase } from '@application/use-cases/logout.use-case';
 import { LogoutAllUseCase } from '@application/use-cases/logout-all.use-case';
+import { Enable2faUseCase } from '@application/use-cases/enable-2fa.use-case';
+import { Verify2faUseCase } from '@application/use-cases/verify-2fa.use-case';
+import { Disable2faUseCase } from '@application/use-cases/disable-2fa.use-case';
 import { LoginContext } from '@domain/value-objects/login-context.vo';
 import { I18nService, successResponse } from '@saas/shared';
 import { Request, Response } from 'express';
@@ -20,6 +26,7 @@ import { RegisterSwagger } from '@infrastructure/swagger/register.swagger';
 import { LoginSwagger } from '@infrastructure/swagger/login.swagger';
 import { ChangePasswordSwagger } from '@infrastructure/swagger/change-password.swagger';
 import { LogoutSwagger, LogoutAllSwagger } from '@infrastructure/swagger/logout.swagger';
+import { Enable2faSwagger, Verify2faSwagger, Disable2faSwagger } from '@infrastructure/swagger/2fa.swagger';
 import { ApiTags } from '@nestjs/swagger';
 import { RefreshTokenUseCase } from '@application/use-cases/refresh-token.use-case';
 
@@ -43,6 +50,9 @@ export class AuthController {
     private readonly changePasswordUseCase: ChangePasswordUseCase,
     private readonly logoutUseCase: LogoutUseCase,
     private readonly logoutAllUseCase: LogoutAllUseCase,
+    private readonly enable2faUseCase: Enable2faUseCase,
+    private readonly verify2faUseCase: Verify2faUseCase,
+    private readonly disable2faUseCase: Disable2faUseCase,
     private readonly i18n: I18nService,
   ) { }
 
@@ -260,6 +270,86 @@ export class AuthController {
       {},
       {
         message: this.i18n.translate('auth.change_password_success', lang),
+      },
+    );
+  }
+
+  @Post('2fa/enable')
+  @Enable2faSwagger()
+  async enable2fa(
+    @Body() dto: Enable2faDto,
+    @Req() req: Request,
+  ) {
+    const userId = this.getHeader(req, 'x-user-id')!;
+
+    const setup = await this.enable2faUseCase.execute(
+      userId,
+      dto.password,
+      {
+        ip: this.resolveClientIp(req),
+        country: this.getHeader(req, 'x-country'),
+      },
+    );
+
+    return successResponse(
+      {
+        secret: setup.secret,
+        otpauthUrl: setup.otpauthUrl,
+        qrCode: setup.qrCode,
+      },
+      {
+        message: this.i18n.translate('auth.2fa_enable_success', this.resolveLanguage(req)),
+      },
+    );
+  }
+
+  @Post('2fa/verify')
+  @Verify2faSwagger()
+  async verify2fa(
+    @Body() dto: Verify2faDto,
+    @Req() req: Request,
+  ) {
+    const userId = this.getHeader(req, 'x-user-id')!;
+
+    const result = await this.verify2faUseCase.execute(
+      userId,
+      dto.totpCode,
+      {
+        ip: this.resolveClientIp(req),
+        country: this.getHeader(req, 'x-country'),
+      },
+    );
+
+    return successResponse(
+      { recoveryCodes: result.recoveryCodes },
+      {
+        message: this.i18n.translate('auth.2fa_verify_success', this.resolveLanguage(req)),
+      },
+    );
+  }
+
+  @Post('2fa/disable')
+  @Disable2faSwagger()
+  async disable2fa(
+    @Body() dto: Disable2faDto,
+    @Req() req: Request,
+  ) {
+    const userId = this.getHeader(req, 'x-user-id')!;
+
+    await this.disable2faUseCase.execute(
+      userId,
+      dto.password,
+      dto.totpCode,
+      {
+        ip: this.resolveClientIp(req),
+        country: this.getHeader(req, 'x-country'),
+      },
+    );
+
+    return successResponse(
+      {},
+      {
+        message: this.i18n.translate('auth.2fa_disable_success', this.resolveLanguage(req)),
       },
     );
   }

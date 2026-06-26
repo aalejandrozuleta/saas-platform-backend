@@ -17,6 +17,9 @@ import {
   LogoutGatewaySwagger,
   LogoutAllGatewaySwagger,
   ChangePasswordGatewaySwagger,
+  Enable2faGatewaySwagger,
+  Verify2faGatewaySwagger,
+  Disable2faGatewaySwagger,
 } from '@infrastructure/swagger/auth.swagger';
 
 /**
@@ -129,6 +132,36 @@ export class AuthController {
     }
 
     return result.body;
+  }
+
+  @Enable2faGatewaySwagger()
+  @Post('2fa/enable')
+  async enable2fa(@Req() req: Request) {
+    this.prepareRequest(req);
+    req.headers['x-user-id'] = req.user!.id;
+
+    const { body } = await this.authProxy.forward(req, '/2fa/enable');
+    return body;
+  }
+
+  @Verify2faGatewaySwagger()
+  @Post('2fa/verify')
+  async verify2fa(@Req() req: Request) {
+    this.prepareRequest(req);
+    req.headers['x-user-id'] = req.user!.id;
+
+    const { body } = await this.authProxy.forward(req, '/2fa/verify');
+    return body;
+  }
+
+  @Disable2faGatewaySwagger()
+  @Post('2fa/disable')
+  async disable2fa(@Req() req: Request) {
+    this.prepareRequest(req);
+    req.headers['x-user-id'] = req.user!.id;
+
+    const { body } = await this.authProxy.forward(req, '/2fa/disable');
+    return body;
   }
 
   /**

@@ -7,5 +7,6 @@ allowBuilds:
   '@scarf/scarf': false
   '@swc/core': true
   argon2: true
+  esbuild: set this to true or false
   prisma: true
   unrs-resolver: false

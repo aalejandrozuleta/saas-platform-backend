@@ -89,4 +89,36 @@ export class DomainErrorFactory {
       422,
     );
   }
+
+  static twoFactorAlreadyEnabled(): DomainException {
+    return DomainException.create(
+      'auth.two_factor_already_enabled',
+      ErrorCode.TWO_FACTOR_ALREADY_ENABLED,
+      409,
+    );
+  }
+
+  static twoFactorNotEnabled(): DomainException {
+    return DomainException.create(
+      'auth.two_factor_not_enabled',
+      ErrorCode.TWO_FACTOR_NOT_ENABLED,
+      422,
+    );
+  }
+
+  static invalidTotpCode(): DomainException {
+    return DomainException.create(
+      'auth.invalid_totp_code',
+      ErrorCode.INVALID_TOTP_CODE,
+      401,
+    );
+  }
+
+  static twoFactorSetupNotInitiated(): DomainException {
+    return DomainException.create(
+      'auth.two_factor_setup_not_initiated',
+      ErrorCode.TWO_FACTOR_SETUP_NOT_INITIATED,
+      422,
+    );
+  }
 }

@@ -1,4 +1,4 @@
-import { UserRole } from '@domain/enums/user-role.enum';
+import { type UserRole } from '@domain/enums/user-role.enum';
 
 /**
  * Servicio de generación de tokens.

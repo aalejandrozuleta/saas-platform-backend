@@ -7,11 +7,13 @@
  * Ejecutar:  npx prisma db seed
  * (o automáticamente en prisma migrate deploy en CI)
  */
+import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '../src/generated/prisma';
 import { ROLE_PERMISSIONS } from '../../../shared/permissions/role-permissions.map';
 import { Permission } from '../../../shared/permissions/permission.enum';
 
-const prisma = new PrismaClient();
+const adapter = new PrismaPg({ connectionString: process.env['DATABASE_URL']! });
+const prisma  = new PrismaClient({ adapter });
 
 /** Metadatos legibles para cada permiso (descripción + módulo) */
 const PERMISSION_META: Record<Permission, { description: string; module: string }> = {

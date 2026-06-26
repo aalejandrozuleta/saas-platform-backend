@@ -1,8 +1,8 @@
 import { type Provider } from '@nestjs/common';
 import { PasswordHasherService } from '@infrastructure/crypto/password-hasher.service';
-import { DOMAIN_EVENT_BUS, PASSWORD_HASHER, SESSION_CACHE, TOKEN_SERVICE, UNIT_OF_WORK } from '@domain/token/services.tokens';
+import { DOMAIN_EVENT_BUS, PASSWORD_HASHER, SESSION_CACHE, TOKEN_SERVICE, TOTP_SERVICE, UNIT_OF_WORK } from '@domain/token/services.tokens';
 import { NestDomainEventBus } from '@infrastructure/messaging/nest-domain-event.bus';
-import { DEVICE_REPOSITORY, PERMISSION_REPOSITORY, REFRESH_TOKEN_REPOSITORY, SECURITY_REPOSITORY, SESSION_REPOSITORY, USER_REPOSITORY } from '@domain/token/repositories.tokens';
+import { DEVICE_REPOSITORY, PERMISSION_REPOSITORY, RECOVERY_CODE_REPOSITORY, REFRESH_TOKEN_REPOSITORY, SECURITY_REPOSITORY, SESSION_REPOSITORY, USER_REPOSITORY } from '@domain/token/repositories.tokens';
 import { UserPrismaRepository } from '@infrastructure/persistence/prisma/user.prisma.repository';
 import { PrismaUnitOfWork } from '@infrastructure/persistence/prisma/prisma-unit-of-work';
 import { SecurityPrismaRepository } from '@infrastructure/persistence/prisma/security-prisma.repository';
@@ -16,23 +16,27 @@ import { RedisSessionCacheService } from '@infrastructure/persistence/cache/redi
 import { LoginSecurityChallengeService } from '@application/security/login-security-challenge.service';
 import { PermissionPrismaRepository } from '@infrastructure/persistence/prisma/permission.prisma.repository';
 import { UserPermissionService } from '@application/services/user-permission.service';
+import { RecoveryCodePrismaRepository } from '@infrastructure/persistence/prisma/recovery-code.prisma.repository';
+import { TotpServiceImpl } from '@infrastructure/security/totp.service';
 
 /**
  * Providers del módulo Auth
  */
 export const authProviders: Provider[] = [
-  { provide: USER_REPOSITORY,       useClass: UserPrismaRepository },
-  { provide: SECURITY_REPOSITORY,   useClass: SecurityPrismaRepository },
-  { provide: DEVICE_REPOSITORY,     useClass: DevicePrismaRepository },
-  { provide: SESSION_REPOSITORY,    useClass: SessionPrismaRepository },
-  { provide: REFRESH_TOKEN_REPOSITORY, useClass: RefreshTokenPrismaRepository },
-  { provide: PERMISSION_REPOSITORY, useClass: PermissionPrismaRepository },
-  { provide: PASSWORD_HASHER,       useClass: PasswordHasherService },
-  { provide: TOKEN_SERVICE,         useClass: JwtTokenService },
-  { provide: UNIT_OF_WORK,          useClass: PrismaUnitOfWork },
-  { provide: DOMAIN_EVENT_BUS,      useClass: NestDomainEventBus },
-  { provide: 'CLOCK',               useClass: SystemClock },
-  { provide: SESSION_CACHE,         useClass: RedisSessionCacheService },
+  { provide: USER_REPOSITORY,           useClass: UserPrismaRepository },
+  { provide: SECURITY_REPOSITORY,       useClass: SecurityPrismaRepository },
+  { provide: DEVICE_REPOSITORY,         useClass: DevicePrismaRepository },
+  { provide: SESSION_REPOSITORY,        useClass: SessionPrismaRepository },
+  { provide: REFRESH_TOKEN_REPOSITORY,  useClass: RefreshTokenPrismaRepository },
+  { provide: PERMISSION_REPOSITORY,     useClass: PermissionPrismaRepository },
+  { provide: RECOVERY_CODE_REPOSITORY,  useClass: RecoveryCodePrismaRepository },
+  { provide: PASSWORD_HASHER,           useClass: PasswordHasherService },
+  { provide: TOKEN_SERVICE,             useClass: JwtTokenService },
+  { provide: UNIT_OF_WORK,              useClass: PrismaUnitOfWork },
+  { provide: DOMAIN_EVENT_BUS,          useClass: NestDomainEventBus },
+  { provide: 'CLOCK',                   useClass: SystemClock },
+  { provide: SESSION_CACHE,             useClass: RedisSessionCacheService },
+  { provide: TOTP_SERVICE,              useClass: TotpServiceImpl },
 
   LoginPolicy,
   LoginSecurityChallengeService,

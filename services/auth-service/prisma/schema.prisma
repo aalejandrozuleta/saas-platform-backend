@@ -39,10 +39,12 @@ model User {
 }
 
 model UserSecurity {
-  userId           String           @id
-  twoFactorEnabled Boolean          @default(false)
-  twoFactorMethod  TwoFactorMethod?
-  trustedCountries String[]
+  userId              String           @id
+  twoFactorEnabled    Boolean          @default(false)
+  twoFactorMethod     TwoFactorMethod?
+  totpSecret          String?
+  totpPendingSecret   String?
+  trustedCountries    String[]
 
   lastPasswordChange DateTime?
 

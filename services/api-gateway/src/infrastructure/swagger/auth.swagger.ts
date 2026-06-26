@@ -126,3 +126,60 @@ export function ChangePasswordGatewaySwagger() {
     }),
   );
 }
+
+/** Swagger para `POST /auth/2fa/enable` */
+export function Enable2faGatewaySwagger() {
+  return applyDecorators(
+    ApiOperation({ summary: 'Iniciar activación de 2FA (TOTP)' }),
+    ApiCreatedResponse({
+      description: 'Secreto TOTP generado. Escanea el QR con tu app y confirma con /2fa/verify.',
+    }),
+    ApiUnauthorizedResponse({
+      description: 'Contraseña incorrecta o sesión inválida.',
+    }),
+    ApiConflictResponse({
+      description: '2FA ya está habilitado para este usuario.',
+    }),
+    ApiServiceUnavailableResponse({
+      description: 'Auth-service no disponible.',
+    }),
+  );
+}
+
+/** Swagger para `POST /auth/2fa/verify` */
+export function Verify2faGatewaySwagger() {
+  return applyDecorators(
+    ApiOperation({ summary: 'Confirmar código TOTP y activar 2FA' }),
+    ApiOkResponse({
+      description: '2FA activado. Se devuelven los códigos de recuperación de un solo uso.',
+    }),
+    ApiUnauthorizedResponse({
+      description: 'Código TOTP inválido o expirado.',
+    }),
+    ApiUnprocessableEntityResponse({
+      description: 'Setup de 2FA no iniciado. Llama primero a /2fa/enable.',
+    }),
+    ApiServiceUnavailableResponse({
+      description: 'Auth-service no disponible.',
+    }),
+  );
+}
+
+/** Swagger para `POST /auth/2fa/disable` */
+export function Disable2faGatewaySwagger() {
+  return applyDecorators(
+    ApiOperation({ summary: 'Desactivar 2FA del usuario autenticado' }),
+    ApiOkResponse({
+      description: '2FA desactivado. Secreto y códigos de recuperación eliminados.',
+    }),
+    ApiUnauthorizedResponse({
+      description: 'Contraseña o código TOTP incorrecto.',
+    }),
+    ApiUnprocessableEntityResponse({
+      description: '2FA no está habilitado para este usuario.',
+    }),
+    ApiServiceUnavailableResponse({
+      description: 'Auth-service no disponible.',
+    }),
+  );
+}
