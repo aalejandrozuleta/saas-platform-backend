@@ -1,0 +1,24 @@
+# NOSONAR: dev image — non-root not required for hot-reload container
+FROM node:24-alpine
+
+WORKDIR /app
+
+ENV PNPM_STORE_PATH=/pnpm-store
+
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+
+RUN corepack enable && corepack prepare --activate
+
+COPY .npmrc ./
+COPY tsconfig.base.json ./
+
+COPY services ./services
+COPY shared ./shared
+
+RUN pnpm install --frozen-lockfile --ignore-scripts
+
+WORKDIR /app/services/notification-service
+
+EXPOSE 3003
+
+CMD ["node_modules/.bin/nest", "start", "notification-service", "--watch"]

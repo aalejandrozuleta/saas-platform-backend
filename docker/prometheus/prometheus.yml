@@ -26,6 +26,17 @@ scrape_configs:
           service: auth-service
 
   # ============================
+  # NOTIFICATION SERVICE
+  # ============================
+  - job_name: "notification-service"
+    metrics_path: /notifications/metrics
+    static_configs:
+      - targets:
+          - notification-service:3003
+        labels:
+          service: notification-service
+
+  # ============================
   # POSTGRES EXPORTER
   # ============================
   - job_name: "postgres-exporter"

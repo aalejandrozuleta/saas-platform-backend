@@ -32,6 +32,16 @@
         "tsConfigPath": "services/config-service/tsconfig.json",
         "deleteOutDir": true
       }
+    },
+    "notification-service": {
+      "type": "application",
+      "root": "services/notification-service",
+      "entryFile": "main",
+      "sourceRoot": "services/notification-service/src",
+      "compilerOptions": {
+        "tsConfigPath": "services/notification-service/tsconfig.build.json",
+        "deleteOutDir": true
+      }
     }
   }
 }

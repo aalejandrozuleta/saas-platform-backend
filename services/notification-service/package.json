@@ -1,0 +1,58 @@
+{
+  "name": "notification-service",
+  "version": "0.0.1",
+  "description": "Microservicio de notificaciones: email (Resend) y WebSocket broadcast con colas BullMQ",
+  "author": "",
+  "private": true,
+  "license": "UNLICENSED",
+  "scripts": {
+    "build": "nest build notification-service",
+    "start": "node dist/main.js",
+    "dev": "nest start notification-service --watch",
+    "start:debug": "nest start --debug --watch",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "test:cov": "jest --config jest.config.cjs --coverage",
+    "test": "jest --config jest.config.cjs",
+    "test:watch": "jest --watch --config jest.config.cjs",
+    "test:watch:cov": "jest --watch --coverage --config jest.config.cjs"
+  },
+  "dependencies": {
+    "@nestjs/bullmq": "^11.0.2",
+    "@nestjs/common": "11.1.17",
+    "@nestjs/config": "4.0.3",
+    "@nestjs/core": "11.1.17",
+    "@nestjs/event-emitter": "^3.0.1",
+    "@nestjs/platform-express": "11.1.17",
+    "@nestjs/platform-socket.io": "11.1.17",
+    "@nestjs/schedule": "^6.1.1",
+    "@nestjs/swagger": "^11.2.6",
+    "@nestjs/websockets": "11.1.17",
+    "@saas/shared": "workspace:*",
+    "bullmq": "^5.56.4",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.15.1",
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^17.2.4",
+    "express": "^5.2.1",
+    "helmet": "^8.1.0",
+    "ioredis": "^5.10.0",
+    "prom-client": "^15.1.3",
+    "reflect-metadata": "^0.2.2",
+    "resend": "^4.7.0",
+    "rxjs": "^7.8.2",
+    "socket.io": "^4.8.1",
+    "swagger-ui-express": "^5.0.1",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "^11.0.16",
+    "@nestjs/testing": "11.1.17",
+    "@types/cookie-parser": "^1.4.10",
+    "@types/express": "^5.0.6",
+    "typescript": "^5.9.3"
+  },
+  "files": [
+    "dist",
+    "package.json"
+  ]
+}

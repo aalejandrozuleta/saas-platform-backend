@@ -47,6 +47,41 @@ services:
     networks:
       - saas-dev
 
+  notification-service:
+    container_name: notification-service-dev
+    init: true
+    restart: unless-stopped
+    build:
+      context: ..
+      dockerfile: services/notification-service/Dockerfile.dev
+    env_file:
+      - ../services/notification-service/.env
+    volumes:
+      - ../services/notification-service:/app/services/notification-service
+      - /app/services/notification-service/node_modules
+      - ../shared:/app/shared
+      - /app/node_modules
+      - pnpm-store:/pnpm-store
+    environment:
+      PNPM_STORE_PATH: /pnpm-store
+      SERVICE_NAME: notification-service
+      REDIS_HOST: redis
+    ports:
+      - "3003:3003"
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3003/notifications/metrics"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    stop_grace_period: 15s
+    logging: *default-logging
+    networks:
+      - saas-dev
+
   config-service:
     container_name: config-service-dev
     init: true

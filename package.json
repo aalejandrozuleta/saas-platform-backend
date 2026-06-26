@@ -11,6 +11,7 @@
     "dev:down": "docker compose -f docker/docker-compose.dev.yml down",
     "dev:reset": "docker compose -f docker/docker-compose.dev.yml down -v",
     "dev:auth": "nest start auth-service --watch",
+    "dev:notification": "pnpm --filter notification-service dev",
     "prod:up": "docker compose -f docker/docker-compose.prod.yml up --build -d",
     "prod:down": "docker compose -f docker/docker-compose.prod.yml down",
     "sonar:local": "dotenv -e .env.sonar -- sonar-scanner",
