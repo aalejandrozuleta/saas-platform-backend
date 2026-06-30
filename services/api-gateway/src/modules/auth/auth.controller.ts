@@ -28,6 +28,8 @@ import {
   GetTrustedCountriesGatewaySwagger,
   AddTrustedCountryGatewaySwagger,
   RemoveTrustedCountryGatewaySwagger,
+  VerifyEmailGatewaySwagger,
+  ResendVerificationGatewaySwagger,
 } from '@infrastructure/swagger/auth.swagger';
 
 /**
@@ -43,6 +45,24 @@ import {
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authProxy: AuthProxy) { }
+
+  @VerifyEmailGatewaySwagger()
+  @PublicRoute()
+  @Post('verify-email')
+  async verifyEmail(@Req() req: Request) {
+    this.prepareRequest(req);
+    const { body } = await this.authProxy.forward(req, '/verify-email');
+    return body;
+  }
+
+  @ResendVerificationGatewaySwagger()
+  @PublicRoute()
+  @Post('resend-verification')
+  async resendVerification(@Req() req: Request) {
+    this.prepareRequest(req);
+    const { body } = await this.authProxy.forward(req, '/resend-verification');
+    return body;
+  }
 
   @RegisterGatewaySwagger()
   @PublicRoute()

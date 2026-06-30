@@ -241,3 +241,23 @@ export function RemoveTrustedCountryGatewaySwagger() {
     ApiServiceUnavailableResponse({ description: 'Auth-service no disponible.' }),
   );
 }
+
+/** Swagger para `POST /auth/verify-email` */
+export function VerifyEmailGatewaySwagger() {
+  return applyDecorators(
+    ApiOperation({ summary: 'Verificar email con el token enviado al correo' }),
+    ApiOkResponse({ description: 'Email verificado. Ya puedes iniciar sesión.' }),
+    ApiBadRequestResponse({ description: 'Token inválido o expirado.' }),
+    ApiServiceUnavailableResponse({ description: 'Auth-service no disponible.' }),
+  );
+}
+
+/** Swagger para `POST /auth/resend-verification` */
+export function ResendVerificationGatewaySwagger() {
+  return applyDecorators(
+    ApiOperation({ summary: 'Reenviar email de activación (usuarios sin verificar)' }),
+    ApiOkResponse({ description: 'Email enviado si la cuenta existe y no está verificada.' }),
+    ApiConflictResponse({ description: 'El email ya está verificado.' }),
+    ApiServiceUnavailableResponse({ description: 'Auth-service no disponible.' }),
+  );
+}
