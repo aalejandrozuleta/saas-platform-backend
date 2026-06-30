@@ -24,8 +24,13 @@
     "typecheck": "pnpm -r exec tsc --noEmit",
     "docs:code": "pnpm -r run docs"
   },
+  "dependencies": {
+    "@react-email/render": "^1.1.2",
+    "react": "^19.1.0"
+  },
   "devDependencies": {
     "@nestjs/cli": "^11.0.16",
+    "@types/react": "^19.1.8",
     "@swc/core": "^1.15.18",
     "@swc/jest": "^0.2.39",
     "@types/jest": "^30.0.0",

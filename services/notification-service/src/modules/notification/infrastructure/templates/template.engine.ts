@@ -1,43 +1,47 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { render } from '@react-email/render';
 
-/** Templates disponibles en la plataforma */
-const TEMPLATES: Record<string, string> = {
-  welcome: `
-    <h1>Bienvenido, {{name}}!</h1>
-    <p>Tu cuenta en la plataforma ha sido creada exitosamente.</p>
-    <p>Puedes iniciar sesión en: <a href="{{loginUrl}}">{{loginUrl}}</a></p>
-  `,
-  maintenance: `
-    <h1>Aviso de Mantenimiento</h1>
-    <p>{{message}}</p>
-    <p>Fecha programada: <strong>{{scheduledAt}}</strong></p>
-    <p>Duración estimada: <strong>{{duration}}</strong></p>
-  `,
-  'password-changed': `
-    <h1>Tu contraseña fue cambiada</h1>
-    <p>Si no realizaste este cambio, contáctanos de inmediato.</p>
-    <p>Fecha: {{changedAt}}</p>
-    <p>IP: {{ip}}</p>
-  `,
-  'otp-code': `
-    <h1>Código de verificación</h1>
-    <p>Tu código es: <strong style="font-size:24px;letter-spacing:4px">{{code}}</strong></p>
-    <p>Expira en {{expiresIn}} minutos.</p>
-  `,
+import { WelcomeEmail } from './emails/WelcomeEmail';
+import { PasswordChangedEmail } from './emails/PasswordChangedEmail';
+import { TwoFactorEnabledEmail } from './emails/TwoFactorEnabledEmail';
+import { TwoFactorDisabledEmail } from './emails/TwoFactorDisabledEmail';
+import { AccountLockedEmail } from './emails/AccountLockedEmail';
+import { MaintenanceEmail } from './emails/MaintenanceEmail';
+import { OtpCodeEmail } from './emails/OtpCodeEmail';
+
+type Vars = Record<string, unknown>;
+
+function s(v: Vars, key: string, fallback = '—'): string {
+  return (v[key] as string | undefined) ?? fallback;
+}
+
+const TEMPLATES: Record<string, (v: Vars) => React.ReactElement> = {
+  welcome: (v) => WelcomeEmail(s(v, 'email'), s(v, 'registeredAt'), s(v, 'ip'), s(v, 'country')),
+
+  'password-changed': (v) => PasswordChangedEmail(s(v, 'email'), s(v, 'changedAt'), s(v, 'ip'), s(v, 'country')),
+
+  '2fa-enabled': (v) => TwoFactorEnabledEmail(s(v, 'email'), s(v, 'enabledAt'), s(v, 'ip'), s(v, 'country')),
+
+  '2fa-disabled': (v) => TwoFactorDisabledEmail(s(v, 'email'), s(v, 'disabledAt'), s(v, 'ip'), s(v, 'country')),
+
+  'account-locked': (v) => AccountLockedEmail(s(v, 'blockedUntil', 'Próximos 30 minutos'), s(v, 'ip'), s(v, 'country')),
+
+  maintenance: (v) =>
+    MaintenanceEmail(
+      s(v, 'message', 'La plataforma Arlok tendrá un período de mantenimiento planificado.'),
+      s(v, 'scheduledAt'),
+      s(v, 'duration'),
+    ),
+
+  'otp-code': (v) => OtpCodeEmail(s(v, 'code', '------'), s(v, 'expiresIn', '10')),
 };
 
 @Injectable()
 export class TemplateEngine {
-  render(template: string, variables: Record<string, unknown> = {}): string {
-    const html = TEMPLATES[template];
-
-    if (!html) {
-      throw new NotFoundException(`Template '${template}' no encontrado`);
-    }
-
-    return html.replace(/\{\{(\w+)\}\}/g, (_, key: string) =>
-      variables[key] !== undefined ? String(variables[key]) : `{{${key}}}`,
-    );
+  async render(template: string, variables: Vars = {}): Promise<string> {
+    const factory = TEMPLATES[template];
+    if (!factory) throw new NotFoundException(`Template '${template}' no encontrado`);
+    return render(factory(variables));
   }
 
   list(): string[] {

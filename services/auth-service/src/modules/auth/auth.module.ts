@@ -1,5 +1,4 @@
 import { RegisterUserUseCase } from '@application/use-cases/register-user.use-case';
-import { UserPermissionService } from '@application/services/user-permission.service';
 import { AuthController } from '@infrastructure/controllers/auth.controller';
 import { Module } from '@nestjs/common';
 import { I18nModule } from '@infrastructure/i18n/i18n.module';
@@ -24,10 +23,11 @@ import { AddTrustedCountryUseCase } from '@application/use-cases/add-trusted-cou
 import { RemoveTrustedCountryUseCase } from '@application/use-cases/remove-trusted-country.use-case';
 import { GetSessionsUseCase } from '@application/use-cases/get-sessions.use-case';
 import { RevokeSessionUseCase } from '@application/use-cases/revoke-session.use-case';
-
 import { JwtAuthGuard } from '@infrastructure/security/jwt-auth.guard';
-import { authProviders } from './auth.providers';
+import { NotificationClient } from '@infrastructure/notifications/notification.client';
+import { NotificationListener } from '@infrastructure/messaging/listeners/notification.listener';
 
+import { authProviders } from './auth.providers';
 /**
  * Módulo de Autenticación
  */
@@ -61,6 +61,8 @@ import { authProviders } from './auth.providers';
     PasswordChangeListener,
     LogoutListener,
     TwoFactorListener,
+    NotificationClient,
+    NotificationListener,
   ],
 })
 export class AuthModule {}

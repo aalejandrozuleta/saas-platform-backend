@@ -24,6 +24,8 @@ export const envSchema = z.object({
   REDIS_HOST: z.string(),
   REDIS_PORT: z.coerce.number(),
   REDIS_PASSWORD: z.string().optional(),
+
+  NOTIFICATION_SERVICE_URL: z.string().default('http://notification-service:3003'),
 });
 
 export type EnvVars = z.infer<typeof envSchema>;

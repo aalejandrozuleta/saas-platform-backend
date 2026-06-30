@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Resend } from 'resend';
 
 import { EnvService } from '@config/env/env.service';
+
 import { EmailNotificationPayload } from '../../domain/events/email-notification.event';
 import { TemplateEngine } from '../templates/template.engine';
 
@@ -18,7 +19,7 @@ export class EmailChannel {
   }
 
   async send(payload: EmailNotificationPayload): Promise<void> {
-    const html = this.templateEngine.render(payload.template, payload.variables ?? {});
+    const html = await this.templateEngine.render(payload.template, payload.variables ?? {});
     const from = this.env.get('RESEND_FROM_EMAIL');
     const to = Array.isArray(payload.to) ? payload.to : [payload.to];
 

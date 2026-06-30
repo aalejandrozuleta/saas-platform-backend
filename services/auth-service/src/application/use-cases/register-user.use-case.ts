@@ -14,11 +14,13 @@ import {
   SECURITY_REPOSITORY,
   USER_REPOSITORY,
 } from '@domain/token/repositories.tokens';
-import { AUDIT_LOGGER, PASSWORD_HASHER } from '@domain/token/services.tokens';
+import { AUDIT_LOGGER, DOMAIN_EVENT_BUS, PASSWORD_HASHER } from '@domain/token/services.tokens';
 import { SecurityRepository } from '@domain/repositories/security.repository';
 import { AuthActivityReportFactory } from '@application/audit/auth-activity-report.factory';
 import { DomainErrorFactory } from '@domain/errors/domain-error.factory';
 import { DeviceRepository } from '@domain/repositories/device.repository';
+import { DomainEventBus } from '@application/events/domain-event.bus';
+import { UserRegisteredEvent } from '@application/events/user/user-registered.event';
 
 /**
  * Caso de uso para registrar usuario
@@ -42,6 +44,9 @@ export class RegisterUserUseCase {
 
     @Inject(PLATFORM_LOGGER)
     private readonly logger: PlatformLogger,
+
+    @Inject(DOMAIN_EVENT_BUS)
+    private readonly eventBus: DomainEventBus,
   ) { }
 
   async execute(email: string, password: string, context: {
@@ -102,6 +107,13 @@ export class RegisterUserUseCase {
       userId: user.id,
       email,
     });
+
+    this.eventBus.publish(
+      new UserRegisteredEvent(user.id, email, {
+        ip: context.ip,
+        country: context.country,
+      }),
+    );
 
     return user;
   }
