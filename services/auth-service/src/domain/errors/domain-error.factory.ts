@@ -169,4 +169,12 @@ export class DomainErrorFactory {
       400,
     );
   }
+
+  static emailAlreadyVerified(): DomainException {
+    return DomainException.create(
+      'auth.email_already_verified',
+      ErrorCode.EMAIL_ALREADY_VERIFIED,
+      409,
+    );
+  }
 }

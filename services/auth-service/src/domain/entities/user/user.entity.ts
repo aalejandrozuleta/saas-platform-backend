@@ -128,6 +128,14 @@ export class User {
     );
   }
 
+  requestVerification(token: string, expiresAt: Date): User {
+    return new User({
+      ...this.props,
+      emailVerificationToken: token,
+      emailVerificationExpiresAt: expiresAt,
+    });
+  }
+
   verifyEmail(): User {
     return new User({
       ...this.props,

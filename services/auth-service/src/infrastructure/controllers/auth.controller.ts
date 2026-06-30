@@ -45,6 +45,9 @@ import { RefreshTokenUseCase } from '@application/use-cases/refresh-token.use-ca
 import { VerifyEmailUseCase } from '@application/use-cases/verify-email.use-case';
 import { VerifyEmailDto } from '@application/dto/verify-email/verify-email.dto';
 import { VerifyEmailSwagger } from '@infrastructure/swagger/verify-email.swagger';
+import { ResendVerificationUseCase } from '@application/use-cases/resend-verification.use-case';
+import { ResendVerificationDto } from '@application/dto/resend-verification/resend-verification.dto';
+import { ResendVerificationSwagger } from '@infrastructure/swagger/resend-verification.swagger';
 
 /**
  * Controller de autenticación
@@ -75,6 +78,7 @@ export class AuthController {
     private readonly getSessionsUseCase: GetSessionsUseCase,
     private readonly revokeSessionUseCase: RevokeSessionUseCase,
     private readonly verifyEmailUseCase: VerifyEmailUseCase,
+    private readonly resendVerificationUseCase: ResendVerificationUseCase,
     private readonly i18n: I18nService,
   ) { }
 
@@ -93,6 +97,22 @@ export class AuthController {
       {},
       {
         message: this.i18n.translate('auth.email_verified', this.resolveLanguage(req)),
+      },
+    );
+  }
+
+  @Post('resend-verification')
+  @ResendVerificationSwagger()
+  async resendVerification(
+    @Body() dto: ResendVerificationDto,
+    @Req() req: Request,
+  ) {
+    await this.resendVerificationUseCase.execute(dto.email);
+
+    return successResponse(
+      {},
+      {
+        message: this.i18n.translate('auth.verification_email_sent', this.resolveLanguage(req)),
       },
     );
   }

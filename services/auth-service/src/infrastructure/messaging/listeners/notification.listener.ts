@@ -9,6 +9,7 @@ import { UserRepository } from '@domain/repositories/user.repository';
 import { USER_REPOSITORY } from '@domain/token/repositories.tokens';
 import { NotificationClient } from '@infrastructure/notifications/notification.client';
 import { EnvService } from '@config/env/env.service';
+import { VerificationEmailRequestedEvent } from '@application/events/user/verification-email-requested.event';
 
 /**
  * Escucha eventos de dominio y envía emails vía notification-service.
@@ -118,6 +119,24 @@ export class NotificationListener {
         disabledAt: now,
         ip: event.context.ip,
         country: event.context.country ?? '—',
+      },
+    });
+  }
+
+  @OnEvent(VerificationEmailRequestedEvent.name)
+  handleVerificationEmailRequested(event: VerificationEmailRequestedEvent): void {
+    const appUrl = this.envService.get('APP_URL');
+    const verificationUrl = `${appUrl}/verify-email?token=${event.verificationToken}`;
+    this.notificationClient.sendEmail({
+      to: event.email,
+      subject: 'Activa tu cuenta Arlok',
+      template: 'welcome',
+      variables: {
+        email: event.email,
+        registeredAt: new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' }),
+        ip: '—',
+        country: '—',
+        verificationUrl,
       },
     });
   }
