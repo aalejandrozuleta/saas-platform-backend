@@ -8,6 +8,7 @@ import { TwoFactorDisabledEvent } from '@application/events/two-factor/two-facto
 import { UserRepository } from '@domain/repositories/user.repository';
 import { USER_REPOSITORY } from '@domain/token/repositories.tokens';
 import { NotificationClient } from '@infrastructure/notifications/notification.client';
+import { EnvService } from '@config/env/env.service';
 
 /**
  * Escucha eventos de dominio y envía emails vía notification-service.
@@ -20,6 +21,7 @@ export class NotificationListener {
 
   constructor(
     private readonly notificationClient: NotificationClient,
+    private readonly envService: EnvService,
     @Inject(USER_REPOSITORY)
     private readonly userRepository: UserRepository,
   ) {}
@@ -27,15 +29,18 @@ export class NotificationListener {
   @OnEvent(UserRegisteredEvent.name)
   handleUserRegistered(event: UserRegisteredEvent): void {
     const now = new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' });
+    const appUrl = this.envService.get('APP_URL');
+    const verificationUrl = `${appUrl}/verify-email?token=${event.verificationToken}`;
     this.notificationClient.sendEmail({
       to: event.email,
-      subject: 'Bienvenido a Arlok — Tu cuenta está lista',
+      subject: 'Activa tu cuenta Arlok',
       template: 'welcome',
       variables: {
         email: event.email,
         registeredAt: now,
         ip: event.context.ip,
         country: event.context.country ?? '—',
+        verificationUrl,
       },
     });
   }

@@ -153,4 +153,20 @@ export class DomainErrorFactory {
       404,
     );
   }
+
+  static emailNotVerified(): DomainException {
+    return DomainException.create(
+      'auth.email_not_verified',
+      ErrorCode.EMAIL_NOT_VERIFIED,
+      403,
+    );
+  }
+
+  static invalidVerificationToken(): DomainException {
+    return DomainException.create(
+      'auth.invalid_verification_token',
+      ErrorCode.INVALID_VERIFICATION_TOKEN,
+      400,
+    );
+  }
 }

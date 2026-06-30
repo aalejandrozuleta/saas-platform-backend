@@ -42,6 +42,9 @@ import { GetTrustedCountriesSwagger, AddTrustedCountrySwagger, RemoveTrustedCoun
 import { GetSessionsSwagger, RevokeSessionSwagger } from '@infrastructure/swagger/sessions.swagger';
 import { ApiTags } from '@nestjs/swagger';
 import { RefreshTokenUseCase } from '@application/use-cases/refresh-token.use-case';
+import { VerifyEmailUseCase } from '@application/use-cases/verify-email.use-case';
+import { VerifyEmailDto } from '@application/dto/verify-email/verify-email.dto';
+import { VerifyEmailSwagger } from '@infrastructure/swagger/verify-email.swagger';
 
 /**
  * Controller de autenticación
@@ -71,8 +74,28 @@ export class AuthController {
     private readonly removeTrustedCountryUseCase: RemoveTrustedCountryUseCase,
     private readonly getSessionsUseCase: GetSessionsUseCase,
     private readonly revokeSessionUseCase: RevokeSessionUseCase,
+    private readonly verifyEmailUseCase: VerifyEmailUseCase,
     private readonly i18n: I18nService,
   ) { }
+
+  /**
+   * Verifica el email del usuario con el token enviado al correo
+   */
+  @Post('verify-email')
+  @VerifyEmailSwagger()
+  async verifyEmail(
+    @Body() dto: VerifyEmailDto,
+    @Req() req: Request,
+  ) {
+    await this.verifyEmailUseCase.execute(dto.token);
+
+    return successResponse(
+      {},
+      {
+        message: this.i18n.translate('auth.email_verified', this.resolveLanguage(req)),
+      },
+    );
+  }
 
   /**
    * Registro de usuario

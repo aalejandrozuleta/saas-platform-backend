@@ -6,5 +6,6 @@ export class UserRegisteredEvent {
       ip: string;
       country?: string;
     },
+    public readonly verificationToken: string,
   ) {}
 }

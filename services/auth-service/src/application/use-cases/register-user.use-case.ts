@@ -1,4 +1,4 @@
-import { randomUUID } from 'node:crypto';
+import { randomUUID, randomBytes } from 'node:crypto';
 
 import { UserRepository } from '@domain/repositories/user.repository';
 import { EmailVO } from '@domain/value-objects/email.vo';
@@ -21,6 +21,7 @@ import { DomainErrorFactory } from '@domain/errors/domain-error.factory';
 import { DeviceRepository } from '@domain/repositories/device.repository';
 import { DomainEventBus } from '@application/events/domain-event.bus';
 import { UserRegisteredEvent } from '@application/events/user/user-registered.event';
+import { EnvService } from '@config/env/env.service';
 
 /**
  * Caso de uso para registrar usuario
@@ -47,6 +48,8 @@ export class RegisterUserUseCase {
 
     @Inject(DOMAIN_EVENT_BUS)
     private readonly eventBus: DomainEventBus,
+
+    private readonly envService: EnvService,
   ) { }
 
   async execute(email: string, password: string, context: {
@@ -83,10 +86,16 @@ export class RegisterUserUseCase {
 
     const hash = await this.passwordHasher.hash(passwordVO.getValue());
 
+    const verificationToken = randomBytes(32).toString('hex');
+    const ttlSeconds = this.envService.get('EMAIL_VERIFICATION_TTL');
+    const expiresAt = new Date(Date.now() + ttlSeconds * 1000);
+
     const user = User.create({
       id: randomUUID(),
       email: emailVO,
       passwordHash: hash,
+      emailVerificationToken: verificationToken,
+      emailVerificationExpiresAt: expiresAt,
     });
 
     await this.userRepository.save(user);
@@ -109,10 +118,12 @@ export class RegisterUserUseCase {
     });
 
     this.eventBus.publish(
-      new UserRegisteredEvent(user.id, email, {
-        ip: context.ip,
-        country: context.country,
-      }),
+      new UserRegisteredEvent(
+        user.id,
+        email,
+        { ip: context.ip, country: context.country },
+        verificationToken,
+      ),
     );
 
     return user;

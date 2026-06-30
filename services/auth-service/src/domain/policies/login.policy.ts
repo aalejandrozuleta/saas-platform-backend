@@ -15,8 +15,12 @@ export class LoginPolicy {
 
   /**
    * Valida que el usuario esté activo.
+   * PENDING → email no verificado (403), BLOCKED → credenciales inválidas (401).
    */
   validateUserStatus(status: UserStatus): void {
+    if (status === UserStatus.PENDING) {
+      throw DomainErrorFactory.emailNotVerified();
+    }
     if (status !== UserStatus.ACTIVE) {
       throw DomainErrorFactory.invalidCredentials();
     }

@@ -29,6 +29,8 @@ export class UserMapper {
     lockoutCount: number;
     lastLoginAt: Date | null;
     createdAt: Date;
+    emailVerificationToken?: string | null;
+    emailVerificationExpiresAt?: Date | null;
   }): User {
     const props: UserProps = {
       id: raw.id,
@@ -42,6 +44,8 @@ export class UserMapper {
       lockoutCount: raw.lockoutCount,
       lastLoginAt: raw.lastLoginAt ?? undefined,
       createdAt: raw.createdAt,
+      emailVerificationToken: raw.emailVerificationToken ?? undefined,
+      emailVerificationExpiresAt: raw.emailVerificationExpiresAt ?? undefined,
     };
 
     return User.fromPersistence(props);
@@ -59,6 +63,8 @@ export class UserMapper {
     emailVerified: boolean;
     failedLoginAttempts: number;
     blockedUntil?: Date;
+    emailVerificationToken?: string | null;
+    emailVerificationExpiresAt?: Date | null;
   } {
     return {
       id: user.id,
@@ -69,6 +75,8 @@ export class UserMapper {
       emailVerified: user.emailVerified,
       failedLoginAttempts: user.failedLoginAttempts,
       blockedUntil: user.blockedUntil,
+      emailVerificationToken: user.emailVerificationToken ?? null,
+      emailVerificationExpiresAt: user.emailVerificationExpiresAt ?? null,
     };
   }
 

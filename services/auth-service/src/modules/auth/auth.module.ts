@@ -23,6 +23,7 @@ import { AddTrustedCountryUseCase } from '@application/use-cases/add-trusted-cou
 import { RemoveTrustedCountryUseCase } from '@application/use-cases/remove-trusted-country.use-case';
 import { GetSessionsUseCase } from '@application/use-cases/get-sessions.use-case';
 import { RevokeSessionUseCase } from '@application/use-cases/revoke-session.use-case';
+import { VerifyEmailUseCase } from '@application/use-cases/verify-email.use-case';
 import { JwtAuthGuard } from '@infrastructure/security/jwt-auth.guard';
 import { NotificationClient } from '@infrastructure/notifications/notification.client';
 import { NotificationListener } from '@infrastructure/messaging/listeners/notification.listener';
@@ -54,6 +55,7 @@ import { authProviders } from './auth.providers';
     RemoveTrustedCountryUseCase,
     GetSessionsUseCase,
     RevokeSessionUseCase,
+    VerifyEmailUseCase,
     ...authProviders,
     JwtAuthGuard,
     AuthActivityListener,

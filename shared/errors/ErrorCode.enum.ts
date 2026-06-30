@@ -42,4 +42,8 @@ export enum ErrorCode {
 
   // 🔹 Sessions
   SESSION_NOT_FOUND = 'SESSION_NOT_FOUND',
+
+  // 🔹 Email verification
+  EMAIL_NOT_VERIFIED = 'EMAIL_NOT_VERIFIED',
+  INVALID_VERIFICATION_TOKEN = 'INVALID_VERIFICATION_TOKEN',
 }

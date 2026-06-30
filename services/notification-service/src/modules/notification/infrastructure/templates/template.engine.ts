@@ -16,7 +16,7 @@ function s(v: Vars, key: string, fallback = '—'): string {
 }
 
 const TEMPLATES: Record<string, (v: Vars) => React.ReactElement> = {
-  welcome: (v) => WelcomeEmail(s(v, 'email'), s(v, 'registeredAt'), s(v, 'ip'), s(v, 'country')),
+  welcome: (v) => WelcomeEmail(s(v, 'email'), s(v, 'registeredAt'), s(v, 'ip'), s(v, 'country'), (v['verificationUrl'] as string | undefined)),
 
   'password-changed': (v) => PasswordChangedEmail(s(v, 'email'), s(v, 'changedAt'), s(v, 'ip'), s(v, 'country')),
 

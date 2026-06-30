@@ -36,6 +36,12 @@ export interface UserProps {
   /** Último login exitoso */
   lastLoginAt?: Date;
 
+  /** Token de verificación de email (raw, expira en EMAIL_VERIFICATION_TTL) */
+  emailVerificationToken?: string;
+
+  /** Fecha de expiración del token de verificación */
+  emailVerificationExpiresAt?: Date;
+
   /** Fecha de creación */
   createdAt: Date;
 }

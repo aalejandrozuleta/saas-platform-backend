@@ -32,9 +32,25 @@ export class UserPrismaRepository implements UserRepository {
     return user ? UserMapper.toDomain(user) : null;
   }
 
+  async findByVerificationToken(token: string): Promise<User | null> {
+    const user = await this.prisma.user.findUnique({
+      where: { emailVerificationToken: token },
+    });
+
+    return user ? UserMapper.toDomain(user) : null;
+  }
+
   async save(user: User): Promise<void> {
     await this.prisma.user.create({
       data: UserMapper.toPersistence(user),
+    });
+  }
+
+  async update(user: User): Promise<void> {
+    const data = UserMapper.toPersistence(user);
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data,
     });
   }
 

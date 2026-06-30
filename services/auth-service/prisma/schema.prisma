@@ -25,9 +25,12 @@ model User {
   blockedUntil        DateTime?
   lockoutCount        Int       @default(0)
 
+  emailVerificationToken     String?   @unique
+  emailVerificationExpiresAt DateTime?
+
   lastLoginAt DateTime?
   createdAt   DateTime  @default(now())
-  updatedAt DateTime @updatedAt
+  updatedAt   DateTime  @updatedAt
 
   // Relaciones
   security         UserSecurity?

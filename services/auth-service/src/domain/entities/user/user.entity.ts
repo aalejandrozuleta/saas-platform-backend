@@ -18,14 +18,18 @@ export class User {
     email: EmailVO;
     passwordHash: string;
     role?: UserRole;
+    emailVerificationToken?: string;
+    emailVerificationExpiresAt?: Date;
   }): User {
     return new User({
       id: params.id,
       email: params.email,
       passwordHash: params.passwordHash,
       role: params.role ?? UserRole.CUSTOMER,
-      status: UserStatus.ACTIVE,
+      status: UserStatus.PENDING,
       emailVerified: false,
+      emailVerificationToken: params.emailVerificationToken,
+      emailVerificationExpiresAt: params.emailVerificationExpiresAt,
       failedLoginAttempts: 0,
       lockoutCount: 0,
       createdAt: new Date(),
@@ -85,6 +89,14 @@ export class User {
     return this.props.createdAt;
   }
 
+  get emailVerificationToken(): string | undefined {
+    return this.props.emailVerificationToken;
+  }
+
+  get emailVerificationExpiresAt(): Date | undefined {
+    return this.props.emailVerificationExpiresAt;
+  }
+
   // ===== Reglas de dominio =====
 
   isBlocked(): boolean {
@@ -114,6 +126,21 @@ export class User {
       this.props.blockedUntil !== undefined &&
       this.props.blockedUntil <= now
     );
+  }
+
+  verifyEmail(): User {
+    return new User({
+      ...this.props,
+      emailVerified: true,
+      status: UserStatus.ACTIVE,
+      emailVerificationToken: undefined,
+      emailVerificationExpiresAt: undefined,
+    });
+  }
+
+  isEmailVerificationTokenExpired(now: Date): boolean {
+    if (!this.props.emailVerificationExpiresAt) return true;
+    return this.props.emailVerificationExpiresAt <= now;
   }
 
   /**
