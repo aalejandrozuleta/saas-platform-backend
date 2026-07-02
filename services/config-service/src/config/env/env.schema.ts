@@ -16,6 +16,9 @@ export const envSchema = z.object({
   REDIS_PASSWORD: z.string().optional(),
 
   CONFIG_CACHE_TTL: z.coerce.number().default(300),
+
+  /** Secreto compartido con el API Gateway; ver InternalServiceGuard. */
+  INTERNAL_SERVICE_SECRET: z.string().min(32),
 });
 
 export type EnvVars = z.infer<typeof envSchema>;

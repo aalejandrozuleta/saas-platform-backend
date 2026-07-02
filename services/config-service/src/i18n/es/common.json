@@ -1,4 +1,5 @@
 {
   "common.internal_error": "Ocurrió un error interno. Inténtalo de nuevo.",
-  "common.validation_error": "La solicitud contiene datos inválidos"
+  "common.validation_error": "La solicitud contiene datos inválidos",
+  "common.unauthorized": "Credenciales de servicio interno ausentes o inválidas"
 }

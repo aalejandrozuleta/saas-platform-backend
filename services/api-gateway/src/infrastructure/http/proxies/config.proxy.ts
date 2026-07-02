@@ -1,14 +1,5 @@
-import {
-  HttpException,
-  HttpStatus,
-  Inject,
-  Injectable,
-} from '@nestjs/common';
-import {
-  AxiosError,
-  type AxiosRequestConfig,
-  type Method,
-} from 'axios';
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { AxiosError, type AxiosRequestConfig, type Method } from 'axios';
 import type { Request } from 'express';
 import {
   ErrorCode,
@@ -54,7 +45,10 @@ export class ConfigProxy {
         url: `${this.CONFIG_BASE_PATH}${path}`,
         method: req.method as Method,
         data: req.body,
-        headers: forwardHeaders(req),
+        headers: {
+          ...forwardHeaders(req),
+          'x-internal-api-key': this.env.get('INTERNAL_SERVICE_SECRET'),
+        },
       };
 
       const response = await this.client.requestTyped<T>(config);
@@ -66,14 +60,23 @@ export class ConfigProxy {
 
   private handleForwardError(req: Request, path: string, error: unknown): never {
     if (
-      typeof error === 'object' && error !== null &&
-      'code' in error && error.code === 'EOPENBREAKER'
+      typeof error === 'object' &&
+      error !== null &&
+      'code' in error &&
+      error.code === 'EOPENBREAKER'
     ) {
       this.logger.warn('Config service circuit open', {
-        event: 'config.upstream.circuit_open', path, method: req.method,
+        event: 'config.upstream.circuit_open',
+        path,
+        method: req.method,
       });
       throw new HttpException(
-        buildGatewayErrorResponse(req, HttpStatus.SERVICE_UNAVAILABLE, ErrorCode.SERVICE_UNAVAILABLE, 'common.config_service_temporarily_unavailable'),
+        buildGatewayErrorResponse(
+          req,
+          HttpStatus.SERVICE_UNAVAILABLE,
+          ErrorCode.SERVICE_UNAVAILABLE,
+          'common.config_service_temporarily_unavailable',
+        ),
         HttpStatus.SERVICE_UNAVAILABLE,
       );
     }
@@ -81,26 +84,51 @@ export class ConfigProxy {
     if (error instanceof AxiosError) {
       if (error.response) {
         if (error.response.status >= 500) {
-          this.logger.warn('Config service 5xx', { event: 'config.upstream.5xx', path, method: req.method, status: error.response.status });
+          this.logger.warn('Config service 5xx', {
+            event: 'config.upstream.5xx',
+            path,
+            method: req.method,
+            status: error.response.status,
+          });
         }
         if (isApiErrorResponse(error.response.data)) {
           throw new HttpException(error.response.data, error.response.status);
         }
         throw new HttpException(
-          buildGatewayErrorResponse(req, error.response.status, getErrorCodeFromHttpStatus(error.response.status), 'common.upstream_error', { details: error.response.data }),
+          buildGatewayErrorResponse(
+            req,
+            error.response.status,
+            getErrorCodeFromHttpStatus(error.response.status),
+            'common.upstream_error',
+            { details: error.response.data },
+          ),
           error.response.status,
         );
       }
 
       throw new HttpException(
-        buildGatewayErrorResponse(req, HttpStatus.SERVICE_UNAVAILABLE, ErrorCode.SERVICE_UNAVAILABLE, 'common.config_service_unavailable'),
+        buildGatewayErrorResponse(
+          req,
+          HttpStatus.SERVICE_UNAVAILABLE,
+          ErrorCode.SERVICE_UNAVAILABLE,
+          'common.config_service_unavailable',
+        ),
         HttpStatus.SERVICE_UNAVAILABLE,
       );
     }
 
-    this.logger.error('Config service unknown failure', { event: 'config.upstream.unknown_error', path, method: req.method });
+    this.logger.error('Config service unknown failure', {
+      event: 'config.upstream.unknown_error',
+      path,
+      method: req.method,
+    });
     throw new HttpException(
-      buildGatewayErrorResponse(req, HttpStatus.BAD_GATEWAY, ErrorCode.BAD_GATEWAY, 'common.gateway_upstream_failure'),
+      buildGatewayErrorResponse(
+        req,
+        HttpStatus.BAD_GATEWAY,
+        ErrorCode.BAD_GATEWAY,
+        'common.gateway_upstream_failure',
+      ),
       HttpStatus.BAD_GATEWAY,
     );
   }

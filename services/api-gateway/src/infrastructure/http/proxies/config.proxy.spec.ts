@@ -34,6 +34,7 @@ describe('ConfigProxy', () => {
           CONFIG_SERVICE_URL: 'http://config:3002',
           CONFIG_SERVICE_TIMEOUT: 5000,
           CONFIG_SERVICE_CIRCUIT_TIMEOUT: 10000,
+          INTERNAL_SERVICE_SECRET: 'test-internal-secret-32-chars-min',
         };
         return map[key];
       }),
@@ -74,6 +75,20 @@ describe('ConfigProxy', () => {
         }),
       );
     });
+
+    it('adjunta el secreto interno para que config-service acepte la petición (InternalServiceGuard)', async () => {
+      mockClient.requestTyped.mockResolvedValue({ data: {}, headers: {} });
+
+      await proxy.forward(makeReq(), '/feature-flags');
+
+      expect(mockClient.requestTyped).toHaveBeenCalledWith(
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            'x-internal-api-key': 'test-internal-secret-32-chars-min',
+          }),
+        }),
+      );
+    });
   });
 
   describe('forward — errores del upstream', () => {
@@ -83,14 +98,9 @@ describe('ConfigProxy', () => {
       });
       mockClient.requestTyped.mockRejectedValue(circuitError);
 
-      await expect(proxy.forward(makeReq(), '/maintenance/status')).rejects.toThrow(
-        HttpException,
-      );
+      await expect(proxy.forward(makeReq(), '/maintenance/status')).rejects.toThrow(HttpException);
 
-      expect(logger.warn).toHaveBeenCalledWith(
-        'Config service circuit open',
-        expect.any(Object),
-      );
+      expect(logger.warn).toHaveBeenCalledWith('Config service circuit open', expect.any(Object));
     });
 
     it('lanza HttpException con el status del upstream en errores 4xx con ApiErrorResponse', async () => {
@@ -149,18 +159,11 @@ describe('ConfigProxy', () => {
 
       await expect(proxy.forward(makeReq(), '/stats')).rejects.toThrow(HttpException);
 
-      expect(logger.warn).toHaveBeenCalledWith(
-        'Config service 5xx',
-        expect.any(Object),
-      );
+      expect(logger.warn).toHaveBeenCalledWith('Config service 5xx', expect.any(Object));
     });
 
     it('lanza HttpException 503 cuando el upstream no responde (sin response)', async () => {
-      const axiosError = new AxiosError(
-        'Network Error',
-        'ECONNREFUSED',
-        { headers: {} } as any,
-      );
+      const axiosError = new AxiosError('Network Error', 'ECONNREFUSED', { headers: {} } as any);
       mockClient.requestTyped.mockRejectedValue(axiosError);
 
       await expect(proxy.forward(makeReq(), '/maintenance/status')).rejects.toThrow(HttpException);

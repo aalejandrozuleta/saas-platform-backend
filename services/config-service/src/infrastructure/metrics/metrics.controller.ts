@@ -1,4 +1,5 @@
 import { Controller, Get, Header } from '@nestjs/common';
+import { PublicRoute } from '@saas/shared';
 
 import { MetricsService } from './metrics.service';
 
@@ -8,6 +9,7 @@ export class MetricsController {
 
   @Get()
   @Header('Content-Type', 'text/plain')
+  @PublicRoute()
   async getMetrics(): Promise<string> {
     return this.metricsService.getMetrics();
   }

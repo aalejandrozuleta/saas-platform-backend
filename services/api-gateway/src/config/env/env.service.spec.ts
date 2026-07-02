@@ -17,6 +17,8 @@ describe('EnvService', () => {
 
     CONFIG_SERVICE_URL: 'http://localhost:3002',
 
+    INTERNAL_SERVICE_SECRET: 'a'.repeat(32),
+
     JWT_ACCESS_SECRET: 'super-secret-jwt-key',
 
     CORS_ORIGINS: 'http://localhost:3000,http://localhost:4200',
@@ -64,9 +66,6 @@ describe('EnvService', () => {
   it('should return transformed values', () => {
     const service = new EnvService();
 
-    expect(service.get('CORS_ORIGINS')).toEqual([
-      'http://localhost:3000',
-      'http://localhost:4200',
-    ]);
+    expect(service.get('CORS_ORIGINS')).toEqual(['http://localhost:3000', 'http://localhost:4200']);
   });
 });

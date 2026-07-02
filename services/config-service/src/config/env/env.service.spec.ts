@@ -12,6 +12,7 @@ describe('EnvService', () => {
       REDIS_HOST: 'localhost',
       REDIS_PORT: '6379',
       CONFIG_CACHE_TTL: '300',
+      INTERNAL_SERVICE_SECRET: 'a'.repeat(32),
     };
   });
 

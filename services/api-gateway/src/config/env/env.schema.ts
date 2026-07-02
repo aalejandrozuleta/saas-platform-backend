@@ -1,4 +1,3 @@
-
 import { z } from 'zod';
 
 /**
@@ -18,17 +17,16 @@ export const envSchema = z.object({
   CONFIG_SERVICE_URL: z.string(),
   CONFIG_SERVICE_TIMEOUT: z.coerce.number().default(5000),
   CONFIG_SERVICE_CIRCUIT_TIMEOUT: z.coerce.number().default(10000),
+  /** Secreto compartido enviado a config-service; ver InternalServiceGuard. */
+  INTERNAL_SERVICE_SECRET: z.string().min(32),
   JWT_ACCESS_SECRET: z.string().min(10),
 
-
-  CORS_ORIGINS: z
-    .string()
-    .transform((value) =>
-      value
-        .split(',')
-        .map((origin) => origin.trim())
-        .filter(Boolean),
-    ),
+  CORS_ORIGINS: z.string().transform((value) =>
+    value
+      .split(',')
+      .map((origin) => origin.trim())
+      .filter(Boolean),
+  ),
 
   TRUST_PROXY: z.coerce.number().int().min(0).max(1),
 
