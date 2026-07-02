@@ -1,5 +1,7 @@
 import { ROLES_KEY } from '@saas/shared';
 import { Reflector } from '@nestjs/core';
+import { METHOD_METADATA } from '@nestjs/common/constants';
+import { RequestMethod } from '@nestjs/common';
 
 import { ConfigController } from './config.controller';
 
@@ -78,10 +80,7 @@ describe('ConfigController', () => {
 
     it('tiene metadata @Roles(SUPER_ADMIN) en el handler forwardAll', () => {
       const reflector = new Reflector();
-      const roles = reflector.get<string[]>(
-        ROLES_KEY,
-        controller.forwardAll,
-      );
+      const roles = reflector.get<string[]>(ROLES_KEY, controller.forwardAll);
       expect(roles).toEqual(['SUPER_ADMIN']);
     });
   });
@@ -97,6 +96,16 @@ describe('ConfigController', () => {
       const reflector = new Reflector();
       const roles = reflector.get<string[]>(ROLES_KEY, controller.featureFlags);
       expect(roles).toBeUndefined();
+    });
+
+    it('featureFlags solo acepta GET (evita que POST/DELETE bypaseen el guard SUPER_ADMIN)', () => {
+      const method = Reflect.getMetadata(METHOD_METADATA, controller.featureFlags);
+      expect(method).toBe(RequestMethod.GET);
+    });
+
+    it('forwardAll (protegido por SUPER_ADMIN) sigue capturando cualquier verbo no-GET en feature-flags/*', () => {
+      const method = Reflect.getMetadata(METHOD_METADATA, controller.forwardAll);
+      expect(method).toBe(RequestMethod.ALL);
     });
   });
 });

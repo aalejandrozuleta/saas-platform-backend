@@ -1,4 +1,4 @@
-import { All, Controller, Req, Res } from '@nestjs/common';
+import { All, Controller, Get, Req, Res } from '@nestjs/common';
 import type { Request, Response } from 'express';
 import { Permission, PublicRoute, RequirePermission, Roles } from '@saas/shared';
 import { ConfigProxy } from '@infrastructure/http/proxies/config.proxy';
@@ -25,7 +25,7 @@ export class ConfigController {
   }
 
   /** Endpoint público para leer feature flags (lectura). */
-  @All('feature-flags')
+  @Get('feature-flags')
   @PublicRoute()
   async featureFlags(@Req() req: Request, @Res() res: Response) {
     const { body } = await this.proxy.forward(req, '/feature-flags');
