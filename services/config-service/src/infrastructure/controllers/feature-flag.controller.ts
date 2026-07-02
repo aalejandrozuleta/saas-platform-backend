@@ -48,10 +48,7 @@ export class FeatureFlagController {
 
   @Get()
   @GetFeatureFlagsSwagger()
-  async listFlags(
-    @Query('enabled') enabled?: string,
-    @Query('environment') environment?: string,
-  ) {
+  async listFlags(@Query('enabled') enabled?: string, @Query('environment') environment?: string) {
     const flags = await this.repo.findAll({
       enabled: enabled ? enabled === 'true' : undefined,
       environment: environment ?? undefined,
@@ -63,8 +60,8 @@ export class FeatureFlagController {
   @DeleteFeatureFlagSwagger()
   async deleteFlag(@Param('id') id: string) {
     const flags = await this.repo.findAll();
-    const flag = flags.find((f) => f.id === id);
-    if (!flag) throw DomainErrorFactory.featureFlagNotFound(id);
+    const exists = flags.some((f) => f.id === id);
+    if (!exists) throw DomainErrorFactory.featureFlagNotFound(id);
     await this.repo.delete(id);
     return successResponse({ deleted: true, id });
   }

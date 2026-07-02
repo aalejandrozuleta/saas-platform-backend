@@ -9,7 +9,7 @@ export const envSchema = z.object({
   REDIS_PASSWORD: z.string().optional(),
 
   RESEND_API_KEY: z.string().min(1),
-  RESEND_FROM_EMAIL: z.string().email().default('noreply@saas-platform.dev'),
+  RESEND_FROM_EMAIL: z.email().default('noreply@saas-platform.dev'),
 
   // Reintentos para la cola de email
   EMAIL_QUEUE_ATTEMPTS: z.coerce.number().default(5),

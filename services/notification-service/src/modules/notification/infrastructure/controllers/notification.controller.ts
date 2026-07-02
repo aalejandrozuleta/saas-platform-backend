@@ -1,4 +1,16 @@
-import { Body, Controller, Get, Header, HttpCode, HttpStatus, NotFoundException, Param, Post, Query, Res } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Header,
+  HttpCode,
+  HttpStatus,
+  NotFoundException,
+  Param,
+  Post,
+  Query,
+  Res,
+} from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
 
@@ -9,12 +21,41 @@ import { SendWsDto } from '../../application/dtos/send-ws.dto';
 import { TemplateEngine } from '../templates/template.engine';
 
 const PREVIEW_DEFAULTS: Record<string, Record<string, string>> = {
-  welcome: { email: 'ana.garcia@empresa.com', registeredAt: '30 jun 2026, 10:35 a. m.', ip: '190.157.12.44', country: 'Colombia' },
-  'password-changed': { email: 'ana.garcia@empresa.com', changedAt: '30 jun 2026, 10:35 a. m.', ip: '190.157.12.44', country: 'Colombia' },
-  '2fa-enabled': { email: 'ana.garcia@empresa.com', enabledAt: '30 jun 2026, 10:35 a. m.', ip: '190.157.12.44', country: 'Colombia' },
-  '2fa-disabled': { email: 'ana.garcia@empresa.com', disabledAt: '30 jun 2026, 10:35 a. m.', ip: '190.157.12.44', country: 'Colombia' },
-  'account-locked': { blockedUntil: '30 jun 2026, 11:05 a. m.', ip: '201.245.88.12', country: 'Venezuela' },
-  maintenance: { message: 'Realizaremos una actualización de infraestructura para mejorar el rendimiento de la plataforma.', scheduledAt: '1 jul 2026, 2:00 a. m.', duration: '2 horas' },
+  welcome: {
+    email: 'ana.garcia@empresa.com',
+    registeredAt: '30 jun 2026, 10:35 a. m.',
+    ip: '203.0.113.10',
+    country: 'Colombia',
+  },
+  'password-changed': {
+    email: 'ana.garcia@empresa.com',
+    changedAt: '30 jun 2026, 10:35 a. m.',
+    ip: '203.0.113.10',
+    country: 'Colombia',
+  },
+  '2fa-enabled': {
+    email: 'ana.garcia@empresa.com',
+    enabledAt: '30 jun 2026, 10:35 a. m.',
+    ip: '203.0.113.10',
+    country: 'Colombia',
+  },
+  '2fa-disabled': {
+    email: 'ana.garcia@empresa.com',
+    disabledAt: '30 jun 2026, 10:35 a. m.',
+    ip: '203.0.113.10',
+    country: 'Colombia',
+  },
+  'account-locked': {
+    blockedUntil: '30 jun 2026, 11:05 a. m.',
+    ip: '198.51.100.24',
+    country: 'Venezuela',
+  },
+  maintenance: {
+    message:
+      'Realizaremos una actualización de infraestructura para mejorar el rendimiento de la plataforma.',
+    scheduledAt: '1 jul 2026, 2:00 a. m.',
+    duration: '2 horas',
+  },
   'otp-code': { code: '847 293', expiresIn: '10' },
 };
 
@@ -77,7 +118,9 @@ export class NotificationController {
   ): Promise<void> {
     const available = this.templateEngine.list();
     if (!available.includes(template)) {
-      throw new NotFoundException(`Template '${template}' no encontrado. Disponibles: ${available.join(', ')}`);
+      throw new NotFoundException(
+        `Template '${template}' no encontrado. Disponibles: ${available.join(', ')}`,
+      );
     }
 
     const defaults = PREVIEW_DEFAULTS[template] ?? {};

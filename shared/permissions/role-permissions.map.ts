@@ -12,10 +12,9 @@ import { Permission } from './permission.enum';
  * Claves: valores del enum UserRole (strings).
  */
 export const ROLE_PERMISSIONS: Record<string, Permission[]> = {
-
   /**
    * SUPER_ADMIN — Operador de la plataforma.
-   * Tiene acceso a absolutamente todo.
+   * Tiene acceso completo a todos los recursos.
    */
   SUPER_ADMIN: Object.values(Permission),
 

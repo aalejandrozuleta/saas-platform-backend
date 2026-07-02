@@ -1,10 +1,5 @@
 import { applyDecorators } from '@nestjs/common';
-import {
-  ApiOperation,
-  ApiOkResponse,
-  ApiNotFoundResponse,
-  ApiParam,
-} from '@nestjs/swagger';
+import { ApiOperation, ApiOkResponse, ApiNotFoundResponse, ApiParam } from '@nestjs/swagger';
 
 export function GetSessionsSwagger() {
   return applyDecorators(
@@ -19,7 +14,7 @@ export function GetSessionsSwagger() {
               {
                 id: 'uuid',
                 isCurrent: true,
-                ipAddress: '192.168.1.1',
+                ipAddress: '203.0.113.1',
                 country: 'CO',
                 startedAt: '2026-06-26T20:00:00.000Z',
                 device: {

@@ -1,4 +1,4 @@
-import { randomBytes } from 'crypto';
+import { randomBytes } from 'node:crypto';
 
 import { Inject, Injectable } from '@nestjs/common';
 import { UserRepository } from '@domain/repositories/user.repository';
