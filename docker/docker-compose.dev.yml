@@ -261,12 +261,13 @@ services:
     image: ${REDIS_IMAGE:-redis:8-alpine}
     container_name: redis-dev
     restart: unless-stopped
+    command: ['redis-server', '--requirepass', *redis_password]
     ports:
       - '127.0.0.1:6379:6379'
     volumes:
       - redis-data:/data
     healthcheck:
-      test: ['CMD', 'redis-cli', 'ping']
+      test: ['CMD', 'redis-cli', '-a', *redis_password, '--no-auth-warning', 'ping']
       interval: 5s
       timeout: 3s
       retries: 10
