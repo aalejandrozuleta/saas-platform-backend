@@ -35,6 +35,9 @@ export class NotificationClient {
         [INTERNAL_SERVICE_HEADER]: this.env.get('INTERNAL_SERVICE_SECRET'),
       },
       body: JSON.stringify(payload),
+      // Sin esto, un notification-service colgado dejaría fetches
+      // fire-and-forget acumulándose indefinidamente (fugas de sockets/promesas).
+      signal: AbortSignal.timeout(this.env.get('NOTIFICATION_SERVICE_TIMEOUT')),
     })
       .then((res) => {
         if (!res.ok) {
