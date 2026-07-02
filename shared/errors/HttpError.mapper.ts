@@ -36,6 +36,9 @@ export const HttpErrorMapper: Record<ErrorCode, number> = {
   [ErrorCode.TRUSTED_COUNTRY_NOT_FOUND]: 404,
   [ErrorCode.TRUSTED_COUNTRY_LIMIT_REACHED]: 422,
   [ErrorCode.SESSION_NOT_FOUND]: 404,
+  [ErrorCode.EMAIL_NOT_VERIFIED]: 403,
+  [ErrorCode.INVALID_VERIFICATION_TOKEN]: 400,
+  [ErrorCode.EMAIL_ALREADY_VERIFIED]: 409
 };
 
 export const getErrorCodeFromHttpStatus = (status: number): ErrorCode => {
