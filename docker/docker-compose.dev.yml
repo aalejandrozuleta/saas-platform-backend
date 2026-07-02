@@ -22,6 +22,11 @@ services:
     depends_on:
       api-gateway:
         condition: service_started
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 128M
     logging: *default-logging
     networks:
       - saas-dev
@@ -49,6 +54,11 @@ services:
       REDIS_PASSWORD: *redis_password
     ports:
       - '3000:3000'
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 768M
     logging: *default-logging
     networks:
       - saas-dev
@@ -87,6 +97,11 @@ services:
       retries: 5
       start_period: 30s
     stop_grace_period: 15s
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 768M
     logging: *default-logging
     networks:
       - saas-dev
@@ -132,6 +147,11 @@ services:
       retries: 5
       start_period: 30s
     stop_grace_period: 15s
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 768M
     logging: *default-logging
     networks:
       - saas-dev
@@ -152,6 +172,11 @@ services:
       - config-postgres-data:/var/lib/postgresql/data
     ports:
       - '5433:5432'
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
     logging: *default-logging
     networks:
       - saas-dev
@@ -197,6 +222,11 @@ services:
       retries: 5
       start_period: 30s
     stop_grace_period: 15s
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 768M
     logging: *default-logging
     networks:
       - saas-dev
@@ -217,6 +247,11 @@ services:
       - auth-postgres-data:/var/lib/postgresql/data
     ports:
       - '5432:5432'
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
     logging: *default-logging
     networks:
       - saas-dev
@@ -234,6 +269,11 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
     logging: *default-logging
     networks:
       - saas-dev
@@ -267,6 +307,11 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 768M
     logging: *default-logging
     networks:
       - saas-dev
@@ -284,6 +329,11 @@ services:
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus-data:/prometheus
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
     logging: *default-logging
     networks:
       - saas-dev
@@ -304,6 +354,11 @@ services:
     depends_on:
       auth-postgres:
         condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 64M
     logging: *default-logging
     networks:
       - saas-dev
@@ -322,6 +377,11 @@ services:
     depends_on:
       redis:
         condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 64M
     logging: *default-logging
     networks:
       - saas-dev
@@ -344,6 +404,11 @@ services:
       - /dev/disk/:/dev/disk:ro
     devices:
       - /dev/kmsg:/dev/kmsg
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
     logging: *default-logging
     networks:
       - saas-dev
@@ -358,6 +423,11 @@ services:
       - ./loki/loki.yml:/etc/loki/loki.yml:ro
       - loki-data:/loki
     command: -config.file=/etc/loki/loki.yml
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
     logging: *default-logging
     networks:
       - saas-dev
@@ -379,6 +449,11 @@ services:
       - /etc/alloy/config.alloy
     depends_on:
       - loki
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
     logging: *default-logging
     networks:
       - saas-dev
@@ -396,6 +471,11 @@ services:
     depends_on:
       - prometheus
       - loki
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
     logging: *default-logging
     networks:
       - saas-dev
@@ -407,6 +487,11 @@ services:
     ports:
       - '1025:1025'
       - '8025:8025'
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 128M
     logging: *default-logging
     networks:
       - saas-dev
@@ -425,6 +510,11 @@ services:
         condition: service_healthy
     volumes:
       - pgadmin-data:/var/lib/pgadmin
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
     logging: *default-logging
     networks:
       - saas-dev
@@ -441,6 +531,11 @@ services:
     depends_on:
       redis:
         condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 128M
     logging: *default-logging
     networks:
       - saas-dev
@@ -460,6 +555,11 @@ services:
     depends_on:
       mongo:
         condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 128M
     logging: *default-logging
     networks:
       - saas-dev

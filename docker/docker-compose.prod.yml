@@ -17,6 +17,11 @@ services:
     depends_on:
       api-gateway:
         condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 128M
     networks:
       - saas-edge
 
@@ -58,6 +63,11 @@ services:
       timeout: 5s
       retries: 5
       start_period: 20s
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
     networks:
       - saas-edge
       - saas-internal
@@ -97,6 +107,11 @@ services:
       timeout: 5s
       retries: 5
       start_period: 30s
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
     networks:
       - saas-internal
       - saas-data
@@ -116,6 +131,11 @@ services:
       retries: 5
     volumes:
       - auth-postgres-prod-data:/var/lib/postgresql/data
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1024M
     networks:
       - saas-data
 
@@ -131,6 +151,11 @@ services:
       retries: 5
     volumes:
       - redis-prod-data:/data
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
     networks:
       - saas-internal
 
@@ -161,6 +186,11 @@ services:
       retries: 5
     volumes:
       - mongo-prod-data:/data/db
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1024M
     networks:
       - saas-data
 
@@ -174,6 +204,11 @@ services:
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus-prod-data:/prometheus
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
     networks:
       - saas-internal
 
@@ -188,6 +223,11 @@ services:
       - ./loki/loki.yml:/etc/loki/loki.yml:ro
       - loki-prod-data:/loki
     command: -config.file=/etc/loki/loki.yml
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
     networks:
       - saas-internal
 
@@ -202,6 +242,11 @@ services:
     command: -config.file=/etc/promtail/promtail.yml
     depends_on:
       - loki
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 128M
     networks:
       - saas-internal
 
@@ -219,6 +264,11 @@ services:
     depends_on:
       - prometheus
       - loki
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
     networks:
       - saas-internal
 
