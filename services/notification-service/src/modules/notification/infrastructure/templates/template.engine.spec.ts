@@ -55,9 +55,15 @@ describe('TemplateEngine', () => {
 
     it.each([
       ['welcome', { email: 'ana@example.com', registeredAt: 'hoy', ip: '1.1.1.1', country: 'CO' }],
-      ['password-changed', { email: 'ana@example.com', changedAt: 'hoy', ip: '1.1.1.1', country: 'CO' }],
+      [
+        'password-changed',
+        { email: 'ana@example.com', changedAt: 'hoy', ip: '1.1.1.1', country: 'CO' },
+      ],
       ['2fa-enabled', { email: 'ana@example.com', enabledAt: 'hoy', ip: '1.1.1.1', country: 'CO' }],
-      ['2fa-disabled', { email: 'ana@example.com', disabledAt: 'hoy', ip: '1.1.1.1', country: 'CO' }],
+      [
+        '2fa-disabled',
+        { email: 'ana@example.com', disabledAt: 'hoy', ip: '1.1.1.1', country: 'CO' },
+      ],
       ['account-locked', { blockedUntil: 'hoy', ip: '1.1.1.1', country: 'CO' }],
       ['maintenance', { message: 'msg', scheduledAt: 'hoy', duration: '1h' }],
       ['otp-code', { code: '123456', expiresIn: '10' }],
@@ -83,6 +89,25 @@ describe('TemplateEngine', () => {
 
       expect(html).toContain('Activar mi cuenta');
       expect(html).toContain('expira en 24 horas');
+    });
+
+    it('debe descartar verificationUrl con esquema no http(s) (ej. javascript:) en welcome', async () => {
+      const html = await engine.render('welcome', {
+        email: 'ana@example.com',
+        verificationUrl: 'javascript:alert(document.cookie)',
+      });
+
+      expect(html).not.toContain('javascript:');
+      expect(html).not.toContain('Activar mi cuenta');
+    });
+
+    it('debe descartar verificationUrl malformado en welcome', async () => {
+      const html = await engine.render('welcome', {
+        email: 'ana@example.com',
+        verificationUrl: 'not-a-valid-url',
+      });
+
+      expect(html).not.toContain('Activar mi cuenta');
     });
   });
 });
