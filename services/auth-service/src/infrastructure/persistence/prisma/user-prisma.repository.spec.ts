@@ -1,6 +1,7 @@
 import { EmailVO } from '@domain/value-objects/email.vo';
 import { User } from '@domain/entities/user/user.entity';
 import { UserStatus } from '@domain/enums/user-status.enum';
+import { UserRole } from '@domain/enums/user-role.enum';
 
 import { UserStatus as PrismaUserStatus } from '../../../generated/prisma';
 import { UserMapper } from '../mappers/user.mapper';
@@ -53,6 +54,7 @@ describe('UserPrismaRepository', () => {
         id: prismaUser.id,
         email,
         passwordHash: prismaUser.passwordHash,
+        role: UserRole.CUSTOMER,
         status: UserStatus.ACTIVE,
         emailVerified: false,
         failedLoginAttempts: 0,
@@ -106,6 +108,7 @@ describe('UserPrismaRepository', () => {
         id: prismaUser.id,
         email,
         passwordHash: prismaUser.passwordHash,
+        role: UserRole.CUSTOMER,
         status: UserStatus.ACTIVE,
         emailVerified: true,
         failedLoginAttempts: 0,

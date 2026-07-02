@@ -1,11 +1,6 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./dist",
-    "rootDir": "./src",
-    "removeComments": true,
-    "sourceMap": false,
-    "incremental": false,
     "paths": {
       "@saas/shared": ["../../shared/index.ts"],
       "@saas/shared/*": ["../../shared/*"],

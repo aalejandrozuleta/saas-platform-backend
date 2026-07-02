@@ -285,18 +285,6 @@ importers:
         specifier: ^5.9.3
         version: 5.9.3
 
-  services/auth-service/dist/generated/generated/prisma:
-    dependencies:
-      '@prisma/client-runtime-utils':
-        specifier: 7.6.0
-        version: 7.6.0
-
-  services/auth-service/dist/generated/prisma:
-    dependencies:
-      '@prisma/client-runtime-utils':
-        specifier: 7.6.0
-        version: 7.6.0
-
   services/auth-service/src/generated/prisma:
     dependencies:
       '@prisma/client-runtime-utils':
@@ -399,18 +387,6 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-
-  services/config-service/dist/generated/generated/prisma:
-    dependencies:
-      '@prisma/client-runtime-utils':
-        specifier: 7.6.0
-        version: 7.6.0
-
-  services/config-service/dist/generated/prisma:
-    dependencies:
-      '@prisma/client-runtime-utils':
-        specifier: 7.6.0
-        version: 7.6.0
 
   services/config-service/src/generated/prisma:
     dependencies:

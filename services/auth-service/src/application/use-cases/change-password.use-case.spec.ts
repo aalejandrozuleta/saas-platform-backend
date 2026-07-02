@@ -2,6 +2,7 @@ import { ErrorCode } from '@saas/shared';
 import { User } from '@domain/entities/user/user.entity';
 import { EmailVO } from '@domain/value-objects/email.vo';
 import { UserStatus } from '@domain/enums/user-status.enum';
+import { UserRole } from '@domain/enums/user-role.enum';
 import { type UserRepository } from '@domain/repositories/user.repository';
 import { type SecurityRepository } from '@domain/repositories/security.repository';
 import { type SessionRepository } from '@application/ports/session.repository';
@@ -46,6 +47,7 @@ describe('ChangePasswordUseCase', () => {
       id: 'user-1',
       email: EmailVO.create('test@example.com'),
       passwordHash: 'current-hash',
+      role: UserRole.CUSTOMER,
       status: UserStatus.ACTIVE,
       emailVerified: true,
       failedLoginAttempts: 0,

@@ -24,6 +24,7 @@ import { type Clock } from '@application/ports/clock.port';
 import { type SessionCache } from '@application/ports/session-cache.port';
 import { type EnvService } from '@config/env/env.service';
 import { UserStatus } from '@domain/enums/user-status.enum';
+import { UserRole } from '@domain/enums/user-role.enum';
 import { LoginSecurityChallengeService } from '@application/security/login-security-challenge.service';
 import { LoginChallengeReason } from '@application/security/login-challenge.types';
 import { UserPermissionService } from '@application/services/user-permission.service';
@@ -60,6 +61,7 @@ describe('LoginUserUseCase', () => {
       id: 'user-1',
       email: EmailVO.create('test@test.com'),
       passwordHash: 'hash',
+      role: UserRole.CUSTOMER,
       status: UserStatus.ACTIVE,
       emailVerified: true,
       failedLoginAttempts: 0,

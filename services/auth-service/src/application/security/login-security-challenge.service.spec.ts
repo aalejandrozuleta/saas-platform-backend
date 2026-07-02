@@ -1,6 +1,7 @@
 import { User } from '@domain/entities/user/user.entity';
 import { EmailVO } from '@domain/value-objects/email.vo';
 import { UserStatus } from '@domain/enums/user-status.enum';
+import { UserRole } from '@domain/enums/user-role.enum';
 import { LoginContext } from '@domain/value-objects/login-context.vo';
 import { ErrorCode } from '@saas/shared';
 
@@ -21,6 +22,7 @@ describe('LoginSecurityChallengeService', () => {
       id: 'user-1',
       email: EmailVO.create(email),
       passwordHash: 'hash',
+      role: UserRole.CUSTOMER,
       status: UserStatus.ACTIVE,
       emailVerified: true,
       failedLoginAttempts: 0,
@@ -130,6 +132,7 @@ describe('LoginSecurityChallengeService', () => {
         id: 'user-x',
         email: { getValue: () => 'noemail' } as any,
         passwordHash: 'hash',
+        role: UserRole.CUSTOMER,
         status: UserStatus.ACTIVE,
         emailVerified: false,
         failedLoginAttempts: 0,

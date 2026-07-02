@@ -42,6 +42,8 @@ playwright-report/
 shared/**/*.js
 shared/**/*.d.ts
 shared/**/*.js.map
+services/*/prisma/seed.js
+services/*/prisma/seed.js.map
 
 ############################################
 # Prisma — generated clients (re-created via prisma generate)

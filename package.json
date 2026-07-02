@@ -20,6 +20,8 @@
     "test:cov": "pnpm -r test:cov",
     "test:auth": "pnpm --filter auth-service test",
     "test:gateway": "pnpm --filter api-gateway test",
+    "test:shared": "pnpm --filter shared test",
+    "test:notification": "pnpm --filter notification-service test",
     "build": "pnpm -r --parallel --workspace-concurrency=4 build",
     "typecheck": "pnpm -r exec tsc --noEmit",
     "docs:code": "pnpm -r run docs"

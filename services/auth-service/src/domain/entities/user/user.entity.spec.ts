@@ -16,7 +16,7 @@ describe('User entity', () => {
       id: 'user-1',
       email: EmailVO.create('test@example.com'),
       passwordHash: 'hash',
-      role: UserRole.USER,
+      role: UserRole.CUSTOMER,
       status: UserStatus.ACTIVE,
       emailVerified: false,
       failedLoginAttempts: 0,

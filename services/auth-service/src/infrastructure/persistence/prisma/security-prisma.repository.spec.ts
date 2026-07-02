@@ -1,4 +1,5 @@
 import { DomainErrorFactory } from '@domain/errors/domain-error.factory';
+import { type TotpEncryptionPort } from '@application/ports/totp-encryption.port';
 
 import { SecurityPrismaRepository } from './security-prisma.repository';
 import { type PrismaService } from './prisma.service';
@@ -7,6 +8,7 @@ describe('SecurityPrismaRepository', () => {
   let repository: SecurityPrismaRepository;
 
   let prisma: any;
+  let totpEncryption: jest.Mocked<TotpEncryptionPort>;
 
   beforeEach(() => {
     prisma = {
@@ -17,8 +19,14 @@ describe('SecurityPrismaRepository', () => {
       },
     };
 
+    totpEncryption = {
+      encrypt: jest.fn((plaintext: string) => plaintext),
+      decrypt: jest.fn((ciphertext: string) => ciphertext),
+    };
+
     repository = new SecurityPrismaRepository(
       prisma as unknown as PrismaService,
+      totpEncryption,
     );
   });
 

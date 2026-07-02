@@ -4,6 +4,9 @@ import { type UserRepository } from '@domain/repositories/user.repository';
 import { type AuditLogger } from '@application/ports/audit-logger.port';
 import { type PasswordHasher } from '@application/ports/password-hasher.port';
 import { type DeviceRepository } from '@domain/repositories/device.repository';
+import { type SecurityRepository } from '@domain/repositories/security.repository';
+import { type DomainEventBus } from '@application/events/domain-event.bus';
+import { type EnvService } from '@config/env/env.service';
 
 import { AuthAuditEvent } from '../audit/auth-events.enum';
 
@@ -15,8 +18,11 @@ describe('RegisterUserUseCase', () => {
   let userRepository: jest.Mocked<UserRepository>;
   let passwordHasher: jest.Mocked<PasswordHasher>;
   let deviceRepository: jest.Mocked<DeviceRepository>;
+  let securityRepository: jest.Mocked<SecurityRepository>;
   let auditLogger: jest.Mocked<AuditLogger>;
   let logger: jest.Mocked<PlatformLogger>;
+  let eventBus: jest.Mocked<DomainEventBus>;
+  let envService: jest.Mocked<EnvService>;
 
   const context = {
     ip: '127.0.0.1',
@@ -40,6 +46,10 @@ describe('RegisterUserUseCase', () => {
       getByUserIdAndFingerprint: jest.fn(),
     } as any;
 
+    securityRepository = {
+      addTrustedCountry: jest.fn(),
+    } as any;
+
     auditLogger = {
       log: jest.fn(),
     } as any;
@@ -51,12 +61,23 @@ describe('RegisterUserUseCase', () => {
       debug: jest.fn(),
     } as jest.Mocked<PlatformLogger>;
 
+    eventBus = {
+      publish: jest.fn(),
+    } as any;
+
+    envService = {
+      get: jest.fn().mockReturnValue(3600),
+    } as any;
+
     useCase = new RegisterUserUseCase(
       userRepository,
       passwordHasher,
       deviceRepository,
+      securityRepository,
       auditLogger,
       logger,
+      eventBus,
+      envService,
     );
   });
 
