@@ -17,7 +17,6 @@ import {
 import { AUDIT_LOGGER, DOMAIN_EVENT_BUS, PASSWORD_HASHER } from '@domain/token/services.tokens';
 import { SecurityRepository } from '@domain/repositories/security.repository';
 import { AuthActivityReportFactory } from '@application/audit/auth-activity-report.factory';
-import { DomainErrorFactory } from '@domain/errors/domain-error.factory';
 import { DeviceRepository } from '@domain/repositories/device.repository';
 import { DomainEventBus } from '@application/events/domain-event.bus';
 import { UserRegisteredEvent } from '@application/events/user/user-registered.event';
@@ -50,13 +49,17 @@ export class RegisterUserUseCase {
     private readonly eventBus: DomainEventBus,
 
     private readonly envService: EnvService,
-  ) { }
+  ) {}
 
-  async execute(email: string, password: string, context: {
-    ip: string;
-    country?: string;
-    deviceFingerprint?: string;
-  },): Promise<User> {
+  async execute(
+    email: string,
+    password: string,
+    context: {
+      ip: string;
+      country?: string;
+      deviceFingerprint?: string;
+    },
+  ): Promise<User> {
     this.logger.info('Inicio registro de usuario', {
       email,
       ip: context.ip,
@@ -66,6 +69,13 @@ export class RegisterUserUseCase {
 
     const exists = await this.userRepository.findByEmail(emailVO);
     if (exists) {
+      // No se revela al llamante que el email ya está registrado (evita
+      // enumeración de cuentas vía el 409 de este endpoint): se hace un
+      // hash dummy para no filtrar la diferencia por tiempo de respuesta,
+      // se audita internamente, y se responde como si el registro hubiera
+      // sido exitoso, sin crear un duplicado ni tocar la cuenta real.
+      await this.passwordHasher.hash(passwordVO.getValue());
+
       this.logger.warn('Registro fallido: email ya existe', {
         email,
         ip: context.ip,
@@ -81,7 +91,12 @@ export class RegisterUserUseCase {
           deviceFingerprint: context.deviceFingerprint,
         }),
       );
-      throw DomainErrorFactory.emailAlreadyExists();
+
+      return User.create({
+        id: randomUUID(),
+        email: emailVO,
+        passwordHash: '',
+      });
     }
 
     const hash = await this.passwordHasher.hash(passwordVO.getValue());
@@ -129,10 +144,7 @@ export class RegisterUserUseCase {
     return user;
   }
 
-  private async registerTrustedCountry(
-    userId: string,
-    country?: string,
-  ): Promise<void> {
+  private async registerTrustedCountry(userId: string, country?: string): Promise<void> {
     if (!country) return;
     await this.securityRepository.addTrustedCountry(userId, country);
   }

@@ -95,8 +95,7 @@ describe('RegisterUserUseCase', () => {
     expect(result.email.getValue()).toBe(email);
     expect(result.passwordHash).toBe('hashed-password');
 
-    const calledEmailVO =
-      (userRepository.findByEmail as jest.Mock).mock.calls[0][0];
+    const calledEmailVO = (userRepository.findByEmail as jest.Mock).mock.calls[0][0];
 
     expect(calledEmailVO.getValue()).toBe(email);
     expect(passwordHasher.hash).toHaveBeenCalledWith(password);
@@ -137,7 +136,7 @@ describe('RegisterUserUseCase', () => {
     expect(deviceRepository.save).not.toHaveBeenCalled();
   });
 
-  it('debe lanzar error si el email ya existe', async () => {
+  it('no debe revelar que el email ya existe: responde como éxito sin crear un duplicado', async () => {
     const email = 'existing@example.com';
     const password = 'Str0ng-P@ssword';
 
@@ -146,14 +145,20 @@ describe('RegisterUserUseCase', () => {
     } as User;
 
     userRepository.findByEmail.mockResolvedValue(existingUser);
+    passwordHasher.hash.mockResolvedValue('dummy-hash');
 
-    await expect(
-      useCase.execute(email, password, context),
-    ).rejects.toBeInstanceOf(Error);
+    const result = await useCase.execute(email, password, context);
+
+    expect(result).toBeInstanceOf(User);
+    expect(result.email.getValue()).toBe(email);
+    // No es la cuenta real: no se debe filtrar el id del usuario existente.
+    expect(result.id).not.toBe('user-id');
 
     expect(userRepository.save).not.toHaveBeenCalled();
-    expect(passwordHasher.hash).not.toHaveBeenCalled();
     expect(deviceRepository.save).not.toHaveBeenCalled();
+    expect(eventBus.publish).not.toHaveBeenCalled();
+    // Se hashea igualmente la contraseña recibida para no filtrar por timing.
+    expect(passwordHasher.hash).toHaveBeenCalledWith(password);
     expect(auditLogger.log).toHaveBeenCalledWith(
       expect.objectContaining({
         action: AuthAuditEvent.REGISTER_FAILED,
