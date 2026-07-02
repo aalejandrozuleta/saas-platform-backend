@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
-
 import { EnvService } from '@config/env/env.service';
+
 import { QUEUE_EMAIL, JOB_EMAIL_SEND } from '../../domain/queues.constants';
 import { EmailNotificationPayload } from '../../domain/events/email-notification.event';
 

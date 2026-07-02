@@ -1,7 +1,7 @@
-import { UnauthorizedException } from '@nestjs/common';
-import { ExecutionContext } from '@nestjs/common';
+import { UnauthorizedException, type ExecutionContext } from '@nestjs/common';
 import { sign } from 'jsonwebtoken';
-import { EnvService } from '@config/env/env.service';
+import { type EnvService } from '@config/env/env.service';
+
 import { JwtAuthGuard } from './jwt-auth.guard';
 
 const SECRET = 'test-secret';
@@ -18,11 +18,10 @@ function makeContext(cookies: Record<string, string>): ExecutionContext {
 }
 
 function validToken(overrides: Partial<Record<string, unknown>> = {}): string {
-  return sign(
-    { sub: 'user-1', sid: 'session-1', role: 'USER', ...overrides },
-    SECRET,
-    { issuer: 'auth-service', audience: 'api-gateway' },
-  );
+  return sign({ sub: 'user-1', sid: 'session-1', role: 'USER', ...overrides }, SECRET, {
+    issuer: 'auth-service',
+    audience: 'api-gateway',
+  });
 }
 
 describe('JwtAuthGuard', () => {

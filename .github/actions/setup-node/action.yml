@@ -5,7 +5,7 @@ runs:
   using: composite
   steps:
     - name: Setup pnpm
-      uses: pnpm/action-setup@v6.0.8
+      uses: pnpm/action-setup@v6.0.9
       with:
         run_install: false
 
@@ -23,7 +23,7 @@ runs:
 
     - name: Cache Prisma
       id: cache-prisma
-      uses: actions/cache@v5.0.5
+      uses: actions/cache@v6.1.0
       with:
         path: |
           services/auth-service/node_modules/.prisma

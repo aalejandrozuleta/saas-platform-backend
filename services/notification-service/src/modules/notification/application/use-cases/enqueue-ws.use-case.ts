@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
-
 import { EnvService } from '@config/env/env.service';
+
 import { QUEUE_WS, JOB_WS_BROADCAST, JOB_WS_SEND_TO_USER } from '../../domain/queues.constants';
 import { WsNotificationPayload } from '../../domain/events/ws-notification.event';
 

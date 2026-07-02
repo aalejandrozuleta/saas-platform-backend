@@ -1,8 +1,9 @@
-import { Verify2faUseCase } from './verify-2fa.use-case';
 import { SECURITY_REPOSITORY, RECOVERY_CODE_REPOSITORY } from '@domain/token/repositories.tokens';
 import { PASSWORD_HASHER, DOMAIN_EVENT_BUS, TOTP_SERVICE } from '@domain/token/services.tokens';
 import { DomainException } from '@domain/errors/domain.exception';
 import { Test, type TestingModule } from '@nestjs/testing';
+
+import { Verify2faUseCase } from './verify-2fa.use-case';
 
 describe('Verify2faUseCase', () => {
   let useCase: Verify2faUseCase;
@@ -30,18 +31,18 @@ describe('Verify2faUseCase', () => {
             createMany: jest.fn(),
           },
         },
-        { provide: PASSWORD_HASHER,  useValue: { hash: jest.fn() } },
-        { provide: TOTP_SERVICE,     useValue: { verifyToken: jest.fn() } },
+        { provide: PASSWORD_HASHER, useValue: { hash: jest.fn() } },
+        { provide: TOTP_SERVICE, useValue: { verifyToken: jest.fn() } },
         { provide: DOMAIN_EVENT_BUS, useValue: { publish: jest.fn() } },
       ],
     }).compile();
 
-    useCase                = module.get(Verify2faUseCase);
-    securityRepository     = module.get(SECURITY_REPOSITORY);
+    useCase = module.get(Verify2faUseCase);
+    securityRepository = module.get(SECURITY_REPOSITORY);
     recoveryCodeRepository = module.get(RECOVERY_CODE_REPOSITORY);
-    passwordHasher         = module.get(PASSWORD_HASHER);
-    totpService            = module.get(TOTP_SERVICE);
-    eventBus               = module.get(DOMAIN_EVENT_BUS);
+    passwordHasher = module.get(PASSWORD_HASHER);
+    totpService = module.get(TOTP_SERVICE);
+    eventBus = module.get(DOMAIN_EVENT_BUS);
   });
 
   const ctx = { ip: '127.0.0.1' };
@@ -64,15 +65,13 @@ describe('Verify2faUseCase', () => {
   it('debe lanzar error si no hay secreto pendiente', async () => {
     securityRepository.getTotpPendingSecret.mockResolvedValue(null);
 
-    await expect(useCase.execute('user-1', '123456', ctx))
-      .rejects.toBeInstanceOf(DomainException);
+    await expect(useCase.execute('user-1', '123456', ctx)).rejects.toBeInstanceOf(DomainException);
   });
 
   it('debe lanzar error si el código TOTP es inválido', async () => {
     securityRepository.getTotpPendingSecret.mockResolvedValue('PENDING_SECRET');
     totpService.verifyToken.mockReturnValue(false);
 
-    await expect(useCase.execute('user-1', '000000', ctx))
-      .rejects.toBeInstanceOf(DomainException);
+    await expect(useCase.execute('user-1', '000000', ctx)).rejects.toBeInstanceOf(DomainException);
   });
 });

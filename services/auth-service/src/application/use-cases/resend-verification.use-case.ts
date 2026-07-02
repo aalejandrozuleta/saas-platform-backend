@@ -1,4 +1,5 @@
 import { randomBytes } from 'crypto';
+
 import { Inject, Injectable } from '@nestjs/common';
 import { UserRepository } from '@domain/repositories/user.repository';
 import { USER_REPOSITORY } from '@domain/token/repositories.tokens';
@@ -35,8 +36,6 @@ export class ResendVerificationUseCase {
     const updated = user.requestVerification(token, expiresAt);
     await this.userRepository.update(updated);
 
-    this.eventBus.publish(
-      new VerificationEmailRequestedEvent(email, token),
-    );
+    this.eventBus.publish(new VerificationEmailRequestedEvent(email, token));
   }
 }

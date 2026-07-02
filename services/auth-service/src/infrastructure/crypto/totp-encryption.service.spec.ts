@@ -1,5 +1,6 @@
+import { type EnvService } from '@config/env/env.service';
+
 import { TotpEncryptionService } from './totp-encryption.service';
-import { EnvService } from '@config/env/env.service';
 
 const VALID_KEY = 'a'.repeat(64); // 32-byte hex key for tests
 
@@ -34,8 +35,8 @@ describe('TotpEncryptionService', () => {
     const encrypted = svc.encrypt('SECRET');
     const parts = encrypted.split(':');
     expect(parts).toHaveLength(3);
-    expect(parts[0]).toHaveLength(24);  // 12 bytes IV → 24 hex chars
-    expect(parts[1]).toHaveLength(32);  // 16 bytes authTag → 32 hex chars
+    expect(parts[0]).toHaveLength(24); // 12 bytes IV → 24 hex chars
+    expect(parts[1]).toHaveLength(32); // 16 bytes authTag → 32 hex chars
     expect(parts[2].length).toBeGreaterThan(0);
   });
 

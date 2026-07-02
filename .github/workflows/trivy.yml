@@ -23,12 +23,14 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: aquasecurity/trivy-action@v0.36.0
+        uses: actions/checkout@v7.0.0
 
       - name: Detect service directories
         id: set-matrix
         run: |
-          SERVICES=$(ls -d services/*/ | cut -d'/' -f2 | jq -R -s -c 'split("\n")[:-1]')
+          SERVICES=$(for d in services/*/; do
+            [ -f "${d}Dockerfile.prod" ] && basename "$d"
+          done | jq -R -s -c 'split("\n")[:-1]')
           echo "services=$SERVICES" >> $GITHUB_OUTPUT
 
   trivy:
@@ -43,7 +45,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: aquasecurity/trivy-action@v0.36.0
+        uses: actions/checkout@v7.0.0
 
       - name: Setup environment
         uses: ./.github/actions/setup-node

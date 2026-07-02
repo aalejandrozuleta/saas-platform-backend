@@ -1,5 +1,4 @@
 import { type Queue } from 'bullmq';
-
 import { type EnvService } from '@config/env/env.service';
 
 import { JOB_EMAIL_SEND } from '../../domain/queues.constants';

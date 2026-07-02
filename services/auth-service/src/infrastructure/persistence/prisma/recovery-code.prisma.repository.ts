@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { RecoveryCodeRepository } from '@application/ports/recovery-code.repository';
+
 import { PrismaService } from './prisma.service';
 
 @Injectable()

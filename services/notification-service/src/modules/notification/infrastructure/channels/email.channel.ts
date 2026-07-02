@@ -1,6 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Resend } from 'resend';
-
 import { EnvService } from '@config/env/env.service';
 
 import { EmailNotificationPayload } from '../../domain/events/email-notification.event';

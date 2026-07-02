@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER } from '@nestjs/core';
-
 import { EnvModule } from '@config/env/env.module';
 import { QueueModule } from '@infrastructure/persistence/cache/redis.module';
 import { MetricsModule } from '@infrastructure/metrics/metrics.module';

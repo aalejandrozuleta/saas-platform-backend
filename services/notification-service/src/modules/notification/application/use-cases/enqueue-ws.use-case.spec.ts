@@ -1,5 +1,4 @@
 import { type Queue } from 'bullmq';
-
 import { type EnvService } from '@config/env/env.service';
 
 import { JOB_WS_BROADCAST, JOB_WS_SEND_TO_USER } from '../../domain/queues.constants';
@@ -58,10 +57,6 @@ describe('EnqueueWsUseCase', () => {
 
     await useCase.execute(payload);
 
-    expect(queue.add).toHaveBeenCalledWith(
-      JOB_WS_SEND_TO_USER,
-      payload,
-      expect.any(Object),
-    );
+    expect(queue.add).toHaveBeenCalledWith(JOB_WS_SEND_TO_USER, payload, expect.any(Object));
   });
 });

@@ -1,10 +1,15 @@
-import { Disable2faUseCase } from './disable-2fa.use-case';
-import { USER_REPOSITORY, SECURITY_REPOSITORY, RECOVERY_CODE_REPOSITORY } from '@domain/token/repositories.tokens';
+import {
+  USER_REPOSITORY,
+  SECURITY_REPOSITORY,
+  RECOVERY_CODE_REPOSITORY,
+} from '@domain/token/repositories.tokens';
 import { PASSWORD_HASHER, DOMAIN_EVENT_BUS, TOTP_SERVICE } from '@domain/token/services.tokens';
 import { UserStatus } from '@domain/enums/user-status.enum';
 import { DomainException } from '@domain/errors/domain.exception';
 import { Test, type TestingModule } from '@nestjs/testing';
 import { EmailVO } from '@domain/value-objects/email.vo';
+
+import { Disable2faUseCase } from './disable-2fa.use-case';
 
 const mockUser = {
   status: UserStatus.ACTIVE,
@@ -41,19 +46,19 @@ describe('Disable2faUseCase', () => {
           provide: RECOVERY_CODE_REPOSITORY,
           useValue: { deleteAllByUser: jest.fn() },
         },
-        { provide: PASSWORD_HASHER,  useValue: { verify: jest.fn() } },
-        { provide: TOTP_SERVICE,     useValue: { verifyToken: jest.fn() } },
+        { provide: PASSWORD_HASHER, useValue: { verify: jest.fn() } },
+        { provide: TOTP_SERVICE, useValue: { verifyToken: jest.fn() } },
         { provide: DOMAIN_EVENT_BUS, useValue: { publish: jest.fn() } },
       ],
     }).compile();
 
-    useCase                = module.get(Disable2faUseCase);
-    userRepository         = module.get(USER_REPOSITORY);
-    securityRepository     = module.get(SECURITY_REPOSITORY);
+    useCase = module.get(Disable2faUseCase);
+    userRepository = module.get(USER_REPOSITORY);
+    securityRepository = module.get(SECURITY_REPOSITORY);
     recoveryCodeRepository = module.get(RECOVERY_CODE_REPOSITORY);
-    passwordHasher         = module.get(PASSWORD_HASHER);
-    totpService            = module.get(TOTP_SERVICE);
-    eventBus               = module.get(DOMAIN_EVENT_BUS);
+    passwordHasher = module.get(PASSWORD_HASHER);
+    totpService = module.get(TOTP_SERVICE);
+    eventBus = module.get(DOMAIN_EVENT_BUS);
   });
 
   const ctx = { ip: '127.0.0.1' };
@@ -76,8 +81,9 @@ describe('Disable2faUseCase', () => {
     userRepository.findById.mockResolvedValue(mockUser);
     passwordHasher.verify.mockResolvedValue(false);
 
-    await expect(useCase.execute('user-1', 'wrongpass', '123456', ctx))
-      .rejects.toBeInstanceOf(DomainException);
+    await expect(useCase.execute('user-1', 'wrongpass', '123456', ctx)).rejects.toBeInstanceOf(
+      DomainException,
+    );
   });
 
   it('debe lanzar error si 2FA no está habilitado', async () => {
@@ -85,8 +91,9 @@ describe('Disable2faUseCase', () => {
     passwordHasher.verify.mockResolvedValue(true);
     securityRepository.findByUserId.mockResolvedValue({ twoFactorEnabled: false });
 
-    await expect(useCase.execute('user-1', 'ValidPass123!', '123456', ctx))
-      .rejects.toBeInstanceOf(DomainException);
+    await expect(useCase.execute('user-1', 'ValidPass123!', '123456', ctx)).rejects.toBeInstanceOf(
+      DomainException,
+    );
   });
 
   it('debe lanzar error si el código TOTP es inválido', async () => {
@@ -96,7 +103,8 @@ describe('Disable2faUseCase', () => {
     securityRepository.getTotpSecret.mockResolvedValue('ACTIVE_SECRET');
     totpService.verifyToken.mockReturnValue(false);
 
-    await expect(useCase.execute('user-1', 'ValidPass123!', '000000', ctx))
-      .rejects.toBeInstanceOf(DomainException);
+    await expect(useCase.execute('user-1', 'ValidPass123!', '000000', ctx)).rejects.toBeInstanceOf(
+      DomainException,
+    );
   });
 });

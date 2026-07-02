@@ -1,5 +1,4 @@
 import { type PermissionRepository } from '@application/ports/permission.repository';
-import { PERMISSION_REPOSITORY } from '@domain/token/repositories.tokens';
 
 import { UserPermissionService } from './user-permission.service';
 
@@ -9,7 +8,7 @@ describe('UserPermissionService', () => {
 
   beforeEach(() => {
     repo = {
-      findCodesByRole:  jest.fn(),
+      findCodesByRole: jest.fn(),
       findUserOverrides: jest.fn(),
     };
 
@@ -30,9 +29,7 @@ describe('UserPermissionService', () => {
 
   it('debe añadir permisos extra concedidos por override (granted=true)', async () => {
     repo.findCodesByRole.mockResolvedValue(['invoice:create']);
-    repo.findUserOverrides.mockResolvedValue([
-      { permissionCode: 'finance:read', granted: true },
-    ]);
+    repo.findUserOverrides.mockResolvedValue([{ permissionCode: 'finance:read', granted: true }]);
 
     const result = await service.getEffectivePermissions('user-1', 'EMPLOYEE');
 
@@ -56,7 +53,7 @@ describe('UserPermissionService', () => {
     repo.findCodesByRole.mockResolvedValue(['invoice:create', 'invoice:delete']);
     repo.findUserOverrides.mockResolvedValue([
       { permissionCode: 'invoice:delete', granted: false },
-      { permissionCode: 'finance:read',   granted: true },
+      { permissionCode: 'finance:read', granted: true },
     ]);
 
     const result = await service.getEffectivePermissions('user-1', 'EMPLOYEE');

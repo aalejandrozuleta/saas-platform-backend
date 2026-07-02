@@ -1,8 +1,9 @@
-import { AddTrustedCountryUseCase } from './add-trusted-country.use-case';
-import { SecurityRepository } from '@domain/repositories/security.repository';
+import { type SecurityRepository } from '@domain/repositories/security.repository';
 import { SECURITY_REPOSITORY } from '@domain/token/repositories.tokens';
 import { Test } from '@nestjs/testing';
 import { ErrorCode } from '@saas/shared';
+
+import { AddTrustedCountryUseCase } from './add-trusted-country.use-case';
 
 describe('AddTrustedCountryUseCase', () => {
   let useCase: AddTrustedCountryUseCase;

@@ -7,6 +7,7 @@
     "lint:fix": "eslint . --fix --ignore-pattern '**/coverage/**' --ignore-pattern '**/dist/**' --ignore-pattern '**/*.d.ts'",
     "format": "prettier . --write",
     "lint-staged": "lint-staged",
+    "prepare": "husky",
     "dev": "docker compose -f docker/docker-compose.dev.yml up --build",
     "dev:down": "docker compose -f docker/docker-compose.dev.yml down",
     "dev:reset": "docker compose -f docker/docker-compose.dev.yml down -v",
@@ -31,6 +32,8 @@
     "react": "^19.1.0"
   },
   "devDependencies": {
+    "@commitlint/cli": "^21.2.0",
+    "@commitlint/config-conventional": "^21.2.0",
     "@nestjs/cli": "^11.0.16",
     "@types/react": "^19.1.8",
     "@swc/core": "^1.15.18",
@@ -59,7 +62,10 @@
   },
   "lint-staged": {
     "**/*.ts": [
-      "eslint --fix",
+      "eslint --fix --max-warnings=0",
+      "prettier --write"
+    ],
+    "**/*.{json,md,yml,yaml}": [
       "prettier --write"
     ]
   },

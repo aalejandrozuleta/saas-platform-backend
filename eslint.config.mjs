@@ -137,5 +137,16 @@ export default [
     },
   },
 
+  /*
+   PRISMA SEED SCRIPTS
+   scripts CLI: console.log es la salida esperada
+  */
+  {
+    files: ['**/prisma/seed.ts'],
+    rules: {
+      'no-console': 'off',
+    },
+  },
+
   prettierConfig,
 ];

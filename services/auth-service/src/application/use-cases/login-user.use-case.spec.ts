@@ -27,7 +27,7 @@ import { UserStatus } from '@domain/enums/user-status.enum';
 import { UserRole } from '@domain/enums/user-role.enum';
 import { LoginSecurityChallengeService } from '@application/security/login-security-challenge.service';
 import { LoginChallengeReason } from '@application/security/login-challenge.types';
-import { UserPermissionService } from '@application/services/user-permission.service';
+import { type UserPermissionService } from '@application/services/user-permission.service';
 
 import { LoginUserUseCase } from './login-user.use-case';
 
@@ -94,9 +94,7 @@ describe('LoginUserUseCase', () => {
         isTrusted: true,
       }),
     } as any);
-    securityRepository.findByUserId.mockResolvedValue(
-      createSecurityProfile(),
-    );
+    securityRepository.findByUserId.mockResolvedValue(createSecurityProfile());
     sessionRepository.countActiveSessions.mockResolvedValue(0);
     sessionRepository.create.mockResolvedValue({
       id: 'session-1',
@@ -179,10 +177,10 @@ describe('LoginUserUseCase', () => {
     } as any;
 
     sessionCache = {
-      storeSession:    jest.fn(),
-      getSession:      jest.fn(),
+      storeSession: jest.fn(),
+      getSession: jest.fn(),
       isSessionActive: jest.fn(),
-      revokeSession:   jest.fn(),
+      revokeSession: jest.fn(),
     } as any;
 
     envService = {
@@ -223,37 +221,25 @@ describe('LoginUserUseCase', () => {
   it('debe autenticar correctamente', async () => {
     setupSuccessfulLogin();
 
-    const result = await useCase.execute(
-      'test@test.com',
-      'Password123!',
-      context,
-    );
+    const result = await useCase.execute('test@test.com', 'Password123!', context);
 
     expect(result).toEqual({
       token: 'access-token',
       refreshToken: 'refresh-token',
     });
 
-    expect(eventBus.publish).toHaveBeenCalledWith(
-      expect.any(LoginAttemptedEvent),
-    );
-    expect(eventBus.publish).toHaveBeenCalledWith(
-      expect.any(LoginSucceededEvent),
-    );
+    expect(eventBus.publish).toHaveBeenCalledWith(expect.any(LoginAttemptedEvent));
+    expect(eventBus.publish).toHaveBeenCalledWith(expect.any(LoginSucceededEvent));
   });
 
   it('debe lanzar error si usuario no existe', async () => {
     userRepository.findByEmail.mockResolvedValue(null);
 
-    await expect(
-      useCase.execute('test@test.com', 'Password123!', context),
-    ).rejects.toMatchObject({
+    await expect(useCase.execute('test@test.com', 'Password123!', context)).rejects.toMatchObject({
       code: ErrorCode.INVALID_CREDENTIALS,
     });
 
-    expect(eventBus.publish).toHaveBeenCalledWith(
-      expect.any(LoginFailedEvent),
-    );
+    expect(eventBus.publish).toHaveBeenCalledWith(expect.any(LoginFailedEvent));
 
     expect(eventBus.publish).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -268,16 +254,12 @@ describe('LoginUserUseCase', () => {
     userRepository.findByEmail.mockResolvedValue(user);
     passwordHasher.verify.mockResolvedValue(false);
 
-    await expect(
-      useCase.execute('test@test.com', 'Password123!', context),
-    ).rejects.toMatchObject({
+    await expect(useCase.execute('test@test.com', 'Password123!', context)).rejects.toMatchObject({
       code: ErrorCode.INVALID_CREDENTIALS,
     });
 
-    expect(securityRepository.registerFailedAttempt)
-      .toHaveBeenCalled();
-    expect(securityRepository.resetFailedLoginAttempts)
-      .not.toHaveBeenCalled();
+    expect(securityRepository.registerFailedAttempt).toHaveBeenCalled();
+    expect(securityRepository.resetFailedLoginAttempts).not.toHaveBeenCalled();
   });
 
   it('debe emitir LoginBlockedEvent si usuario está bloqueado', async () => {
@@ -290,13 +272,9 @@ describe('LoginUserUseCase', () => {
       throw DomainErrorFactory.userBlocked();
     });
 
-    await expect(
-      useCase.execute('test@test.com', 'Password123!', context),
-    ).rejects.toThrow();
+    await expect(useCase.execute('test@test.com', 'Password123!', context)).rejects.toThrow();
 
-    expect(eventBus.publish).toHaveBeenCalledWith(
-      expect.any(LoginBlockedEvent),
-    );
+    expect(eventBus.publish).toHaveBeenCalledWith(expect.any(LoginBlockedEvent));
   });
 
   it('debe relanzar error sin publicar LoginBlockedEvent cuando validateAttempts lanza error', async () => {
@@ -306,9 +284,9 @@ describe('LoginUserUseCase', () => {
       throw new Error('raw string error');
     });
 
-    await expect(
-      useCase.execute('test@test.com', 'Password123!', context),
-    ).rejects.toThrow('raw string error');
+    await expect(useCase.execute('test@test.com', 'Password123!', context)).rejects.toThrow(
+      'raw string error',
+    );
 
     expect(eventBus.publish).not.toHaveBeenCalledWith(expect.any(LoginBlockedEvent));
   });
@@ -326,9 +304,7 @@ describe('LoginUserUseCase', () => {
     );
     deviceRepository.getByUserIdAndFingerprint.mockResolvedValue(null);
 
-    await expect(
-      useCase.execute('test@test.com', 'Password123!', context),
-    ).rejects.toMatchObject({
+    await expect(useCase.execute('test@test.com', 'Password123!', context)).rejects.toMatchObject({
       code: ErrorCode.SECURITY_CHALLENGE_REQUIRED,
       metadata: expect.objectContaining({
         reason: LoginChallengeReason.NEW_DEVICE,
@@ -352,9 +328,7 @@ describe('LoginUserUseCase', () => {
       updateLastUsed: () => ({ id: 'device-1', isTrusted: true }),
     } as any);
 
-    await expect(
-      useCase.execute('test@test.com', 'Password123!', context),
-    ).rejects.toMatchObject({
+    await expect(useCase.execute('test@test.com', 'Password123!', context)).rejects.toMatchObject({
       code: ErrorCode.SECURITY_CHALLENGE_REQUIRED,
       metadata: expect.objectContaining({
         reason: LoginChallengeReason.UNTRUSTED_COUNTRY,
@@ -366,14 +340,9 @@ describe('LoginUserUseCase', () => {
     setupSuccessfulLogin();
     sessionRepository.countActiveSessions.mockResolvedValue(3);
 
-    await useCase.execute(
-      'test@test.com',
-      'Password123!',
-      context,
-    );
+    await useCase.execute('test@test.com', 'Password123!', context);
 
-    expect(sessionRepository.revokeOldestActiveSession)
-      .toHaveBeenCalled();
+    expect(sessionRepository.revokeOldestActiveSession).toHaveBeenCalled();
   });
 
   it('debe liberar un bloqueo temporal expirado antes de validar estado', async () => {
@@ -388,16 +357,12 @@ describe('LoginUserUseCase', () => {
     userRepository.findByEmail.mockResolvedValue(user);
     passwordHasher.verify.mockResolvedValue(false);
 
-    await expect(
-      useCase.execute('test@test.com', 'Password123!', context),
-    ).rejects.toMatchObject({
+    await expect(useCase.execute('test@test.com', 'Password123!', context)).rejects.toMatchObject({
       code: ErrorCode.INVALID_CREDENTIALS,
     });
 
-    expect(securityRepository.releaseTemporaryBlock)
-      .toHaveBeenCalledWith(user.id);
-    expect(policy.validateUserStatus)
-      .toHaveBeenCalledWith(UserStatus.ACTIVE);
+    expect(securityRepository.releaseTemporaryBlock).toHaveBeenCalledWith(user.id);
+    expect(policy.validateUserStatus).toHaveBeenCalledWith(UserStatus.ACTIVE);
   });
 
   it('debe resetear intentos cuando la contraseña es correcta aunque luego se exija challenge', async () => {
@@ -416,20 +381,15 @@ describe('LoginUserUseCase', () => {
         isTrusted: false,
       }),
     } as any);
-    securityRepository.findByUserId.mockResolvedValue(
-      createSecurityProfile(),
-    );
+    securityRepository.findByUserId.mockResolvedValue(createSecurityProfile());
 
-    await expect(
-      useCase.execute('test@test.com', 'Password123!', context),
-    ).rejects.toMatchObject({
+    await expect(useCase.execute('test@test.com', 'Password123!', context)).rejects.toMatchObject({
       code: ErrorCode.SECURITY_CHALLENGE_REQUIRED,
       metadata: expect.objectContaining({
         reason: LoginChallengeReason.UNTRUSTED_DEVICE,
       }),
     });
 
-    expect(securityRepository.resetFailedLoginAttempts)
-      .toHaveBeenCalledWith(user.id);
+    expect(securityRepository.resetFailedLoginAttempts).toHaveBeenCalledWith(user.id);
   });
 });

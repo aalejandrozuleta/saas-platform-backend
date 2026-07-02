@@ -1,10 +1,11 @@
-import { Enable2faUseCase } from './enable-2fa.use-case';
 import { USER_REPOSITORY, SECURITY_REPOSITORY } from '@domain/token/repositories.tokens';
 import { PASSWORD_HASHER, DOMAIN_EVENT_BUS, TOTP_SERVICE } from '@domain/token/services.tokens';
 import { UserStatus } from '@domain/enums/user-status.enum';
 import { DomainException } from '@domain/errors/domain.exception';
 import { Test, type TestingModule } from '@nestjs/testing';
 import { EmailVO } from '@domain/value-objects/email.vo';
+
+import { Enable2faUseCase } from './enable-2fa.use-case';
 
 const mockUser = {
   status: UserStatus.ACTIVE,
@@ -30,20 +31,23 @@ describe('Enable2faUseCase', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         Enable2faUseCase,
-        { provide: USER_REPOSITORY,     useValue: { findById: jest.fn() } },
-        { provide: SECURITY_REPOSITORY, useValue: { findByUserId: jest.fn(), saveTotpPendingSecret: jest.fn() } },
-        { provide: PASSWORD_HASHER,     useValue: { verify: jest.fn() } },
-        { provide: TOTP_SERVICE,        useValue: { generateSecret: jest.fn() } },
-        { provide: DOMAIN_EVENT_BUS,    useValue: { publish: jest.fn() } },
+        { provide: USER_REPOSITORY, useValue: { findById: jest.fn() } },
+        {
+          provide: SECURITY_REPOSITORY,
+          useValue: { findByUserId: jest.fn(), saveTotpPendingSecret: jest.fn() },
+        },
+        { provide: PASSWORD_HASHER, useValue: { verify: jest.fn() } },
+        { provide: TOTP_SERVICE, useValue: { generateSecret: jest.fn() } },
+        { provide: DOMAIN_EVENT_BUS, useValue: { publish: jest.fn() } },
       ],
     }).compile();
 
-    useCase           = module.get(Enable2faUseCase);
-    userRepository    = module.get(USER_REPOSITORY);
+    useCase = module.get(Enable2faUseCase);
+    userRepository = module.get(USER_REPOSITORY);
     securityRepository = module.get(SECURITY_REPOSITORY);
-    passwordHasher    = module.get(PASSWORD_HASHER);
-    totpService       = module.get(TOTP_SERVICE);
-    eventBus          = module.get(DOMAIN_EVENT_BUS);
+    passwordHasher = module.get(PASSWORD_HASHER);
+    totpService = module.get(TOTP_SERVICE);
+    eventBus = module.get(DOMAIN_EVENT_BUS);
   });
 
   const ctx = { ip: '127.0.0.1' };
@@ -57,7 +61,10 @@ describe('Enable2faUseCase', () => {
     const result = await useCase.execute('user-1', 'ValidPass123!', ctx);
 
     expect(totpService.generateSecret).toHaveBeenCalledWith('user@example.com', 'SaaS Platform');
-    expect(securityRepository.saveTotpPendingSecret).toHaveBeenCalledWith('user-1', mockSetup.secret);
+    expect(securityRepository.saveTotpPendingSecret).toHaveBeenCalledWith(
+      'user-1',
+      mockSetup.secret,
+    );
     expect(result).toEqual(mockSetup);
     expect(eventBus.publish).toHaveBeenCalled();
   });
@@ -66,15 +73,15 @@ describe('Enable2faUseCase', () => {
     userRepository.findById.mockResolvedValue(mockUser);
     passwordHasher.verify.mockResolvedValue(false);
 
-    await expect(useCase.execute('user-1', 'wrongpass', ctx))
-      .rejects.toBeInstanceOf(DomainException);
+    await expect(useCase.execute('user-1', 'wrongpass', ctx)).rejects.toBeInstanceOf(
+      DomainException,
+    );
   });
 
   it('debe lanzar error si el usuario no está activo', async () => {
     userRepository.findById.mockResolvedValue({ ...mockUser, status: UserStatus.BLOCKED });
 
-    await expect(useCase.execute('user-1', 'pass', ctx))
-      .rejects.toBeInstanceOf(DomainException);
+    await expect(useCase.execute('user-1', 'pass', ctx)).rejects.toBeInstanceOf(DomainException);
   });
 
   it('debe lanzar error si 2FA ya está habilitado', async () => {
@@ -82,7 +89,8 @@ describe('Enable2faUseCase', () => {
     passwordHasher.verify.mockResolvedValue(true);
     securityRepository.findByUserId.mockResolvedValue({ twoFactorEnabled: true });
 
-    await expect(useCase.execute('user-1', 'ValidPass123!', ctx))
-      .rejects.toBeInstanceOf(DomainException);
+    await expect(useCase.execute('user-1', 'ValidPass123!', ctx)).rejects.toBeInstanceOf(
+      DomainException,
+    );
   });
 });
