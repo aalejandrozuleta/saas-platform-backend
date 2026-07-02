@@ -92,7 +92,7 @@ services:
       redis:
         condition: service_healthy
     healthcheck:
-      test: ['CMD', 'wget', '-qO-', 'http://localhost:3003/notifications/metrics']
+      test: ['CMD', 'wget', '-qO-', 'http://localhost:3003/notifications/v1/metrics']
       interval: 10s
       timeout: 5s
       retries: 5

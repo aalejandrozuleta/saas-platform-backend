@@ -6,7 +6,7 @@ scrape_configs:
   # ============================
   # API GATEWAY
   # ============================
-  - job_name: "api-gateway"
+  - job_name: 'api-gateway'
     metrics_path: /v1/metrics
     static_configs:
       - targets:
@@ -17,7 +17,7 @@ scrape_configs:
   # ============================
   # AUTH SERVICE
   # ============================
-  - job_name: "auth-service"
+  - job_name: 'auth-service'
     metrics_path: /auth/v1/metrics
     static_configs:
       - targets:
@@ -28,8 +28,8 @@ scrape_configs:
   # ============================
   # NOTIFICATION SERVICE
   # ============================
-  - job_name: "notification-service"
-    metrics_path: /notifications/metrics
+  - job_name: 'notification-service'
+    metrics_path: /notifications/v1/metrics
     static_configs:
       - targets:
           - notification-service:3003
@@ -39,7 +39,7 @@ scrape_configs:
   # ============================
   # POSTGRES EXPORTER
   # ============================
-  - job_name: "postgres-exporter"
+  - job_name: 'postgres-exporter'
     static_configs:
       - targets:
           - postgres-exporter:9187
@@ -47,7 +47,7 @@ scrape_configs:
   # ============================
   # REDIS EXPORTER
   # ============================
-  - job_name: "redis-exporter"
+  - job_name: 'redis-exporter'
     static_configs:
       - targets:
           - redis-exporter:9121
@@ -55,7 +55,7 @@ scrape_configs:
   # ============================
   # CADVISOR (Container Metrics)
   # ============================
-  - job_name: "cadvisor"
+  - job_name: 'cadvisor'
     static_configs:
       - targets:
           - cadvisor:8080
@@ -63,7 +63,7 @@ scrape_configs:
   # ============================
   # PROMETHEUS SELF-MONITORING
   # ============================
-  - job_name: "prometheus"
+  - job_name: 'prometheus'
     static_configs:
       - targets:
           - localhost:9090
