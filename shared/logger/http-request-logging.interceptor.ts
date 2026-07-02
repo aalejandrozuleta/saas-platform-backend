@@ -1,12 +1,6 @@
 import { randomUUID } from 'node:crypto';
 
-import {
-  CallHandler,
-  ExecutionContext,
-  Inject,
-  Injectable,
-  NestInterceptor,
-} from '@nestjs/common';
+import { CallHandler, ExecutionContext, Inject, Injectable, NestInterceptor } from '@nestjs/common';
 import { defer, Observable } from 'rxjs';
 import { catchError, finalize } from 'rxjs/operators';
 import type { Request, Response } from 'express';
@@ -23,10 +17,7 @@ export class HttpRequestLoggingInterceptor implements NestInterceptor {
     private readonly logger: PlatformLogger,
   ) {}
 
-  intercept(
-    context: ExecutionContext,
-    next: CallHandler,
-  ): Observable<any> {
+  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const http = context.switchToHttp();
     const req = http.getRequest<Request>();
     const res = http.getResponse<Response>();
@@ -38,8 +29,7 @@ export class HttpRequestLoggingInterceptor implements NestInterceptor {
 
     // Always echo correlation id for clients and for upstream services.
     res.setHeader('x-correlation-id', correlationId);
-    (req.headers as Record<string, unknown>)['x-correlation-id'] =
-      correlationId;
+    (req.headers as Record<string, unknown>)['x-correlation-id'] = correlationId;
 
     const userId =
       (req as any).user?.id && typeof (req as any).user.id === 'string'
@@ -59,8 +49,7 @@ export class HttpRequestLoggingInterceptor implements NestInterceptor {
           throw err;
         }),
         finalize(() => {
-          const durationMs =
-            Number(process.hrtime.bigint() - startNs) / 1_000_000;
+          const durationMs = Number(process.hrtime.bigint() - startNs) / 1_000_000;
 
           const defaultStatus = thrown ? 500 : 200;
           const status =
@@ -77,9 +66,7 @@ export class HttpRequestLoggingInterceptor implements NestInterceptor {
               : req.ip;
 
           const userAgent =
-            typeof req.headers['user-agent'] === 'string'
-              ? req.headers['user-agent']
-              : undefined;
+            typeof req.headers['user-agent'] === 'string' ? req.headers['user-agent'] : undefined;
 
           const meta: Record<string, unknown> = {
             event: 'http.request',
@@ -107,8 +94,12 @@ export class HttpRequestLoggingInterceptor implements NestInterceptor {
             return;
           }
 
-          if (this.isLowValuePath(path)) {
-            this.logger.debug('HTTP request completed', meta);
+          if (this.isPollingPath(path)) {
+            // Scrapers/healthchecks pegan estas rutas cada pocos segundos y una
+            // respuesta 2xx no aporta nada al entender un proceso; se omite el
+            // log entero (no solo se baja a debug) para no ensuciar la salida
+            // incluso en LOG_LEVEL=debug. Los fallos (4xx/5xx) igual se loguean,
+            // porque esas ramas corren antes de llegar aquí.
             return;
           }
 
@@ -118,17 +109,14 @@ export class HttpRequestLoggingInterceptor implements NestInterceptor {
     );
   }
 
-  private isLowValuePath(path: string): boolean {
-    return /\/(metrics|health)(\/|$)/.test(path);
+  private isPollingPath(path: string): boolean {
+    return /\/(metrics|health|maintenance\/status)(\/|$|\?)/.test(path);
   }
 
   private resolveCorrelationId(req: Request): string {
     const header =
-      (req.headers['x-correlation-id'] as unknown) ??
-      (req.headers['x-request-id'] as unknown);
+      (req.headers['x-correlation-id'] as unknown) ?? (req.headers['x-request-id'] as unknown);
 
-    return typeof header === 'string' && header.trim().length > 0
-      ? header
-      : randomUUID();
+    return typeof header === 'string' && header.trim().length > 0 ? header : randomUUID();
   }
 }

@@ -1,4 +1,5 @@
 import { Controller, Get } from '@nestjs/common';
+import { PublicRoute } from '@saas/shared';
 
 /**
  * Endpoint de salud del Gateway.
@@ -7,6 +8,7 @@ import { Controller, Get } from '@nestjs/common';
 @Controller('health')
 export class HealthController {
   @Get()
+  @PublicRoute()
   health(): { status: string } {
     return { status: 'ok' };
   }

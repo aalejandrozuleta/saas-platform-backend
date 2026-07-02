@@ -12,7 +12,10 @@ describe('HttpRequestLoggingInterceptor', () => {
     debug: jest.Mock;
   };
 
-  const makeContext = (req: any, res: any = { statusCode: 200, setHeader: jest.fn() }): ExecutionContext =>
+  const makeContext = (
+    req: any,
+    res: any = { statusCode: 200, setHeader: jest.fn() },
+  ): ExecutionContext =>
     ({
       switchToHttp: () => ({
         getRequest: () => req,
@@ -73,9 +76,7 @@ describe('HttpRequestLoggingInterceptor', () => {
     const err = new Error('crash');
 
     await expect(
-      lastValueFrom(
-        interceptor.intercept(makeContext(req, res), makeNext(throwError(() => err))),
-      ),
+      lastValueFrom(interceptor.intercept(makeContext(req, res), makeNext(throwError(() => err)))),
     ).rejects.toThrow('crash');
 
     expect(logger.error).toHaveBeenCalledWith(
@@ -84,27 +85,48 @@ describe('HttpRequestLoggingInterceptor', () => {
     );
   });
 
-  it('debe loggear debug para rutas de bajo valor (/metrics)', async () => {
+  it('no loggea requests exitosas a rutas de polling (/metrics)', async () => {
     const req = makeReq({ url: '/metrics', originalUrl: '/metrics' });
     const res = makeRes(200);
 
     await lastValueFrom(interceptor.intercept(makeContext(req, res), makeNext()));
 
-    expect(logger.debug).toHaveBeenCalledWith(
-      'HTTP request completed',
-      expect.objectContaining({ path: '/metrics' }),
-    );
+    expect(logger.info).not.toHaveBeenCalled();
+    expect(logger.debug).not.toHaveBeenCalled();
   });
 
-  it('debe loggear debug para rutas de bajo valor (/health)', async () => {
+  it('no loggea requests exitosas a rutas de polling (/health)', async () => {
     const req = makeReq({ url: '/health', originalUrl: '/health' });
     const res = makeRes(200);
 
     await lastValueFrom(interceptor.intercept(makeContext(req, res), makeNext()));
 
-    expect(logger.debug).toHaveBeenCalledWith(
-      'HTTP request completed',
-      expect.any(Object),
+    expect(logger.info).not.toHaveBeenCalled();
+    expect(logger.debug).not.toHaveBeenCalled();
+  });
+
+  it('no loggea requests exitosas a rutas de polling con versión y prefijo (/config/v1/maintenance/status)', async () => {
+    const req = makeReq({
+      url: '/config/v1/maintenance/status',
+      originalUrl: '/config/v1/maintenance/status',
+    });
+    const res = makeRes(200);
+
+    await lastValueFrom(interceptor.intercept(makeContext(req, res), makeNext()));
+
+    expect(logger.info).not.toHaveBeenCalled();
+    expect(logger.debug).not.toHaveBeenCalled();
+  });
+
+  it('sí loggea como warn un 4xx en una ruta de polling (/auth/v1/metrics)', async () => {
+    const req = makeReq({ url: '/auth/v1/metrics', originalUrl: '/auth/v1/metrics' });
+    const res = makeRes(403);
+
+    await lastValueFrom(interceptor.intercept(makeContext(req, res), makeNext()));
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      'HTTP request client error',
+      expect.objectContaining({ status: 403 }),
     );
   });
 
@@ -167,9 +189,7 @@ describe('HttpRequestLoggingInterceptor', () => {
     const err = new Error('known error');
 
     await expect(
-      lastValueFrom(
-        interceptor.intercept(makeContext(req, res), makeNext(throwError(() => err))),
-      ),
+      lastValueFrom(interceptor.intercept(makeContext(req, res), makeNext(throwError(() => err)))),
     ).rejects.toThrow();
 
     expect(logger.error).toHaveBeenCalledWith(
@@ -184,9 +204,7 @@ describe('HttpRequestLoggingInterceptor', () => {
     const err = new Error('fail');
 
     await expect(
-      lastValueFrom(
-        interceptor.intercept(makeContext(req, res), makeNext(throwError(() => err))),
-      ),
+      lastValueFrom(interceptor.intercept(makeContext(req, res), makeNext(throwError(() => err)))),
     ).rejects.toThrow();
 
     expect(logger.error).toHaveBeenCalledWith(
@@ -207,7 +225,13 @@ describe('HttpRequestLoggingInterceptor', () => {
   });
 
   it('usa "unknown" como path cuando originalUrl y url son undefined', async () => {
-    const req = { method: 'GET', ip: '127.0.0.1', headers: {}, originalUrl: undefined, url: undefined };
+    const req = {
+      method: 'GET',
+      ip: '127.0.0.1',
+      headers: {},
+      originalUrl: undefined,
+      url: undefined,
+    };
     const res = makeRes(200);
 
     await lastValueFrom(interceptor.intercept(makeContext(req, res), makeNext()));

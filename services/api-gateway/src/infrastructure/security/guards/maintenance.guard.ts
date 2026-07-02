@@ -21,7 +21,7 @@ const CACHE_TTL_SECONDS = 30;
  * Consulta el estado de mantenimiento del config-service (caché Redis 30s)
  * y rechaza todas las peticiones con 503 cuando `maintenanceEnabled = true`.
  *
- * Rutas siempre permitidas (bypass):
+ * Rutas siempre permitidas (bypass), con o sin prefijo de versión (/v1/...):
  *  - /health
  *  - /config/maintenance/*  → el super-admin puede desactivar el modo desde aquí
  *
@@ -55,7 +55,9 @@ export class MaintenanceGuard implements CanActivate {
           error: {
             code: 'SERVICE_UNAVAILABLE',
             messageKey: 'common.maintenance_mode',
-            message: status.maintenanceMessage ?? 'The platform is under maintenance. Please try again later.',
+            message:
+              status.maintenanceMessage ??
+              'The platform is under maintenance. Please try again later.',
           },
         },
         HttpStatus.SERVICE_UNAVAILABLE,
@@ -67,12 +69,10 @@ export class MaintenanceGuard implements CanActivate {
 
   // ─── Bypass ───────────────────────────────────────────────────────────────────
 
+  private static readonly BYPASS_PATH_PATTERN = /^\/(?:v\d+\/)?(?:health$|config\/maintenance)/;
+
   private isBypassRoute(req: Request): boolean {
-    const path = req.path;
-    return (
-      path === '/health' ||
-      path.startsWith('/config/maintenance')
-    );
+    return MaintenanceGuard.BYPASS_PATH_PATTERN.test(req.path);
   }
 
   // ─── Resolución del estado ────────────────────────────────────────────────────
@@ -131,21 +131,18 @@ export class MaintenanceGuard implements CanActivate {
     if (err instanceof HttpException) {
       const status = err.getStatus();
       const response = err.getResponse();
-      const detail = typeof response === 'object' && response !== null
-        ? JSON.stringify(response)
-        : String(response);
+      const detail =
+        typeof response === 'object' && response !== null
+          ? JSON.stringify(response)
+          : String(response);
 
-      this.logger.warn(
-        `Failing open — config-service returned HTTP ${status}: ${detail}`,
-      );
+      this.logger.warn(`Failing open — config-service returned HTTP ${status}: ${detail}`);
       return;
     }
 
     // ECONNREFUSED / ENOTFOUND / ETIMEDOUT — servicio no iniciado (común en dev)
     if (this.isNetworkError(err)) {
-      this.logger.debug(
-        `Failing open — config-service unreachable (${this.extractCode(err)})`,
-      );
+      this.logger.debug(`Failing open — config-service unreachable (${this.extractCode(err)})`);
       return;
     }
 
@@ -166,8 +163,10 @@ export class MaintenanceGuard implements CanActivate {
   private isNetworkError(err: unknown): boolean {
     if (typeof err !== 'object' || err === null) return false;
     const code = (err as Record<string, unknown>).code;
-    return typeof code === 'string' &&
-      ['ECONNREFUSED', 'ENOTFOUND', 'ETIMEDOUT', 'ECONNRESET'].includes(code);
+    return (
+      typeof code === 'string' &&
+      ['ECONNREFUSED', 'ENOTFOUND', 'ETIMEDOUT', 'ECONNRESET'].includes(code)
+    );
   }
 
   private extractCode(err: unknown): string {
