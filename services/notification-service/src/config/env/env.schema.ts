@@ -8,6 +8,9 @@ export const envSchema = z.object({
   REDIS_PORT: z.coerce.number().default(6379),
   REDIS_PASSWORD: z.string().min(16),
 
+  /** Secreto compartido con auth-service; ver InternalServiceGuard. */
+  INTERNAL_SERVICE_SECRET: z.string().min(32),
+
   RESEND_API_KEY: z.string().min(1),
   RESEND_FROM_EMAIL: z.email().default('noreply@saas-platform.dev'),
 

@@ -80,6 +80,9 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_PASSWORD: *redis_password
+      # NOTE: notification-service is not yet deployed in this prod compose file.
+      # This secret must match notification-service's INTERNAL_SERVICE_SECRET once it is.
+      INTERNAL_SERVICE_SECRET: ${INTERNAL_SERVICE_SECRET:?INTERNAL_SERVICE_SECRET is required}
     depends_on:
       auth-postgres:
         condition: service_healthy

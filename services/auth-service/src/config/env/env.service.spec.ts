@@ -11,6 +11,7 @@ describe('EnvService', () => {
     REDIS_HOST: 'localhost',
     REDIS_PORT: '6379',
     REDIS_PASSWORD: 'a'.repeat(16),
+    INTERNAL_SERVICE_SECRET: 'a'.repeat(32),
   };
 
   let originalEnv: NodeJS.ProcessEnv;

@@ -15,6 +15,7 @@ describe('EnvService', () => {
     NODE_ENV: 'test',
     REDIS_HOST: 'localhost',
     REDIS_PASSWORD: 'a'.repeat(16),
+    INTERNAL_SERVICE_SECRET: 'a'.repeat(32),
     RESEND_API_KEY: 'test-key',
   };
 

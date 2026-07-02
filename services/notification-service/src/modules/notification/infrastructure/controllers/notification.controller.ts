@@ -13,6 +13,7 @@ import {
 } from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
+import { PublicRoute } from '@saas/shared';
 
 import { EnqueueEmailUseCase } from '../../application/use-cases/enqueue-email.use-case';
 import { EnqueueWsUseCase } from '../../application/use-cases/enqueue-ws.use-case';
@@ -96,6 +97,7 @@ export class NotificationController {
   @Get('preview')
   @Header('Content-Type', 'text/html; charset=utf-8')
   @ApiOperation({ summary: 'Lista todos los templates disponibles con links de preview' })
+  @PublicRoute()
   listPreviews(): string {
     const templates = this.templateEngine.list();
     const links = templates
@@ -111,6 +113,7 @@ export class NotificationController {
   @ApiOperation({ summary: 'Preview de un template de email en el browser' })
   @ApiParam({ name: 'template', example: 'welcome' })
   @ApiQuery({ name: 'email', required: false, example: 'usuario@empresa.com' })
+  @PublicRoute()
   async previewTemplate(
     @Param('template') template: string,
     @Query() query: Record<string, string>,

@@ -72,6 +72,9 @@ services:
       PNPM_STORE_PATH: /pnpm-store
       SERVICE_NAME: notification-service
       REDIS_HOST: redis
+      REDIS_PASSWORD: *redis_password
+      # Debe coincidir con el valor de auth-service (ver InternalServiceGuard)
+      INTERNAL_SERVICE_SECRET: ${INTERNAL_SERVICE_SECRET:-dev-only-internal-secret-do-not-use-in-prod}
     ports:
       - '3003:3003'
     depends_on:
@@ -110,6 +113,7 @@ services:
       DATABASE_URL: postgresql://config_user:config_pass@config-postgres:5432/config_db
       MONGO_URL: mongodb://${MONGO_ROOT_USER:-root}:${MONGO_ROOT_PASSWORD:-dev-only-mongo-password-change-me}@mongo:27017/config_audit?authSource=admin
       REDIS_HOST: redis
+      REDIS_PASSWORD: *redis_password
       # Debe coincidir con el valor de api-gateway (ver InternalServiceGuard)
       INTERNAL_SERVICE_SECRET: ${INTERNAL_SERVICE_SECRET:-dev-only-internal-secret-do-not-use-in-prod}
     ports:
@@ -174,6 +178,9 @@ services:
       DATABASE_URL: postgresql://auth_user:auth_pass@auth-postgres:5432/auth_db
       MONGO_URL: mongodb://${MONGO_ROOT_USER:-root}:${MONGO_ROOT_PASSWORD:-dev-only-mongo-password-change-me}@mongo:27017/auth_audit?authSource=admin
       REDIS_HOST: redis
+      REDIS_PASSWORD: *redis_password
+      # Debe coincidir con el valor de notification-service (ver InternalServiceGuard)
+      INTERNAL_SERVICE_SECRET: ${INTERNAL_SERVICE_SECRET:-dev-only-internal-secret-do-not-use-in-prod}
     ports:
       - '3001:3001'
     depends_on:
