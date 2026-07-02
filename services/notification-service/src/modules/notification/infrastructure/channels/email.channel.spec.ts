@@ -25,6 +25,7 @@ describe('EmailChannel', () => {
       get: jest.fn((key: string) => {
         if (key === 'RESEND_API_KEY') return 'test-api-key';
         if (key === 'RESEND_FROM_EMAIL') return 'noreply@arlok.dev';
+        if (key === 'RESEND_TIMEOUT_MS') return 10000;
         return undefined;
       }),
     } as any;
@@ -96,5 +97,34 @@ describe('EmailChannel', () => {
         template: 'welcome',
       }),
     ).rejects.toThrow('Dominio no verificado');
+  });
+
+  it('debe envolver un rechazo no-Error del SDK de Resend en un Error', async () => {
+    sendMock.mockRejectedValue('boom'); // el SDK podría rechazar con un valor no-Error
+
+    await expect(
+      channel.send({
+        to: 'user@example.com',
+        subject: 'Hola',
+        template: 'welcome',
+      }),
+    ).rejects.toThrow('boom');
+  });
+
+  it('debe rechazar si Resend no responde antes del timeout configurado', async () => {
+    jest.useFakeTimers();
+    sendMock.mockImplementation(() => new Promise(() => {})); // nunca resuelve
+
+    const pending = channel.send({
+      to: 'user@example.com',
+      subject: 'Hola',
+      template: 'welcome',
+    });
+    const assertion = expect(pending).rejects.toThrow('excedió el timeout de 10000ms');
+
+    await jest.advanceTimersByTimeAsync(10000);
+    await assertion;
+
+    jest.useRealTimers();
   });
 });

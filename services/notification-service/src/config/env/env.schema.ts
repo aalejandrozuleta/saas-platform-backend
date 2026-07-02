@@ -15,6 +15,7 @@ export const envSchema = z.object({
 
   RESEND_API_KEY: z.string().min(1),
   RESEND_FROM_EMAIL: z.email().default('noreply@saas-platform.dev'),
+  RESEND_TIMEOUT_MS: z.coerce.number().default(10000),
 
   // Reintentos para la cola de email
   EMAIL_QUEUE_ATTEMPTS: z.coerce.number().default(5),
