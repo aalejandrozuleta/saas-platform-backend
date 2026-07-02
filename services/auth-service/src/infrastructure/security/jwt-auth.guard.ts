@@ -1,9 +1,4 @@
-import {
-  CanActivate,
-  ExecutionContext,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
 import type { Request } from 'express';
 import { verify, type JwtPayload } from 'jsonwebtoken';
 import { EnvService } from '@config/env/env.service';
@@ -34,7 +29,6 @@ declare global {
  */
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
-
   constructor(private readonly envService: EnvService) {}
 
   canActivate(context: ExecutionContext): boolean {
@@ -46,14 +40,11 @@ export class JwtAuthGuard implements CanActivate {
     }
 
     try {
-      const payload = verify(
-        token,
-        this.envService.get('JWT_ACCESS_SECRET'),
-        {
-          issuer: 'auth-service',
-          audience: 'api-gateway',
-        },
-      ) as AccessTokenPayload;
+      const payload = verify(token, this.envService.get('JWT_ACCESS_SECRET'), {
+        issuer: 'auth-service',
+        audience: 'api-gateway',
+        algorithms: ['HS256'],
+      }) as AccessTokenPayload;
 
       if (!payload.sub || !payload.sid) {
         throw new UnauthorizedException();

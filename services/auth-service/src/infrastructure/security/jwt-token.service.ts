@@ -16,20 +16,12 @@ import { EnvService } from '@config/env/env.service';
  */
 @Injectable()
 export class JwtTokenService implements TokenService {
-
-  constructor(
-    private readonly envService: EnvService,
-  ) { }
+  constructor(private readonly envService: EnvService) {}
 
   /**
    * Genera access token firmado.
    */
-  generateAccessToken(payload: {
-    userId: string;
-    sessionId: string;
-    role: UserRole;
-  }): string {
-
+  generateAccessToken(payload: { userId: string; sessionId: string; role: UserRole }): string {
     const ttl = Number(this.envService.get('ACCESS_TOKEN_TTL'));
 
     return sign(
@@ -55,25 +47,16 @@ export class JwtTokenService implements TokenService {
     jti: string;
     expiresAt: Date;
   } {
-
     const jti = randomUUID();
 
-    const ttl = Number(
-      this.envService.get('REFRESH_TOKEN_TTL'),
-    );
+    const ttl = Number(this.envService.get('REFRESH_TOKEN_TTL'));
 
-    const expiresAt = new Date(
-      Date.now() + ttl * 1000,
-    );
+    const expiresAt = new Date(Date.now() + ttl * 1000);
 
-    const token = sign(
-      { jti },
-      this.envService.get('JWT_REFRESH_SECRET'),
-      {
-        expiresIn: ttl,
-        issuer: 'auth-service',
-      },
-    );
+    const token = sign({ jti }, this.envService.get('JWT_REFRESH_SECRET'), {
+      expiresIn: ttl,
+      issuer: 'auth-service',
+    });
 
     return {
       token,
@@ -83,10 +66,9 @@ export class JwtTokenService implements TokenService {
   }
 
   verifyRefreshToken(token: string): { jti: string } {
-    const payload = verify(
-      token,
-      this.envService.get('JWT_REFRESH_SECRET'),
-    ) as { jti: string };
+    const payload = verify(token, this.envService.get('JWT_REFRESH_SECRET'), {
+      algorithms: ['HS256'],
+    }) as { jti: string };
 
     return payload;
   }

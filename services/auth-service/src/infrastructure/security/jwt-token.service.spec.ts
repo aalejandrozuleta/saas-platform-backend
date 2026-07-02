@@ -32,8 +32,8 @@ describe('JwtTokenService', () => {
   });
 
   afterEach(() => {
-  jest.restoreAllMocks();
-});
+    jest.restoreAllMocks();
+  });
 
   describe('generateAccessToken', () => {
     it('debe generar un access token con sub, sid y role en el payload', () => {
@@ -85,10 +85,9 @@ describe('JwtTokenService', () => {
 
       const result = service.verifyRefreshToken('raw-refresh-token');
 
-      expect(verify).toHaveBeenCalledWith(
-        'raw-refresh-token',
-        'refresh-secret',
-      );
+      expect(verify).toHaveBeenCalledWith('raw-refresh-token', 'refresh-secret', {
+        algorithms: ['HS256'],
+      });
       expect(result).toEqual({ jti: 'jti-abc' });
     });
   });
@@ -104,21 +103,15 @@ describe('JwtTokenService', () => {
 
       const result = service.generateRefreshToken();
 
-      expect(sign).toHaveBeenCalledWith(
-        { jti: 'uuid-123' },
-        'refresh-secret',
-        {
-          expiresIn: 604800,
-          issuer: 'auth-service',
-        },
-      );
+      expect(sign).toHaveBeenCalledWith({ jti: 'uuid-123' }, 'refresh-secret', {
+        expiresIn: 604800,
+        issuer: 'auth-service',
+      });
 
       expect(result.token).toBe('refresh-token');
       expect(result.jti).toBe('uuid-123');
 
-      expect(result.expiresAt.getTime()).toBe(
-        now + 604800 * 1000,
-      );
+      expect(result.expiresAt.getTime()).toBe(now + 604800 * 1000);
     });
   });
 });

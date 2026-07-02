@@ -10,10 +10,7 @@ import { Request } from 'express';
 import { Redis } from 'ioredis';
 import { verify, JwtPayload } from 'jsonwebtoken';
 import { EnvService } from '@config/env/env.service';
-import {
-  REDIS_CLIENT,
-  PUBLIC_ROUTE_KEY,
-} from '@saas/shared';
+import { REDIS_CLIENT, PUBLIC_ROUTE_KEY } from '@saas/shared';
 
 interface AccessTokenPayload extends JwtPayload {
   sub: string;
@@ -47,7 +44,6 @@ declare global {
  */
 @Injectable()
 export class JwtSessionGuard implements CanActivate {
-
   constructor(
     private readonly reflector: Reflector,
     private readonly envService: EnvService,
@@ -56,25 +52,17 @@ export class JwtSessionGuard implements CanActivate {
     private readonly redis: Redis,
   ) {}
 
-  async canActivate(
-    context: ExecutionContext,
-  ): Promise<boolean> {
-
-    const isPublic = this.reflector.getAllAndOverride<boolean>(
-      PUBLIC_ROUTE_KEY,
-      [
-        context.getHandler(),
-        context.getClass(),
-      ],
-    );
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const isPublic = this.reflector.getAllAndOverride<boolean>(PUBLIC_ROUTE_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
 
     if (isPublic) {
       return true;
     }
 
-    const req = context
-      .switchToHttp()
-      .getRequest<Request>();
+    const req = context.switchToHttp().getRequest<Request>();
 
     const token = this.extractTokenFromCookie(req);
 
@@ -110,7 +98,6 @@ export class JwtSessionGuard implements CanActivate {
    * Extrae accessToken desde cookie
    */
   private extractTokenFromCookie(req: Request): string {
-
     const token = req.cookies?.accessToken;
 
     if (!token) {
@@ -125,20 +112,13 @@ export class JwtSessionGuard implements CanActivate {
   /**
    * Verifica JWT
    */
-  private verifyToken(
-    token: string,
-  ): AccessTokenPayload {
-
+  private verifyToken(token: string): AccessTokenPayload {
     try {
-
-      const payload = verify(
-        token,
-        this.envService.get('JWT_ACCESS_SECRET'),
-        {
-          issuer: 'auth-service',
-          audience: 'api-gateway',
-        },
-      ) as AccessTokenPayload;
+      const payload = verify(token, this.envService.get('JWT_ACCESS_SECRET'), {
+        issuer: 'auth-service',
+        audience: 'api-gateway',
+        algorithms: ['HS256'],
+      }) as AccessTokenPayload;
 
       if (!payload.sub || !payload.sid || !payload.role) {
         throw new UnauthorizedException({
@@ -147,7 +127,6 @@ export class JwtSessionGuard implements CanActivate {
       }
 
       return payload;
-
     } catch {
       throw new UnauthorizedException({
         messageKey: 'common.invalid_token',
