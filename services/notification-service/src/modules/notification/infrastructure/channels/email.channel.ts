@@ -17,18 +17,29 @@ export class EmailChannel {
     this.resend = new Resend(this.env.get('RESEND_API_KEY'));
   }
 
-  async send(payload: EmailNotificationPayload): Promise<void> {
+  /**
+   * @param idempotencyKey - Normalmente el id del job de BullMQ. Un reintento
+   * de un job con timeout (ver withTimeout) no cancela la petición HTTP en
+   * curso: Resend podría haber enviado el correo igual aunque nosotros
+   * hayamos marcado el intento como fallido. Pasar la misma idempotencyKey
+   * en cada reintento del mismo job hace que Resend deduplique del lado del
+   * servidor y nunca envíe el mismo correo dos veces.
+   */
+  async send(payload: EmailNotificationPayload, idempotencyKey?: string): Promise<void> {
     const html = await this.templateEngine.render(payload.template, payload.variables ?? {});
     const from = this.env.get('RESEND_FROM_EMAIL');
     const to = Array.isArray(payload.to) ? payload.to : [payload.to];
 
     const { error } = await this.withTimeout(
-      this.resend.emails.send({
-        from,
-        to,
-        subject: payload.subject,
-        html,
-      }),
+      this.resend.emails.send(
+        {
+          from,
+          to,
+          subject: payload.subject,
+          html,
+        },
+        idempotencyKey ? { idempotencyKey } : undefined,
+      ),
       this.env.get('RESEND_TIMEOUT_MS'),
     );
 

@@ -50,12 +50,26 @@ describe('EmailChannel', () => {
     await channel.send(payload);
 
     expect(templateEngine.render).toHaveBeenCalledWith('welcome', { name: 'Juan' });
-    expect(sendMock).toHaveBeenCalledWith({
-      from: 'noreply@arlok.dev',
-      to: ['user@example.com'],
-      subject: 'Bienvenido',
-      html: '<html>hola</html>',
-    });
+    expect(sendMock).toHaveBeenCalledWith(
+      {
+        from: 'noreply@arlok.dev',
+        to: ['user@example.com'],
+        subject: 'Bienvenido',
+        html: '<html>hola</html>',
+      },
+      undefined,
+    );
+  });
+
+  it('debe pasar la idempotencyKey a Resend cuando se provee (dedup en reintentos de BullMQ)', async () => {
+    sendMock.mockResolvedValue({ data: { id: 'email-idem' }, error: null });
+
+    await channel.send(
+      { to: 'user@example.com', subject: 'Hola', template: 'welcome' },
+      'bullmq-job-42',
+    );
+
+    expect(sendMock).toHaveBeenCalledWith(expect.any(Object), { idempotencyKey: 'bullmq-job-42' });
   });
 
   it('debe normalizar "to" como arreglo cuando ya es un arreglo', async () => {
@@ -69,6 +83,7 @@ describe('EmailChannel', () => {
 
     expect(sendMock).toHaveBeenCalledWith(
       expect.objectContaining({ to: ['a@example.com', 'b@example.com'] }),
+      undefined,
     );
   });
 
@@ -97,6 +112,18 @@ describe('EmailChannel', () => {
         template: 'welcome',
       }),
     ).rejects.toThrow('Dominio no verificado');
+  });
+
+  it('debe propagar un rechazo que ya es una instancia de Error', async () => {
+    sendMock.mockRejectedValue(new Error('network fail'));
+
+    await expect(
+      channel.send({
+        to: 'user@example.com',
+        subject: 'Hola',
+        template: 'welcome',
+      }),
+    ).rejects.toThrow('network fail');
   });
 
   it('debe envolver un rechazo no-Error del SDK de Resend en un Error', async () => {

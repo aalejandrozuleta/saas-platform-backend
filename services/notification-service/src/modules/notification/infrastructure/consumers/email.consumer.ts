@@ -18,14 +18,15 @@ export class EmailConsumer extends WorkerHost {
     if (job.name !== JOB_EMAIL_SEND) return;
 
     this.logger.log(`Procesando job ${job.id} intento ${job.attemptsMade + 1}`);
-    await this.emailChannel.send(job.data);
+    // job.id es estable entre reintentos del mismo job: sirve como
+    // idempotency key para que Resend deduplique si un reintento ocurre
+    // después de que el correo ya se envió (ver EmailChannel.send).
+    await this.emailChannel.send(job.data, job.id);
   }
 
   @OnWorkerEvent('failed')
   onFailed(job: Job, error: Error): void {
-    this.logger.error(
-      `Job ${job.id} falló en intento ${job.attemptsMade}: ${error.message}`,
-    );
+    this.logger.error(`Job ${job.id} falló en intento ${job.attemptsMade}: ${error.message}`);
   }
 
   @OnWorkerEvent('completed')

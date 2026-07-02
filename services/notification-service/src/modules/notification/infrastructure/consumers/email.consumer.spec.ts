@@ -35,7 +35,7 @@ describe('EmailConsumer', () => {
 
       await consumer.process(job);
 
-      expect(emailChannel.send).toHaveBeenCalledWith(payload);
+      expect(emailChannel.send).toHaveBeenCalledWith(payload, 'job-1');
     });
 
     it('no debe procesar jobs con un nombre distinto a email.send', async () => {
