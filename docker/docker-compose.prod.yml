@@ -66,7 +66,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3001
-      DATABASE_URL: postgresql://${POSTGRES_USER:-auth_user}:${POSTGRES_PASSWORD:-auth_pass}@auth-postgres:5432/${POSTGRES_DB:-auth_db}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-auth_user}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@auth-postgres:5432/${POSTGRES_DB:-auth_db}
       MONGO_URL: mongodb://mongo:27017/${MONGO_DB:-auth_audit}
       JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:?JWT_ACCESS_SECRET is required}
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?JWT_REFRESH_SECRET is required}
@@ -99,7 +99,7 @@ services:
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-auth_db}
       POSTGRES_USER: ${POSTGRES_USER:-auth_user}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-auth_pass}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-auth_user} -d ${POSTGRES_DB:-auth_db}']
       interval: 10s
