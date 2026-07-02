@@ -161,6 +161,101 @@ describe('SessionPrismaRepository', () => {
     });
   });
 
+  describe('findActiveSessions', () => {
+    it('debe listar las sesiones activas mapeando el dispositivo', async () => {
+      const startedAt = new Date();
+      const lastUsedAt = new Date();
+      prisma.session.findMany = jest.fn().mockResolvedValue([
+        {
+          id: 'session-1',
+          ipAddress: '127.0.0.1',
+          country: 'CO',
+          startedAt,
+          device: {
+            deviceName: 'iPhone',
+            os: 'iOS',
+            browser: 'Safari',
+            isTrusted: true,
+            lastUsedAt,
+          },
+        },
+        {
+          id: 'session-2',
+          ipAddress: '10.0.0.1',
+          country: 'US',
+          startedAt,
+          device: null,
+        },
+      ]);
+
+      const result = await repository.findActiveSessions('user-1');
+
+      expect(prisma.session.findMany).toHaveBeenCalledWith({
+        where: { userId: 'user-1', revokedAt: null, endedAt: null },
+        orderBy: { startedAt: 'desc' },
+        select: {
+          id: true,
+          ipAddress: true,
+          country: true,
+          startedAt: true,
+          device: {
+            select: {
+              deviceName: true,
+              os: true,
+              browser: true,
+              isTrusted: true,
+              lastUsedAt: true,
+            },
+          },
+        },
+      });
+
+      expect(result).toEqual([
+        {
+          id: 'session-1',
+          ipAddress: '127.0.0.1',
+          country: 'CO',
+          startedAt,
+          device: {
+            name: 'iPhone',
+            os: 'iOS',
+            browser: 'Safari',
+            isTrusted: true,
+            lastUsedAt,
+          },
+        },
+        {
+          id: 'session-2',
+          ipAddress: '10.0.0.1',
+          country: 'US',
+          startedAt,
+          device: null,
+        },
+      ]);
+    });
+  });
+
+  describe('sessionBelongsToUser', () => {
+    it('debe retornar true si la sesión pertenece al usuario y está activa', async () => {
+      prisma.session.count.mockResolvedValue(1);
+
+      const result = await repository.sessionBelongsToUser('session-1', 'user-1');
+
+      expect(prisma.session.count).toHaveBeenCalledWith({
+        where: { id: 'session-1', userId: 'user-1', revokedAt: null, endedAt: null },
+      });
+      expect(result).toBe(true);
+    });
+
+    it('debe retornar false si la sesión no pertenece al usuario', async () => {
+      prisma.session.count.mockResolvedValue(0);
+
+      const result = await repository.sessionBelongsToUser('session-1', 'user-2');
+
+      expect(result).toBe(false);
+    });
+  });
+
   describe('revokeOldestActiveSession', () => {
     it('debe revocar la sesión activa más antigua', async () => {
       const now = new Date();

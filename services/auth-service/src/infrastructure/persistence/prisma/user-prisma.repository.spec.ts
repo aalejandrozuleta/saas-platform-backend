@@ -138,6 +138,88 @@ describe('UserPrismaRepository', () => {
     });
   });
 
+  describe('findByVerificationToken', () => {
+    it('debe retornar un User cuando el token corresponde a un usuario', async () => {
+      const email = EmailVO.create('verify@example.com');
+      const prismaUser = {
+        id: 'user-verify',
+        email: email.getValue(),
+        passwordHash: 'hash',
+        status: PrismaUserStatus.PENDING,
+        emailVerified: false,
+        emailVerificationToken: 'token-abc',
+        failedLoginAttempts: 0,
+        lockoutCount: 0,
+        blockedUntil: null,
+        createdAt: new Date(),
+      };
+
+      const domainUser = User.fromPersistence({
+        id: prismaUser.id,
+        email,
+        passwordHash: prismaUser.passwordHash,
+        role: UserRole.CUSTOMER,
+        status: UserStatus.PENDING,
+        emailVerified: false,
+        failedLoginAttempts: 0,
+        lockoutCount: 0,
+        blockedUntil: undefined,
+        createdAt: prismaUser.createdAt,
+      });
+
+      prismaMock.user.findUnique.mockResolvedValue(prismaUser);
+      (UserMapper.toDomain as jest.Mock).mockReturnValue(domainUser);
+
+      const result = await repository.findByVerificationToken('token-abc');
+
+      expect(prismaMock.user.findUnique).toHaveBeenCalledWith({
+        where: { emailVerificationToken: 'token-abc' },
+      });
+      expect(result).toBe(domainUser);
+    });
+
+    it('debe retornar null si el token no corresponde a ningún usuario', async () => {
+      prismaMock.user.findUnique.mockResolvedValue(null);
+
+      const result = await repository.findByVerificationToken('invalid-token');
+
+      expect(result).toBeNull();
+      expect(UserMapper.toDomain).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('update', () => {
+    it('debe actualizar un usuario persistido', async () => {
+      const user = User.create({
+        id: 'user-update',
+        email: EmailVO.create('update@example.com'),
+        passwordHash: 'hashed-password',
+      });
+
+      const persistenceUser = {
+        id: user.id,
+        email: user.email.getValue(),
+        passwordHash: user.passwordHash,
+        status: PrismaUserStatus.PENDING,
+        emailVerified: false,
+        failedLoginAttempts: 0,
+        lockoutCount: 0,
+        blockedUntil: undefined,
+      };
+
+      (UserMapper.toPersistence as jest.Mock).mockReturnValue(persistenceUser);
+      prismaMock.user.update.mockResolvedValue({});
+
+      await repository.update(user);
+
+      expect(UserMapper.toPersistence).toHaveBeenCalledWith(user);
+      expect(prismaMock.user.update).toHaveBeenCalledWith({
+        where: { id: user.id },
+        data: persistenceUser,
+      });
+    });
+  });
+
   describe('updatePasswordHash', () => {
     it('debe actualizar el hash de contraseña del usuario', async () => {
       prismaMock.user.update.mockResolvedValue({});

@@ -38,7 +38,7 @@ describe('RemoveTrustedCountryUseCase', () => {
     securityRepo.getTrustedCountries.mockResolvedValue(['CO']);
 
     await expect(useCase.execute('user-1', 'MX')).rejects.toMatchObject({
-      errorCode: ErrorCode.TRUSTED_COUNTRY_NOT_FOUND,
+      code: ErrorCode.TRUSTED_COUNTRY_NOT_FOUND,
     });
     expect(securityRepo.removeTrustedCountry).not.toHaveBeenCalled();
   });
@@ -47,7 +47,7 @@ describe('RemoveTrustedCountryUseCase', () => {
     securityRepo.getTrustedCountries.mockResolvedValue([]);
 
     await expect(useCase.execute('user-1', 'CO')).rejects.toMatchObject({
-      errorCode: ErrorCode.TRUSTED_COUNTRY_NOT_FOUND,
+      code: ErrorCode.TRUSTED_COUNTRY_NOT_FOUND,
     });
   });
 });

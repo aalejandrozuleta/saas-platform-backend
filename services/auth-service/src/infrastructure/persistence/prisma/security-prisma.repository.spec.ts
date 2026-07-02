@@ -25,7 +25,7 @@ describe('SecurityPrismaRepository', () => {
     };
 
     repository = new SecurityPrismaRepository(
-      prisma as unknown as PrismaService,
+      prisma as PrismaService,
       totpEncryption,
     );
   });
@@ -131,6 +131,181 @@ describe('SecurityPrismaRepository', () => {
         where: { userId: 'user-1' },
         update: { lastPasswordChange: now },
         create: { userId: 'user-1', lastPasswordChange: now },
+      });
+    });
+  });
+
+  describe('saveTotpPendingSecret', () => {
+    it('debe cifrar y guardar el secreto TOTP pendiente', async () => {
+      prisma.userSecurity = { upsert: jest.fn() };
+      totpEncryption.encrypt.mockReturnValue('encrypted-secret');
+
+      await repository.saveTotpPendingSecret('user-1', 'plain-secret');
+
+      expect(totpEncryption.encrypt).toHaveBeenCalledWith('plain-secret');
+      expect(prisma.userSecurity.upsert).toHaveBeenCalledWith({
+        where: { userId: 'user-1' },
+        update: { totpPendingSecret: 'encrypted-secret' },
+        create: { userId: 'user-1', totpPendingSecret: 'encrypted-secret' },
+      });
+    });
+  });
+
+  describe('activateTwoFactor', () => {
+    it('debe activar 2FA usando el secreto pendiente existente', async () => {
+      prisma.userSecurity = {
+        findUnique: jest.fn().mockResolvedValue({ totpPendingSecret: 'pending-secret' }),
+        update: jest.fn(),
+      };
+
+      await repository.activateTwoFactor('user-1');
+
+      expect(prisma.userSecurity.update).toHaveBeenCalledWith({
+        where: { userId: 'user-1' },
+        data: {
+          twoFactorEnabled: true,
+          twoFactorMethod: 'TOTP',
+          totpSecret: 'pending-secret',
+          totpPendingSecret: null,
+        },
+      });
+    });
+
+    it('debe usar null si no hay secreto pendiente', async () => {
+      prisma.userSecurity = {
+        findUnique: jest.fn().mockResolvedValue(null),
+        update: jest.fn(),
+      };
+
+      await repository.activateTwoFactor('user-1');
+
+      expect(prisma.userSecurity.update).toHaveBeenCalledWith({
+        where: { userId: 'user-1' },
+        data: expect.objectContaining({ totpSecret: null }),
+      });
+    });
+  });
+
+  describe('disableTwoFactor', () => {
+    it('debe desactivar 2FA y limpiar los secretos', async () => {
+      prisma.userSecurity = { update: jest.fn() };
+
+      await repository.disableTwoFactor('user-1');
+
+      expect(prisma.userSecurity.update).toHaveBeenCalledWith({
+        where: { userId: 'user-1' },
+        data: {
+          twoFactorEnabled: false,
+          twoFactorMethod: null,
+          totpSecret: null,
+          totpPendingSecret: null,
+        },
+      });
+    });
+  });
+
+  describe('getTotpSecret', () => {
+    it('debe descifrar y retornar el secreto TOTP', async () => {
+      prisma.userSecurity = {
+        findUnique: jest.fn().mockResolvedValue({ totpSecret: 'encrypted-secret' }),
+      };
+      totpEncryption.decrypt.mockReturnValue('plain-secret');
+
+      const result = await repository.getTotpSecret('user-1');
+
+      expect(totpEncryption.decrypt).toHaveBeenCalledWith('encrypted-secret');
+      expect(result).toBe('plain-secret');
+    });
+
+    it('debe retornar null si no hay secreto guardado', async () => {
+      prisma.userSecurity = {
+        findUnique: jest.fn().mockResolvedValue({ totpSecret: null }),
+      };
+
+      const result = await repository.getTotpSecret('user-1');
+
+      expect(result).toBeNull();
+      expect(totpEncryption.decrypt).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('getTotpPendingSecret', () => {
+    it('debe descifrar y retornar el secreto TOTP pendiente', async () => {
+      prisma.userSecurity = {
+        findUnique: jest.fn().mockResolvedValue({ totpPendingSecret: 'encrypted-pending' }),
+      };
+      totpEncryption.decrypt.mockReturnValue('plain-pending');
+
+      const result = await repository.getTotpPendingSecret('user-1');
+
+      expect(totpEncryption.decrypt).toHaveBeenCalledWith('encrypted-pending');
+      expect(result).toBe('plain-pending');
+    });
+
+    it('debe retornar null si no hay secreto pendiente guardado', async () => {
+      prisma.userSecurity = {
+        findUnique: jest.fn().mockResolvedValue({ totpPendingSecret: null }),
+      };
+
+      const result = await repository.getTotpPendingSecret('user-1');
+
+      expect(result).toBeNull();
+      expect(totpEncryption.decrypt).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('getTrustedCountries', () => {
+    it('debe retornar los países de confianza del usuario', async () => {
+      prisma.userSecurity = {
+        findUnique: jest.fn().mockResolvedValue({ trustedCountries: ['CO', 'US'] }),
+      };
+
+      const result = await repository.getTrustedCountries('user-1');
+
+      expect(prisma.userSecurity.findUnique).toHaveBeenCalledWith({
+        where: { userId: 'user-1' },
+        select: { trustedCountries: true },
+      });
+      expect(result).toEqual(['CO', 'US']);
+    });
+
+    it('debe retornar arreglo vacío si el usuario no tiene UserSecurity', async () => {
+      prisma.userSecurity = {
+        findUnique: jest.fn().mockResolvedValue(null),
+      };
+
+      const result = await repository.getTrustedCountries('user-1');
+
+      expect(result).toEqual([]);
+    });
+  });
+
+  describe('addTrustedCountry', () => {
+    it('debe hacer upsert agregando el país a la lista', async () => {
+      prisma.userSecurity = { upsert: jest.fn() };
+
+      await repository.addTrustedCountry('user-1', 'CO');
+
+      expect(prisma.userSecurity.upsert).toHaveBeenCalledWith({
+        where: { userId: 'user-1' },
+        update: { trustedCountries: { push: 'CO' } },
+        create: { userId: 'user-1', trustedCountries: ['CO'] },
+      });
+    });
+  });
+
+  describe('removeTrustedCountry', () => {
+    it('debe eliminar el país de la lista existente', async () => {
+      prisma.userSecurity = {
+        findUnique: jest.fn().mockResolvedValue({ trustedCountries: ['CO', 'US'] }),
+        update: jest.fn(),
+      };
+
+      await repository.removeTrustedCountry('user-1', 'CO');
+
+      expect(prisma.userSecurity.update).toHaveBeenCalledWith({
+        where: { userId: 'user-1' },
+        data: { trustedCountries: ['US'] },
       });
     });
   });

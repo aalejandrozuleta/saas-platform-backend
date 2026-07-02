@@ -8,6 +8,13 @@ import { LogoutAllUseCase } from '@application/use-cases/logout-all.use-case';
 import { Enable2faUseCase } from '@application/use-cases/enable-2fa.use-case';
 import { Verify2faUseCase } from '@application/use-cases/verify-2fa.use-case';
 import { Disable2faUseCase } from '@application/use-cases/disable-2fa.use-case';
+import { GetTrustedCountriesUseCase } from '@application/use-cases/get-trusted-countries.use-case';
+import { AddTrustedCountryUseCase } from '@application/use-cases/add-trusted-country.use-case';
+import { RemoveTrustedCountryUseCase } from '@application/use-cases/remove-trusted-country.use-case';
+import { GetSessionsUseCase } from '@application/use-cases/get-sessions.use-case';
+import { RevokeSessionUseCase } from '@application/use-cases/revoke-session.use-case';
+import { VerifyEmailUseCase } from '@application/use-cases/verify-email.use-case';
+import { ResendVerificationUseCase } from '@application/use-cases/resend-verification.use-case';
 import { I18nService } from '@saas/shared';
 import { type RegisterUserDto } from '@application/dto/register/register-user.dto';
 import { User } from '@domain/entities/user/user.entity';
@@ -27,6 +34,13 @@ describe('AuthController', () => {
   let enable2faUseCase: jest.Mocked<Enable2faUseCase>;
   let verify2faUseCase: jest.Mocked<Verify2faUseCase>;
   let disable2faUseCase: jest.Mocked<Disable2faUseCase>;
+  let getTrustedCountriesUseCase: jest.Mocked<GetTrustedCountriesUseCase>;
+  let addTrustedCountryUseCase: jest.Mocked<AddTrustedCountryUseCase>;
+  let removeTrustedCountryUseCase: jest.Mocked<RemoveTrustedCountryUseCase>;
+  let getSessionsUseCase: jest.Mocked<GetSessionsUseCase>;
+  let revokeSessionUseCase: jest.Mocked<RevokeSessionUseCase>;
+  let verifyEmailUseCase: jest.Mocked<VerifyEmailUseCase>;
+  let resendVerificationUseCase: jest.Mocked<ResendVerificationUseCase>;
   let i18n: jest.Mocked<I18nService>;
 
   beforeEach(async () => {
@@ -76,6 +90,34 @@ describe('AuthController', () => {
           useValue: { execute: jest.fn() },
         },
         {
+          provide: GetTrustedCountriesUseCase,
+          useValue: { execute: jest.fn() },
+        },
+        {
+          provide: AddTrustedCountryUseCase,
+          useValue: { execute: jest.fn() },
+        },
+        {
+          provide: RemoveTrustedCountryUseCase,
+          useValue: { execute: jest.fn() },
+        },
+        {
+          provide: GetSessionsUseCase,
+          useValue: { execute: jest.fn() },
+        },
+        {
+          provide: RevokeSessionUseCase,
+          useValue: { execute: jest.fn() },
+        },
+        {
+          provide: VerifyEmailUseCase,
+          useValue: { execute: jest.fn() },
+        },
+        {
+          provide: ResendVerificationUseCase,
+          useValue: { execute: jest.fn() },
+        },
+        {
           provide: I18nService,
           useValue: {
             translate: jest.fn((key: string) => key),
@@ -100,7 +142,61 @@ describe('AuthController', () => {
     enable2faUseCase = module.get(Enable2faUseCase);
     verify2faUseCase = module.get(Verify2faUseCase);
     disable2faUseCase = module.get(Disable2faUseCase);
+    getTrustedCountriesUseCase = module.get(GetTrustedCountriesUseCase);
+    addTrustedCountryUseCase = module.get(AddTrustedCountryUseCase);
+    removeTrustedCountryUseCase = module.get(RemoveTrustedCountryUseCase);
+    getSessionsUseCase = module.get(GetSessionsUseCase);
+    revokeSessionUseCase = module.get(RevokeSessionUseCase);
+    verifyEmailUseCase = module.get(VerifyEmailUseCase);
+    resendVerificationUseCase = module.get(ResendVerificationUseCase);
     i18n = module.get(I18nService);
+  });
+
+  // ──────────────────────────────────────────────────
+  // Verify Email / Resend Verification
+  // ──────────────────────────────────────────────────
+
+  it('debe verificar el email con el token recibido', async () => {
+    verifyEmailUseCase.execute.mockResolvedValue(undefined);
+    i18n.translate.mockReturnValue('Email verificado correctamente');
+
+    const req: any = {
+      headers: { 'accept-language': 'es' },
+      get: (key: string) => req.headers[key],
+    };
+
+    const result = await controller.verifyEmail({ token: 'verify-token' }, req);
+
+    expect(verifyEmailUseCase.execute).toHaveBeenCalledWith('verify-token');
+    expect(i18n.translate).toHaveBeenCalledWith('auth.email_verified', 'es');
+    expect(result).toEqual({
+      success: true,
+      message: 'Email verificado correctamente',
+      data: {},
+    });
+  });
+
+  it('debe reenviar el email de verificación', async () => {
+    resendVerificationUseCase.execute.mockResolvedValue(undefined);
+    i18n.translate.mockReturnValue('Correo de verificación reenviado');
+
+    const req: any = {
+      headers: { 'accept-language': 'es' },
+      get: (key: string) => req.headers[key],
+    };
+
+    const result = await controller.resendVerification(
+      { email: 'test@example.com' },
+      req,
+    );
+
+    expect(resendVerificationUseCase.execute).toHaveBeenCalledWith('test@example.com');
+    expect(i18n.translate).toHaveBeenCalledWith('auth.verification_email_sent', 'es');
+    expect(result).toEqual({
+      success: true,
+      message: 'Correo de verificación reenviado',
+      data: {},
+    });
   });
 
   it('debe registrar usuario y devolver respuesta en español', async () => {
@@ -537,6 +633,118 @@ describe('AuthController', () => {
       success: true,
       message: 'Todas las sesiones han sido cerradas',
       data: { revokedCount: 4 },
+    });
+  });
+
+  // ──────────────────────────────────────────────────
+  // Trusted Countries
+  // ──────────────────────────────────────────────────
+
+  it('debe listar los países de confianza del usuario', async () => {
+    getTrustedCountriesUseCase.execute.mockResolvedValue({ countries: ['CO', 'US'] });
+
+    const req: any = {
+      user: { id: 'user-1', sessionId: 'session-1', role: 'USER' },
+      headers: { 'accept-language': 'es' },
+      get: (key: string) => req.headers[key],
+    };
+
+    const result = await controller.getTrustedCountries(req);
+
+    expect(getTrustedCountriesUseCase.execute).toHaveBeenCalledWith('user-1');
+    expect(result).toEqual({
+      success: true,
+      data: { countries: ['CO', 'US'] },
+    });
+  });
+
+  it('debe agregar un país de confianza', async () => {
+    addTrustedCountryUseCase.execute.mockResolvedValue(undefined);
+    i18n.translate.mockReturnValue('País de confianza agregado');
+
+    const req: any = {
+      user: { id: 'user-1', sessionId: 'session-1', role: 'USER' },
+      headers: { 'accept-language': 'es' },
+      get: (key: string) => req.headers[key],
+    };
+
+    const result = await controller.addTrustedCountry({ country: 'MX' }, req);
+
+    expect(addTrustedCountryUseCase.execute).toHaveBeenCalledWith('user-1', 'MX');
+    expect(result).toEqual({
+      success: true,
+      message: 'País de confianza agregado',
+      data: {},
+    });
+  });
+
+  it('debe eliminar un país de confianza', async () => {
+    removeTrustedCountryUseCase.execute.mockResolvedValue(undefined);
+    i18n.translate.mockReturnValue('País de confianza eliminado');
+
+    const req: any = {
+      user: { id: 'user-1', sessionId: 'session-1', role: 'USER' },
+      headers: { 'accept-language': 'es' },
+      get: (key: string) => req.headers[key],
+    };
+
+    const result = await controller.removeTrustedCountry('MX', req);
+
+    expect(removeTrustedCountryUseCase.execute).toHaveBeenCalledWith('user-1', 'MX');
+    expect(result).toEqual({
+      success: true,
+      message: 'País de confianza eliminado',
+      data: {},
+    });
+  });
+
+  // ──────────────────────────────────────────────────
+  // Sessions
+  // ──────────────────────────────────────────────────
+
+  it('debe listar las sesiones activas del usuario', async () => {
+    const sessions = [{ id: 'session-1', current: true }];
+    getSessionsUseCase.execute.mockResolvedValue(sessions as any);
+    i18n.translate.mockReturnValue('Sesiones obtenidas correctamente');
+
+    const req: any = {
+      user: { id: 'user-1', sessionId: 'session-1', role: 'USER' },
+      headers: { 'accept-language': 'es' },
+      get: (key: string) => req.headers[key],
+    };
+
+    const result = await controller.getSessions(req);
+
+    expect(getSessionsUseCase.execute).toHaveBeenCalledWith('user-1', 'session-1');
+    expect(result).toEqual({
+      success: true,
+      message: 'Sesiones obtenidas correctamente',
+      data: { sessions },
+    });
+  });
+
+  it('debe revocar una sesión específica', async () => {
+    revokeSessionUseCase.execute.mockResolvedValue(undefined);
+    i18n.translate.mockReturnValue('Sesión revocada correctamente');
+
+    const req: any = {
+      ip: '127.0.0.1',
+      user: { id: 'user-1', sessionId: 'session-1', role: 'USER' },
+      headers: { 'accept-language': 'es', 'x-country': 'CO' },
+      get: (key: string) => req.headers[key],
+    };
+
+    const result = await controller.revokeSession('session-2', req);
+
+    expect(revokeSessionUseCase.execute).toHaveBeenCalledWith(
+      'user-1',
+      'session-2',
+      { ip: '127.0.0.1', country: 'CO' },
+    );
+    expect(result).toEqual({
+      success: true,
+      message: 'Sesión revocada correctamente',
+      data: {},
     });
   });
 });

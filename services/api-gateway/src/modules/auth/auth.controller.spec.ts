@@ -47,6 +47,34 @@ describe('AuthController (api-gateway)', () => {
   };
 
   // ──────────────────────────────────────────────────
+  // Verify Email
+  // ──────────────────────────────────────────────────
+
+  it('debe reenviar POST /verify-email al auth-service', async () => {
+    mockForward({ success: true });
+    const req = makeReq();
+
+    const result = await controller.verifyEmail(req);
+
+    expect(authProxy.forward).toHaveBeenCalledWith(req, '/verify-email');
+    expect(result).toEqual({ success: true });
+  });
+
+  // ──────────────────────────────────────────────────
+  // Resend Verification
+  // ──────────────────────────────────────────────────
+
+  it('debe reenviar POST /resend-verification al auth-service', async () => {
+    mockForward({ success: true });
+    const req = makeReq();
+
+    const result = await controller.resendVerification(req);
+
+    expect(authProxy.forward).toHaveBeenCalledWith(req, '/resend-verification');
+    expect(result).toEqual({ success: true });
+  });
+
+  // ──────────────────────────────────────────────────
   // Register
   // ──────────────────────────────────────────────────
 
@@ -210,6 +238,65 @@ describe('AuthController (api-gateway)', () => {
 
     expect(req.headers['x-user-id']).toBeUndefined();
     expect(authProxy.forward).toHaveBeenCalledWith(req, '/2fa/disable');
+  });
+
+  // ──────────────────────────────────────────────────
+  // Sessions
+  // ──────────────────────────────────────────────────
+
+  it('debe reenviar GET /sessions sin inyectar x-user-id', async () => {
+    mockForward({ data: [{ id: 'session-1' }] });
+    const req = makeReq();
+
+    const result = await controller.getSessions(req);
+
+    expect(req.headers['x-user-id']).toBeUndefined();
+    expect(authProxy.forward).toHaveBeenCalledWith(req, '/sessions');
+    expect(result).toEqual({ data: [{ id: 'session-1' }] });
+  });
+
+  it('debe reenviar DELETE /sessions/:sessionId al auth-service', async () => {
+    mockForward({ success: true });
+    const req = makeReq();
+
+    const result = await controller.revokeSession(req, 'session-2');
+
+    expect(authProxy.forward).toHaveBeenCalledWith(req, '/sessions/session-2');
+    expect(result).toEqual({ success: true });
+  });
+
+  // ──────────────────────────────────────────────────
+  // Trusted Countries
+  // ──────────────────────────────────────────────────
+
+  it('debe reenviar GET /trusted-countries al auth-service', async () => {
+    mockForward({ data: ['CO', 'US'] });
+    const req = makeReq();
+
+    const result = await controller.getTrustedCountries(req);
+
+    expect(authProxy.forward).toHaveBeenCalledWith(req, '/trusted-countries');
+    expect(result).toEqual({ data: ['CO', 'US'] });
+  });
+
+  it('debe reenviar POST /trusted-countries al auth-service', async () => {
+    mockForward({ success: true });
+    const req = makeReq();
+
+    const result = await controller.addTrustedCountry(req);
+
+    expect(authProxy.forward).toHaveBeenCalledWith(req, '/trusted-countries');
+    expect(result).toEqual({ success: true });
+  });
+
+  it('debe reenviar DELETE /trusted-countries/:country al auth-service', async () => {
+    mockForward({ success: true });
+    const req = makeReq();
+
+    const result = await controller.removeTrustedCountry(req, 'CO');
+
+    expect(authProxy.forward).toHaveBeenCalledWith(req, '/trusted-countries/CO');
+    expect(result).toEqual({ success: true });
   });
 
   // ──────────────────────────────────────────────────

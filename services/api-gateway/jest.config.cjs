@@ -28,4 +28,13 @@ module.exports = {
   transformIgnorePatterns: [
     'node_modules/(?!(?:@saas/shared)/)',
   ],
+
+  coverageThreshold: {
+    global: {
+      branches: 95,
+      functions: 95,
+      lines: 95,
+      statements: 95,
+    },
+  },
 };

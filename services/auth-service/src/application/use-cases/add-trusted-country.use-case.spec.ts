@@ -45,7 +45,7 @@ describe('AddTrustedCountryUseCase', () => {
     securityRepo.getTrustedCountries.mockResolvedValue(['CO', 'US']);
 
     await expect(useCase.execute('user-1', 'CO')).rejects.toMatchObject({
-      errorCode: ErrorCode.TRUSTED_COUNTRY_ALREADY_EXISTS,
+      code: ErrorCode.TRUSTED_COUNTRY_ALREADY_EXISTS,
     });
     expect(securityRepo.addTrustedCountry).not.toHaveBeenCalled();
   });
@@ -54,7 +54,7 @@ describe('AddTrustedCountryUseCase', () => {
     securityRepo.getTrustedCountries.mockResolvedValue(['CO', 'US']);
 
     await expect(useCase.execute('user-1', 'MX')).rejects.toMatchObject({
-      errorCode: ErrorCode.TRUSTED_COUNTRY_LIMIT_REACHED,
+      code: ErrorCode.TRUSTED_COUNTRY_LIMIT_REACHED,
     });
     expect(securityRepo.addTrustedCountry).not.toHaveBeenCalled();
   });

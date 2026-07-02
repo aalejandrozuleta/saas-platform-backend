@@ -107,6 +107,8 @@ describe('UserMapper', () => {
         role: PrismaUserRole.CUSTOMER,
         status: PrismaUserStatus.ACTIVE,
         emailVerified: false,
+        emailVerificationToken: null,
+        emailVerificationExpiresAt: null,
         failedLoginAttempts: 2,
         blockedUntil: undefined,
       });

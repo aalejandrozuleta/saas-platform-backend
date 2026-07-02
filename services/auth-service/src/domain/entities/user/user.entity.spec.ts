@@ -35,7 +35,7 @@ describe('User entity', () => {
       });
 
       expect(user.role).toBe(UserRole.CUSTOMER);
-      expect(user.status).toBe(UserStatus.ACTIVE);
+      expect(user.status).toBe(UserStatus.PENDING);
       expect(user.failedLoginAttempts).toBe(0);
       expect(user.emailVerified).toBe(false);
     });
@@ -113,6 +113,58 @@ describe('User entity', () => {
     it('retorna undefined cuando no hay lastLoginAt', () => {
       const user = makeUser();
       expect(user.lastLoginAt).toBeUndefined();
+    });
+  });
+
+  describe('requestVerification', () => {
+    it('debe asignar el token y la fecha de expiración de verificación', () => {
+      const expiresAt = new Date(Date.now() + 60_000);
+      const user = makeUser();
+      const updated = user.requestVerification('token-abc', expiresAt);
+
+      expect(updated.emailVerificationToken).toBe('token-abc');
+      expect(updated.emailVerificationExpiresAt).toBe(expiresAt);
+      // inmutabilidad
+      expect(user.emailVerificationToken).toBeUndefined();
+    });
+  });
+
+  describe('verifyEmail', () => {
+    it('debe marcar el email como verificado, activar el usuario y limpiar el token', () => {
+      const user = makeUser({ status: UserStatus.PENDING }).requestVerification(
+        'token-abc',
+        new Date(Date.now() + 60_000),
+      );
+
+      const verified = user.verifyEmail();
+
+      expect(verified.emailVerified).toBe(true);
+      expect(verified.status).toBe(UserStatus.ACTIVE);
+      expect(verified.emailVerificationToken).toBeUndefined();
+      expect(verified.emailVerificationExpiresAt).toBeUndefined();
+    });
+  });
+
+  describe('isEmailVerificationTokenExpired', () => {
+    it('debe devolver true si no hay fecha de expiración', () => {
+      const user = makeUser();
+      expect(user.isEmailVerificationTokenExpired(new Date())).toBe(true);
+    });
+
+    it('debe devolver true si la fecha de expiración ya pasó', () => {
+      const user = makeUser().requestVerification(
+        'token-abc',
+        new Date(Date.now() - 1000),
+      );
+      expect(user.isEmailVerificationTokenExpired(new Date())).toBe(true);
+    });
+
+    it('debe devolver false si la fecha de expiración está en el futuro', () => {
+      const user = makeUser().requestVerification(
+        'token-abc',
+        new Date(Date.now() + 60_000),
+      );
+      expect(user.isEmailVerificationTokenExpired(new Date())).toBe(false);
     });
   });
 });

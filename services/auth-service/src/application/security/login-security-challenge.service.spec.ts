@@ -134,9 +134,9 @@ describe('LoginSecurityChallengeService', () => {
         passwordHash: 'hash',
         role: UserRole.CUSTOMER,
         status: UserStatus.ACTIVE,
-        emailVerified: false,
+        emailVerified: true,
         failedLoginAttempts: 0,
-      lockoutCount: 0,
+        lockoutCount: 0,
         createdAt: new Date(),
       });
 

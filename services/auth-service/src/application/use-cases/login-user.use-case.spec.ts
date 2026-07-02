@@ -128,6 +128,7 @@ describe('LoginUserUseCase', () => {
       resetFailedLoginAttempts: jest.fn(),
       releaseTemporaryBlock: jest.fn(),
       findByUserId: jest.fn(),
+      addTrustedCountry: jest.fn(),
     } as any;
 
     deviceRepository = {
