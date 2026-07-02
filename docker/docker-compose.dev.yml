@@ -85,6 +85,7 @@ services:
       REDIS_PASSWORD: *redis_password
       # Debe coincidir con el valor de auth-service (ver InternalServiceGuard)
       INTERNAL_SERVICE_SECRET: ${INTERNAL_SERVICE_SECRET:-dev-only-internal-secret-do-not-use-in-prod}
+      WS_CORS_ORIGINS: ${WS_CORS_ORIGINS:-http://localhost:5173}
     ports:
       - '3003:3003'
     depends_on:

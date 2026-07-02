@@ -11,6 +11,14 @@ import { EnvService } from '@config/env/env.service';
 
 const ACCESS_TOKEN_COOKIE = 'accessToken';
 
+// El decorador @WebSocketGateway evalúa sus opciones al cargar el módulo,
+// antes de que Nest instancie EnvService, así que el origin se lee
+// directamente de process.env en vez de vía inyección de dependencias.
+const wsCorsOrigins = (process.env.WS_CORS_ORIGINS ?? 'http://localhost:3000,http://localhost:4200')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
 /**
  * Gateway WebSocket.
  * Clientes se conectan a ws://<host>:3003; la sala personal (`user:<id>`) se
@@ -22,7 +30,7 @@ const ACCESS_TOKEN_COOKIE = 'accessToken';
  */
 @Injectable()
 @WebSocketGateway({
-  cors: { origin: '*' },
+  cors: { origin: wsCorsOrigins, credentials: true },
   namespace: '/notifications',
 })
 export class WsNotificationsGateway implements OnGatewayConnection, OnGatewayDisconnect {
