@@ -1,14 +1,4 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Post,
-  Req,
-  Res,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '@infrastructure/security/jwt-auth.guard';
 import { RegisterUserDto } from '@application/dto/register/register-user.dto';
 import { LoginUserDto } from '@application/dto/login/login-user.dto';
@@ -37,8 +27,16 @@ import { RegisterSwagger } from '@infrastructure/swagger/register.swagger';
 import { LoginSwagger } from '@infrastructure/swagger/login.swagger';
 import { ChangePasswordSwagger } from '@infrastructure/swagger/change-password.swagger';
 import { LogoutSwagger, LogoutAllSwagger } from '@infrastructure/swagger/logout.swagger';
-import { Enable2faSwagger, Verify2faSwagger, Disable2faSwagger } from '@infrastructure/swagger/2fa.swagger';
-import { GetTrustedCountriesSwagger, AddTrustedCountrySwagger, RemoveTrustedCountrySwagger } from '@infrastructure/swagger/trusted-countries.swagger';
+import {
+  Enable2faSwagger,
+  Verify2faSwagger,
+  Disable2faSwagger,
+} from '@infrastructure/swagger/2fa.swagger';
+import {
+  GetTrustedCountriesSwagger,
+  AddTrustedCountrySwagger,
+  RemoveTrustedCountrySwagger,
+} from '@infrastructure/swagger/trusted-countries.swagger';
 import { GetSessionsSwagger, RevokeSessionSwagger } from '@infrastructure/swagger/sessions.swagger';
 import { ApiTags } from '@nestjs/swagger';
 import { RefreshTokenUseCase } from '@application/use-cases/refresh-token.use-case';
@@ -80,17 +78,14 @@ export class AuthController {
     private readonly verifyEmailUseCase: VerifyEmailUseCase,
     private readonly resendVerificationUseCase: ResendVerificationUseCase,
     private readonly i18n: I18nService,
-  ) { }
+  ) {}
 
   /**
    * Verifica el email del usuario con el token enviado al correo
    */
   @Post('verify-email')
   @VerifyEmailSwagger()
-  async verifyEmail(
-    @Body() dto: VerifyEmailDto,
-    @Req() req: Request,
-  ) {
+  async verifyEmail(@Body() dto: VerifyEmailDto, @Req() req: Request) {
     await this.verifyEmailUseCase.execute(dto.token);
 
     return successResponse(
@@ -103,10 +98,7 @@ export class AuthController {
 
   @Post('resend-verification')
   @ResendVerificationSwagger()
-  async resendVerification(
-    @Body() dto: ResendVerificationDto,
-    @Req() req: Request,
-  ) {
+  async resendVerification(@Body() dto: ResendVerificationDto, @Req() req: Request) {
     await this.resendVerificationUseCase.execute(dto.email);
 
     return successResponse(
@@ -122,21 +114,14 @@ export class AuthController {
    */
   @Post('register')
   @RegisterSwagger()
-  async register(
-    @Body() dto: RegisterUserDto,
-    @Req() req: Request,
-  ) {
+  async register(@Body() dto: RegisterUserDto, @Req() req: Request) {
     const lang = this.resolveLanguage(req);
 
-    const user = await this.registerUserUseCase.execute(
-      dto.email,
-      dto.password,
-      {
-        ip: this.resolveClientIp(req),
-        country: this.getHeader(req, 'x-country'),
-        deviceFingerprint: this.getHeader(req, 'x-device-fingerprint'),
-      },
-    );
+    const user = await this.registerUserUseCase.execute(dto.email, dto.password, {
+      ip: this.resolveClientIp(req),
+      country: this.getHeader(req, 'x-country'),
+      deviceFingerprint: this.getHeader(req, 'x-device-fingerprint'),
+    });
 
     return successResponse(
       {
@@ -159,18 +144,13 @@ export class AuthController {
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
-
     const context = LoginContext.create({
       ip: this.resolveClientIp(req),
       country: this.getHeader(req, 'x-country'),
       deviceFingerprint: this.getHeader(req, 'x-device-fingerprint'),
     });
 
-    const result = await this.loginUserUseCase.execute(
-      dto.email,
-      dto.password,
-      context,
-    );
+    const result = await this.loginUserUseCase.execute(dto.email, dto.password, context);
 
     const secure = this.shouldUseSecureCookies(req);
 
@@ -190,28 +170,16 @@ export class AuthController {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-
-    return successResponse(
-      {
-        message: this.i18n.translate(
-          'auth.login_success',
-          this.resolveLanguage(req),
-        ),
-      },
-    );
+    return successResponse({
+      message: this.i18n.translate('auth.login_success', this.resolveLanguage(req)),
+    });
   }
 
   @Post('refresh')
-  async refresh(
-    @Req() req: Request,
-    @Res({ passthrough: true }) res: Response,
-  ) {
-
+  async refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const refreshToken = req.cookies?.refreshToken;
 
-    const result = await this.refreshTokenUseCase.execute(
-      refreshToken,
-    );
+    const result = await this.refreshTokenUseCase.execute(refreshToken);
 
     res.cookie('refreshToken', result.refreshToken, {
       httpOnly: true,
@@ -226,10 +194,7 @@ export class AuthController {
         token: result.token,
       },
       {
-        message: this.i18n.translate(
-          'auth.refresh_success',
-          this.resolveLanguage(req),
-        ),
+        message: this.i18n.translate('auth.refresh_success', this.resolveLanguage(req)),
       },
     );
   }
@@ -245,22 +210,15 @@ export class AuthController {
   @Post('logout')
   @UseGuards(JwtAuthGuard)
   @LogoutSwagger()
-  async logout(
-    @Req() req: Request,
-    @Res({ passthrough: true }) res: Response,
-  ) {
+  async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const lang = this.resolveLanguage(req);
     const userId = req.user!.id;
     const sessionId = req.user!.sessionId;
 
-    await this.logoutUseCase.execute(
-      userId,
-      sessionId,
-      {
-        ip: this.resolveClientIp(req),
-        country: this.getHeader(req, 'x-country'),
-      },
-    );
+    await this.logoutUseCase.execute(userId, sessionId, {
+      ip: this.resolveClientIp(req),
+      country: this.getHeader(req, 'x-country'),
+    });
 
     this.clearAuthCookies(res);
 
@@ -282,20 +240,14 @@ export class AuthController {
   @Post('logout-all')
   @UseGuards(JwtAuthGuard)
   @LogoutAllSwagger()
-  async logoutAll(
-    @Req() req: Request,
-    @Res({ passthrough: true }) res: Response,
-  ) {
+  async logoutAll(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const lang = this.resolveLanguage(req);
     const userId = req.user!.id;
 
-    const { revokedCount } = await this.logoutAllUseCase.execute(
-      userId,
-      {
-        ip: this.resolveClientIp(req),
-        country: this.getHeader(req, 'x-country'),
-      },
-    );
+    const { revokedCount } = await this.logoutAllUseCase.execute(userId, {
+      ip: this.resolveClientIp(req),
+      country: this.getHeader(req, 'x-country'),
+    });
 
     this.clearAuthCookies(res);
 
@@ -313,22 +265,14 @@ export class AuthController {
   @Post('change-password')
   @UseGuards(JwtAuthGuard)
   @ChangePasswordSwagger()
-  async changePassword(
-    @Body() dto: ChangePasswordDto,
-    @Req() req: Request,
-  ) {
+  async changePassword(@Body() dto: ChangePasswordDto, @Req() req: Request) {
     const lang = this.resolveLanguage(req);
     const userId = req.user!.id;
 
-    await this.changePasswordUseCase.execute(
-      userId,
-      dto.currentPassword,
-      dto.newPassword,
-      {
-        ip: this.resolveClientIp(req),
-        country: this.getHeader(req, 'x-country'),
-      },
-    );
+    await this.changePasswordUseCase.execute(userId, dto.currentPassword, dto.newPassword, {
+      ip: this.resolveClientIp(req),
+      country: this.getHeader(req, 'x-country'),
+    });
 
     return successResponse(
       {},
@@ -341,20 +285,13 @@ export class AuthController {
   @Post('2fa/enable')
   @UseGuards(JwtAuthGuard)
   @Enable2faSwagger()
-  async enable2fa(
-    @Body() dto: Enable2faDto,
-    @Req() req: Request,
-  ) {
+  async enable2fa(@Body() dto: Enable2faDto, @Req() req: Request) {
     const userId = req.user!.id;
 
-    const setup = await this.enable2faUseCase.execute(
-      userId,
-      dto.password,
-      {
-        ip: this.resolveClientIp(req),
-        country: this.getHeader(req, 'x-country'),
-      },
-    );
+    const setup = await this.enable2faUseCase.execute(userId, dto.password, {
+      ip: this.resolveClientIp(req),
+      country: this.getHeader(req, 'x-country'),
+    });
 
     return successResponse(
       {
@@ -371,20 +308,13 @@ export class AuthController {
   @Post('2fa/verify')
   @UseGuards(JwtAuthGuard)
   @Verify2faSwagger()
-  async verify2fa(
-    @Body() dto: Verify2faDto,
-    @Req() req: Request,
-  ) {
+  async verify2fa(@Body() dto: Verify2faDto, @Req() req: Request) {
     const userId = req.user!.id;
 
-    const result = await this.verify2faUseCase.execute(
-      userId,
-      dto.totpCode,
-      {
-        ip: this.resolveClientIp(req),
-        country: this.getHeader(req, 'x-country'),
-      },
-    );
+    const result = await this.verify2faUseCase.execute(userId, dto.totpCode, {
+      ip: this.resolveClientIp(req),
+      country: this.getHeader(req, 'x-country'),
+    });
 
     return successResponse(
       { recoveryCodes: result.recoveryCodes },
@@ -397,21 +327,13 @@ export class AuthController {
   @Post('2fa/disable')
   @UseGuards(JwtAuthGuard)
   @Disable2faSwagger()
-  async disable2fa(
-    @Body() dto: Disable2faDto,
-    @Req() req: Request,
-  ) {
+  async disable2fa(@Body() dto: Disable2faDto, @Req() req: Request) {
     const userId = req.user!.id;
 
-    await this.disable2faUseCase.execute(
-      userId,
-      dto.password,
-      dto.totpCode,
-      {
-        ip: this.resolveClientIp(req),
-        country: this.getHeader(req, 'x-country'),
-      },
-    );
+    await this.disable2faUseCase.execute(userId, dto.password, dto.totpCode, {
+      ip: this.resolveClientIp(req),
+      country: this.getHeader(req, 'x-country'),
+    });
 
     return successResponse(
       {},
@@ -432,10 +354,7 @@ export class AuthController {
   @Post('trusted-countries')
   @UseGuards(JwtAuthGuard)
   @AddTrustedCountrySwagger()
-  async addTrustedCountry(
-    @Body() dto: AddTrustedCountryDto,
-    @Req() req: Request,
-  ) {
+  async addTrustedCountry(@Body() dto: AddTrustedCountryDto, @Req() req: Request) {
     await this.addTrustedCountryUseCase.execute(req.user!.id, dto.country);
     return successResponse(
       {},
@@ -446,10 +365,7 @@ export class AuthController {
   @Delete('trusted-countries/:country')
   @UseGuards(JwtAuthGuard)
   @RemoveTrustedCountrySwagger()
-  async removeTrustedCountry(
-    @Param('country') country: string,
-    @Req() req: Request,
-  ) {
+  async removeTrustedCountry(@Param('country') country: string, @Req() req: Request) {
     await this.removeTrustedCountryUseCase.execute(req.user!.id, country);
     return successResponse(
       {},
@@ -461,10 +377,7 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @GetSessionsSwagger()
   async getSessions(@Req() req: Request) {
-    const sessions = await this.getSessionsUseCase.execute(
-      req.user!.id,
-      req.user!.sessionId,
-    );
+    const sessions = await this.getSessionsUseCase.execute(req.user!.id, req.user!.sessionId);
     return successResponse(
       { sessions },
       { message: this.i18n.translate('auth.sessions_list_success', this.resolveLanguage(req)) },
@@ -474,18 +387,11 @@ export class AuthController {
   @Delete('sessions/:sessionId')
   @UseGuards(JwtAuthGuard)
   @RevokeSessionSwagger()
-  async revokeSession(
-    @Param('sessionId') sessionId: string,
-    @Req() req: Request,
-  ) {
-    await this.revokeSessionUseCase.execute(
-      req.user!.id,
-      sessionId,
-      {
-        ip: this.resolveClientIp(req),
-        country: this.getHeader(req, 'x-country'),
-      },
-    );
+  async revokeSession(@Param('sessionId') sessionId: string, @Req() req: Request) {
+    await this.revokeSessionUseCase.execute(req.user!.id, sessionId, {
+      ip: this.resolveClientIp(req),
+      country: this.getHeader(req, 'x-country'),
+    });
     return successResponse(
       {},
       { message: this.i18n.translate('auth.session_revoked', this.resolveLanguage(req)) },
@@ -496,36 +402,26 @@ export class AuthController {
    * Resuelve idioma desde Accept-Language
    */
   private resolveLanguage(req: Request): 'es' | 'en' {
-    return this.i18n.resolveLanguage(
-      req.get('accept-language'),
-    ) as 'es' | 'en';
+    return this.i18n.resolveLanguage(req.get('accept-language')) as 'es' | 'en';
   }
 
   /**
-   * Obtiene IP real considerando reverse proxy
+   * Obtiene la IP real del cliente.
    *
-   * Requiere:
-   * app.set('trust proxy', true);
+   * req.ip usa la configuración `trust proxy` de Express (ver main.ts, 1 hop)
+   * para resolverla a partir de X-Forwarded-For de forma segura. Un cliente
+   * no puede spoofear esta IP directamente: solo se confía en el valor que
+   * el hop inmediato (api-gateway) declaró, no en headers arbitrarios que el
+   * cliente original haya enviado.
    */
   private resolveClientIp(req: Request): string {
-    const forwardedFor = req.headers['x-forwarded-for'] as
-      | string
-      | undefined;
-
-    if (forwardedFor) {
-      return forwardedFor.split(',')[0].trim();
-    }
-
     return req.ip ?? '';
   }
 
   /**
    * Helper tipado para lectura segura de headers
    */
-  private getHeader(
-    req: Request,
-    key: string,
-  ): string | undefined {
+  private getHeader(req: Request, key: string): string | undefined {
     const value = req.headers[key.toLowerCase()];
     return typeof value === 'string' ? value : undefined;
   }

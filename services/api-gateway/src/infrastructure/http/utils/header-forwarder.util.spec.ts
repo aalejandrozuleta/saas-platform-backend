@@ -1,8 +1,7 @@
 import { forwardHeaders } from './header-forwarder.util';
 
 describe('forwardHeaders', () => {
-  const makeReq = (headers: Record<string, string | string[] | undefined>) =>
-    ({ headers } as any);
+  const makeReq = (headers: Record<string, string | string[] | undefined>) => ({ headers }) as any;
 
   it('debe copiar headers de cadena presentes', () => {
     const req = makeReq({
@@ -59,5 +58,24 @@ describe('forwardHeaders', () => {
 
     expect(result['x-country']).toBeUndefined();
     expect(result['content-type']).toBe('text/plain');
+  });
+
+  it('debe reenviar req.ip como x-forwarded-for en vez del header entrante (evita spoofing)', () => {
+    const req = {
+      headers: { 'x-forwarded-for': '198.51.100.9' }, // valor que el cliente podría falsificar
+      ip: '203.0.113.1', // resuelto por Express vía trust proxy
+    } as any;
+
+    const result = forwardHeaders(req);
+
+    expect(result['x-forwarded-for']).toBe('203.0.113.1');
+  });
+
+  it('debe omitir x-forwarded-for cuando req.ip no está definido', () => {
+    const req = makeReq({});
+
+    const result = forwardHeaders(req);
+
+    expect(result['x-forwarded-for']).toBeUndefined();
   });
 });

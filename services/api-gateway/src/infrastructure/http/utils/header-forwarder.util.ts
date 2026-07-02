@@ -1,9 +1,6 @@
 import type { Request } from 'express';
 
-export function forwardHeaders(
-  req: Request,
-): Record<string, string> {
-
+export function forwardHeaders(req: Request): Record<string, string> {
   const headers: Record<string, string> = {};
 
   const copy = (key: string) => {
@@ -20,6 +17,13 @@ export function forwardHeaders(
   copy('x-country');
   copy('x-device-fingerprint');
   copy('cookie');
+
+  // No se copia el x-forwarded-for entrante (el cliente podría falsificarlo).
+  // Se reenvía req.ip, que Express ya resolvió de forma confiable usando la
+  // config `trust proxy` del gateway (ver main.ts).
+  if (req.ip) {
+    headers['x-forwarded-for'] = req.ip;
+  }
 
   return headers;
 }

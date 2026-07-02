@@ -121,16 +121,14 @@ describe('AuthController', () => {
           provide: I18nService,
           useValue: {
             translate: jest.fn((key: string) => key),
-            resolveLanguage: jest.fn((lang?: string) =>
-              lang?.startsWith('es') ? 'es' : 'en',
-            ),
+            resolveLanguage: jest.fn((lang?: string) => (lang?.startsWith('es') ? 'es' : 'en')),
           },
         },
       ],
     })
-    .overrideGuard(JwtAuthGuard)
-    .useValue({ canActivate: () => true })
-    .compile();
+      .overrideGuard(JwtAuthGuard)
+      .useValue({ canActivate: () => true })
+      .compile();
 
     controller = module.get(AuthController);
     registerUserUseCase = module.get(RegisterUserUseCase);
@@ -185,10 +183,7 @@ describe('AuthController', () => {
       get: (key: string) => req.headers[key],
     };
 
-    const result = await controller.resendVerification(
-      { email: 'test@example.com' },
-      req,
-    );
+    const result = await controller.resendVerification({ email: 'test@example.com' }, req);
 
     expect(resendVerificationUseCase.execute).toHaveBeenCalledWith('test@example.com');
     expect(i18n.translate).toHaveBeenCalledWith('auth.verification_email_sent', 'es');
@@ -228,20 +223,13 @@ describe('AuthController', () => {
 
     const result = await controller.register(dto, req);
 
-    expect(registerUserUseCase.execute).toHaveBeenCalledWith(
-      dto.email,
-      dto.password,
-      {
-        ip: '127.0.0.1',
-        country: 'CO',
-        deviceFingerprint: 'device-123',
-      },
-    );
+    expect(registerUserUseCase.execute).toHaveBeenCalledWith(dto.email, dto.password, {
+      ip: '127.0.0.1',
+      country: 'CO',
+      deviceFingerprint: 'device-123',
+    });
 
-    expect(i18n.translate).toHaveBeenCalledWith(
-      'auth.register_success',
-      'es',
-    );
+    expect(i18n.translate).toHaveBeenCalledWith('auth.register_success', 'es');
 
     expect(result).toEqual({
       success: true,
@@ -328,9 +316,7 @@ describe('AuthController', () => {
 
     const result = await controller.refresh(req, res);
 
-    expect(refreshTokenUseCase.execute).toHaveBeenCalledWith(
-      'old-refresh-token',
-    );
+    expect(refreshTokenUseCase.execute).toHaveBeenCalledWith('old-refresh-token');
     expect(res.cookie).toHaveBeenCalledWith(
       'refreshToken',
       'new-refresh-token',
@@ -401,7 +387,7 @@ describe('AuthController', () => {
     );
   });
 
-  it('debe resolver la IP del cliente desde x-forwarded-for cuando está presente', async () => {
+  it('debe usar req.ip (ya resuelto por Express vía trust proxy) sin volver a parsear x-forwarded-for', async () => {
     const user = User.create({
       id: 'uuid-test',
       email: EmailVO.create('test@example.com'),
@@ -410,10 +396,12 @@ describe('AuthController', () => {
     registerUserUseCase.execute.mockResolvedValue(user);
 
     const req: any = {
-      ip: '10.0.0.1', // ip real del proxy
+      ip: '203.0.113.1', // ya resuelto por Express (trust proxy) a partir de x-forwarded-for
       headers: {
         'accept-language': 'es',
-        'x-forwarded-for': '203.0.113.1, 10.0.0.2', // ip del cliente real
+        // Un cliente podría enviar un x-forwarded-for propio para intentar
+        // spoofear su IP; no debe usarse, solo req.ip es confiable.
+        'x-forwarded-for': '198.51.100.9',
         'x-country': 'CO',
         'x-device-fingerprint': 'fp-xyz',
       },
@@ -461,10 +449,7 @@ describe('AuthController', () => {
       },
     );
 
-    expect(i18n.translate).toHaveBeenCalledWith(
-      'auth.change_password_success',
-      'es',
-    );
+    expect(i18n.translate).toHaveBeenCalledWith('auth.change_password_success', 'es');
 
     expect(result).toEqual({
       success: true,
@@ -532,11 +517,10 @@ describe('AuthController', () => {
 
     const result = await controller.enable2fa({ password: 'ValidPass123!' }, req);
 
-    expect(enable2faUseCase.execute).toHaveBeenCalledWith(
-      'user-1',
-      'ValidPass123!',
-      { ip: '127.0.0.1', country: 'CO' },
-    );
+    expect(enable2faUseCase.execute).toHaveBeenCalledWith('user-1', 'ValidPass123!', {
+      ip: '127.0.0.1',
+      country: 'CO',
+    });
     expect(result).toEqual({
       success: true,
       message: '2FA iniciado correctamente',
@@ -561,11 +545,10 @@ describe('AuthController', () => {
 
     const result = await controller.verify2fa({ totpCode: '123456' }, req);
 
-    expect(verify2faUseCase.execute).toHaveBeenCalledWith(
-      'user-1',
-      '123456',
-      { ip: '127.0.0.1', country: 'CO' },
-    );
+    expect(verify2faUseCase.execute).toHaveBeenCalledWith('user-1', '123456', {
+      ip: '127.0.0.1',
+      country: 'CO',
+    });
     expect(result).toEqual({
       success: true,
       message: '2FA activado correctamente',
@@ -592,12 +575,10 @@ describe('AuthController', () => {
       req,
     );
 
-    expect(disable2faUseCase.execute).toHaveBeenCalledWith(
-      'user-1',
-      'ValidPass123!',
-      '123456',
-      { ip: '127.0.0.1', country: 'CO' },
-    );
+    expect(disable2faUseCase.execute).toHaveBeenCalledWith('user-1', 'ValidPass123!', '123456', {
+      ip: '127.0.0.1',
+      country: 'CO',
+    });
     expect(result).toEqual({
       success: true,
       message: '2FA desactivado correctamente',
@@ -736,11 +717,10 @@ describe('AuthController', () => {
 
     const result = await controller.revokeSession('session-2', req);
 
-    expect(revokeSessionUseCase.execute).toHaveBeenCalledWith(
-      'user-1',
-      'session-2',
-      { ip: '127.0.0.1', country: 'CO' },
-    );
+    expect(revokeSessionUseCase.execute).toHaveBeenCalledWith('user-1', 'session-2', {
+      ip: '127.0.0.1',
+      country: 'CO',
+    });
     expect(result).toEqual({
       success: true,
       message: 'Sesión revocada correctamente',

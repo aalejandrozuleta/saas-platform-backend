@@ -29,6 +29,15 @@ async function bootstrap(): Promise<void> {
   app.use(cookieParser());
 
   /**
+   * Confía en exactamente 1 hop (api-gateway, el único cliente HTTP directo
+   * de este servicio) para que Express resuelva req.ip a partir de
+   * X-Forwarded-For en vez de la IP del socket. Sin esto, req.ip sería
+   * siempre la IP interna de api-gateway y el rate limiting/lockout por IP
+   * no distinguiría clientes reales.
+   */
+  app.getHttpAdapter().getInstance().set('trust proxy', 1);
+
+  /**
    * Versionado de API
    */
   app.enableVersioning({

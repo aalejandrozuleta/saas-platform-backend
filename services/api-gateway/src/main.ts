@@ -62,7 +62,7 @@ async function bootstrap(): Promise<void> {
 
   app.use(express.json({ limit: '1mb' }));
   app.use(express.urlencoded({ extended: true, limit: '1mb' }));
-  app.getHttpAdapter().getInstance().set('trust proxy', 1);
+  app.getHttpAdapter().getInstance().set('trust proxy', envService.get('TRUST_PROXY'));
 
   if (envService.get('NODE_ENV') === 'development') {
     setupSwagger(app, 'API Gateway');
