@@ -31,7 +31,7 @@ describe('envSchema', () => {
 
     REDIS_HOST: 'localhost',
     REDIS_PORT: '6379',
-    REDIS_PASSWORD: '',
+    REDIS_PASSWORD: 'a'.repeat(16),
   });
 
   it('debe parsear correctamente un entorno válido', () => {

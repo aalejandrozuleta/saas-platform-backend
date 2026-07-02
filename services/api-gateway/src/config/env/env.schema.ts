@@ -38,7 +38,7 @@ export const envSchema = z.object({
 
   REDIS_HOST: z.string(),
   REDIS_PORT: z.coerce.number(),
-  REDIS_PASSWORD: z.string().optional(),
+  REDIS_PASSWORD: z.string().min(16),
 });
 
 export type EnvVars = z.infer<typeof envSchema>;

@@ -10,6 +10,7 @@ describe('EnvService', () => {
     MONGO_URL: 'mongodb://localhost:27017/test',
     REDIS_HOST: 'localhost',
     REDIS_PORT: '6379',
+    REDIS_PASSWORD: 'a'.repeat(16),
   };
 
   let originalEnv: NodeJS.ProcessEnv;
@@ -35,9 +36,7 @@ describe('EnvService', () => {
   it('debe lanzar error si faltan variables de entorno requeridas', () => {
     process.env = {} as NodeJS.ProcessEnv;
 
-    expect(() => new EnvService()).toThrow(
-      'Error en variables de entorno',
-    );
+    expect(() => new EnvService()).toThrow('Error en variables de entorno');
   });
 
   it('debe lanzar error si NODE_ENV tiene un valor inválido', () => {
@@ -46,8 +45,6 @@ describe('EnvService', () => {
       NODE_ENV: 'invalid',
     } as NodeJS.ProcessEnv;
 
-    expect(() => new EnvService()).toThrow(
-      'Error en variables de entorno',
-    );
+    expect(() => new EnvService()).toThrow('Error en variables de entorno');
   });
 });

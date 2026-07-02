@@ -6,7 +6,7 @@ export const envSchema = z.object({
 
   REDIS_HOST: z.string(),
   REDIS_PORT: z.coerce.number().default(6379),
-  REDIS_PASSWORD: z.string().optional(),
+  REDIS_PASSWORD: z.string().min(16),
 
   RESEND_API_KEY: z.string().min(1),
   RESEND_FROM_EMAIL: z.email().default('noreply@saas-platform.dev'),

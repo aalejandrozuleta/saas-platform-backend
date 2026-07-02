@@ -6,6 +6,8 @@ x-logging: &default-logging
     max-size: '10m'
     max-file: '3'
 
+x-redis-password: &redis_password '${REDIS_PASSWORD:-dev-only-redis-password-change-me}'
+
 services:
   nginx:
     image: ${NGINX_IMAGE:-nginx:stable-alpine}
@@ -42,6 +44,7 @@ services:
       SERVICE_NAME: api-gateway
       # Debe coincidir con el valor de config-service (ver InternalServiceGuard)
       INTERNAL_SERVICE_SECRET: ${INTERNAL_SERVICE_SECRET:-dev-only-internal-secret-do-not-use-in-prod}
+      REDIS_PASSWORD: *redis_password
     ports:
       - '3000:3000'
     logging: *default-logging

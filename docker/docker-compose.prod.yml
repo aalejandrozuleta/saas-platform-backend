@@ -1,5 +1,7 @@
 name: saas-platform-prod
 
+x-redis-password: &redis_password '${REDIS_PASSWORD:?REDIS_PASSWORD is required}'
+
 services:
   nginx:
     image: nginx:1.29.6-alpine
@@ -42,7 +44,7 @@ services:
       SMTP_SECURE: ${SMTP_SECURE:-true}
       REDIS_HOST: redis
       REDIS_PORT: 6379
-      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      REDIS_PASSWORD: *redis_password
     depends_on:
       auth-service:
         condition: service_healthy
@@ -75,7 +77,7 @@ services:
       REDIS_SESSION_TTL: ${REDIS_SESSION_TTL:-900}
       REDIS_HOST: redis
       REDIS_PORT: 6379
-      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      REDIS_PASSWORD: *redis_password
     depends_on:
       auth-postgres:
         condition: service_healthy
@@ -114,9 +116,9 @@ services:
     image: redis:8.0.6-alpine
     container_name: redis-prod
     restart: unless-stopped
-    command: ['redis-server', '--appendonly', 'yes']
+    command: ['redis-server', '--requirepass', *redis_password, '--appendonly', 'yes']
     healthcheck:
-      test: ['CMD', 'redis-cli', 'ping']
+      test: ['CMD', 'redis-cli', '-a', *redis_password, '--no-auth-warning', 'ping']
       interval: 10s
       timeout: 5s
       retries: 5

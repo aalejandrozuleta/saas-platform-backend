@@ -13,7 +13,7 @@ export const envSchema = z.object({
 
   REDIS_HOST: z.string(),
   REDIS_PORT: z.coerce.number(),
-  REDIS_PASSWORD: z.string().optional(),
+  REDIS_PASSWORD: z.string().min(16),
 
   CONFIG_CACHE_TTL: z.coerce.number().default(300),
 

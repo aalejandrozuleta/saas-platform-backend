@@ -11,6 +11,7 @@ describe('EnvService', () => {
       MONGO_URL: 'mongodb://localhost:27017/audit',
       REDIS_HOST: 'localhost',
       REDIS_PORT: '6379',
+      REDIS_PASSWORD: 'a'.repeat(16),
       CONFIG_CACHE_TTL: '300',
       INTERNAL_SERVICE_SECRET: 'a'.repeat(32),
     };

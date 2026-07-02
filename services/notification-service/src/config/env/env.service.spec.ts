@@ -14,6 +14,7 @@ describe('EnvService', () => {
   const validEnv = {
     NODE_ENV: 'test',
     REDIS_HOST: 'localhost',
+    REDIS_PASSWORD: 'a'.repeat(16),
     RESEND_API_KEY: 'test-key',
   };
 

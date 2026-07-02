@@ -33,7 +33,7 @@ describe('EnvService', () => {
 
     REDIS_HOST: 'localhost',
     REDIS_PORT: '6379',
-    REDIS_PASSWORD: '',
+    REDIS_PASSWORD: 'a'.repeat(16),
   };
 
   beforeEach(() => {

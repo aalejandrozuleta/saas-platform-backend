@@ -25,7 +25,7 @@ export const envSchema = z.object({
 
   REDIS_HOST: z.string(),
   REDIS_PORT: z.coerce.number(),
-  REDIS_PASSWORD: z.string().optional(),
+  REDIS_PASSWORD: z.string().min(16),
 
   NOTIFICATION_SERVICE_URL: z.string().default('http://notification-service:3003'), // NOSONAR: internal Docker network address (service-to-service), not exposed externally
 
