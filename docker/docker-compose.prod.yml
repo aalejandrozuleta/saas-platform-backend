@@ -33,6 +33,7 @@ services:
     restart: unless-stopped
     environment:
       NODE_ENV: production
+      SERVICE_NAME: api-gateway
       PORT: 3000
       AUTH_SERVICE_URL: http://auth-service:3001
       AUTH_SERVICE_TIMEOUT: ${AUTH_SERVICE_TIMEOUT:-5000}
@@ -80,6 +81,7 @@ services:
     restart: unless-stopped
     environment:
       NODE_ENV: production
+      SERVICE_NAME: auth-service
       PORT: 3001
       DATABASE_URL: postgresql://${POSTGRES_USER:-auth_user}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@auth-postgres:5432/${POSTGRES_DB:-auth_db}
       MONGO_URL: mongodb://${MONGO_ROOT_USER:-root}:${MONGO_ROOT_PASSWORD:?MONGO_ROOT_PASSWORD is required}@mongo:27017/${MONGO_DB:-auth_audit}?authSource=admin
