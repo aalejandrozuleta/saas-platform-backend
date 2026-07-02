@@ -19,7 +19,7 @@ export const envSchema = z.object({
   CONFIG_SERVICE_CIRCUIT_TIMEOUT: z.coerce.number().default(10000),
   /** Secreto compartido enviado a config-service; ver InternalServiceGuard. */
   INTERNAL_SERVICE_SECRET: z.string().min(32),
-  JWT_ACCESS_SECRET: z.string().min(10),
+  JWT_ACCESS_SECRET: z.string().min(32),
 
   CORS_ORIGINS: z.string().transform((value) =>
     value

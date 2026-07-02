@@ -3,8 +3,8 @@ import { EnvService } from './env.service';
 describe('EnvService', () => {
   const validEnv = {
     NODE_ENV: 'test',
-    JWT_ACCESS_SECRET: 'access-secret-min-10',
-    JWT_REFRESH_SECRET: 'refresh-secret-min-10',
+    JWT_ACCESS_SECRET: 'access-secret-with-at-least-32-chars',
+    JWT_REFRESH_SECRET: 'refresh-secret-with-at-least-32-chars',
     TOTP_ENCRYPTION_KEY: 'a'.repeat(64),
     DATABASE_URL: 'postgresql://localhost:5432/test',
     MONGO_URL: 'mongodb://localhost:27017/test',

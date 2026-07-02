@@ -16,7 +16,7 @@ describe('EnvService', () => {
     REDIS_HOST: 'localhost',
     REDIS_PASSWORD: 'a'.repeat(16),
     INTERNAL_SERVICE_SECRET: 'a'.repeat(32),
-    JWT_ACCESS_SECRET: 'a'.repeat(10),
+    JWT_ACCESS_SECRET: 'a'.repeat(32),
     RESEND_API_KEY: 'test-key',
   };
 
