@@ -10,6 +10,8 @@ export const envSchema = z.object({
 
   /** Secreto compartido con auth-service; ver InternalServiceGuard. */
   INTERNAL_SERVICE_SECRET: z.string().min(32),
+  /** Verifica el accessToken (cookie) en el handshake del WS gateway; debe coincidir con auth-service/api-gateway. */
+  JWT_ACCESS_SECRET: z.string().min(10),
 
   RESEND_API_KEY: z.string().min(1),
   RESEND_FROM_EMAIL: z.email().default('noreply@saas-platform.dev'),
