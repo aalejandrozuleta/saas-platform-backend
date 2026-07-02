@@ -1,6 +1,8 @@
 name: saas-platform-prod
 
 x-redis-password: &redis_password '${REDIS_PASSWORD:?REDIS_PASSWORD is required}'
+x-mongo-user: &mongo_user '${MONGO_ROOT_USER:-root}'
+x-mongo-password: &mongo_password '${MONGO_ROOT_PASSWORD:?MONGO_ROOT_PASSWORD is required}'
 
 services:
   nginx:
@@ -69,7 +71,7 @@ services:
       NODE_ENV: production
       PORT: 3001
       DATABASE_URL: postgresql://${POSTGRES_USER:-auth_user}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@auth-postgres:5432/${POSTGRES_DB:-auth_db}
-      MONGO_URL: mongodb://mongo:27017/${MONGO_DB:-auth_audit}
+      MONGO_URL: mongodb://${MONGO_ROOT_USER:-root}:${MONGO_ROOT_PASSWORD:?MONGO_ROOT_PASSWORD is required}@mongo:27017/${MONGO_DB:-auth_audit}?authSource=admin
       JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:?JWT_ACCESS_SECRET is required}
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?JWT_REFRESH_SECRET is required}
       ACCESS_TOKEN_TTL: ${ACCESS_TOKEN_TTL:-900}
@@ -131,8 +133,24 @@ services:
     image: mongo:8.2
     container_name: mongo-prod
     restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: *mongo_user
+      MONGO_INITDB_ROOT_PASSWORD: *mongo_password
     healthcheck:
-      test: ['CMD-SHELL', "mongosh --quiet --eval 'db.adminCommand({ ping: 1 }).ok' | grep 1"]
+      test:
+        [
+          'CMD',
+          'mongosh',
+          '--quiet',
+          '-u',
+          *mongo_user,
+          '-p',
+          *mongo_password,
+          '--authenticationDatabase',
+          'admin',
+          '--eval',
+          'quit(db.adminCommand({ ping: 1 }).ok ? 0 : 1)',
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
