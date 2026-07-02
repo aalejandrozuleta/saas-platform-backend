@@ -18,7 +18,7 @@ services:
       api-gateway:
         condition: service_healthy
     networks:
-      - saas-prod
+      - saas-edge
 
   api-gateway:
     container_name: api-gateway-prod
@@ -59,7 +59,8 @@ services:
       retries: 5
       start_period: 20s
     networks:
-      - saas-prod
+      - saas-edge
+      - saas-internal
 
   auth-service:
     container_name: auth-service-prod
@@ -97,7 +98,8 @@ services:
       retries: 5
       start_period: 30s
     networks:
-      - saas-prod
+      - saas-internal
+      - saas-data
 
   auth-postgres:
     image: postgres:17-alpine
@@ -115,7 +117,7 @@ services:
     volumes:
       - auth-postgres-prod-data:/var/lib/postgresql/data
     networks:
-      - saas-prod
+      - saas-data
 
   redis:
     image: redis:8.0.6-alpine
@@ -130,7 +132,7 @@ services:
     volumes:
       - redis-prod-data:/data
     networks:
-      - saas-prod
+      - saas-internal
 
   mongo:
     image: mongo:8.2
@@ -160,7 +162,7 @@ services:
     volumes:
       - mongo-prod-data:/data/db
     networks:
-      - saas-prod
+      - saas-data
 
   prometheus:
     image: prom/prometheus:v3.10.0
@@ -173,7 +175,7 @@ services:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus-prod-data:/prometheus
     networks:
-      - saas-prod
+      - saas-internal
 
   loki:
     image: grafana/loki:3.5.12
@@ -187,7 +189,7 @@ services:
       - loki-prod-data:/loki
     command: -config.file=/etc/loki/loki.yml
     networks:
-      - saas-prod
+      - saas-internal
 
   promtail:
     image: grafana/promtail:3.5.12
@@ -201,7 +203,7 @@ services:
     depends_on:
       - loki
     networks:
-      - saas-prod
+      - saas-internal
 
   grafana:
     image: grafana/grafana:12.4.1
@@ -218,11 +220,22 @@ services:
       - prometheus
       - loki
     networks:
-      - saas-prod
+      - saas-internal
 
 networks:
-  saas-prod:
+  # Public-facing tier: nginx <-> api-gateway only.
+  saas-edge:
     driver: bridge
+  # Service-to-service tier: api-gateway, auth-service, redis, and observability.
+  # Deliberately excludes the data tier so api-gateway cannot reach the databases directly.
+  # Not marked `internal: true` because prometheus/loki/grafana publish ports to the host.
+  saas-internal:
+    driver: bridge
+  # Private data tier: only auth-service (and other future backend services) may reach it.
+  # No container on this network publishes host ports, so it's fully isolated from outside.
+  saas-data:
+    driver: bridge
+    internal: true
 
 volumes:
   auth-postgres-prod-data:
