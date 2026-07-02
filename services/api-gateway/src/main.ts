@@ -10,7 +10,10 @@ import { AppModule } from './app.module';
 import { methodGuardMiddleware } from './infrastructure/security/method-guard.middleware';
 import { pathSanitizerMiddleware } from './infrastructure/security/path-sanitizer.middleware';
 import { headerValidationMiddleware } from './infrastructure/security/header-validation.middleware';
-import { globalRateLimiter } from './infrastructure/security/rate-limit.middleware';
+import {
+  authRateLimiter,
+  globalRateLimiter,
+} from './infrastructure/security/rate-limit.middleware';
 import { timeoutMiddleware } from './infrastructure/security/timeout.middleware';
 import { EnvService } from './config/env/env.service';
 
@@ -43,6 +46,18 @@ async function bootstrap(): Promise<void> {
   app.use(pathSanitizerMiddleware);
   app.use(headerValidationMiddleware);
   app.use(globalRateLimiter);
+  app.use(
+    [
+      '/auth/v1/login',
+      '/auth/v1/register',
+      '/auth/v1/refresh',
+      '/auth/v1/resend-verification',
+      '/auth/v1/verify-email',
+      '/auth/v1/2fa/verify',
+      '/auth/v1/change-password',
+    ],
+    authRateLimiter,
+  );
   app.use(timeoutMiddleware);
 
   app.use(express.json({ limit: '1mb' }));
