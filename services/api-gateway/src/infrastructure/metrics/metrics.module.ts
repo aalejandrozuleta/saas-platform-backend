@@ -5,6 +5,13 @@ import { MetricsController } from './metrics.controller';
 import { MetricsInterceptor } from './metrics.interceptor';
 import { MetricsService } from './metrics.service';
 
+/**
+ * Módulo de métricas del gateway.
+ *
+ * Registra `MetricsInterceptor` como interceptor global (`APP_INTERCEPTOR`)
+ * para instrumentar todas las peticiones, y expone `MetricsController`
+ * con el endpoint de scraping de Prometheus.
+ */
 @Module({
   controllers: [MetricsController],
   providers: [
@@ -17,4 +24,3 @@ import { MetricsService } from './metrics.service';
   exports: [MetricsService],
 })
 export class MetricsModule {}
-

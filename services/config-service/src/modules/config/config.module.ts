@@ -9,26 +9,28 @@ import { SetMaintenanceModeUseCase } from '@application/use-cases/set-maintenanc
 import { FeatureFlagController } from '@infrastructure/controllers/feature-flag.controller';
 import { MaintenanceController } from '@infrastructure/controllers/maintenance.controller';
 import { StatsController } from '@infrastructure/controllers/stats.controller';
-import { ConfigAuditLog, ConfigAuditLogSchema } from '@infrastructure/messaging/config-audit.schema';
+import {
+  ConfigAuditLog,
+  ConfigAuditLogSchema,
+} from '@infrastructure/messaging/config-audit.schema';
 import { MongoAuditLoggerService } from '@infrastructure/messaging/mongo-audit-logger.service';
 import { PrismaModule } from '@infrastructure/persistence/prisma/prisma.module';
 import { PrismaStatsService } from '@infrastructure/stats/prisma-stats.service';
 
 import { configProviders } from './config.providers';
 
+/**
+ * Módulo raíz de dominio de config-service.
+ * Une controladores, casos de uso y providers (repositorios, cache,
+ * auditoría, estadísticas) para feature flags, mantenimiento y stats.
+ */
 @Module({
   imports: [
     SharedModule,
     PrismaModule,
-    MongooseModule.forFeature([
-      { name: ConfigAuditLog.name, schema: ConfigAuditLogSchema },
-    ]),
+    MongooseModule.forFeature([{ name: ConfigAuditLog.name, schema: ConfigAuditLogSchema }]),
   ],
-  controllers: [
-    MaintenanceController,
-    FeatureFlagController,
-    StatsController,
-  ],
+  controllers: [MaintenanceController, FeatureFlagController, StatsController],
   providers: [
     ...configProviders,
     MongoAuditLoggerService,

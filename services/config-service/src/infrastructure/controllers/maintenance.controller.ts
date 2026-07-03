@@ -27,6 +27,13 @@ import {
   CancelMaintenanceWindowSwagger,
 } from '@infrastructure/swagger/maintenance.swagger';
 
+/**
+ * Controlador de mantenimiento de la plataforma.
+ *
+ * Expone el estado de mantenimiento, permite activar/desactivar el modo
+ * mantenimiento global (solo-lectura) y gestiona las ventanas de
+ * mantenimiento programadas (crear, listar, cancelar).
+ */
 @ApiTags('Maintenance')
 @Controller('maintenance')
 export class MaintenanceController {
@@ -38,6 +45,10 @@ export class MaintenanceController {
     private readonly windowRepo: MaintenanceWindowRepository,
   ) {}
 
+  /**
+   * Devuelve el estado actual de mantenimiento (activo/inactivo) y si la
+   * plataforma se encuentra en modo solo-lectura.
+   */
   @Get('status')
   @GetMaintenanceStatusSwagger()
   async status() {
@@ -45,6 +56,10 @@ export class MaintenanceController {
     return successResponse(data);
   }
 
+  /**
+   * Activa o desactiva el modo mantenimiento global.
+   * Al activarlo, la plataforma pasa a solo-lectura para el resto de servicios.
+   */
   @Post('mode')
   @HttpCode(HttpStatus.OK)
   @SetMaintenanceModeSwagger()
@@ -53,6 +68,10 @@ export class MaintenanceController {
     return successResponse(data);
   }
 
+  /**
+   * Programa una nueva ventana de mantenimiento futura.
+   * El caso de uso valida que el rango de fechas no se solape con otra ventana activa.
+   */
   @Post('windows')
   @ScheduleMaintenanceWindowSwagger()
   async schedule(@Body() dto: ScheduleMaintenanceWindowDto) {
@@ -60,6 +79,9 @@ export class MaintenanceController {
     return successResponse(data);
   }
 
+  /**
+   * Lista todas las ventanas de mantenimiento registradas, pasadas y futuras.
+   */
   @Get('windows')
   @GetMaintenanceWindowsSwagger()
   async listWindows() {
@@ -76,6 +98,10 @@ export class MaintenanceController {
     return successResponse(data);
   }
 
+  /**
+   * Cancela una ventana de mantenimiento programada por su ID.
+   * Lanza un error de dominio si la ventana no existe.
+   */
   @Delete('windows/:id')
   @CancelMaintenanceWindowSwagger()
   async cancelWindow(@Param('id') id: string) {

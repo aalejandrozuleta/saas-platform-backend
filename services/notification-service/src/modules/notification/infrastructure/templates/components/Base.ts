@@ -3,20 +3,54 @@ import React from 'react';
 const e = React.createElement;
 
 const styles = {
-  body: { backgroundColor: '#0a0a0a', fontFamily: 'Inter,-apple-system,BlinkMacSystemFont,sans-serif', margin: '0', padding: '0' },
+  body: {
+    backgroundColor: '#0a0a0a',
+    fontFamily: 'Inter,-apple-system,BlinkMacSystemFont,sans-serif',
+    margin: '0',
+    padding: '0',
+  },
   wrapper: { maxWidth: '600px', margin: '0 auto', padding: '40px 20px' },
-  card: { backgroundColor: '#111111', border: '1px solid #1e1e1e', borderRadius: '12px', overflow: 'hidden' },
+  card: {
+    backgroundColor: '#111111',
+    border: '1px solid #1e1e1e',
+    borderRadius: '12px',
+    overflow: 'hidden',
+  },
   header: { padding: '36px 40px 28px', borderBottom: '1px solid #1e1e1e' },
-  logo: { fontSize: '22px', fontWeight: '600', letterSpacing: '-0.5px', color: '#ffffff', margin: '0' },
+  logo: {
+    fontSize: '22px',
+    fontWeight: '600',
+    letterSpacing: '-0.5px',
+    color: '#ffffff',
+    margin: '0',
+  },
   logoAccent: { color: '#6b7af7' },
   content: { padding: '36px 40px' },
   footer: { padding: '0 40px 28px' },
   footerDivider: { border: 'none', borderTop: '1px solid #1e1e1e', margin: '0 0 20px' },
-  footerText: { fontSize: '12px', color: '#444444', lineHeight: '1.7', textAlign: 'center' as const, margin: '0 0 8px' },
+  footerText: {
+    fontSize: '12px',
+    color: '#444444',
+    lineHeight: '1.7',
+    textAlign: 'center' as const,
+    margin: '0 0 8px',
+  },
   footerLink: { color: '#555555', textDecoration: 'none' },
   footerCopy: { fontSize: '11px', color: '#333333', textAlign: 'center' as const, margin: '0' },
 } as const;
 
+/**
+ * Layout común a todos los emails: tarjeta oscura con header (logo "Arlok"),
+ * área de contenido y footer con aviso de seguridad. Cada template en
+ * `../emails` invoca `Base(preview, children)` para no repetir el markup
+ * del wrapper.
+ *
+ * @param preview - Texto de preheader (oculto, `display: none`) que muchos
+ * clientes de correo muestran junto al asunto en la bandeja de entrada.
+ * @param children - Contenido específico del template (títulos, cuerpo,
+ * metadata) que se inserta dentro de la tarjeta.
+ * @returns Documento HTML completo (`<html>`...`</html>`) del email.
+ */
 export function Base(preview: string, children: React.ReactElement): React.ReactElement {
   const year = new Date().getFullYear();
 

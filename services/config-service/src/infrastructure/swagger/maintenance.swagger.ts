@@ -10,6 +10,7 @@ import { MaintenanceStatusDto } from '@application/dto/maintenance/maintenance-s
 import { SetMaintenanceModeResponseDto } from '@application/dto/maintenance/set-maintenance-mode.dto';
 import { MaintenanceWindowResponseDto } from '@application/dto/maintenance/schedule-maintenance-window.dto';
 
+/** Decoradores Swagger para consultar el estado actual de mantenimiento. */
 export function GetMaintenanceStatusSwagger() {
   return applyDecorators(
     ApiOperation({ summary: 'Estado actual de mantenimiento y modo solo-lectura' }),
@@ -17,6 +18,7 @@ export function GetMaintenanceStatusSwagger() {
   );
 }
 
+/** Decoradores Swagger para activar/desactivar el modo mantenimiento global. */
 export function SetMaintenanceModeSwagger() {
   return applyDecorators(
     ApiOperation({ summary: 'Activar/desactivar modo mantenimiento global' }),
@@ -25,7 +27,10 @@ export function SetMaintenanceModeSwagger() {
   );
 }
 
-
+/**
+ * Decoradores Swagger para programar una ventana de mantenimiento.
+ * Documenta el conflicto cuando la ventana se solapa con otra ya existente.
+ */
 export function ScheduleMaintenanceWindowSwagger() {
   return applyDecorators(
     ApiOperation({ summary: 'Programar una ventana de mantenimiento' }),
@@ -35,6 +40,7 @@ export function ScheduleMaintenanceWindowSwagger() {
   );
 }
 
+/** Decoradores Swagger para listar las ventanas de mantenimiento. */
 export function GetMaintenanceWindowsSwagger() {
   return applyDecorators(
     ApiOperation({ summary: 'Listar ventanas de mantenimiento' }),
@@ -42,6 +48,7 @@ export function GetMaintenanceWindowsSwagger() {
   );
 }
 
+/** Decoradores Swagger para cancelar una ventana de mantenimiento programada. */
 export function CancelMaintenanceWindowSwagger() {
   return applyDecorators(
     ApiOperation({ summary: 'Cancelar una ventana de mantenimiento programada' }),

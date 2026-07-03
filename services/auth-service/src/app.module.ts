@@ -13,8 +13,19 @@ import { MaintenanceModule } from '@infrastructure/maintenance/maintenance.modul
 import { RedisModule } from '@infrastructure/persistence/cache/redis.module';
 import { AuthGlobalExceptionFilter } from '@infrastructure/filters/auth-global-exception.filter';
 
-
 const APP_FILTER_TOKEN = APP_FILTER;
+
+/**
+ * Módulo raíz de auth-service.
+ *
+ * @remarks
+ * Ensambla la configuración (`EnvModule`, `ConfigModule`), infraestructura
+ * transversal (Mongo, Redis, métricas, i18n, tareas programadas, mantenimiento)
+ * y el módulo de dominio (`AuthModule`), además de registrar
+ * {@link AuthGlobalExceptionFilter} como filtro de excepciones global de toda
+ * la aplicación (vía `APP_FILTER`), de modo que ningún endpoint quede sin
+ * el manejo uniforme de errores y auditoría.
+ */
 @Module({
   imports: [
     EventEmitterModule.forRoot(),
@@ -27,7 +38,7 @@ const APP_FILTER_TOKEN = APP_FILTER;
     AuditModule,
     AuthModule,
     I18nModule,
-    RedisModule
+    RedisModule,
   ],
   providers: [
     {
@@ -36,5 +47,4 @@ const APP_FILTER_TOKEN = APP_FILTER;
     },
   ],
 })
-export class AppModule {
-}
+export class AppModule {}

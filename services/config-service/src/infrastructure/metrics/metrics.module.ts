@@ -5,6 +5,11 @@ import { MetricsService } from './metrics.service';
 import { MetricsController } from './metrics.controller';
 import { MetricsInterceptor } from './metrics.interceptor';
 
+/**
+ * Módulo de observabilidad: expone el endpoint `/metrics` y registra
+ * `MetricsInterceptor` como interceptor global (`APP_INTERCEPTOR`) para
+ * instrumentar automáticamente todas las requests del servicio.
+ */
 @Module({
   controllers: [MetricsController],
   providers: [

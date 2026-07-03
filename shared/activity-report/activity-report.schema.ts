@@ -1,27 +1,22 @@
-import {
-  Prop,
-  Schema,
-  SchemaFactory,
-  raw,
-} from '@nestjs/mongoose';
+import { Prop, Schema, SchemaFactory, raw } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 
-import type {
-  ActivityActor,
-  ActivityContext,
-  ActivityOutcome,
-} from './activity-report.interface';
+import type { ActivityActor, ActivityContext, ActivityOutcome } from './activity-report.interface';
 
-export const DEFAULT_ACTIVITY_REPORT_COLLECTION =
-  'user_activity_reports';
-const ACTIVITY_OUTCOMES = [
-  'INFO',
-  'SUCCESS',
-  'FAILURE',
-  'BLOCKED',
-  'REJECTED',
-] as const;
+/**
+ * Nombre de colección de MongoDB usado por defecto para persistir los
+ * reportes de actividad cuando el servicio consumidor no especifica uno
+ * propio.
+ */
+export const DEFAULT_ACTIVITY_REPORT_COLLECTION = 'user_activity_reports';
+const ACTIVITY_OUTCOMES = ['INFO', 'SUCCESS', 'FAILURE', 'BLOCKED', 'REJECTED'] as const;
 
+/**
+ * Documento de Mongoose para un reporte de actividad/auditoría. Refleja la
+ * forma de `ActivityReport` y define los índices necesarios para las
+ * consultas más comunes: por servicio, por actor, por categoría/acción y
+ * por resultado, todas ordenadas por fecha descendente.
+ */
 @Schema({
   versionKey: false,
   timestamps: false,
@@ -78,8 +73,7 @@ export class ActivityReportDocument extends Document {
   createdAt!: Date;
 }
 
-const baseActivityReportSchema =
-  SchemaFactory.createForClass(ActivityReportDocument);
+const baseActivityReportSchema = SchemaFactory.createForClass(ActivityReportDocument);
 
 baseActivityReportSchema.index({
   service: 1,
@@ -99,6 +93,15 @@ baseActivityReportSchema.index({
   createdAt: -1,
 });
 
+/**
+ * Crea (clonando el schema base) el schema de Mongoose para reportes de
+ * actividad, apuntando a la colección indicada. Permite que cada servicio
+ * consumidor use su propia colección sin redefinir los índices.
+ *
+ * @param collection - Nombre de la colección de destino. Por defecto,
+ *   `DEFAULT_ACTIVITY_REPORT_COLLECTION`.
+ * @returns El schema de Mongoose listo para registrar con `MongooseModule`.
+ */
 export const createActivityReportSchema = (
   collection: string = DEFAULT_ACTIVITY_REPORT_COLLECTION,
 ) => {

@@ -3,6 +3,11 @@ import { I18nService } from '@saas/shared';
 
 import { FileI18nLoader } from './file-i18n.loader';
 
+/**
+ * Módulo de internacionalización de config-service.
+ * Construye `I18nService` a partir de los mensajes cargados por
+ * `FileI18nLoader`, con `es` (español) como idioma por defecto.
+ */
 @Module({
   providers: [
     FileI18nLoader,
