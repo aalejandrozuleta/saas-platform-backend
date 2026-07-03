@@ -29,7 +29,7 @@
     "docs:openapi": "node scripts/export-openapi.mjs"
   },
   "dependencies": {
-    "@react-email/render": "^1.1.2",
+    "@react-email/render": "^2.0.10",
     "react": "^19.1.0"
   },
   "devDependencies": {
