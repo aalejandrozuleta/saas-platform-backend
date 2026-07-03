@@ -2,6 +2,25 @@ packages:
   - 'shared'
   - 'services/**'
 injectWorkspacePackages: true
+overrides:
+  axios@1: ^1.16.0
+  follow-redirects@1: ^1.16.0
+  form-data@4: ^4.0.6
+  path-to-regexp@8: ^8.4.0
+  multer@2: ^2.2.0
+  qs@6: ^6.15.2
+  lodash@4: ^4.18.0
+  ip-address@10: ^10.1.1
+  hono@4: ^4.12.25
+  '@hono/node-server@1': ^1.19.13
+  handlebars@4: ^4.7.9
+  js-yaml@3: 3.15.0
+  js-yaml@4: 4.2.0
+  fast-uri@3: ^3.1.2
+  markdown-it@14: ^14.2.0
+  '@babel/core@7': ^7.29.6
+  defu@6: ^6.1.5
+  picomatch@4: ^4.0.4
 allowBuilds:
   '@nestjs/core': false
   '@prisma/engines': true
