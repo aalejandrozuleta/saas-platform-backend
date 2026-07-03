@@ -3,6 +3,7 @@ lockfileVersion: '9.0'
 settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
+  injectWorkspacePackages: true
 
 importers:
 
@@ -144,6 +145,9 @@ importers:
       zod:
         specifier: ^4.3.6
         version: 4.3.6
+    dependenciesMeta:
+      '@saas/shared':
+        injected: true
     devDependencies:
       '@nestjs/cli':
         specifier: ^11.0.16
@@ -268,6 +272,9 @@ importers:
       zod:
         specifier: ^4.3.6
         version: 4.3.6
+    dependenciesMeta:
+      '@saas/shared':
+        injected: true
     devDependencies:
       '@nestjs/cli':
         specifier: ^11.0.16
@@ -386,6 +393,9 @@ importers:
       zod:
         specifier: ^4.3.6
         version: 4.3.6
+    dependenciesMeta:
+      '@saas/shared':
+        injected: true
     devDependencies:
       '@nestjs/cli':
         specifier: ^11.0.16

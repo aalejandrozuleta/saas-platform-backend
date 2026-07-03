@@ -1,6 +1,7 @@
 packages:
-  - "shared"
-  - "services/**"
+  - 'shared'
+  - 'services/**'
+injectWorkspacePackages: true
 allowBuilds:
   '@nestjs/core': false
   '@prisma/engines': true
