@@ -35,6 +35,11 @@
     "rxjs": "^7.8.2",
     "zod": "^4.3.6"
   },
+  "dependenciesMeta": {
+    "@saas/shared": {
+      "injected": true
+    }
+  },
   "devDependencies": {
     "@nestjs/cli": "^11.0.16",
     "@nestjs/testing": "11.1.17",
