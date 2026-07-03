@@ -304,6 +304,18 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
 
+  services/auth-service/dist/generated/prisma:
+    dependencies:
+      '@prisma/client-runtime-utils':
+        specifier: 7.6.0
+        version: 7.6.0
+
+  services/auth-service/src/generated/prisma:
+    dependencies:
+      '@prisma/client-runtime-utils':
+        specifier: 7.6.0
+        version: 7.6.0
+
   services/config-service:
     dependencies:
       '@nestjs/common':
@@ -403,6 +415,18 @@ importers:
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
+
+  services/config-service/dist/generated/prisma:
+    dependencies:
+      '@prisma/client-runtime-utils':
+        specifier: 7.6.0
+        version: 7.6.0
+
+  services/config-service/src/generated/prisma:
+    dependencies:
+      '@prisma/client-runtime-utils':
+        specifier: 7.6.0
+        version: 7.6.0
 
   services/notification-service:
     dependencies:
