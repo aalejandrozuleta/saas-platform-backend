@@ -10,11 +10,19 @@ import {
 import { Enable2faResponseDto } from '@application/dto/2fa/enable-2fa-response.dto';
 import { Verify2faResponseDto } from '@application/dto/2fa/verify-2fa-response.dto';
 
+/**
+ * Decorador Swagger para el endpoint `POST /2fa/enable`.
+ *
+ * @remarks
+ * Requiere reautenticación con contraseña antes de generar el secreto
+ * TOTP pendiente (setup sin confirmar hasta pasar por `/2fa/verify`).
+ */
 export function Enable2faSwagger() {
   return applyDecorators(
     ApiOperation({ summary: 'Iniciar activación de 2FA (TOTP)' }),
     ApiCreatedResponse({
-      description: 'Secreto TOTP generado. Escanea el QR con tu app autenticadora y confirma con /2fa/verify.',
+      description:
+        'Secreto TOTP generado. Escanea el QR con tu app autenticadora y confirma con /2fa/verify.',
       type: Enable2faResponseDto,
     }),
     ApiUnauthorizedResponse({
@@ -26,11 +34,20 @@ export function Enable2faSwagger() {
   );
 }
 
+/**
+ * Decorador Swagger para el endpoint `POST /2fa/verify`.
+ *
+ * @remarks
+ * Confirma el secreto TOTP pendiente generado por `/2fa/enable` y
+ * activa 2FA. Devuelve los códigos de recuperación de un solo uso,
+ * que solo se muestran una vez.
+ */
 export function Verify2faSwagger() {
   return applyDecorators(
     ApiOperation({ summary: 'Confirmar código TOTP y activar 2FA' }),
     ApiOkResponse({
-      description: '2FA activado correctamente. Se devuelven los códigos de recuperación de un solo uso.',
+      description:
+        '2FA activado correctamente. Se devuelven los códigos de recuperación de un solo uso.',
       type: Verify2faResponseDto,
     }),
     ApiUnauthorizedResponse({
@@ -42,6 +59,13 @@ export function Verify2faSwagger() {
   );
 }
 
+/**
+ * Decorador Swagger para el endpoint `POST /2fa/disable`.
+ *
+ * @remarks
+ * Exige contraseña actual + código TOTP vigente como doble confirmación
+ * antes de eliminar el secreto y los códigos de recuperación.
+ */
 export function Disable2faSwagger() {
   return applyDecorators(
     ApiOperation({ summary: 'Desactivar 2FA del usuario autenticado' }),

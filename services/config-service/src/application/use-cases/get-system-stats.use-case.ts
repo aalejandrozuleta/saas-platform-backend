@@ -16,6 +16,9 @@ export class GetSystemStatsUseCase {
     private readonly statsService: StatsPort,
   ) {}
 
+  /**
+   * @returns Estadísticas agregadas actuales del sistema.
+   */
   async execute(): Promise<SystemStats> {
     return this.statsService.getSystemStats();
   }

@@ -1,0 +1,17 @@
+{
+  "entryPoints": ["."],
+  "entryPointStrategy": "expand",
+  "out": "../docs/code/shared",
+  "tsconfig": "tsconfig.build.json",
+  "excludePrivate": true,
+  "excludeProtected": true,
+  "excludeInternal": true,
+  "exclude": [
+    "**/*.spec.ts",
+    "**/*.test.ts",
+    "**/__tests__/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/*.d.ts"
+  ]
+}

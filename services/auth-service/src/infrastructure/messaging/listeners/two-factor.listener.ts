@@ -7,6 +7,15 @@ import { TwoFactorEnabledEvent } from '@application/events/two-factor/two-factor
 import { TwoFactorVerifiedEvent } from '@application/events/two-factor/two-factor-verified.event';
 import { TwoFactorDisabledEvent } from '@application/events/two-factor/two-factor-disabled.event';
 
+/**
+ * Listener de eventos de autenticación de dos factores (2FA).
+ *
+ * @remarks
+ * Escucha `TwoFactorEnabledEvent`, `TwoFactorVerifiedEvent` y
+ * `TwoFactorDisabledEvent` (vía `@OnEvent`) y registra cada uno como
+ * entrada de auditoría a través de {@link AuditLogger}, usando
+ * {@link AuthActivityReportFactory} para construir el reporte.
+ */
 @Injectable()
 export class TwoFactorListener {
   constructor(

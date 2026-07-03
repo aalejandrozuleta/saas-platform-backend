@@ -1,5 +1,18 @@
 import type { Request } from 'express';
 
+/**
+ * Construye el set de headers a reenviar del cliente hacia un servicio
+ * downstream (auth-service, config-service).
+ *
+ * @remarks
+ * Usa un allowlist explícito en vez de reenviar `req.headers` completo:
+ * copiar headers arbitrarios permitiría que el cliente inyecte headers
+ * internos (p. ej. de autenticación entre servicios) o contamine la
+ * petición upstream con valores no esperados.
+ *
+ * @param req - Petición original del cliente.
+ * @returns Headers filtrados listos para pasar como `headers` de Axios.
+ */
 export function forwardHeaders(req: Request): Record<string, string> {
   const headers: Record<string, string> = {};
 

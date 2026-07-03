@@ -10,6 +10,26 @@ import { requestContextStorage } from '../context/async-local-storage';
 import { PLATFORM_LOGGER } from './logger.token';
 import type { PlatformLogger } from './logger.interface';
 
+/**
+ * Interceptor global que establece el {@link RequestContext} de cada
+ * request HTTP y loguea su resultado al finalizar.
+ *
+ * Se registra como `APP_INTERCEPTOR` en {@link SharedModule}, por lo que
+ * se aplica automáticamente a todas las rutas de un servicio sin
+ * configuración adicional. Responsabilidades:
+ *
+ * - Resuelve o genera un `correlationId` (header `x-correlation-id` /
+ *   `x-request-id`, o `randomUUID()` si no viene ninguno) y lo devuelve en
+ *   la respuesta vía el header `x-correlation-id`.
+ * - Ejecuta el resto del pipeline dentro de
+ *   `requestContextStorage.run(ctx, ...)`, para que {@link PinoLoggerAdapter}
+ *   y cualquier otro consumidor de {@link requestContextStorage} tengan
+ *   acceso al contexto durante toda la request.
+ * - Al finalizar (éxito o error), emite un log estructurado con método,
+ *   ruta, status, duración, IP y user agent. Las rutas de polling
+ *   (`/metrics`, `/health`, `/maintenance/status`) se omiten en 2xx para no
+ *   inundar los logs.
+ */
 @Injectable()
 export class HttpRequestLoggingInterceptor implements NestInterceptor {
   constructor(

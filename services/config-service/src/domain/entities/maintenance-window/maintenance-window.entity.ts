@@ -39,28 +39,45 @@ export class MaintenanceWindow {
     this._updatedAt = props.updatedAt;
   }
 
-  get isActive(): boolean { return this._isActive; }
-  get notifiedAt(): Date | null { return this._notifiedAt; }
-  get updatedAt(): Date { return this._updatedAt; }
+  get isActive(): boolean {
+    return this._isActive;
+  }
+  get notifiedAt(): Date | null {
+    return this._notifiedAt;
+  }
+  get updatedAt(): Date {
+    return this._updatedAt;
+  }
 
+  /**
+   * @param now - Instante a evaluar (inyectable para pruebas)
+   * @returns `true` si la ventana está activa y `now` cae dentro de [startAt, endAt].
+   */
   isOngoing(now: Date = new Date()): boolean {
     return this._isActive && now >= this.startAt && now <= this.endAt;
   }
 
+  /**
+   * @param now - Instante a evaluar (inyectable para pruebas)
+   * @returns `true` si la ventana está activa pero todavía no ha comenzado.
+   */
   isPending(now: Date = new Date()): boolean {
     return this._isActive && now < this.startAt;
   }
 
+  /** Marca la ventana como inactiva (cancelada) y refresca `updatedAt`. */
   cancel(): void {
     this._isActive = false;
     this._updatedAt = new Date();
   }
 
+  /** Registra que ya se notificó esta ventana, para no notificarla dos veces. */
   markNotified(): void {
     this._notifiedAt = new Date();
     this._updatedAt = new Date();
   }
 
+  /** Exporta el estado interno como objeto plano para persistencia. */
   toSnapshot(): MaintenanceWindowProps {
     return {
       id: this.id,

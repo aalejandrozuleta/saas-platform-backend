@@ -1,6 +1,14 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsDateString, IsOptional, IsString, MaxLength } from 'class-validator';
 
+/**
+ * Payload para programar una nueva ventana de mantenimiento.
+ *
+ * @remarks
+ * `endAt` debe ser posterior a `startAt` y el rango no puede solaparse con
+ * otra ventana activa existente; ambas reglas se validan en
+ * `ScheduleMaintenanceWindowUseCase`, no a nivel de DTO.
+ */
 export class ScheduleMaintenanceWindowDto {
   @ApiProperty({ example: 'Migración de base de datos' })
   @IsString()
@@ -27,6 +35,7 @@ export class ScheduleMaintenanceWindowDto {
   createdBy?: string;
 }
 
+/** Representación pública de una ventana de mantenimiento persistida. */
 export class MaintenanceWindowResponseDto {
   @ApiProperty() id!: string;
   @ApiProperty() title!: string;

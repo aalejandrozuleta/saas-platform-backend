@@ -1,6 +1,13 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiOperation, ApiOkResponse, ApiNotFoundResponse, ApiParam } from '@nestjs/swagger';
 
+/**
+ * Decorador Swagger para el endpoint `GET /sessions`.
+ *
+ * @remarks
+ * Lista las sesiones activas del usuario autenticado, marcando con
+ * `isCurrent` la sesión asociada al access token de la petición.
+ */
 export function GetSessionsSwagger() {
   return applyDecorators(
     ApiOperation({ summary: 'Listar sesiones activas del usuario autenticado' }),
@@ -33,6 +40,13 @@ export function GetSessionsSwagger() {
   );
 }
 
+/**
+ * Decorador Swagger para el endpoint `DELETE /sessions/:sessionId`.
+ *
+ * @remarks
+ * Revoca una sesión específica del usuario autenticado (no necesariamente
+ * la actual), útil para cerrar sesión en un dispositivo remoto.
+ */
 export function RevokeSessionSwagger() {
   return applyDecorators(
     ApiOperation({ summary: 'Revocar una sesión activa por ID' }),

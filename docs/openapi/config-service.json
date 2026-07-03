@@ -1,0 +1,502 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/config/v1/metrics": {
+      "get": {
+        "operationId": "MetricsController_getMetrics_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["Metrics"]
+      }
+    },
+    "/config/v1/maintenance/status": {
+      "get": {
+        "operationId": "MaintenanceController_status_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaintenanceStatusDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Estado actual de mantenimiento y modo solo-lectura",
+        "tags": ["Maintenance"]
+      }
+    },
+    "/config/v1/maintenance/mode": {
+      "post": {
+        "operationId": "MaintenanceController_setMode_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetMaintenanceModeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetMaintenanceModeResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos de entrada inválidos"
+          }
+        },
+        "summary": "Activar/desactivar modo mantenimiento global",
+        "tags": ["Maintenance"]
+      }
+    },
+    "/config/v1/maintenance/windows": {
+      "post": {
+        "operationId": "MaintenanceController_schedule_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScheduleMaintenanceWindowDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaintenanceWindowResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Rango de fechas inválido"
+          },
+          "409": {
+            "description": "Ya existe una ventana en ese rango"
+          }
+        },
+        "summary": "Programar una ventana de mantenimiento",
+        "tags": ["Maintenance"]
+      },
+      "get": {
+        "operationId": "MaintenanceController_listWindows_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MaintenanceWindowResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Listar ventanas de mantenimiento",
+        "tags": ["Maintenance"]
+      }
+    },
+    "/config/v1/maintenance/windows/{id}": {
+      "delete": {
+        "operationId": "MaintenanceController_cancelWindow_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaintenanceWindowResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Cancelar una ventana de mantenimiento programada",
+        "tags": ["Maintenance"]
+      }
+    },
+    "/config/v1/feature-flags": {
+      "post": {
+        "operationId": "FeatureFlagController_setFlag_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetFeatureFlagDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeatureFlagResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Clave inválida o formato incorrecto"
+          }
+        },
+        "summary": "Crear o actualizar un feature flag",
+        "tags": ["Feature Flags"]
+      },
+      "get": {
+        "operationId": "FeatureFlagController_listFlags_v1",
+        "parameters": [
+          {
+            "name": "enabled",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "environment",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FeatureFlagResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Listar todos los feature flags con filtros opcionales",
+        "tags": ["Feature Flags"]
+      }
+    },
+    "/config/v1/feature-flags/{id}": {
+      "delete": {
+        "operationId": "FeatureFlagController_deleteFlag_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Flag eliminado correctamente"
+          },
+          "404": {
+            "description": "Flag no encontrado"
+          }
+        },
+        "summary": "Eliminar un feature flag por ID",
+        "tags": ["Feature Flags"]
+      }
+    },
+    "/config/v1/stats": {
+      "get": {
+        "operationId": "StatsController_getStats_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SystemStatsDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Estadísticas agregadas del sistema de configuración",
+        "tags": ["Stats"]
+      }
+    }
+  },
+  "info": {
+    "title": "Config Service API",
+    "description": "Documentación del servicio Config Service",
+    "version": "1.0.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "access-token": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http"
+      }
+    },
+    "schemas": {
+      "MaintenanceStatusDto": {
+        "type": "object",
+        "properties": {
+          "maintenanceEnabled": {
+            "type": "boolean",
+            "description": "¿Está activo el modo mantenimiento?"
+          },
+          "readOnlyEnabled": {
+            "type": "boolean",
+            "description": "¿Está activo el modo solo-lectura?"
+          },
+          "maintenanceMessage": {
+            "type": "object",
+            "description": "Mensaje de mantenimiento personalizado"
+          },
+          "activeWindow": {
+            "type": "object",
+            "description": "Ventana de mantenimiento activa en este momento"
+          }
+        },
+        "required": ["maintenanceEnabled", "readOnlyEnabled"]
+      },
+      "SetMaintenanceModeDto": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "Activa o desactiva el modo mantenimiento",
+            "example": true
+          },
+          "message": {
+            "type": "string",
+            "description": "Mensaje personalizado para los usuarios",
+            "example": "Sistema en mantenimiento, volvemos a las 18:00"
+          },
+          "updatedBy": {
+            "type": "string",
+            "description": "ID del usuario que realiza el cambio"
+          }
+        },
+        "required": ["enabled"]
+      },
+      "SetMaintenanceModeResponseDto": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "object"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": ["enabled", "message", "updatedAt"]
+      },
+      "ScheduleMaintenanceWindowDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "example": "Migración de base de datos"
+          },
+          "description": {
+            "type": "string",
+            "example": "Actualización a PostgreSQL 17"
+          },
+          "startAt": {
+            "type": "string",
+            "example": "2025-12-01T02:00:00Z"
+          },
+          "endAt": {
+            "type": "string",
+            "example": "2025-12-01T04:00:00Z"
+          },
+          "createdBy": {
+            "type": "string",
+            "description": "ID del super-admin que programa la ventana"
+          }
+        },
+        "required": ["title", "startAt", "endAt"]
+      },
+      "MaintenanceWindowResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "object"
+          },
+          "startAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "endAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": ["id", "title", "startAt", "endAt", "isActive", "createdAt"]
+      },
+      "SetFeatureFlagDto": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "example": "auth-service",
+            "description": "Nombre del servicio o módulo (snake-case o kebab-case)"
+          },
+          "enabled": {
+            "type": "boolean",
+            "example": true
+          },
+          "environment": {
+            "type": "string",
+            "example": "production",
+            "description": "Entorno al que aplica. null / omitido = todos los entornos."
+          },
+          "description": {
+            "type": "string",
+            "description": "Descripción opcional del flag"
+          },
+          "updatedBy": {
+            "type": "string",
+            "description": "ID del usuario super-admin que realiza el cambio"
+          }
+        },
+        "required": ["key", "enabled"]
+      },
+      "FeatureFlagResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "environment": {
+            "type": "object"
+          },
+          "description": {
+            "type": "object"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": ["id", "key", "enabled", "createdAt", "updatedAt"]
+      },
+      "SystemStatsDto": {
+        "type": "object",
+        "properties": {
+          "totalFeatureFlags": {
+            "type": "number"
+          },
+          "enabledFeatureFlags": {
+            "type": "number"
+          },
+          "disabledFeatureFlags": {
+            "type": "number"
+          },
+          "activeMaintenanceWindows": {
+            "type": "number"
+          },
+          "upcomingMaintenanceWindows": {
+            "type": "number"
+          },
+          "maintenanceEnabled": {
+            "type": "boolean"
+          },
+          "readOnlyEnabled": {
+            "type": "boolean"
+          },
+          "generatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "totalFeatureFlags",
+          "enabledFeatureFlags",
+          "disabledFeatureFlags",
+          "activeMaintenanceWindows",
+          "upcomingMaintenanceWindows",
+          "maintenanceEnabled",
+          "readOnlyEnabled",
+          "generatedAt"
+        ]
+      }
+    }
+  }
+}

@@ -1,5 +1,16 @@
 /**
- * Códigos de error genéricos compartidos entre microservicios.
+ * Códigos de error genéricos y de dominio compartidos entre microservicios.
+ *
+ * Es la fuente de verdad para el campo `code` de {@link ApiErrorPayload}.
+ * Los primeros valores (INTERNAL_ERROR, VALIDATION_ERROR, UNAUTHORIZED,
+ * etc.) tienen un status HTTP asociado en {@link HttpErrorMapper}; el resto
+ * son códigos de dominio específicos (seguridad, 2FA, países de confianza,
+ * sesiones, verificación de email) que cada servicio mapea al status que
+ * corresponda al lanzar su propia excepción (ver {@link BaseException}).
+ *
+ * Al agregar un código nuevo: si es un código HTTP genérico, súmalo también
+ * a {@link HttpErrorMapper}; si es un código de dominio específico de un
+ * servicio, el status se define al construir la excepción, no aquí.
  */
 export enum ErrorCode {
   INTERNAL_ERROR = 'INTERNAL_ERROR',
@@ -23,9 +34,9 @@ export enum ErrorCode {
   USER_BLOCKED = 'USER_BLOCKED',
   INVALID_CREDENTIALS = 'INVALID_CREDENTIALS',
   EMAIL_ALREADY_EXISTS = 'EMAIL_ALREADY_EXISTS',
-  COUNTRY_NOT_TRUSTED = "COUNTRY_NOT_TRUSTED",
-  SECURITY_CHALLENGE_REQUIRED= 'SECURITY_CHALLENGE_REQUIRED',
-  INVALID_REFRESH_TOKEN = "INVALID_REFRESH_TOKEN",
+  COUNTRY_NOT_TRUSTED = 'COUNTRY_NOT_TRUSTED',
+  SECURITY_CHALLENGE_REQUIRED = 'SECURITY_CHALLENGE_REQUIRED',
+  INVALID_REFRESH_TOKEN = 'INVALID_REFRESH_TOKEN',
   INVALID_CURRENT_PASSWORD = 'INVALID_CURRENT_PASSWORD',
   SAME_PASSWORD_NOT_ALLOWED = 'SAME_PASSWORD_NOT_ALLOWED',
 

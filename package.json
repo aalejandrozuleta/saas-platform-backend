@@ -25,7 +25,8 @@
     "test:notification": "pnpm --filter notification-service test",
     "build": "pnpm -r --parallel --workspace-concurrency=4 build",
     "typecheck": "pnpm -r exec tsc --noEmit",
-    "docs:code": "pnpm -r run docs"
+    "docs:code": "pnpm -r run docs",
+    "docs:openapi": "node scripts/export-openapi.mjs"
   },
   "dependencies": {
     "@react-email/render": "^1.1.2",

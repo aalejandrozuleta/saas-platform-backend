@@ -6,9 +6,7 @@ import type { DeviceProps } from './device.props';
  * Representa un dispositivo asociado a un usuario.
  */
 export class Device {
-  private constructor(
-    private readonly props: DeviceProps,
-  ) {}
+  private constructor(private readonly props: DeviceProps) {}
 
   /**
    * Fábrica para creación de un nuevo dispositivo.
@@ -73,6 +71,11 @@ export class Device {
   // Reglas de dominio
   // ======================
 
+  /**
+   * Marca el dispositivo como confiable.
+   * Un dispositivo confiable exime al login de fricciones adicionales
+   * de seguridad (ver `LoginPolicy.validateDevice`).
+   */
   markAsTrusted(): Device {
     return new Device({
       ...this.props,
@@ -80,6 +83,9 @@ export class Device {
     });
   }
 
+  /**
+   * Actualiza la marca de tiempo de último uso al momento actual.
+   */
   updateLastUsed(): Device {
     return new Device({
       ...this.props,

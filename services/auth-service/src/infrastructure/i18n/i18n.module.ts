@@ -3,6 +3,12 @@ import { I18nService } from '@saas/shared';
 
 import { FileI18nLoader } from './file-i18n.loader';
 
+/**
+ * Módulo de internacionalización (i18n).
+ *
+ * Construye y expone un `I18nService` (default: `'es'`) inicializado
+ * con los mensajes cargados por {@link FileI18nLoader}.
+ */
 @Module({
   providers: [
     FileI18nLoader,

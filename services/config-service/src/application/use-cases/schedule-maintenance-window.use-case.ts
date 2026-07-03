@@ -7,7 +7,10 @@ import { AUDIT_LOGGER } from '@domain/token/services.tokens';
 import { DomainErrorFactory } from '@domain/errors/domain-error.factory';
 import type { MaintenanceWindowRepository } from '@domain/repositories/maintenance-window.repository';
 import type { AuditLogger } from '@application/ports/audit-logger.port';
-import type { ScheduleMaintenanceWindowDto, MaintenanceWindowResponseDto } from '@application/dto/maintenance/schedule-maintenance-window.dto';
+import type {
+  ScheduleMaintenanceWindowDto,
+  MaintenanceWindowResponseDto,
+} from '@application/dto/maintenance/schedule-maintenance-window.dto';
 
 /**
  * Programa una ventana de mantenimiento de plataforma.
@@ -24,6 +27,13 @@ export class ScheduleMaintenanceWindowUseCase {
     private readonly auditLogger: AuditLogger,
   ) {}
 
+  /**
+   * @param dto - Título, rango de fechas y autor de la ventana a programar
+   * @returns La ventana de mantenimiento creada
+   * @throws DomainException si `endAt` no es posterior a `startAt`
+   *  (`invalidDateRange`) o si el rango se solapa con otra ventana activa
+   *  (`maintenanceWindowOverlap`)
+   */
   async execute(dto: ScheduleMaintenanceWindowDto): Promise<MaintenanceWindowResponseDto> {
     const startAt = new Date(dto.startAt);
     const endAt = new Date(dto.endAt);

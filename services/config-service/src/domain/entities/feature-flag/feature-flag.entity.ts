@@ -35,24 +35,32 @@ export class FeatureFlag {
     this._updatedAt = props.updatedAt;
   }
 
-  get enabled(): boolean { return this._enabled; }
-  get updatedAt(): Date { return this._updatedAt; }
+  get enabled(): boolean {
+    return this._enabled;
+  }
+  get updatedAt(): Date {
+    return this._updatedAt;
+  }
 
+  /** Activa el flag y refresca `updatedAt`. */
   enable(): void {
     this._enabled = true;
     this._updatedAt = new Date();
   }
 
+  /** Desactiva el flag y refresca `updatedAt`. */
   disable(): void {
     this._enabled = false;
     this._updatedAt = new Date();
   }
 
+  /** Invierte el estado actual del flag y refresca `updatedAt`. */
   toggle(): void {
     this._enabled = !this._enabled;
     this._updatedAt = new Date();
   }
 
+  /** Exporta el estado interno como objeto plano para persistencia. */
   toSnapshot(): FeatureFlagProps {
     return {
       id: this.id,

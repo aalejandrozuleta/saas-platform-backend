@@ -1,0 +1,669 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/auth/v1/metrics": {
+      "get": {
+        "operationId": "MetricsController_getMetrics_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["Metrics"]
+      }
+    },
+    "/auth/v1/verify-email": {
+      "post": {
+        "operationId": "AuthController_verifyEmail_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyEmailDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Email verificado correctamente"
+          },
+          "400": {
+            "description": "Token inválido o expirado"
+          }
+        },
+        "summary": "Activa la cuenta verificando el token enviado por email",
+        "tags": ["Auth"]
+      }
+    },
+    "/auth/v1/resend-verification": {
+      "post": {
+        "operationId": "AuthController_resendVerification_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResendVerificationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Email de verificación enviado si la cuenta existe y no está verificada"
+          },
+          "409": {
+            "description": "El email ya está verificado"
+          }
+        },
+        "summary": "Reenvía el email de verificación (útil para usuarios pre-registro)",
+        "tags": ["Auth"]
+      }
+    },
+    "/auth/v1/register": {
+      "post": {
+        "operationId": "AuthController_register_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Solicitud aceptada. Si el email no estaba registrado, se crea la cuenta y se envía un correo de verificación; si ya existía, la respuesta es idéntica pero no se realiza ninguna acción (evita enumeración de cuentas).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegisterUserResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos de entrada inválidos (email mal formado, contraseña débil, etc.)."
+          }
+        },
+        "summary": "Registrar usuario",
+        "tags": ["Auth"]
+      }
+    },
+    "/auth/v1/login": {
+      "post": {
+        "operationId": "AuthController_login_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login exitoso. Tokens enviados en cookies HttpOnly (path=/v1/auth).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginUserResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos de entrada inválidos o fingerprint de dispositivo ausente."
+          },
+          "401": {
+            "description": "Credenciales incorrectas (respuesta idéntica si el email no existe)."
+          },
+          "403": {
+            "description": "Cuenta bloqueada por intentos fallidos (bloqueo progresivo), dispositivo no confiable o país no reconocido."
+          }
+        },
+        "summary": "Autenticar usuario",
+        "tags": ["Auth"]
+      }
+    },
+    "/auth/v1/refresh": {
+      "post": {
+        "operationId": "AuthController_refresh_v1",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": ["Auth"]
+      }
+    },
+    "/auth/v1/logout": {
+      "post": {
+        "operationId": "AuthController_logout_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Sesión cerrada correctamente"
+          },
+          "401": {
+            "description": "Token de sesión inválido o expirado"
+          }
+        },
+        "summary": "Cerrar sesión actual",
+        "tags": ["Auth"]
+      }
+    },
+    "/auth/v1/logout-all": {
+      "post": {
+        "operationId": "AuthController_logoutAll_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Todas las sesiones cerradas correctamente"
+          },
+          "401": {
+            "description": "Token de sesión inválido o expirado"
+          }
+        },
+        "summary": "Cerrar todas las sesiones activas",
+        "tags": ["Auth"]
+      }
+    },
+    "/auth/v1/change-password": {
+      "post": {
+        "operationId": "AuthController_changePassword_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangePasswordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Contraseña actualizada. Todas las sesiones previas quedan revocadas."
+          },
+          "401": {
+            "description": "Contraseña actual incorrecta o usuario no autenticado."
+          },
+          "422": {
+            "description": "La nueva contraseña es idéntica a la actual."
+          }
+        },
+        "summary": "Cambiar contraseña del usuario autenticado",
+        "tags": ["Auth"]
+      }
+    },
+    "/auth/v1/2fa/enable": {
+      "post": {
+        "operationId": "AuthController_enable2fa_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Enable2faDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Secreto TOTP generado. Escanea el QR con tu app autenticadora y confirma con /2fa/verify.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Enable2faResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Contraseña incorrecta."
+          },
+          "409": {
+            "description": "2FA ya está habilitado para este usuario."
+          }
+        },
+        "summary": "Iniciar activación de 2FA (TOTP)",
+        "tags": ["Auth"]
+      }
+    },
+    "/auth/v1/2fa/verify": {
+      "post": {
+        "operationId": "AuthController_verify2fa_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Verify2faDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "2FA activado correctamente. Se devuelven los códigos de recuperación de un solo uso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Verify2faResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Código TOTP inválido o expirado."
+          },
+          "422": {
+            "description": "El setup de 2FA no fue iniciado. Llama primero a /2fa/enable."
+          }
+        },
+        "summary": "Confirmar código TOTP y activar 2FA",
+        "tags": ["Auth"]
+      }
+    },
+    "/auth/v1/2fa/disable": {
+      "post": {
+        "operationId": "AuthController_disable2fa_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Disable2faDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "2FA desactivado correctamente. Secreto y códigos de recuperación eliminados."
+          },
+          "401": {
+            "description": "Contraseña o código TOTP incorrecto."
+          },
+          "422": {
+            "description": "2FA no está habilitado para este usuario."
+          }
+        },
+        "summary": "Desactivar 2FA del usuario autenticado",
+        "tags": ["Auth"]
+      }
+    },
+    "/auth/v1/trusted-countries": {
+      "get": {
+        "operationId": "AuthController_getTrustedCountries_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Lista de códigos de país ISO 3166-1 alpha-2.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "success": true,
+                    "data": {
+                      "countries": ["CO", "US"]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Listar países de confianza del usuario autenticado",
+        "tags": ["Auth"]
+      },
+      "post": {
+        "operationId": "AuthController_addTrustedCountry_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddTrustedCountryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "País agregado correctamente."
+          },
+          "409": {
+            "description": "El país ya está en la lista de confianza."
+          },
+          "422": {
+            "description": "Se alcanzó el límite máximo de 2 países de confianza."
+          }
+        },
+        "summary": "Agregar un país de confianza (máx. 2)",
+        "tags": ["Auth"]
+      }
+    },
+    "/auth/v1/trusted-countries/{country}": {
+      "delete": {
+        "operationId": "AuthController_removeTrustedCountry_v1",
+        "parameters": [
+          {
+            "name": "country",
+            "required": true,
+            "in": "path",
+            "description": "Código ISO 3166-1 alpha-2",
+            "schema": {
+              "example": "CO",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "País eliminado correctamente."
+          },
+          "404": {
+            "description": "El país no está en la lista de confianza."
+          }
+        },
+        "summary": "Eliminar un país de la lista de confianza",
+        "tags": ["Auth"]
+      }
+    },
+    "/auth/v1/sessions": {
+      "get": {
+        "operationId": "AuthController_getSessions_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Lista de sesiones activas. `isCurrent: true` marca la sesión actual.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "success": true,
+                    "data": {
+                      "sessions": [
+                        {
+                          "id": "uuid",
+                          "isCurrent": true,
+                          "ipAddress": "203.0.113.1",
+                          "country": "CO",
+                          "startedAt": "2026-06-26T20:00:00.000Z",
+                          "device": {
+                            "name": null,
+                            "os": null,
+                            "browser": null,
+                            "isTrusted": true,
+                            "lastUsedAt": "2026-06-26T21:00:00.000Z"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Listar sesiones activas del usuario autenticado",
+        "tags": ["Auth"]
+      }
+    },
+    "/auth/v1/sessions/{sessionId}": {
+      "delete": {
+        "operationId": "AuthController_revokeSession_v1",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "required": true,
+            "in": "path",
+            "description": "ID de la sesión a cerrar",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sesión cerrada correctamente."
+          },
+          "404": {
+            "description": "La sesión no existe o no pertenece al usuario."
+          }
+        },
+        "summary": "Revocar una sesión activa por ID",
+        "tags": ["Auth"]
+      }
+    }
+  },
+  "info": {
+    "title": "Auth Service API",
+    "description": "Documentación del servicio Auth Service",
+    "version": "1.0.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "access-token": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http"
+      }
+    },
+    "schemas": {
+      "VerifyEmailDto": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "example": "a3f8e1b2c4d5e6f7a3f8e1b2c4d5e6f7a3f8e1b2c4d5e6f7a3f8e1b2c4d5e6f7",
+            "description": "Token de verificación enviado al correo electrónico"
+          }
+        },
+        "required": ["token"]
+      },
+      "ResendVerificationDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "usuario@ejemplo.com",
+            "description": "Correo electrónico de la cuenta a verificar"
+          }
+        },
+        "required": ["email"]
+      },
+      "RegisterUserDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "user@email.com",
+            "description": "Email del usuario"
+          },
+          "password": {
+            "type": "string",
+            "example": "PasswordSuperSeguro123",
+            "description": "Contraseña del usuario",
+            "minLength": 12
+          }
+        },
+        "required": ["email", "password"]
+      },
+      "RegisterUserResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "uuid-del-usuario",
+            "description": "ID del usuario creado"
+          },
+          "email": {
+            "type": "string",
+            "example": "user@email.com",
+            "description": "Email del usuario"
+          }
+        },
+        "required": ["id", "email"]
+      },
+      "LoginUserDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "user@email.com",
+            "description": "Email del usuario"
+          },
+          "password": {
+            "type": "string",
+            "example": "PasswordSuperSeguro123",
+            "description": "Contraseña del usuario",
+            "minLength": 12
+          }
+        },
+        "required": ["email", "password"]
+      },
+      "LoginUserResponseDto": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "Inicio de sesión exitoso",
+            "description": "Mensaje de confirmación"
+          }
+        },
+        "required": ["message"]
+      },
+      "ChangePasswordDto": {
+        "type": "object",
+        "properties": {
+          "currentPassword": {
+            "type": "string",
+            "example": "CurrentPass123!",
+            "description": "Contraseña actual del usuario",
+            "minLength": 12
+          },
+          "newPassword": {
+            "type": "string",
+            "example": "NewPass456@Secure",
+            "description": "Nueva contraseña del usuario",
+            "minLength": 12
+          }
+        },
+        "required": ["currentPassword", "newPassword"]
+      },
+      "Enable2faDto": {
+        "type": "object",
+        "properties": {
+          "password": {
+            "type": "string",
+            "example": "CurrentPass123!",
+            "description": "Contraseña actual del usuario para confirmar identidad",
+            "minLength": 12
+          }
+        },
+        "required": ["password"]
+      },
+      "Enable2faResponseDto": {
+        "type": "object",
+        "properties": {
+          "secret": {
+            "type": "string",
+            "example": "JBSWY3DPEHPK3PXP",
+            "description": "Secreto TOTP en base32"
+          },
+          "otpauthUrl": {
+            "type": "string",
+            "example": "otpauth://totp/...",
+            "description": "URL otpauth para apps autenticadoras"
+          },
+          "qrCode": {
+            "type": "string",
+            "description": "QR code en base64 para escanear con la app autenticadora"
+          }
+        },
+        "required": ["secret", "otpauthUrl", "qrCode"]
+      },
+      "Verify2faDto": {
+        "type": "object",
+        "properties": {
+          "totpCode": {
+            "type": "string",
+            "example": "123456",
+            "description": "Código TOTP de 6 dígitos generado por la app autenticadora",
+            "minLength": 6,
+            "maxLength": 6
+          }
+        },
+        "required": ["totpCode"]
+      },
+      "Verify2faResponseDto": {
+        "type": "object",
+        "properties": {
+          "recoveryCodes": {
+            "example": ["ABCD-EFGH", "IJKL-MNOP"],
+            "description": "Códigos de recuperación de un solo uso. Guárdalos en un lugar seguro.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": ["recoveryCodes"]
+      },
+      "Disable2faDto": {
+        "type": "object",
+        "properties": {
+          "password": {
+            "type": "string",
+            "example": "CurrentPass123!",
+            "description": "Contraseña actual del usuario",
+            "minLength": 12
+          },
+          "totpCode": {
+            "type": "string",
+            "example": "123456",
+            "description": "Código TOTP de 6 dígitos para confirmar desactivación",
+            "minLength": 6,
+            "maxLength": 6
+          }
+        },
+        "required": ["password", "totpCode"]
+      },
+      "AddTrustedCountryDto": {
+        "type": "object",
+        "properties": {
+          "country": {
+            "type": "string",
+            "example": "CO",
+            "description": "Código de país ISO 3166-1 alpha-2"
+          }
+        },
+        "required": ["country"]
+      }
+    }
+  }
+}

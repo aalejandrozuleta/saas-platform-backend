@@ -1,13 +1,25 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsBoolean, IsOptional, IsString, MaxLength, Matches } from 'class-validator';
 
+/**
+ * Payload para crear o actualizar un feature flag.
+ *
+ * @remarks
+ * La clave única real es el par (key, environment): el mismo `key` puede
+ * existir una vez por entorno y otra con `environment` omitido (aplica a
+ * todos). Ver `SetFeatureFlagUseCase` y la constraint `key_environment`
+ * en el esquema de Prisma.
+ */
 export class SetFeatureFlagDto {
   @ApiProperty({
     example: 'auth-service',
     description: 'Nombre del servicio o módulo (snake-case o kebab-case)',
   })
   @IsString()
-  @Matches(/^[a-z][a-z0-9_-]*$/, { message: 'key must be lowercase letters, numbers, hyphens or underscores' })
+  /** Debe empezar con letra minúscula; solo minúsculas, números, `-` y `_`. */
+  @Matches(/^[a-z][a-z0-9_-]*$/, {
+    message: 'key must be lowercase letters, numbers, hyphens or underscores',
+  })
   @MaxLength(100)
   key!: string;
 
@@ -35,6 +47,7 @@ export class SetFeatureFlagDto {
   updatedBy?: string;
 }
 
+/** Representación pública de un feature flag persistido. */
 export class FeatureFlagResponseDto {
   @ApiProperty() id!: string;
   @ApiProperty() key!: string;

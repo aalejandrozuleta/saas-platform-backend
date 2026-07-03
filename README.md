@@ -6,11 +6,11 @@ Este repositorio implementa una plataforma SaaS moderna basada en microservicios
 
 ## 🎯 Objetivo
 
-- Desarrollo local reproducible con Docker  
-- Microservicios desplegables de forma independiente  
-- Gateway centralizado  
-- Observabilidad (logs + métricas + dashboards)  
-- Calidad de código automatizada  
+- Desarrollo local reproducible con Docker
+- Microservicios desplegables de forma independiente
+- Gateway centralizado
+- Observabilidad (logs + métricas + dashboards)
+- Calidad de código automatizada
 - Arquitectura limpia (DDD / Hexagonal)
 
 ---
@@ -71,19 +71,23 @@ docker/
 ### Componentes
 
 NGINX:
+
 - Reverse proxy
 - Punto único de entrada
 - Routing hacia API Gateway
 
 Prometheus:
+
 - Recolección de métricas
 
 Grafana:
+
 - Dashboards
 - Logs
 - Métricas
 
 Loki + Promtail:
+
 - Centralización de logs
 
 ---
@@ -104,7 +108,9 @@ Automatización:
 ```
 services/
 ├── api-gateway/
-└── auth-service/
+├── auth-service/
+├── config-service/
+└── notification-service/
 ```
 
 Cada servicio contiene:
@@ -115,17 +121,17 @@ Cada servicio contiene:
 - tsconfig
 - README
 
-### API Gateway
+### API Gateway ([detalle](services/api-gateway/README.md))
 
 Responsable de:
 
 - Punto de entrada
 - Seguridad
 - Rate limiting
-- Proxy interno
+- Proxy interno resiliente (circuit breaker)
 - Health checks
 
-### Auth Service
+### Auth Service ([detalle](services/auth-service/README.md))
 
 Servicio de autenticación:
 
@@ -135,6 +141,24 @@ Servicio de autenticación:
 - Métricas
 - Persistencia
 - Cache
+
+### Config Service ([detalle](services/config-service/README.md))
+
+Configuración operativa centralizada:
+
+- Feature flags
+- Modo mantenimiento
+- Tenants
+- Reglas de IP
+- Políticas de contraseña
+- Rate limits
+
+### Notification Service ([detalle](services/notification-service/README.md))
+
+Notificaciones asíncronas:
+
+- Envío de emails (Resend) vía colas BullMQ
+- Notificaciones en tiempo real (WebSocket / Socket.io)
 
 ---
 

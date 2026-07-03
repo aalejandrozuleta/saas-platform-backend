@@ -1,3 +1,9 @@
+/**
+ * Tokens de inyección de dependencias (DI) de NestJS para servicios de
+ * infraestructura (hashing, tokens, transacciones, auditoría, eventos,
+ * cache, TOTP). Se usan con `@Inject(...)` para resolver la
+ * implementación concreta de cada puerto/interfaz.
+ */
 export const PASSWORD_HASHER = Symbol('PASSWORD_HASHER');
 export const TOKEN_SERVICE = Symbol('TOKEN_SERVICE');
 export const UNIT_OF_WORK = Symbol('UNIT_OF_WORK');

@@ -6,11 +6,17 @@ import { LoginFailedEvent } from '@application/events/login/login-failed.event';
 import { LoginSucceededEvent } from '@application/events/login/login-succeeded.event';
 import { LoginAuditService } from '@application/audit/login-audit.service';
 
+/**
+ * Listener de eventos de actividad de login.
+ *
+ * @remarks
+ * Escucha `LoginAttemptedEvent`, `LoginSucceededEvent`, `LoginFailedEvent`
+ * y `LoginBlockedEvent` (vía `@OnEvent`) y delega en {@link LoginAuditService}
+ * para dejar registro de auditoría de cada intento de autenticación.
+ */
 @Injectable()
 export class AuthActivityListener {
-  constructor(
-    private readonly audit: LoginAuditService,
-  ) {}
+  constructor(private readonly audit: LoginAuditService) {}
 
   @OnEvent(LoginAttemptedEvent.name)
   async handleAttempted(event: LoginAttemptedEvent) {
@@ -19,29 +25,16 @@ export class AuthActivityListener {
 
   @OnEvent(LoginSucceededEvent.name)
   async handleSucceeded(event: LoginSucceededEvent) {
-    await this.audit.loginSucceeded(
-      event.userId,
-      event.context,
-      event.sessionId,
-    );
+    await this.audit.loginSucceeded(event.userId, event.context, event.sessionId);
   }
 
   @OnEvent(LoginFailedEvent.name)
   async handleFailed(event: LoginFailedEvent) {
-    await this.audit.loginFailed(
-      event.userId,
-      event.context,
-      event.reason,
-      event.email,
-    );
+    await this.audit.loginFailed(event.userId, event.context, event.reason, event.email);
   }
 
   @OnEvent(LoginBlockedEvent.name)
   async handleBlocked(event: LoginBlockedEvent) {
-    await this.audit.loginBlocked(
-      event.userId,
-      event.context,
-      event.blockedUntil,
-    );
+    await this.audit.loginBlocked(event.userId, event.context, event.blockedUntil);
   }
 }

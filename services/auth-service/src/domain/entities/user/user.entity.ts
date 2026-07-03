@@ -99,13 +99,21 @@ export class User {
 
   // ===== Reglas de dominio =====
 
+  /**
+   * Indica si la cuenta está actualmente bajo bloqueo temporal
+   * (por intentos fallidos de login).
+   */
   isBlocked(): boolean {
-    return (
-      this.props.blockedUntil !== undefined &&
-      this.props.blockedUntil > new Date()
-    );
+    return this.props.blockedUntil !== undefined && this.props.blockedUntil > new Date();
   }
 
+  /**
+   * Incrementa el contador de intentos fallidos de login.
+   *
+   * @remarks
+   * No aplica el bloqueo por sí sola: esa decisión la toma `LoginPolicy`
+   * (`shouldLockAccount`) en base al nuevo valor de `failedLoginAttempts`.
+   */
   increaseFailedAttempts(): User {
     return new User({
       ...this.props,
@@ -113,6 +121,10 @@ export class User {
     });
   }
 
+  /**
+   * Resetea intentos fallidos y limpia cualquier bloqueo temporal.
+   * Se invoca tras un login exitoso.
+   */
   resetFailedAttempts(): User {
     return new User({
       ...this.props,
@@ -121,13 +133,18 @@ export class User {
     });
   }
 
+  /**
+   * Indica si el bloqueo temporal ya venció respecto a `now`,
+   * aunque el registro persistido todavía no lo refleje.
+   */
   hasExpiredTemporaryBlock(now: Date): boolean {
-    return (
-      this.props.blockedUntil !== undefined &&
-      this.props.blockedUntil <= now
-    );
+    return this.props.blockedUntil !== undefined && this.props.blockedUntil <= now;
   }
 
+  /**
+   * Asigna un nuevo token de verificación de email con su expiración.
+   * Usado al registrar el usuario y al reenviar el email de verificación.
+   */
   requestVerification(token: string, expiresAt: Date): User {
     return new User({
       ...this.props,
@@ -136,6 +153,13 @@ export class User {
     });
   }
 
+  /**
+   * Marca el email como verificado y activa la cuenta (PENDING → ACTIVE).
+   *
+   * @remarks
+   * Limpia el token de verificación tras su uso para que no pueda
+   * reutilizarse (invariante de un solo uso).
+   */
   verifyEmail(): User {
     return new User({
       ...this.props,
@@ -146,6 +170,10 @@ export class User {
     });
   }
 
+  /**
+   * Indica si el token de verificación de email ya expiró respecto a `now`.
+   * Un usuario sin token asignado se considera expirado.
+   */
   isEmailVerificationTokenExpired(now: Date): boolean {
     if (!this.props.emailVerificationExpiresAt) return true;
     return this.props.emailVerificationExpiresAt <= now;

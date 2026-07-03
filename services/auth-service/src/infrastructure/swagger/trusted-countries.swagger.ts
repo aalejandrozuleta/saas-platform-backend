@@ -9,6 +9,13 @@ import {
   ApiParam,
 } from '@nestjs/swagger';
 
+/**
+ * Decorador Swagger para el endpoint `GET /trusted-countries`.
+ *
+ * @remarks
+ * Los países de confianza eximen al login desde esas ubicaciones de
+ * fricciones adicionales de seguridad (ver LoginSecurityChallengeService).
+ */
 export function GetTrustedCountriesSwagger() {
   return applyDecorators(
     ApiOperation({ summary: 'Listar países de confianza del usuario autenticado' }),
@@ -21,6 +28,12 @@ export function GetTrustedCountriesSwagger() {
   );
 }
 
+/**
+ * Decorador Swagger para el endpoint `POST /trusted-countries`.
+ *
+ * @remarks
+ * Límite de 2 países de confianza por usuario, validado en el use-case.
+ */
 export function AddTrustedCountrySwagger() {
   return applyDecorators(
     ApiOperation({ summary: 'Agregar un país de confianza (máx. 2)' }),
@@ -36,6 +49,9 @@ export function AddTrustedCountrySwagger() {
   );
 }
 
+/**
+ * Decorador Swagger para el endpoint `DELETE /trusted-countries/:country`.
+ */
 export function RemoveTrustedCountrySwagger() {
   return applyDecorators(
     ApiOperation({ summary: 'Eliminar un país de la lista de confianza' }),

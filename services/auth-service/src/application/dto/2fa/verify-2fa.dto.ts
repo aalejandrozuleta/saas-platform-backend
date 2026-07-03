@@ -1,6 +1,10 @@
 import { IsString, Length } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
+/**
+ * DTO para confirmar la activación de 2FA validando el código TOTP
+ * generado por la app autenticadora.
+ */
 export class Verify2faDto {
   @ApiProperty({
     example: '123456',

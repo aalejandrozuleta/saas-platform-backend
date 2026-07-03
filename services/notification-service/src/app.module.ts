@@ -9,6 +9,16 @@ import { InternalServiceGuard } from '@infrastructure/security/internal-service.
 import { NotificationGlobalExceptionFilter } from '@infrastructure/filters/notification-global-exception.filter';
 import { NotificationModule } from '@modules/notification/notification.module';
 
+/**
+ * Módulo raíz del microservicio Notification.
+ *
+ * Cablea la infraestructura transversal (env, colas Redis/BullMQ, métricas,
+ * i18n) y el módulo de dominio `NotificationModule`. Registra globalmente:
+ * - `NotificationGlobalExceptionFilter`: normaliza las respuestas de error.
+ * - `InternalServiceGuard`: exige un secreto compartido en cada request HTTP
+ *   entrante, ya que este servicio no valida sesiones de usuario por sí
+ *   mismo (ver `InternalServiceGuard` para el detalle de esa decisión).
+ */
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),

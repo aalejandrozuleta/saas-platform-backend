@@ -6,7 +6,10 @@ import { FEATURE_FLAG_REPOSITORY } from '@domain/token/repositories.tokens';
 import { AUDIT_LOGGER } from '@domain/token/services.tokens';
 import type { FeatureFlagRepository } from '@domain/repositories/feature-flag.repository';
 import type { AuditLogger } from '@application/ports/audit-logger.port';
-import type { SetFeatureFlagDto, FeatureFlagResponseDto } from '@application/dto/feature-flag/set-feature-flag.dto';
+import type {
+  SetFeatureFlagDto,
+  FeatureFlagResponseDto,
+} from '@application/dto/feature-flag/set-feature-flag.dto';
 
 /**
  * Crea o actualiza un feature flag de plataforma.
@@ -23,6 +26,15 @@ export class SetFeatureFlagUseCase {
     private readonly auditLogger: AuditLogger,
   ) {}
 
+  /**
+   * @param dto - Clave, estado deseado y entorno objetivo del flag
+   * @returns El feature flag creado o actualizado
+   *
+   * @remarks
+   * Si ya existe un flag para (key, environment), se reutiliza y solo se
+   * actualiza su estado (`enable`/`disable`); de lo contrario se crea uno
+   * nuevo. En ambos casos se registra una entrada de auditoría.
+   */
   async execute(dto: SetFeatureFlagDto): Promise<FeatureFlagResponseDto> {
     const environment = dto.environment ?? null;
     const existing = await this.repo.findByKey(dto.key, environment);

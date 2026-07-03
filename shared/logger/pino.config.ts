@@ -47,9 +47,17 @@ function pathsForField(field: string): string[] {
 }
 
 /**
- * Configuración base para Pino.
+ * Construye la configuración base para una instancia de Pino.
  *
- * Se mantiene en shared para consistencia entre servicios.
+ * Se mantiene en shared para que todos los microservicios logueen con el
+ * mismo formato (útil para Loki/Grafana) y, sobre todo, con la misma
+ * política de redacción de campos sensibles. Antes de agregar un campo
+ * nuevo con datos sensibles a cualquier DTO/payload, revisa
+ * `SENSITIVE_FIELDS` en este archivo y añádelo ahí si corresponde — de lo
+ * contrario terminará en texto plano en los logs.
+ *
+ * @param options - Nivel de log y nombre del servicio (ver {@link LoggerOptions}).
+ * @returns Objeto de opciones listo para pasar a `pino(...)`.
  */
 export const createPinoConfig = (options: LoggerOptions) => ({
   level: options.level,

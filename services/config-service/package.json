@@ -17,7 +17,8 @@
     "test:watch:cov": "jest --watch --coverage --config jest.config.cjs",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
-    "prisma:studio": "prisma studio"
+    "prisma:studio": "prisma studio",
+    "docs": "typedoc --options typedoc.json"
   },
   "dependencies": {
     "@nestjs/common": "11.1.17",

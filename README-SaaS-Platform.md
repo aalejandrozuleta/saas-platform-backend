@@ -71,11 +71,12 @@ NGINX
    ▼
 API Gateway
    │
-   ├── Auth Service
-   ├── User Service
-   ├── Notification Service
-   ├── Billing Service
-   └── Otros servicios
+   ├── Auth Service          (implementado)
+   ├── Config Service         (implementado)
+   ├── Notification Service   (implementado)
+   ├── User Service            (roadmap — Fase 4)
+   ├── Billing Service         (roadmap — Fase 5)
+   └── Otros servicios         (roadmap — Fase 5+)
 ```
 
 Todos los servicios deben ser desplegables independientemente.
@@ -84,15 +85,13 @@ Todos los servicios deben ser desplegables independientemente.
 
 # Estado Actual del Proyecto
 
-Actualmente estamos en la fase de construcción de la plataforma base.
+La plataforma base (Fase 1: Foundation) y el API Gateway (Fase 2) están completos.
 
-Ya está definida la arquitectura global y la estructura organizacional del monorepo.
-
-El primer dominio a desarrollar es la autenticación.
+Actualmente hay tres microservicios de negocio implementados: **auth-service**, **config-service** y **notification-service**, además de la librería **shared**. El resto de fases (User Service, Billing, Audit, Event Driven, Cloud) siguen en roadmap — ver detalle más abajo.
 
 ---
 
-# Fase 1: Foundation
+# Fase 1: Foundation `✅ Completado`
 
 ## Objetivo
 
@@ -138,7 +137,7 @@ Crear toda la base técnica del proyecto.
 
 ---
 
-# Fase 2: API Gateway
+# Fase 2: API Gateway `✅ Completado`
 
 ## Objetivo
 
@@ -156,7 +155,7 @@ Crear el punto único de entrada del ecosistema.
 
 ---
 
-# Fase 3: Auth Service
+# Fase 3: Auth Service `✅ Completado`
 
 Primer microservicio de negocio.
 
@@ -197,7 +196,23 @@ Primer microservicio de negocio.
 
 ---
 
-# Fase 4: User Service
+# Fase 3.5: Config Service `✅ Completado`
+
+No estaba en el roadmap original, pero se implementó como servicio independiente para centralizar configuración operativa.
+
+## Funcionalidades
+
+- Feature flags
+- Modo mantenimiento
+- Gestión de tenants
+- Reglas de IP (allow/deny lists)
+- Políticas de contraseña
+- Rate limits configurables
+- Estadísticas del sistema
+
+---
+
+# Fase 4: User Service `📋 Roadmap`
 
 ## Objetivo
 
@@ -214,11 +229,11 @@ Separar la gestión de usuarios de la autenticación.
 
 # Fase 5: Servicios Core
 
-## Notification Service
+## Notification Service `✅ Completado (Email + WebSocket)`
 
-- Email
-- SMS
-- Push Notifications
+- Email transaccional vía Resend, procesado con colas BullMQ
+- Notificaciones en tiempo real vía WebSocket (Socket.io)
+- SMS y Push Notifications siguen en roadmap
 
 ## File Service
 

@@ -10,6 +10,22 @@ import { VerificationEmailRequestedEvent } from '@application/events/user/verifi
 import { EnvService } from '@config/env/env.service';
 import { EmailVO } from '@domain/value-objects/email.vo';
 
+/**
+ * Caso de uso: reenviar el correo de verificación de email.
+ *
+ * @remarks
+ * Responsabilidades:
+ *  1. Genera un nuevo token de verificación con TTL configurable
+ *     (`EMAIL_VERIFICATION_TTL`), invalidando el anterior.
+ *  2. Emite `VerificationEmailRequestedEvent` → listener desacoplado envía
+ *     el correo.
+ *
+ * Si no existe un usuario con ese email, la operación termina en silencio
+ * (no lanza error) para evitar enumeración de cuentas registradas. Si el
+ * email ya fue verificado, sí se lanza un error de dominio, ya que en ese
+ * caso no hay riesgo de enumeración (la existencia del usuario ya quedó
+ * implícita en el flujo previo de registro/login).
+ */
 @Injectable()
 export class ResendVerificationUseCase {
   constructor(
@@ -18,6 +34,12 @@ export class ResendVerificationUseCase {
     private readonly envService: EnvService,
   ) {}
 
+  /**
+   * Ejecuta el reenvío del correo de verificación.
+   *
+   * @param email - Email del usuario que solicita el reenvío
+   * @throws Error de dominio si el email del usuario ya fue verificado
+   */
   async execute(email: string): Promise<void> {
     const emailVO = EmailVO.create(email);
     const user = await this.userRepository.findByEmail(emailVO);

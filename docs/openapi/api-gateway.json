@@ -1,0 +1,576 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/v1/health": {
+      "get": {
+        "operationId": "HealthController_health_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["Health"]
+      }
+    },
+    "/v1/auth/verify-email": {
+      "post": {
+        "operationId": "AuthController_verifyEmail_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Email verificado. Ya puedes iniciar sesión."
+          },
+          "400": {
+            "description": "Token inválido o expirado."
+          },
+          "503": {
+            "description": "Auth-service no disponible."
+          }
+        },
+        "summary": "Verificar email con el token enviado al correo",
+        "tags": ["Auth"]
+      }
+    },
+    "/v1/auth/resend-verification": {
+      "post": {
+        "operationId": "AuthController_resendVerification_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Email enviado si la cuenta existe y no está verificada."
+          },
+          "409": {
+            "description": "El email ya está verificado."
+          },
+          "503": {
+            "description": "Auth-service no disponible."
+          }
+        },
+        "summary": "Reenviar email de activación (usuarios sin verificar)",
+        "tags": ["Auth"]
+      }
+    },
+    "/v1/auth/register": {
+      "post": {
+        "operationId": "AuthController_register_v1",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "Usuario registrado correctamente."
+          },
+          "400": {
+            "description": "Datos de entrada inválidos."
+          },
+          "409": {
+            "description": "El email ya está registrado."
+          },
+          "503": {
+            "description": "Auth-service no disponible (circuit breaker abierto)."
+          }
+        },
+        "summary": "Registrar usuario",
+        "tags": ["Auth"]
+      }
+    },
+    "/v1/auth/login": {
+      "post": {
+        "operationId": "AuthController_login_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Login exitoso. Tokens enviados en cookies HttpOnly."
+          },
+          "400": {
+            "description": "Datos inválidos o fingerprint de dispositivo ausente."
+          },
+          "401": {
+            "description": "Credenciales incorrectas."
+          },
+          "403": {
+            "description": "Cuenta bloqueada, dispositivo o país no reconocido."
+          },
+          "503": {
+            "description": "Auth-service no disponible."
+          }
+        },
+        "summary": "Autenticar usuario",
+        "tags": ["Auth"]
+      }
+    },
+    "/v1/auth/refresh": {
+      "post": {
+        "operationId": "AuthController_refresh_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Access token renovado. Nuevo refreshToken en cookie."
+          },
+          "401": {
+            "description": "Refresh token inválido, expirado o revocado."
+          },
+          "503": {
+            "description": "Auth-service no disponible."
+          }
+        },
+        "summary": "Renovar access token",
+        "tags": ["Auth"]
+      }
+    },
+    "/v1/auth/change-password": {
+      "post": {
+        "operationId": "AuthController_changePassword_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Contraseña actualizada. Todas las sesiones previas revocadas."
+          },
+          "401": {
+            "description": "Contraseña actual incorrecta o sesión inválida."
+          },
+          "422": {
+            "description": "La nueva contraseña es idéntica a la actual."
+          },
+          "503": {
+            "description": "Auth-service no disponible."
+          }
+        },
+        "summary": "Cambiar contraseña del usuario autenticado",
+        "tags": ["Auth"]
+      }
+    },
+    "/v1/auth/logout": {
+      "post": {
+        "operationId": "AuthController_logout_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Sesión cerrada. Cookies de autenticación eliminadas."
+          },
+          "401": {
+            "description": "Token de sesión inválido o expirado."
+          },
+          "503": {
+            "description": "Auth-service no disponible."
+          }
+        },
+        "summary": "Cerrar sesión actual",
+        "tags": ["Auth"]
+      }
+    },
+    "/v1/auth/logout-all": {
+      "post": {
+        "operationId": "AuthController_logoutAll_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Todas las sesiones revocadas."
+          },
+          "401": {
+            "description": "Token de sesión inválido o expirado."
+          },
+          "503": {
+            "description": "Auth-service no disponible."
+          }
+        },
+        "summary": "Cerrar todas las sesiones activas",
+        "tags": ["Auth"]
+      }
+    },
+    "/v1/auth/2fa/enable": {
+      "post": {
+        "operationId": "AuthController_enable2fa_v1",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "Secreto TOTP generado. Escanea el QR con tu app y confirma con /2fa/verify."
+          },
+          "401": {
+            "description": "Contraseña incorrecta o sesión inválida."
+          },
+          "409": {
+            "description": "2FA ya está habilitado para este usuario."
+          },
+          "503": {
+            "description": "Auth-service no disponible."
+          }
+        },
+        "summary": "Iniciar activación de 2FA (TOTP)",
+        "tags": ["Auth"]
+      }
+    },
+    "/v1/auth/2fa/verify": {
+      "post": {
+        "operationId": "AuthController_verify2fa_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "2FA activado. Se devuelven los códigos de recuperación de un solo uso."
+          },
+          "401": {
+            "description": "Código TOTP inválido o expirado."
+          },
+          "422": {
+            "description": "Setup de 2FA no iniciado. Llama primero a /2fa/enable."
+          },
+          "503": {
+            "description": "Auth-service no disponible."
+          }
+        },
+        "summary": "Confirmar código TOTP y activar 2FA",
+        "tags": ["Auth"]
+      }
+    },
+    "/v1/auth/2fa/disable": {
+      "post": {
+        "operationId": "AuthController_disable2fa_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "2FA desactivado. Secreto y códigos de recuperación eliminados."
+          },
+          "401": {
+            "description": "Contraseña o código TOTP incorrecto."
+          },
+          "422": {
+            "description": "2FA no está habilitado para este usuario."
+          },
+          "503": {
+            "description": "Auth-service no disponible."
+          }
+        },
+        "summary": "Desactivar 2FA del usuario autenticado",
+        "tags": ["Auth"]
+      }
+    },
+    "/v1/auth/sessions": {
+      "get": {
+        "operationId": "AuthController_getSessions_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Lista de sesiones activas. `isCurrent: true` indica la sesión en uso."
+          },
+          "503": {
+            "description": "Auth-service no disponible."
+          }
+        },
+        "summary": "Listar sesiones activas del usuario autenticado",
+        "tags": ["Auth"]
+      }
+    },
+    "/v1/auth/sessions/{sessionId}": {
+      "delete": {
+        "operationId": "AuthController_revokeSession_v1",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "required": true,
+            "in": "path",
+            "description": "ID de la sesión a cerrar",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sesión cerrada correctamente."
+          },
+          "404": {
+            "description": "Sesión no encontrada o ya cerrada."
+          },
+          "503": {
+            "description": "Auth-service no disponible."
+          }
+        },
+        "summary": "Revocar una sesión activa por ID",
+        "tags": ["Auth"]
+      }
+    },
+    "/v1/auth/trusted-countries": {
+      "get": {
+        "operationId": "AuthController_getTrustedCountries_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Lista de códigos ISO 3166-1 alpha-2.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "success": true,
+                    "data": {
+                      "countries": ["CO", "US"]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Auth-service no disponible."
+          }
+        },
+        "summary": "Listar países de confianza del usuario autenticado",
+        "tags": ["Auth"]
+      },
+      "post": {
+        "operationId": "AuthController_addTrustedCountry_v1",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "País agregado correctamente."
+          },
+          "409": {
+            "description": "El país ya está en la lista."
+          },
+          "422": {
+            "description": "Límite de 2 países alcanzado."
+          },
+          "503": {
+            "description": "Auth-service no disponible."
+          }
+        },
+        "summary": "Agregar un país de confianza (máx. 2)",
+        "tags": ["Auth"]
+      }
+    },
+    "/v1/auth/trusted-countries/{country}": {
+      "delete": {
+        "operationId": "AuthController_removeTrustedCountry_v1",
+        "parameters": [
+          {
+            "name": "country",
+            "required": true,
+            "in": "path",
+            "description": "Código ISO 3166-1 alpha-2",
+            "schema": {
+              "example": "CO",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "País eliminado correctamente."
+          },
+          "404": {
+            "description": "El país no está en la lista."
+          },
+          "503": {
+            "description": "Auth-service no disponible."
+          }
+        },
+        "summary": "Eliminar un país de la lista de confianza",
+        "tags": ["Auth"]
+      }
+    },
+    "/v1/config/maintenance/status": {
+      "get": {
+        "operationId": "ConfigController_maintenanceStatus_get",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["Config"]
+      },
+      "post": {
+        "operationId": "ConfigController_maintenanceStatus_post",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["Config"]
+      },
+      "put": {
+        "operationId": "ConfigController_maintenanceStatus_put",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["Config"]
+      },
+      "delete": {
+        "operationId": "ConfigController_maintenanceStatus_delete",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["Config"]
+      },
+      "patch": {
+        "operationId": "ConfigController_maintenanceStatus_patch",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["Config"]
+      },
+      "options": {
+        "operationId": "ConfigController_maintenanceStatus_options",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["Config"]
+      },
+      "head": {
+        "operationId": "ConfigController_maintenanceStatus_head",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["Config"]
+      },
+      "search": {
+        "operationId": "ConfigController_maintenanceStatus_search",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["Config"]
+      }
+    },
+    "/v1/config/feature-flags": {
+      "get": {
+        "operationId": "ConfigController_featureFlags_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["Config"]
+      }
+    },
+    "/v1/config/{path}": {
+      "get": {
+        "operationId": "ConfigController_forwardAll_get",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["Config"]
+      },
+      "post": {
+        "operationId": "ConfigController_forwardAll_post",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["Config"]
+      },
+      "put": {
+        "operationId": "ConfigController_forwardAll_put",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["Config"]
+      },
+      "delete": {
+        "operationId": "ConfigController_forwardAll_delete",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["Config"]
+      },
+      "patch": {
+        "operationId": "ConfigController_forwardAll_patch",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["Config"]
+      },
+      "options": {
+        "operationId": "ConfigController_forwardAll_options",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["Config"]
+      },
+      "head": {
+        "operationId": "ConfigController_forwardAll_head",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["Config"]
+      },
+      "search": {
+        "operationId": "ConfigController_forwardAll_search",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["Config"]
+      }
+    },
+    "/v1/metrics": {
+      "get": {
+        "operationId": "MetricsController_getMetrics_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["Metrics"]
+      }
+    }
+  },
+  "info": {
+    "title": "API Gateway API",
+    "description": "Documentación del servicio API Gateway",
+    "version": "1.0.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "access-token": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http"
+      }
+    },
+    "schemas": {}
+  }
+}

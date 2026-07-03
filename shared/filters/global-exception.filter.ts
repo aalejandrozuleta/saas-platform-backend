@@ -1,32 +1,36 @@
 import { Request, Response } from 'express';
-import {
-  ExceptionFilter,
-  Catch,
-  ArgumentsHost,
-  HttpException,
-  HttpStatus,
-} from '@nestjs/common';
+import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus } from '@nestjs/common';
 
-import {
-  BaseException,
-  ErrorCode,
-  getErrorCodeFromHttpStatus,
-} from '../errors';
+import { BaseException, ErrorCode, getErrorCodeFromHttpStatus } from '../errors';
 import { I18nService } from '../i18n';
-import {
-  buildResponseMeta,
-  errorResponse,
-  isApiErrorResponse,
-} from '../response';
+import { buildResponseMeta, errorResponse, isApiErrorResponse } from '../response';
 
 /**
  * Filtro global de excepciones con soporte i18n.
+ *
+ * Captura *cualquier* excepción no manejada (`@Catch()` sin argumentos) y
+ * la traduce a la forma estándar {@link ApiErrorResponse}, resolviendo el
+ * idioma a partir del header `Accept-Language` con {@link I18nService}.
+ * Cada servicio debe registrarlo (globalmente o vía `APP_FILTER`),
+ * típicamente extendiéndolo o instanciándolo con su propia
+ * `I18nService`. Distingue tres casos, en este orden:
+ *
+ * 1. **{@link BaseException}** (errores de dominio): usa su `httpStatus`,
+ *    `code` y traduce `messageKey` con `metadata` como parámetros.
+ * 2. **`HttpException`** de Nest (validación de DTOs, guards, etc.): si el
+ *    body ya tiene forma de {@link ApiErrorResponse} lo reenvía tal cual;
+ *    si no, lo normaliza (soporta arrays de mensajes de `class-validator`,
+ *    `messageKey` para traducir, o mensaje plano).
+ * 3. **Cualquier otra cosa** (errores no controlados): responde 500 con
+ *    `ErrorCode.INTERNAL_ERROR` y un mensaje traducido genérico, sin
+ *    filtrar detalles internos al cliente.
+ *
+ * En todos los casos agrega `meta` (timestamp, path, requestId, lang,
+ * statusCode) vía {@link buildResponseMeta}.
  */
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
-  constructor(
-    private readonly i18n: I18nService,
-  ) {}
+  constructor(private readonly i18n: I18nService) {}
 
   catch(exception: unknown, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
@@ -53,11 +57,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
             metadata: exception.metadata,
           },
           {
-            meta: buildResponseMeta(
-              request,
-              exception.httpStatus,
-              resolvedLang,
-            ),
+            meta: buildResponseMeta(request, exception.httpStatus, resolvedLang),
           },
         ),
       );
@@ -83,12 +83,9 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       }
 
       response.status(status).json(
-        errorResponse(
-          this.normalizeHttpException(body, status, acceptLanguage),
-          {
-            meta: buildResponseMeta(request, status, resolvedLang),
-          },
-        ),
+        errorResponse(this.normalizeHttpException(body, status, acceptLanguage), {
+          meta: buildResponseMeta(request, status, resolvedLang),
+        }),
       );
 
       return;
@@ -101,17 +98,10 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       errorResponse(
         {
           code: ErrorCode.INTERNAL_ERROR,
-          message: this.i18n.translate(
-            'common.internal_error',
-            acceptLanguage,
-          ),
+          message: this.i18n.translate('common.internal_error', acceptLanguage),
         },
         {
-          meta: buildResponseMeta(
-            request,
-            HttpStatus.INTERNAL_SERVER_ERROR,
-            resolvedLang,
-          ),
+          meta: buildResponseMeta(request, HttpStatus.INTERNAL_SERVER_ERROR, resolvedLang),
         },
       ),
     );
@@ -147,10 +137,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 
     if (typeof record.messageKey === 'string') {
       return {
-        code:
-          typeof record.code === 'string'
-            ? record.code
-            : getErrorCodeFromHttpStatus(status),
+        code: typeof record.code === 'string' ? record.code : getErrorCodeFromHttpStatus(status),
         message: this.i18n.translate(record.messageKey, lang, metadata),
         details: record.details,
         metadata,
@@ -159,10 +146,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 
     if (Array.isArray(rawMessage)) {
       return {
-        code:
-          typeof record.code === 'string'
-            ? record.code
-            : getErrorCodeFromHttpStatus(status),
+        code: typeof record.code === 'string' ? record.code : getErrorCodeFromHttpStatus(status),
         message: this.i18n.translate('common.validation_error', lang),
         details: rawMessage,
         metadata,
@@ -180,10 +164,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     }
 
     return {
-      code:
-        typeof record.code === 'string'
-          ? record.code
-          : getErrorCodeFromHttpStatus(status),
+      code: typeof record.code === 'string' ? record.code : getErrorCodeFromHttpStatus(status),
       message,
       details: record.details,
       metadata,
@@ -196,9 +177,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     return typeof acceptLanguage === 'string' ? acceptLanguage : undefined;
   }
 
-  private asMetadata(
-    value: unknown,
-  ): Record<string, unknown> | undefined {
+  private asMetadata(value: unknown): Record<string, unknown> | undefined {
     if (!value || typeof value !== 'object' || Array.isArray(value)) {
       return undefined;
     }

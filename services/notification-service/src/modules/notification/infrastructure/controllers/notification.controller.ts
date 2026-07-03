@@ -60,6 +60,17 @@ const PREVIEW_DEFAULTS: Record<string, Record<string, string>> = {
   'otp-code': { code: '847 293', expiresIn: '10' },
 };
 
+/**
+ * Controller HTTP del dominio de notificaciones.
+ *
+ * @remarks
+ * Los endpoints `POST /email` y `POST /ws` son de disparo asíncrono: solo
+ * encolan el job (ver `EnqueueEmailUseCase` / `EnqueueWsUseCase`) y
+ * responden `202 Accepted` de inmediato, sin esperar a que el email se
+ * envíe o la notificación WS llegue al cliente. Todas las rutas están
+ * protegidas por `InternalServiceGuard` salvo las marcadas `@PublicRoute()`
+ * (los previews de templates, pensados para revisión visual en development).
+ */
 @ApiTags('Notifications')
 @Controller('notifications')
 export class NotificationController {
@@ -69,6 +80,7 @@ export class NotificationController {
     private readonly templateEngine: TemplateEngine,
   ) {}
 
+  /** Encola un email transaccional; responde 202 sin esperar el envío real. */
   @Post('email')
   @HttpCode(HttpStatus.ACCEPTED)
   @ApiOperation({ summary: 'Encola un email para envío asíncrono con Resend' })
@@ -82,6 +94,13 @@ export class NotificationController {
     return { queued: true };
   }
 
+  /**
+   * Encola una notificación WebSocket. `SendWsDto` no valida a nivel de
+   * clase que `userId` venga presente cuando `target === 'user'`; ese caso
+   * se resuelve aquí con `!` y, si `userId` faltara, terminaría fallando
+   * más abajo en `WsConsumer.process`. Este método solo traduce el DTO al
+   * `WsTarget` del dominio.
+   */
   @Post('ws')
   @HttpCode(HttpStatus.ACCEPTED)
   @ApiOperation({ summary: 'Encola una notificación WebSocket (broadcast o usuario específico)' })
@@ -94,6 +113,7 @@ export class NotificationController {
     return { queued: true };
   }
 
+  /** Lista, en HTML, todos los templates registrados en `TemplateEngine` con link a su preview. Ruta pública, solo para uso en development. */
   @Get('preview')
   @Header('Content-Type', 'text/html; charset=utf-8')
   @ApiOperation({ summary: 'Lista todos los templates disponibles con links de preview' })
@@ -109,6 +129,17 @@ export class NotificationController {
     return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Arlok — Email Previews</title><style>body{background:#0a0a0a;color:#e8e8e8;font-family:Inter,sans-serif;padding:40px}h1{color:#fff;font-size:20px;margin-bottom:24px}ul{list-style:none;padding:0}a:hover{text-decoration:underline!important}</style></head><body><h1>Arl<span style="color:#6b7af7">ok</span> · Email Templates</h1><ul>${links}</ul></body></html>`;
   }
 
+  /**
+   * Renderiza un template con datos de ejemplo (`PREVIEW_DEFAULTS`) y los
+   * query params recibidos como overrides. Ruta pública, solo para uso en
+   * development.
+   *
+   * @remarks
+   * `WelcomeEmail` sanea el `verificationUrl` (solo permite http/https) para
+   * evitar que un query param malicioso inyecte un href `javascript:` en el
+   * HTML renderizado, dado que esta ruta pasa query params directo a las
+   * variables del template.
+   */
   @Get('preview/:template')
   @ApiOperation({ summary: 'Preview de un template de email en el browser' })
   @ApiParam({ name: 'template', example: 'welcome' })

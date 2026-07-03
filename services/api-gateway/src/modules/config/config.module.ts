@@ -5,6 +5,13 @@ import { ConfigProxy } from '@infrastructure/http/proxies/config.proxy';
 
 import { ConfigController } from './config.controller';
 
+/**
+ * Módulo de configuración del gateway.
+ * Agrupa `ConfigController` (proxy de rutas hacia config-service) y
+ * `ConfigProxy`. Exporta `ConfigProxy` porque `MaintenanceGuard`
+ * (`infrastructure/security/guards/maintenance.guard.ts`) lo inyecta
+ * directamente para consultar el estado de mantenimiento.
+ */
 @Module({
   imports: [EnvModule, SharedModule],
   controllers: [ConfigController],

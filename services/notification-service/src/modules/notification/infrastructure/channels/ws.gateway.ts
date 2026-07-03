@@ -41,6 +41,13 @@ export class WsNotificationsGateway implements OnGatewayConnection, OnGatewayDis
 
   constructor(private readonly env: EnvService) {}
 
+  /**
+   * Maneja una nueva conexión Socket.io. Verifica el accessToken (si viene
+   * en la cookie del handshake) y, de ser válido, une al cliente a su sala
+   * personal `user:<userId>` para poder recibir notificaciones dirigidas.
+   * No rechaza conexiones sin token válido: quedan anónimas y solo reciben
+   * eventos de broadcast (ver doc de la clase).
+   */
   handleConnection(client: Socket): void {
     const userId = this.verifyUserId(client);
 
@@ -51,14 +58,32 @@ export class WsNotificationsGateway implements OnGatewayConnection, OnGatewayDis
     this.logger.log(`Cliente conectado: ${client.id} userId=${userId ?? 'anon'}`);
   }
 
+  /** Solo registra el evento; Socket.io limpia la membresía de salas automáticamente. */
   handleDisconnect(client: Socket): void {
     this.logger.log(`Cliente desconectado: ${client.id}`);
   }
 
+  /**
+   * Emite `event` con `data` a todos los clientes conectados al namespace
+   * `/notifications`, sin importar si están autenticados o no.
+   *
+   * @param event - Nombre del evento Socket.io.
+   * @param data - Payload serializable a enviar.
+   */
   broadcast(event: string, data: unknown): void {
     this.server.emit(event, data);
   }
 
+  /**
+   * Emite `event` con `data` únicamente a los sockets unidos a la sala
+   * `user:<userId>`. Si el usuario no tiene ningún socket conectado en ese
+   * momento, la emisión es un no-op silencioso (no hay cola de reintento a
+   * este nivel; ver `WsConsumer` para la política de reintentos del job).
+   *
+   * @param userId - Identificador del usuario destino.
+   * @param event - Nombre del evento Socket.io.
+   * @param data - Payload serializable a enviar.
+   */
   sendToUser(userId: string, event: string, data: unknown): void {
     this.server.to(`user:${userId}`).emit(event, data);
   }
@@ -86,6 +111,11 @@ export class WsNotificationsGateway implements OnGatewayConnection, OnGatewayDis
     }
   }
 
+  /**
+   * Parsea el header `Cookie` crudo del handshake para extraer el valor de
+   * `accessToken`. Socket.io no expone un parser de cookies propio en el
+   * handshake, así que se hace manualmente aquí.
+   */
   private extractAccessToken(client: Socket): string | undefined {
     const cookieHeader = client.handshake.headers.cookie;
     if (!cookieHeader) {

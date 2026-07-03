@@ -2,7 +2,10 @@ import { Inject, Injectable } from '@nestjs/common';
 import { AUDIT_LOGGER, CONFIG_CACHE } from '@domain/token/services.tokens';
 import type { AuditLogger } from '@application/ports/audit-logger.port';
 import type { ConfigCache } from '@application/ports/config-cache.port';
-import type { SetMaintenanceModeDto, SetMaintenanceModeResponseDto } from '@application/dto/maintenance/set-maintenance-mode.dto';
+import type {
+  SetMaintenanceModeDto,
+  SetMaintenanceModeResponseDto,
+} from '@application/dto/maintenance/set-maintenance-mode.dto';
 import { PrismaService } from '@infrastructure/persistence/prisma/prisma.service';
 
 export const MAINTENANCE_SINGLETON_ID = 'singleton';
@@ -26,6 +29,10 @@ export class SetMaintenanceModeUseCase {
     private readonly cache: ConfigCache,
   ) {}
 
+  /**
+   * @param dto - Nuevo estado (`enabled`), mensaje opcional y autor del cambio
+   * @returns El estado de mantenimiento resultante
+   */
   async execute(dto: SetMaintenanceModeDto): Promise<SetMaintenanceModeResponseDto> {
     const row = await this.prisma.maintenanceConfig.upsert({
       where: { id: MAINTENANCE_SINGLETON_ID },

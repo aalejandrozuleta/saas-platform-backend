@@ -1,7 +1,11 @@
 import { ErrorCode } from './ErrorCode.enum';
 
 /**
- * Mapeo estándar entre códigos de error y HTTP Status Code.
+ * Mapeo estándar entre cada {@link ErrorCode} y su HTTP Status Code.
+ *
+ * Es un `Record` total (TypeScript exige una entrada por cada valor del
+ * enum), así que al agregar un `ErrorCode` nuevo el compilador obliga a
+ * declarar aquí su status correspondiente.
  */
 export const HttpErrorMapper: Record<ErrorCode, number> = {
   [ErrorCode.INTERNAL_ERROR]: 500,
@@ -38,9 +42,19 @@ export const HttpErrorMapper: Record<ErrorCode, number> = {
   [ErrorCode.SESSION_NOT_FOUND]: 404,
   [ErrorCode.EMAIL_NOT_VERIFIED]: 403,
   [ErrorCode.INVALID_VERIFICATION_TOKEN]: 400,
-  [ErrorCode.EMAIL_ALREADY_VERIFIED]: 409
+  [ErrorCode.EMAIL_ALREADY_VERIFIED]: 409,
 };
 
+/**
+ * Mapeo inverso a {@link HttpErrorMapper}: infiere un {@link ErrorCode} a
+ * partir de un status HTTP. Se usa en {@link GlobalExceptionFilter} para
+ * asignar un código de error a excepciones nativas de Nest (`HttpException`)
+ * que no traen su propio `code`, según el status que ya trae la excepción.
+ *
+ * @param status - Status HTTP (p. ej. `404`).
+ * @returns El `ErrorCode` asociado, o `ErrorCode.INTERNAL_ERROR` si el
+ *   status no tiene un mapeo conocido.
+ */
 export const getErrorCodeFromHttpStatus = (status: number): ErrorCode => {
   switch (status) {
     case 400:

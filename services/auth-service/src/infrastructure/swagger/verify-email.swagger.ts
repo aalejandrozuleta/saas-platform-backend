@@ -2,6 +2,13 @@ import { applyDecorators, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { VerifyEmailDto } from '@application/dto/verify-email/verify-email.dto';
 
+/**
+ * Decorador Swagger para el endpoint `POST /verify-email`.
+ *
+ * @remarks
+ * Activa la cuenta (status PENDING → ACTIVE) usando el token de un solo
+ * uso enviado por email al registrarse.
+ */
 export function VerifyEmailSwagger() {
   return applyDecorators(
     ApiOperation({ summary: 'Activa la cuenta verificando el token enviado por email' }),

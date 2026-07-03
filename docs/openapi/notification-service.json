@@ -1,0 +1,193 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/notifications/v1/metrics": {
+      "get": {
+        "operationId": "MetricsController_getMetrics_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["Metrics"]
+      }
+    },
+    "/notifications/v1/notifications/email": {
+      "post": {
+        "operationId": "NotificationController_sendEmail_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendEmailDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": ""
+          }
+        },
+        "summary": "Encola un email para envío asíncrono con Resend",
+        "tags": ["Notifications"]
+      }
+    },
+    "/notifications/v1/notifications/ws": {
+      "post": {
+        "operationId": "NotificationController_sendWs_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendWsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": ""
+          }
+        },
+        "summary": "Encola una notificación WebSocket (broadcast o usuario específico)",
+        "tags": ["Notifications"]
+      }
+    },
+    "/notifications/v1/notifications/preview": {
+      "get": {
+        "operationId": "NotificationController_listPreviews_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Lista todos los templates disponibles con links de preview",
+        "tags": ["Notifications"]
+      }
+    },
+    "/notifications/v1/notifications/preview/{template}": {
+      "get": {
+        "operationId": "NotificationController_previewTemplate_v1",
+        "parameters": [
+          {
+            "name": "template",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "welcome",
+              "type": "string"
+            }
+          },
+          {
+            "name": "email",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "usuario@empresa.com"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Preview de un template de email en el browser",
+        "tags": ["Notifications"]
+      }
+    }
+  },
+  "info": {
+    "title": "Notification Service API",
+    "description": "Documentación del servicio Notification Service",
+    "version": "1.0.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "access-token": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http"
+      }
+    },
+    "schemas": {
+      "SendEmailDto": {
+        "type": "object",
+        "properties": {
+          "to": {
+            "type": "object",
+            "format": "email",
+            "example": "usuario@ejemplo.com"
+          },
+          "subject": {
+            "type": "string",
+            "minLength": 1,
+            "example": "Bienvenido a la plataforma"
+          },
+          "template": {
+            "type": "string",
+            "example": "welcome",
+            "description": "Nombre del template HTML"
+          },
+          "variables": {
+            "type": "object",
+            "example": {
+              "name": "Juan"
+            }
+          }
+        },
+        "required": ["to", "subject", "template"]
+      },
+      "SendWsDto": {
+        "type": "object",
+        "properties": {
+          "event": {
+            "type": "string",
+            "example": "maintenance.scheduled"
+          },
+          "target": {
+            "type": "string",
+            "enum": ["broadcast", "user"],
+            "example": "broadcast"
+          },
+          "userId": {
+            "type": "string",
+            "example": "user-uuid-123",
+            "description": "Requerido cuando target=user"
+          },
+          "data": {
+            "type": "object",
+            "example": {
+              "message": "El sistema estará en mantenimiento a las 3am"
+            }
+          }
+        },
+        "required": ["event", "target", "data"]
+      }
+    }
+  }
+}
