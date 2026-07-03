@@ -55,7 +55,7 @@
     "prettier": "^3.8.1",
     "prisma": "^7.3.0",
     "supertest": "^7.2.2",
-    "typedoc": "^0.28.17"
+    "typedoc": "^0.28.19"
   },
   "engines": {
     "node": ">=22",
