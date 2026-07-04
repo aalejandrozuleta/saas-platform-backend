@@ -531,6 +531,9 @@ importers:
       zod:
         specifier: ^4.3.6
         version: 4.3.6
+    dependenciesMeta:
+      '@saas/shared':
+        injected: true
     devDependencies:
       '@nestjs/cli':
         specifier: ^11.0.16
