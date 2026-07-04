@@ -22,12 +22,12 @@
     "prisma:seed": "ts-node --project tsconfig.json -e \"require('tsconfig-paths/register')\" prisma/seed.ts"
   },
   "dependencies": {
-    "@nestjs/common": "11.1.17",
+    "@nestjs/common": "11.1.18",
     "@nestjs/config": "4.0.3",
-    "@nestjs/core": "11.1.17",
+    "@nestjs/core": "11.1.18",
     "@nestjs/event-emitter": "^3.0.1",
     "@nestjs/mongoose": "11.0.4",
-    "@nestjs/platform-express": "11.1.17",
+    "@nestjs/platform-express": "11.1.18",
     "@nestjs/schedule": "^6.1.1",
     "@nestjs/swagger": "^11.2.6",
     "@prisma/adapter-pg": "^7.3.0",
@@ -59,7 +59,7 @@
   },
   "devDependencies": {
     "@nestjs/cli": "^11.0.16",
-    "@nestjs/testing": "11.1.17",
+    "@nestjs/testing": "11.1.18",
     "@types/cookie-parser": "^1.4.10",
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
