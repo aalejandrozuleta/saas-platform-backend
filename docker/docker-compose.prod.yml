@@ -17,6 +17,8 @@ services:
     depends_on:
       api-gateway:
         condition: service_healthy
+      notification-service:
+        condition: service_healthy
     deploy:
       resources:
         limits:
@@ -24,6 +26,9 @@ services:
           memory: 128M
     networks:
       - saas-edge
+      # Necesario para proxyar /socket.io/ directo a notification-service
+      # (WebSocket con auth propia, no pasa por api-gateway).
+      - saas-internal
 
   api-gateway:
     container_name: api-gateway-prod
@@ -385,12 +390,14 @@ services:
       - saas-internal
 
 networks:
-  # Public-facing tier: nginx <-> api-gateway only.
+  # Public-facing tier: nginx <-> api-gateway.
+  # nginx also joins saas-internal (below) to proxy /socket.io/ directly to
+  # notification-service, bypassing api-gateway for that one route.
   saas-edge:
     driver: bridge
   # Service-to-service tier: api-gateway, auth-service, config-service, notification-service,
-  # redis, and observability.
-  # Deliberately excludes the data tier so api-gateway cannot reach the databases directly.
+  # redis, observability, and nginx (only for the /socket.io/ WebSocket proxy).
+  # Deliberately excludes the data tier so api-gateway/nginx cannot reach the databases directly.
   # Not marked `internal: true` because prometheus/loki/grafana publish ports to the host.
   saas-internal:
     driver: bridge
