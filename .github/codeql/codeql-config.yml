@@ -9,4 +9,6 @@ paths-ignore:
   - dist
   - docs
   - docker
-  - "**/*.spec.ts"
+  - '**/*.spec.ts'
+  - '**/generated/prisma/**'
+  - '**/webpack.config.js'
