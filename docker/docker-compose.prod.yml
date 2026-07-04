@@ -389,6 +389,104 @@ services:
     networks:
       - saas-internal
 
+  # =====================
+  # POSTGRES EXPORTER (auth-postgres)
+  # =====================
+  postgres-exporter:
+    image: quay.io/prometheuscommunity/postgres-exporter:v0.18.0
+    container_name: postgres-exporter-prod
+    restart: unless-stopped
+    profiles: ['observability']
+    environment:
+      DATA_SOURCE_URI: auth-postgres:5432/${POSTGRES_DB:-auth_db}?sslmode=disable
+      DATA_SOURCE_USER: ${POSTGRES_USER:-auth_user}
+      DATA_SOURCE_PASS: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+    depends_on:
+      auth-postgres:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 64M
+    networks:
+      - saas-internal
+      - saas-data
+
+  # =====================
+  # POSTGRES EXPORTER (config-postgres)
+  # =====================
+  postgres-exporter-config:
+    image: quay.io/prometheuscommunity/postgres-exporter:v0.18.0
+    container_name: postgres-exporter-config-prod
+    restart: unless-stopped
+    profiles: ['observability']
+    environment:
+      DATA_SOURCE_URI: config-postgres:5432/${CONFIG_POSTGRES_DB:-config_db}?sslmode=disable
+      DATA_SOURCE_USER: ${CONFIG_POSTGRES_USER:-config_user}
+      DATA_SOURCE_PASS: ${CONFIG_POSTGRES_PASSWORD:?CONFIG_POSTGRES_PASSWORD is required}
+    depends_on:
+      config-postgres:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 64M
+    networks:
+      - saas-internal
+      - saas-data
+
+  # =====================
+  # REDIS EXPORTER
+  # =====================
+  redis-exporter:
+    image: oliver006/redis_exporter:v1.82.0-alpine
+    container_name: redis-exporter-prod
+    restart: unless-stopped
+    profiles: ['observability']
+    environment:
+      REDIS_ADDR: redis://redis:6379
+      REDIS_PASSWORD: *redis_password
+    depends_on:
+      redis:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 64M
+    networks:
+      - saas-internal
+
+  # =====================
+  # CADVISOR (Container Metrics)
+  # =====================
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.52.0
+    container_name: cadvisor-prod
+    restart: unless-stopped
+    profiles: ['observability']
+    privileged: true
+    volumes:
+      - /:/rootfs:ro
+      # Mounting the whole /var/run dir breaks docker.sock access on Docker
+      # Desktop (it's a symlink to a host-only path there) — mount the
+      # socket file explicitly instead. On native Linux this is the same file.
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    devices:
+      - /dev/kmsg:/dev/kmsg
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+    networks:
+      - saas-internal
+
 networks:
   # Public-facing tier: nginx <-> api-gateway.
   # nginx also joins saas-internal (below) to proxy /socket.io/ directly to
@@ -401,7 +499,8 @@ networks:
   # Not marked `internal: true` because prometheus/loki/grafana publish ports to the host.
   saas-internal:
     driver: bridge
-  # Private data tier: only auth-service and config-service may reach it.
+  # Private data tier: only auth-service, config-service, and their postgres
+  # exporters (metrics-only, read via pg_stat views) may reach it.
   # No container on this network publishes host ports, so it's fully isolated from outside.
   saas-data:
     driver: bridge
