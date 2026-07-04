@@ -2,13 +2,32 @@
   "title": "SaaS Platform – Infra",
   "uid": "saas-infra",
   "schemaVersion": 38,
-  "version": 1,
+  "version": 2,
   "refresh": "10s",
+  "tags": ["saas-platform", "infra"],
+  "time": { "from": "now-6h", "to": "now" },
   "panels": [
     {
+      "type": "row",
+      "title": "Cómputo (por contenedor)",
+      "gridPos": { "x": 0, "y": 0, "w": 24, "h": 1 }
+    },
+    {
       "type": "timeseries",
-      "title": "Container CPU (cores)",
-      "gridPos": { "x": 0, "y": 0, "w": 12, "h": 7 },
+      "title": "CPU",
+      "description": "Uso de CPU por contenedor (núcleos). Compara contra el límite `cpus` configurado en docker-compose.prod.yml para cada servicio.",
+      "gridPos": { "x": 0, "y": 1, "w": 12, "h": 8 },
+      "fieldConfig": {
+        "defaults": { "unit": "none", "decimals": 2 }
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": ["mean", "max", "last"]
+        },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      },
       "targets": [
         {
           "expr": "sum by (container_label_com_docker_compose_service) (rate(container_cpu_usage_seconds_total{container_label_com_docker_compose_service!=\"\"}[2m]))",
@@ -19,70 +38,146 @@
     },
     {
       "type": "timeseries",
-      "title": "Container Memory (MB)",
-      "gridPos": { "x": 12, "y": 0, "w": 12, "h": 7 },
+      "title": "Memoria",
+      "description": "Memoria de trabajo (working set) por contenedor. Compara contra el límite `memory` configurado en docker-compose.prod.yml para cada servicio.",
+      "gridPos": { "x": 12, "y": 1, "w": 12, "h": 8 },
+      "fieldConfig": {
+        "defaults": { "unit": "decbytes" }
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": ["mean", "max", "last"]
+        },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      },
       "targets": [
         {
-          "expr": "sum by (container_label_com_docker_compose_service) (container_memory_working_set_bytes{container_label_com_docker_compose_service!=\"\"}) / 1024 / 1024",
+          "expr": "sum by (container_label_com_docker_compose_service) (container_memory_working_set_bytes{container_label_com_docker_compose_service!=\"\"})",
           "legendFormat": "{{container_label_com_docker_compose_service}}",
           "refId": "A"
         }
       ]
     },
     {
-      "type": "stat",
-      "title": "Postgres Connections",
-      "gridPos": { "x": 0, "y": 7, "w": 6, "h": 4 },
-      "targets": [
-        {
-          "expr": "sum(pg_stat_activity_count{datname=\"auth_db\"})",
-          "refId": "A"
-        }
-      ]
-    },
-    {
-      "type": "timeseries",
-      "title": "Postgres Tx/s",
-      "gridPos": { "x": 6, "y": 7, "w": 12, "h": 4 },
-      "targets": [
-        {
-          "expr": "sum(rate(pg_stat_database_xact_commit{datname=\"auth_db\"}[2m]) + rate(pg_stat_database_xact_rollback{datname=\"auth_db\"}[2m]))",
-          "refId": "A"
-        }
-      ]
+      "type": "row",
+      "title": "PostgreSQL (auth-postgres + config-postgres)",
+      "gridPos": { "x": 0, "y": 9, "w": 24, "h": 1 }
     },
     {
       "type": "stat",
-      "title": "Redis Connected Clients",
-      "gridPos": { "x": 18, "y": 7, "w": 6, "h": 4 },
+      "title": "Conexiones activas — auth_db",
+      "description": "Conexiones abiertas a auth-postgres. Vigilar si se acerca al max_connections configurado.",
+      "gridPos": { "x": 0, "y": 10, "w": 6, "h": 5 },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 60 },
+              { "color": "red", "value": 85 }
+            ]
+          }
+        }
+      },
+      "targets": [{ "expr": "sum(pg_stat_activity_count{datname=\"auth_db\"})", "refId": "A" }]
+    },
+    {
+      "type": "stat",
+      "title": "Conexiones activas — config_db",
+      "description": "Conexiones abiertas a config-postgres. Vigilar si se acerca al max_connections configurado.",
+      "gridPos": { "x": 6, "y": 10, "w": 6, "h": 5 },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 60 },
+              { "color": "red", "value": 85 }
+            ]
+          }
+        }
+      },
+      "targets": [{ "expr": "sum(pg_stat_activity_count{datname=\"config_db\"})", "refId": "A" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Transacciones/seg (commit + rollback)",
+      "description": "Un rollback rate alto y sostenido suele indicar errores de aplicación, no solo carga.",
+      "gridPos": { "x": 12, "y": 10, "w": 12, "h": 5 },
+      "fieldConfig": {
+        "defaults": { "unit": "reqps" }
+      },
+      "options": {
+        "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean", "max"] }
+      },
       "targets": [
         {
-          "expr": "redis_connected_clients",
+          "expr": "sum by (datname) (rate(pg_stat_database_xact_commit{datname=~\"auth_db|config_db\"}[2m]) + rate(pg_stat_database_xact_rollback{datname=~\"auth_db|config_db\"}[2m]))",
+          "legendFormat": "{{datname}}",
           "refId": "A"
         }
       ]
     },
     {
-      "type": "timeseries",
-      "title": "Redis Ops/s",
-      "gridPos": { "x": 0, "y": 11, "w": 12, "h": 6 },
-      "targets": [
-        {
-          "expr": "rate(redis_commands_processed_total[2m])",
-          "refId": "A"
+      "type": "row",
+      "title": "Redis (sesiones, caché, colas BullMQ)",
+      "gridPos": { "x": 0, "y": 15, "w": 24, "h": 1 }
+    },
+    {
+      "type": "stat",
+      "title": "Clientes conectados",
+      "gridPos": { "x": 0, "y": 16, "w": 6, "h": 5 },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 50 },
+              { "color": "red", "value": 100 }
+            ]
+          }
         }
-      ]
+      },
+      "targets": [{ "expr": "redis_connected_clients", "refId": "A" }]
+    },
+    {
+      "type": "stat",
+      "title": "Memoria usada",
+      "gridPos": { "x": 6, "y": 16, "w": 6, "h": 5 },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "decbytes",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 200000000 },
+              { "color": "red", "value": 240000000 }
+            ]
+          }
+        }
+      },
+      "targets": [{ "expr": "redis_memory_used_bytes", "refId": "A" }]
     },
     {
       "type": "timeseries",
-      "title": "Redis Memory (MB)",
-      "gridPos": { "x": 12, "y": 11, "w": 12, "h": 6 },
-      "targets": [
-        {
-          "expr": "redis_memory_used_bytes / 1024 / 1024",
-          "refId": "A"
-        }
-      ]
+      "title": "Comandos/seg",
+      "gridPos": { "x": 12, "y": 16, "w": 12, "h": 5 },
+      "fieldConfig": {
+        "defaults": { "unit": "ops" }
+      },
+      "options": {
+        "legend": { "displayMode": "list", "placement": "bottom" }
+      },
+      "targets": [{ "expr": "rate(redis_commands_processed_total[2m])", "refId": "A" }]
     }
   ]
 }

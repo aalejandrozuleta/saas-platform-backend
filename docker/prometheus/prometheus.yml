@@ -37,12 +37,35 @@ scrape_configs:
           service: notification-service
 
   # ============================
-  # POSTGRES EXPORTER
+  # CONFIG SERVICE
+  # ============================
+  - job_name: 'config-service'
+    metrics_path: /config/v1/metrics
+    static_configs:
+      - targets:
+          - config-service:3002
+        labels:
+          service: config-service
+
+  # ============================
+  # POSTGRES EXPORTER (auth-postgres)
   # ============================
   - job_name: 'postgres-exporter'
     static_configs:
       - targets:
           - postgres-exporter:9187
+        labels:
+          database: auth_db
+
+  # ============================
+  # POSTGRES EXPORTER (config-postgres)
+  # ============================
+  - job_name: 'postgres-exporter-config'
+    static_configs:
+      - targets:
+          - postgres-exporter-config:9187
+        labels:
+          database: config_db
 
   # ============================
   # REDIS EXPORTER

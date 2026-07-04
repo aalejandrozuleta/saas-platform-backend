@@ -366,6 +366,31 @@ services:
       - saas-dev
 
   # =====================
+  # POSTGRES EXPORTER (config-postgres)
+  # =====================
+  postgres-exporter-config:
+    image: ${POSTGRES_EXPORTER_IMAGE:-quay.io/prometheuscommunity/postgres-exporter:v0.18.0}
+    container_name: postgres-exporter-config-dev
+    restart: unless-stopped
+    environment:
+      DATA_SOURCE_URI: config-postgres:5432/config_db?sslmode=disable
+      DATA_SOURCE_USER: config_user
+      DATA_SOURCE_PASS: config_pass
+    expose:
+      - '9187'
+    depends_on:
+      config-postgres:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 64M
+    logging: *default-logging
+    networks:
+      - saas-dev
+
+  # =====================
   # REDIS EXPORTER
   # =====================
   redis-exporter:
@@ -374,6 +399,7 @@ services:
     restart: unless-stopped
     environment:
       REDIS_ADDR: redis://redis:6379
+      REDIS_PASSWORD: *redis_password
     expose:
       - '9121'
     depends_on:
@@ -400,7 +426,10 @@ services:
       - '8080'
     volumes:
       - /:/rootfs:ro
-      - /var/run:/var/run:ro
+      # Mounting the whole /var/run dir breaks docker.sock access on Docker
+      # Desktop (it's a symlink to a host-only path there) — mount the
+      # socket file explicitly instead. On native Linux this is the same file.
+      - /var/run/docker.sock:/var/run/docker.sock:ro
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
       - /dev/disk/:/dev/disk:ro
