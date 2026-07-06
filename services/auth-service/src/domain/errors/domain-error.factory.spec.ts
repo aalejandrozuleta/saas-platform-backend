@@ -20,8 +20,7 @@ describe('DomainErrorFactory', () => {
     it('debe crear excepción USER_BLOCKED con fecha', () => {
       const blockedUntil = new Date();
 
-      const error =
-        DomainErrorFactory.userBlocked(blockedUntil);
+      const error = DomainErrorFactory.userBlocked(blockedUntil);
 
       expect(error).toBeInstanceOf(DomainException);
       expect(error.message).toBe('auth.user_blocked');
@@ -43,63 +42,43 @@ describe('DomainErrorFactory', () => {
 
   describe('deviceFingerprintRequired', () => {
     it('debe crear excepción DEVICE_FINGERPRINT_REQUIRED', () => {
-      const error =
-        DomainErrorFactory.deviceFingerprintRequired();
+      const error = DomainErrorFactory.deviceFingerprintRequired();
 
-      expect(error.message).toBe(
-        'auth.device_fingerprint_required',
-      );
-      expect(error.code).toBe(
-        ErrorCode.DEVICE_FINGERPRINT_REQUIRED,
-      );
+      expect(error.message).toBe('auth.device_fingerprint_required');
+      expect(error.code).toBe(ErrorCode.DEVICE_FINGERPRINT_REQUIRED);
       expect(error.httpStatus).toBe(400);
     });
   });
 
   describe('emailAlreadyExists', () => {
     it('debe crear excepción EMAIL_ALREADY_EXISTS', () => {
-      const error =
-        DomainErrorFactory.emailAlreadyExists();
+      const error = DomainErrorFactory.emailAlreadyExists();
 
-      expect(error.message).toBe(
-        'auth.email_already_exists',
-      );
-      expect(error.code).toBe(
-        ErrorCode.EMAIL_ALREADY_EXISTS,
-      );
+      expect(error.message).toBe('auth.email_already_exists');
+      expect(error.code).toBe(ErrorCode.EMAIL_ALREADY_EXISTS);
       expect(error.httpStatus).toBe(409);
     });
   });
 
   describe('deviceNotTrusted', () => {
     it('debe crear excepción DEVICE_NOT_TRUSTED', () => {
-      const error =
-        DomainErrorFactory.deviceNotTrusted();
+      const error = DomainErrorFactory.deviceNotTrusted();
 
-      expect(error.message).toBe(
-        'auth.device_not_trusted',
-      );
-      expect(error.code).toBe(
-        ErrorCode.DEVICE_NOT_TRUSTED,
-      );
+      expect(error.message).toBe('auth.device_not_trusted');
+      expect(error.code).toBe(ErrorCode.DEVICE_NOT_TRUSTED);
       expect(error.httpStatus).toBe(403);
     });
   });
 
   describe('securityChallengeRequired', () => {
     it('debe crear excepción SECURITY_CHALLENGE_REQUIRED', () => {
-      const error =
-        DomainErrorFactory.securityChallengeRequired({
-          challengeType: 'LOGIN_VERIFICATION',
-          reason: 'NEW_DEVICE',
-        });
+      const error = DomainErrorFactory.securityChallengeRequired({
+        challengeType: 'LOGIN_VERIFICATION',
+        reason: 'NEW_DEVICE',
+      });
 
-      expect(error.message).toBe(
-        'auth.security_challenge_required',
-      );
-      expect(error.code).toBe(
-        ErrorCode.SECURITY_CHALLENGE_REQUIRED,
-      );
+      expect(error.message).toBe('auth.security_challenge_required');
+      expect(error.code).toBe(ErrorCode.SECURITY_CHALLENGE_REQUIRED);
       expect(error.httpStatus).toBe(403);
       expect(error.metadata).toEqual({
         challengeType: 'LOGIN_VERIFICATION',
@@ -110,16 +89,22 @@ describe('DomainErrorFactory', () => {
 
   describe('invalidRefreshToken', () => {
     it('debe crear excepción INVALID_REFRESH_TOKEN', () => {
-      const error =
-        DomainErrorFactory.invalidRefreshToken();
+      const error = DomainErrorFactory.invalidRefreshToken();
 
-      expect(error.message).toBe(
-        'auth.invalid_refresh_token',
-      );
-      expect(error.code).toBe(
-        ErrorCode.INVALID_REFRESH_TOKEN,
-      );
+      expect(error.message).toBe('auth.invalid_refresh_token');
+      expect(error.code).toBe(ErrorCode.INVALID_REFRESH_TOKEN);
       expect(error.httpStatus).toBe(401);
+    });
+  });
+
+  describe('invalidPasswordResetToken', () => {
+    it('debe crear excepción INVALID_PASSWORD_RESET_TOKEN', () => {
+      const error = DomainErrorFactory.invalidPasswordResetToken();
+
+      expect(error).toBeInstanceOf(DomainException);
+      expect(error.message).toBe('auth.invalid_password_reset_token');
+      expect(error.code).toBe(ErrorCode.INVALID_PASSWORD_RESET_TOKEN);
+      expect(error.httpStatus).toBe(400);
     });
   });
 });

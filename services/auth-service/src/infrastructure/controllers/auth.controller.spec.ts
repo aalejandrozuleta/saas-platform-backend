@@ -15,6 +15,8 @@ import { GetSessionsUseCase } from '@application/use-cases/get-sessions.use-case
 import { RevokeSessionUseCase } from '@application/use-cases/revoke-session.use-case';
 import { VerifyEmailUseCase } from '@application/use-cases/verify-email.use-case';
 import { ResendVerificationUseCase } from '@application/use-cases/resend-verification.use-case';
+import { ForgotPasswordUseCase } from '@application/use-cases/forgot-password.use-case';
+import { ResetPasswordUseCase } from '@application/use-cases/reset-password.use-case';
 import { I18nService } from '@saas/shared';
 import { type RegisterUserDto } from '@application/dto/register/register-user.dto';
 import { User } from '@domain/entities/user/user.entity';
@@ -41,6 +43,8 @@ describe('AuthController', () => {
   let revokeSessionUseCase: jest.Mocked<RevokeSessionUseCase>;
   let verifyEmailUseCase: jest.Mocked<VerifyEmailUseCase>;
   let resendVerificationUseCase: jest.Mocked<ResendVerificationUseCase>;
+  let forgotPasswordUseCase: jest.Mocked<ForgotPasswordUseCase>;
+  let resetPasswordUseCase: jest.Mocked<ResetPasswordUseCase>;
   let i18n: jest.Mocked<I18nService>;
 
   beforeEach(async () => {
@@ -118,6 +122,14 @@ describe('AuthController', () => {
           useValue: { execute: jest.fn() },
         },
         {
+          provide: ForgotPasswordUseCase,
+          useValue: { execute: jest.fn() },
+        },
+        {
+          provide: ResetPasswordUseCase,
+          useValue: { execute: jest.fn() },
+        },
+        {
           provide: I18nService,
           useValue: {
             translate: jest.fn((key: string) => key),
@@ -147,6 +159,8 @@ describe('AuthController', () => {
     revokeSessionUseCase = module.get(RevokeSessionUseCase);
     verifyEmailUseCase = module.get(VerifyEmailUseCase);
     resendVerificationUseCase = module.get(ResendVerificationUseCase);
+    forgotPasswordUseCase = module.get(ForgotPasswordUseCase);
+    resetPasswordUseCase = module.get(ResetPasswordUseCase);
     i18n = module.get(I18nService);
   });
 
@@ -190,6 +204,57 @@ describe('AuthController', () => {
     expect(result).toEqual({
       success: true,
       message: 'Correo de verificación reenviado',
+      data: {},
+    });
+  });
+
+  // ──────────────────────────────────────────────────
+  // Forgot Password / Reset Password
+  // ──────────────────────────────────────────────────
+
+  it('debe solicitar la recuperación de contraseña', async () => {
+    forgotPasswordUseCase.execute.mockResolvedValue(undefined);
+    i18n.translate.mockReturnValue('Si existe una cuenta, recibirás un enlace de recuperación');
+
+    const req: any = {
+      headers: { 'accept-language': 'es' },
+      get: (key: string) => req.headers[key],
+    };
+
+    const result = await controller.forgotPassword({ email: 'test@example.com' }, req);
+
+    expect(forgotPasswordUseCase.execute).toHaveBeenCalledWith('test@example.com');
+    expect(i18n.translate).toHaveBeenCalledWith('auth.password_reset_email_sent', 'es');
+    expect(result).toEqual({
+      success: true,
+      message: 'Si existe una cuenta, recibirás un enlace de recuperación',
+      data: {},
+    });
+  });
+
+  it('debe completar la recuperación de contraseña con el token recibido', async () => {
+    resetPasswordUseCase.execute.mockResolvedValue(undefined);
+    i18n.translate.mockReturnValue('Contraseña actualizada correctamente');
+
+    const req: any = {
+      ip: '127.0.0.1',
+      headers: { 'accept-language': 'es', 'x-country': 'CO' },
+      get: (key: string) => req.headers[key],
+    };
+
+    const result = await controller.resetPassword(
+      { token: 'reset-token', newPassword: 'NewPassword456@' },
+      req,
+    );
+
+    expect(resetPasswordUseCase.execute).toHaveBeenCalledWith('reset-token', 'NewPassword456@', {
+      ip: '127.0.0.1',
+      country: 'CO',
+    });
+    expect(i18n.translate).toHaveBeenCalledWith('auth.password_reset_success', 'es');
+    expect(result).toEqual({
+      success: true,
+      message: 'Contraseña actualizada correctamente',
       data: {},
     });
   });

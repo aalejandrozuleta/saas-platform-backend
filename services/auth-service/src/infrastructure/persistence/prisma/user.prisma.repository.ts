@@ -12,7 +12,7 @@ import { PrismaService } from './prisma.service';
  */
 @Injectable()
 export class UserPrismaRepository implements UserRepository {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) {}
 
   async findByEmail(email: EmailVO): Promise<User | null> {
     const user = await this.prisma.user.findUnique({
@@ -35,6 +35,14 @@ export class UserPrismaRepository implements UserRepository {
   async findByVerificationToken(token: string): Promise<User | null> {
     const user = await this.prisma.user.findUnique({
       where: { emailVerificationToken: token },
+    });
+
+    return user ? UserMapper.toDomain(user) : null;
+  }
+
+  async findByPasswordResetToken(token: string): Promise<User | null> {
+    const user = await this.prisma.user.findUnique({
+      where: { passwordResetToken: token },
     });
 
     return user ? UserMapper.toDomain(user) : null;

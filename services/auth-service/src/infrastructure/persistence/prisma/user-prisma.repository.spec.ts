@@ -28,9 +28,7 @@ describe('UserPrismaRepository', () => {
   };
 
   beforeEach(() => {
-    repository = new UserPrismaRepository(
-      prismaMock as unknown as PrismaService,
-    );
+    repository = new UserPrismaRepository(prismaMock as unknown as PrismaService);
     jest.clearAllMocks();
   });
 
@@ -45,7 +43,7 @@ describe('UserPrismaRepository', () => {
         status: PrismaUserStatus.ACTIVE,
         emailVerified: false,
         failedLoginAttempts: 0,
-      lockoutCount: 0,
+        lockoutCount: 0,
         blockedUntil: null,
         createdAt: new Date(),
       };
@@ -58,7 +56,7 @@ describe('UserPrismaRepository', () => {
         status: UserStatus.ACTIVE,
         emailVerified: false,
         failedLoginAttempts: 0,
-      lockoutCount: 0,
+        lockoutCount: 0,
         blockedUntil: undefined,
         createdAt: prismaUser.createdAt,
       });
@@ -99,7 +97,7 @@ describe('UserPrismaRepository', () => {
         status: PrismaUserStatus.ACTIVE,
         emailVerified: true,
         failedLoginAttempts: 0,
-      lockoutCount: 0,
+        lockoutCount: 0,
         blockedUntil: null,
         createdAt: new Date(),
       };
@@ -112,7 +110,7 @@ describe('UserPrismaRepository', () => {
         status: UserStatus.ACTIVE,
         emailVerified: true,
         failedLoginAttempts: 0,
-      lockoutCount: 0,
+        lockoutCount: 0,
         blockedUntil: undefined,
         createdAt: prismaUser.createdAt,
       });
@@ -188,6 +186,56 @@ describe('UserPrismaRepository', () => {
     });
   });
 
+  describe('findByPasswordResetToken', () => {
+    it('debe retornar un User cuando el token corresponde a un usuario', async () => {
+      const email = EmailVO.create('reset@example.com');
+      const prismaUser = {
+        id: 'user-reset',
+        email: email.getValue(),
+        passwordHash: 'hash',
+        status: PrismaUserStatus.ACTIVE,
+        emailVerified: true,
+        passwordResetToken: 'reset-token-abc',
+        failedLoginAttempts: 0,
+        lockoutCount: 0,
+        blockedUntil: null,
+        createdAt: new Date(),
+      };
+
+      const domainUser = User.fromPersistence({
+        id: prismaUser.id,
+        email,
+        passwordHash: prismaUser.passwordHash,
+        role: UserRole.CUSTOMER,
+        status: UserStatus.ACTIVE,
+        emailVerified: true,
+        failedLoginAttempts: 0,
+        lockoutCount: 0,
+        blockedUntil: undefined,
+        createdAt: prismaUser.createdAt,
+      });
+
+      prismaMock.user.findUnique.mockResolvedValue(prismaUser);
+      (UserMapper.toDomain as jest.Mock).mockReturnValue(domainUser);
+
+      const result = await repository.findByPasswordResetToken('reset-token-abc');
+
+      expect(prismaMock.user.findUnique).toHaveBeenCalledWith({
+        where: { passwordResetToken: 'reset-token-abc' },
+      });
+      expect(result).toBe(domainUser);
+    });
+
+    it('debe retornar null si el token no corresponde a ningún usuario', async () => {
+      prismaMock.user.findUnique.mockResolvedValue(null);
+
+      const result = await repository.findByPasswordResetToken('invalid-token');
+
+      expect(result).toBeNull();
+      expect(UserMapper.toDomain).not.toHaveBeenCalled();
+    });
+  });
+
   describe('update', () => {
     it('debe actualizar un usuario persistido', async () => {
       const user = User.create({
@@ -248,13 +296,11 @@ describe('UserPrismaRepository', () => {
         status: PrismaUserStatus.ACTIVE,
         emailVerified: false,
         failedLoginAttempts: 0,
-      lockoutCount: 0,
+        lockoutCount: 0,
         blockedUntil: undefined,
       };
 
-      (UserMapper.toPersistence as jest.Mock).mockReturnValue(
-        persistenceUser,
-      );
+      (UserMapper.toPersistence as jest.Mock).mockReturnValue(persistenceUser);
 
       await repository.save(user);
 

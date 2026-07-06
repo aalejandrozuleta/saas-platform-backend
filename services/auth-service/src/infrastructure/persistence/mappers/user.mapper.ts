@@ -31,6 +31,8 @@ export class UserMapper {
     createdAt: Date;
     emailVerificationToken?: string | null;
     emailVerificationExpiresAt?: Date | null;
+    passwordResetToken?: string | null;
+    passwordResetExpiresAt?: Date | null;
   }): User {
     const props: UserProps = {
       id: raw.id,
@@ -46,6 +48,8 @@ export class UserMapper {
       createdAt: raw.createdAt,
       emailVerificationToken: raw.emailVerificationToken ?? undefined,
       emailVerificationExpiresAt: raw.emailVerificationExpiresAt ?? undefined,
+      passwordResetToken: raw.passwordResetToken ?? undefined,
+      passwordResetExpiresAt: raw.passwordResetExpiresAt ?? undefined,
     };
 
     return User.fromPersistence(props);
@@ -65,6 +69,8 @@ export class UserMapper {
     blockedUntil?: Date;
     emailVerificationToken?: string | null;
     emailVerificationExpiresAt?: Date | null;
+    passwordResetToken?: string | null;
+    passwordResetExpiresAt?: Date | null;
   } {
     return {
       id: user.id,
@@ -77,6 +83,8 @@ export class UserMapper {
       blockedUntil: user.blockedUntil,
       emailVerificationToken: user.emailVerificationToken ?? null,
       emailVerificationExpiresAt: user.emailVerificationExpiresAt ?? null,
+      passwordResetToken: user.passwordResetToken ?? null,
+      passwordResetExpiresAt: user.passwordResetExpiresAt ?? null,
     };
   }
 
@@ -84,31 +92,41 @@ export class UserMapper {
 
   private static toDomainRole(role: PrismaUserRole): DomainUserRole {
     switch (role) {
-      case PrismaUserRole.SUPER_ADMIN:    return DomainUserRole.SUPER_ADMIN;
-      case PrismaUserRole.BUSINESS_OWNER: return DomainUserRole.BUSINESS_OWNER;
-      case PrismaUserRole.ACCOUNTANT:     return DomainUserRole.ACCOUNTANT;
-      case PrismaUserRole.EMPLOYEE:       return DomainUserRole.EMPLOYEE;
-      case PrismaUserRole.CUSTOMER:       return DomainUserRole.CUSTOMER;
-      default:                            return UserMapper.assertUnreachable(role);
+      case PrismaUserRole.SUPER_ADMIN:
+        return DomainUserRole.SUPER_ADMIN;
+      case PrismaUserRole.BUSINESS_OWNER:
+        return DomainUserRole.BUSINESS_OWNER;
+      case PrismaUserRole.ACCOUNTANT:
+        return DomainUserRole.ACCOUNTANT;
+      case PrismaUserRole.EMPLOYEE:
+        return DomainUserRole.EMPLOYEE;
+      case PrismaUserRole.CUSTOMER:
+        return DomainUserRole.CUSTOMER;
+      default:
+        return UserMapper.assertUnreachable(role);
     }
   }
 
   private static toPrismaRole(role: DomainUserRole): PrismaUserRole {
     switch (role) {
-      case DomainUserRole.SUPER_ADMIN:    return PrismaUserRole.SUPER_ADMIN;
-      case DomainUserRole.BUSINESS_OWNER: return PrismaUserRole.BUSINESS_OWNER;
-      case DomainUserRole.ACCOUNTANT:     return PrismaUserRole.ACCOUNTANT;
-      case DomainUserRole.EMPLOYEE:       return PrismaUserRole.EMPLOYEE;
-      case DomainUserRole.CUSTOMER:       return PrismaUserRole.CUSTOMER;
-      default:                            return UserMapper.assertUnreachable(role);
+      case DomainUserRole.SUPER_ADMIN:
+        return PrismaUserRole.SUPER_ADMIN;
+      case DomainUserRole.BUSINESS_OWNER:
+        return PrismaUserRole.BUSINESS_OWNER;
+      case DomainUserRole.ACCOUNTANT:
+        return PrismaUserRole.ACCOUNTANT;
+      case DomainUserRole.EMPLOYEE:
+        return PrismaUserRole.EMPLOYEE;
+      case DomainUserRole.CUSTOMER:
+        return PrismaUserRole.CUSTOMER;
+      default:
+        return UserMapper.assertUnreachable(role);
     }
   }
 
   // ===== Status mapping =====
 
-  private static toDomainStatus(
-    status: PrismaUserStatus,
-  ): DomainUserStatus {
+  private static toDomainStatus(status: PrismaUserStatus): DomainUserStatus {
     switch (status) {
       case PrismaUserStatus.ACTIVE:
         return DomainUserStatus.ACTIVE;
@@ -121,9 +139,7 @@ export class UserMapper {
     }
   }
 
-  private static toPrismaStatus(
-    status: DomainUserStatus,
-  ): PrismaUserStatus {
+  private static toPrismaStatus(status: DomainUserStatus): PrismaUserStatus {
     switch (status) {
       case DomainUserStatus.ACTIVE:
         return PrismaUserStatus.ACTIVE;

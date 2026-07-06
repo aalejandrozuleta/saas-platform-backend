@@ -46,6 +46,12 @@ import { VerifyEmailSwagger } from '@infrastructure/swagger/verify-email.swagger
 import { ResendVerificationUseCase } from '@application/use-cases/resend-verification.use-case';
 import { ResendVerificationDto } from '@application/dto/resend-verification/resend-verification.dto';
 import { ResendVerificationSwagger } from '@infrastructure/swagger/resend-verification.swagger';
+import { ForgotPasswordUseCase } from '@application/use-cases/forgot-password.use-case';
+import { ForgotPasswordDto } from '@application/dto/forgot-password/forgot-password.dto';
+import { ForgotPasswordSwagger } from '@infrastructure/swagger/forgot-password.swagger';
+import { ResetPasswordUseCase } from '@application/use-cases/reset-password.use-case';
+import { ResetPasswordDto } from '@application/dto/reset-password/reset-password.dto';
+import { ResetPasswordSwagger } from '@infrastructure/swagger/reset-password.swagger';
 
 /**
  * Controller de autenticación
@@ -77,6 +83,8 @@ export class AuthController {
     private readonly revokeSessionUseCase: RevokeSessionUseCase,
     private readonly verifyEmailUseCase: VerifyEmailUseCase,
     private readonly resendVerificationUseCase: ResendVerificationUseCase,
+    private readonly forgotPasswordUseCase: ForgotPasswordUseCase,
+    private readonly resetPasswordUseCase: ResetPasswordUseCase,
     private readonly i18n: I18nService,
   ) {}
 
@@ -105,6 +113,35 @@ export class AuthController {
       {},
       {
         message: this.i18n.translate('auth.verification_email_sent', this.resolveLanguage(req)),
+      },
+    );
+  }
+
+  @Post('forgot-password')
+  @ForgotPasswordSwagger()
+  async forgotPassword(@Body() dto: ForgotPasswordDto, @Req() req: Request) {
+    await this.forgotPasswordUseCase.execute(dto.email);
+
+    return successResponse(
+      {},
+      {
+        message: this.i18n.translate('auth.password_reset_email_sent', this.resolveLanguage(req)),
+      },
+    );
+  }
+
+  @Post('reset-password')
+  @ResetPasswordSwagger()
+  async resetPassword(@Body() dto: ResetPasswordDto, @Req() req: Request) {
+    await this.resetPasswordUseCase.execute(dto.token, dto.newPassword, {
+      ip: this.resolveClientIp(req),
+      country: this.getHeader(req, 'x-country'),
+    });
+
+    return successResponse(
+      {},
+      {
+        message: this.i18n.translate('auth.password_reset_success', this.resolveLanguage(req)),
       },
     );
   }

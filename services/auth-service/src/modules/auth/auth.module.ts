@@ -25,6 +25,8 @@ import { GetSessionsUseCase } from '@application/use-cases/get-sessions.use-case
 import { RevokeSessionUseCase } from '@application/use-cases/revoke-session.use-case';
 import { VerifyEmailUseCase } from '@application/use-cases/verify-email.use-case';
 import { ResendVerificationUseCase } from '@application/use-cases/resend-verification.use-case';
+import { ForgotPasswordUseCase } from '@application/use-cases/forgot-password.use-case';
+import { ResetPasswordUseCase } from '@application/use-cases/reset-password.use-case';
 import { JwtAuthGuard } from '@infrastructure/security/jwt-auth.guard';
 import { NotificationClient } from '@infrastructure/notifications/notification.client';
 import { NotificationListener } from '@infrastructure/messaging/listeners/notification.listener';
@@ -34,12 +36,7 @@ import { authProviders } from './auth.providers';
  * Módulo de Autenticación
  */
 @Module({
-  imports: [
-    I18nModule,
-    SharedModule,
-    AuditModule,
-    PrismaModule,
-  ],
+  imports: [I18nModule, SharedModule, AuditModule, PrismaModule],
   controllers: [AuthController],
   providers: [
     RegisterUserUseCase,
@@ -58,6 +55,8 @@ import { authProviders } from './auth.providers';
     RevokeSessionUseCase,
     VerifyEmailUseCase,
     ResendVerificationUseCase,
+    ForgotPasswordUseCase,
+    ResetPasswordUseCase,
     ...authProviders,
     JwtAuthGuard,
     AuthActivityListener,

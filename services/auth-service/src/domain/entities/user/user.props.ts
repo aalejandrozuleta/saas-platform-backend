@@ -1,6 +1,6 @@
-import { type UserRole } from "@domain/enums/user-role.enum";
-import { type UserStatus } from "@domain/enums/user-status.enum";
-import { type EmailVO } from "@domain/value-objects/email.vo";
+import { type UserRole } from '@domain/enums/user-role.enum';
+import { type UserStatus } from '@domain/enums/user-status.enum';
+import { type EmailVO } from '@domain/value-objects/email.vo';
 
 /**
  * Propiedades internas de la entidad User
@@ -41,6 +41,12 @@ export interface UserProps {
 
   /** Fecha de expiración del token de verificación */
   emailVerificationExpiresAt?: Date;
+
+  /** Token de recuperación de contraseña (raw, expira en PASSWORD_RESET_TTL) */
+  passwordResetToken?: string;
+
+  /** Fecha de expiración del token de recuperación de contraseña */
+  passwordResetExpiresAt?: Date;
 
   /** Fecha de creación */
   createdAt: Date;

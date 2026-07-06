@@ -34,6 +34,7 @@ export const envSchema = z.object({
 
   APP_URL: z.string().default('http://localhost:4200'),
   EMAIL_VERIFICATION_TTL: z.coerce.number().default(86400),
+  PASSWORD_RESET_TTL: z.coerce.number().default(1800),
 });
 
 export type EnvVars = z.infer<typeof envSchema>;

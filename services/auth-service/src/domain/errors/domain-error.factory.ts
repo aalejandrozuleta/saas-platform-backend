@@ -7,20 +7,13 @@ import { DomainException } from './domain.exception';
  */
 export class DomainErrorFactory {
   static invalidCredentials(): DomainException {
-    return DomainException.create(
-      'auth.invalid_credentials',
-      ErrorCode.INVALID_CREDENTIALS,
-      401,
-    );
+    return DomainException.create('auth.invalid_credentials', ErrorCode.INVALID_CREDENTIALS, 401);
   }
 
   static userBlocked(until?: Date): DomainException {
-    return DomainException.create(
-      'auth.user_blocked',
-      ErrorCode.USER_BLOCKED,
-      403,
-      { blockedUntil: until },
-    );
+    return DomainException.create('auth.user_blocked', ErrorCode.USER_BLOCKED, 403, {
+      blockedUntil: until,
+    });
   }
 
   static deviceFingerprintRequired(): DomainException {
@@ -32,32 +25,18 @@ export class DomainErrorFactory {
   }
 
   static emailAlreadyExists(): DomainException {
-    return DomainException.create(
-      'auth.email_already_exists',
-      ErrorCode.EMAIL_ALREADY_EXISTS,
-      409,
-    );
+    return DomainException.create('auth.email_already_exists', ErrorCode.EMAIL_ALREADY_EXISTS, 409);
   }
 
   static deviceNotTrusted(): DomainException {
-    return DomainException.create(
-      'auth.device_not_trusted',
-      ErrorCode.DEVICE_NOT_TRUSTED,
-      403,
-    );
+    return DomainException.create('auth.device_not_trusted', ErrorCode.DEVICE_NOT_TRUSTED, 403);
   }
 
   static countryNotTrusted(): DomainException {
-    return DomainException.create(
-      'auth.country_not_trusted',
-      ErrorCode.COUNTRY_NOT_TRUSTED,
-      403,
-    );
+    return DomainException.create('auth.country_not_trusted', ErrorCode.COUNTRY_NOT_TRUSTED, 403);
   }
 
-  static securityChallengeRequired(
-    metadata: Record<string, unknown>,
-  ): DomainException {
+  static securityChallengeRequired(metadata: Record<string, unknown>): DomainException {
     return DomainException.create(
       'auth.security_challenge_required',
       ErrorCode.SECURITY_CHALLENGE_REQUIRED,
@@ -107,11 +86,7 @@ export class DomainErrorFactory {
   }
 
   static invalidTotpCode(): DomainException {
-    return DomainException.create(
-      'auth.invalid_totp_code',
-      ErrorCode.INVALID_TOTP_CODE,
-      401,
-    );
+    return DomainException.create('auth.invalid_totp_code', ErrorCode.INVALID_TOTP_CODE, 401);
   }
 
   static twoFactorSetupNotInitiated(): DomainException {
@@ -147,19 +122,11 @@ export class DomainErrorFactory {
   }
 
   static sessionNotFound(): DomainException {
-    return DomainException.create(
-      'auth.session_not_found',
-      ErrorCode.SESSION_NOT_FOUND,
-      404,
-    );
+    return DomainException.create('auth.session_not_found', ErrorCode.SESSION_NOT_FOUND, 404);
   }
 
   static emailNotVerified(): DomainException {
-    return DomainException.create(
-      'auth.email_not_verified',
-      ErrorCode.EMAIL_NOT_VERIFIED,
-      403,
-    );
+    return DomainException.create('auth.email_not_verified', ErrorCode.EMAIL_NOT_VERIFIED, 403);
   }
 
   static invalidVerificationToken(): DomainException {
@@ -175,6 +142,14 @@ export class DomainErrorFactory {
       'auth.email_already_verified',
       ErrorCode.EMAIL_ALREADY_VERIFIED,
       409,
+    );
+  }
+
+  static invalidPasswordResetToken(): DomainException {
+    return DomainException.create(
+      'auth.invalid_password_reset_token',
+      ErrorCode.INVALID_PASSWORD_RESET_TOKEN,
+      400,
     );
   }
 }

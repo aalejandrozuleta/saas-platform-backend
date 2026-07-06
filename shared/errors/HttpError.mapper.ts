@@ -43,6 +43,7 @@ export const HttpErrorMapper: Record<ErrorCode, number> = {
   [ErrorCode.EMAIL_NOT_VERIFIED]: 403,
   [ErrorCode.INVALID_VERIFICATION_TOKEN]: 400,
   [ErrorCode.EMAIL_ALREADY_VERIFIED]: 409,
+  [ErrorCode.INVALID_PASSWORD_RESET_TOKEN]: 400,
 };
 
 /**

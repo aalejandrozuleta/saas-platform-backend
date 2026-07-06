@@ -10,6 +10,7 @@ import { USER_REPOSITORY } from '@domain/token/repositories.tokens';
 import { NotificationClient } from '@infrastructure/notifications/notification.client';
 import { EnvService } from '@config/env/env.service';
 import { VerificationEmailRequestedEvent } from '@application/events/user/verification-email-requested.event';
+import { PasswordResetRequestedEvent } from '@application/events/password/password-reset-requested.event';
 
 /**
  * Escucha eventos de dominio y envía emails vía notification-service.
@@ -141,12 +142,30 @@ export class NotificationListener {
     });
   }
 
+  @OnEvent(PasswordResetRequestedEvent.name)
+  handlePasswordResetRequested(event: PasswordResetRequestedEvent): void {
+    const appUrl = this.envService.get('APP_URL');
+    const resetUrl = `${appUrl}/reset-password?token=${event.resetToken}`;
+    this.notificationClient.sendEmail({
+      to: event.email,
+      subject: 'Recupera tu contraseña — Arlok',
+      template: 'password-reset',
+      variables: {
+        email: event.email,
+        requestedAt: new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' }),
+        resetUrl,
+      },
+    });
+  }
+
   private async resolveEmail(userId: string): Promise<string | null> {
     try {
       const user = await this.userRepository.findById(userId);
       return user?.email.getValue() ?? null;
     } catch (err: unknown) {
-      this.logger.warn(`No se pudo resolver email para userId=${userId}: ${(err as Error).message}`);
+      this.logger.warn(
+        `No se pudo resolver email para userId=${userId}: ${(err as Error).message}`,
+      );
       return null;
     }
   }

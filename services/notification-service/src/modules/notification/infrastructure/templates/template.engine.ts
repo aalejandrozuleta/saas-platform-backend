@@ -3,6 +3,7 @@ import { render } from '@react-email/render';
 
 import { WelcomeEmail } from './emails/WelcomeEmail';
 import { PasswordChangedEmail } from './emails/PasswordChangedEmail';
+import { PasswordResetEmail } from './emails/PasswordResetEmail';
 import { TwoFactorEnabledEmail } from './emails/TwoFactorEnabledEmail';
 import { TwoFactorDisabledEmail } from './emails/TwoFactorDisabledEmail';
 import { AccountLockedEmail } from './emails/AccountLockedEmail';
@@ -43,6 +44,9 @@ const TEMPLATES: Record<string, (v: Vars) => React.ReactElement> = {
 
   'password-changed': (v) =>
     PasswordChangedEmail(s(v, 'email'), s(v, 'changedAt'), s(v, 'ip'), s(v, 'country')),
+
+  'password-reset': (v) =>
+    PasswordResetEmail(s(v, 'email'), s(v, 'requestedAt'), v['resetUrl'] as string | undefined),
 
   '2fa-enabled': (v) =>
     TwoFactorEnabledEmail(s(v, 'email'), s(v, 'enabledAt'), s(v, 'ip'), s(v, 'country')),

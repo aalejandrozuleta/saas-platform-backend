@@ -9,6 +9,7 @@ export abstract class UserRepository {
   abstract findByEmail(email: EmailVO): Promise<User | null>;
   abstract findById(id: string): Promise<User | null>;
   abstract findByVerificationToken(token: string): Promise<User | null>;
+  abstract findByPasswordResetToken(token: string): Promise<User | null>;
   abstract save(user: User): Promise<void>;
   abstract update(user: User): Promise<void>;
   abstract updatePasswordHash(userId: string, passwordHash: string): Promise<void>;

@@ -39,6 +39,7 @@ describe('TemplateEngine', () => {
       expect(engine.list()).toEqual([
         'welcome',
         'password-changed',
+        'password-reset',
         '2fa-enabled',
         '2fa-disabled',
         'account-locked',
@@ -59,6 +60,7 @@ describe('TemplateEngine', () => {
         'password-changed',
         { email: 'ana@example.com', changedAt: 'hoy', ip: '1.1.1.1', country: 'CO' },
       ],
+      ['password-reset', { email: 'ana@example.com', requestedAt: 'hoy' }],
       ['2fa-enabled', { email: 'ana@example.com', enabledAt: 'hoy', ip: '1.1.1.1', country: 'CO' }],
       [
         '2fa-disabled',
@@ -108,6 +110,35 @@ describe('TemplateEngine', () => {
       });
 
       expect(html).not.toContain('Activar mi cuenta');
+    });
+
+    it('debe incluir el link de recuperación en password-reset cuando se provee resetUrl', async () => {
+      const html = await engine.render('password-reset', {
+        email: 'ana@example.com',
+        resetUrl: 'https://arlok.dev/reset-password?token=abc',
+      });
+
+      expect(html).toContain('Restablecer contraseña');
+      expect(html).toContain('expira en 30 minutos');
+    });
+
+    it('debe descartar resetUrl con esquema no http(s) (ej. javascript:) en password-reset', async () => {
+      const html = await engine.render('password-reset', {
+        email: 'ana@example.com',
+        resetUrl: 'javascript:alert(document.cookie)',
+      });
+
+      expect(html).not.toContain('javascript:');
+      expect(html).not.toContain('Restablecer contraseña');
+    });
+
+    it('debe descartar resetUrl malformado en password-reset', async () => {
+      const html = await engine.render('password-reset', {
+        email: 'ana@example.com',
+        resetUrl: 'not-a-valid-url',
+      });
+
+      expect(html).not.toContain('Restablecer contraseña');
     });
   });
 });
