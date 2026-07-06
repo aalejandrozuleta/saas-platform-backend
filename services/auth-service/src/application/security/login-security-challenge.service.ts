@@ -34,7 +34,9 @@ export class LoginSecurityChallengeService {
    * @param user - Usuario que intenta autenticarse.
    * @param profile - Perfil de seguridad del usuario (2FA, recovery codes), o `null` si no existe aún.
    * @param context - Contexto de red/dispositivo del intento de login.
-   * @param reason - Motivo que disparó el challenge (dispositivo nuevo, no confiable, país no confiable).
+   * @param reason - Motivo que disparó el challenge (dispositivo nuevo, no confiable, país no confiable, 2FA activo).
+   * @param challengeToken - Token de corta duración (generado por el use case vía `TokenService`) que el cliente
+   * reenvía a `POST /auth/login/verify-2fa` para resolver el challenge sin repetir la contraseña.
    * @returns Excepción de dominio lista para ser lanzada, con `availableMethods` ya resueltos.
    */
   createChallenge(
@@ -42,6 +44,7 @@ export class LoginSecurityChallengeService {
     profile: LoginSecurityProfile | null,
     context: LoginContext,
     reason: LoginChallengeReason,
+    challengeToken: string,
   ) {
     const metadata: LoginSecurityChallengeMetadata = {
       challengeType: 'LOGIN_VERIFICATION',
@@ -52,6 +55,7 @@ export class LoginSecurityChallengeService {
       deviceFingerprint: context.deviceFingerprint,
       country: context.country,
       availableMethods: this.resolveMethods(user, profile),
+      challengeToken,
     };
 
     return DomainErrorFactory.securityChallengeRequired(

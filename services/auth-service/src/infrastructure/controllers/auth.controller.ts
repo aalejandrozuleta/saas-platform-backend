@@ -52,6 +52,12 @@ import { ForgotPasswordSwagger } from '@infrastructure/swagger/forgot-password.s
 import { ResetPasswordUseCase } from '@application/use-cases/reset-password.use-case';
 import { ResetPasswordDto } from '@application/dto/reset-password/reset-password.dto';
 import { ResetPasswordSwagger } from '@infrastructure/swagger/reset-password.swagger';
+import { VerifyLoginChallengeUseCase } from '@application/use-cases/verify-login-challenge.use-case';
+import { VerifyLoginChallengeDto } from '@application/dto/verify-login-challenge/verify-login-challenge.dto';
+import { VerifyLoginChallengeSwagger } from '@infrastructure/swagger/verify-login-challenge.swagger';
+import { RegenerateRecoveryCodesUseCase } from '@application/use-cases/regenerate-recovery-codes.use-case';
+import { RegenerateRecoveryCodesDto } from '@application/dto/recovery-codes/regenerate-recovery-codes.dto';
+import { RegenerateRecoveryCodesSwagger } from '@infrastructure/swagger/recovery-codes.swagger';
 
 /**
  * Controller de autenticación
@@ -85,6 +91,8 @@ export class AuthController {
     private readonly resendVerificationUseCase: ResendVerificationUseCase,
     private readonly forgotPasswordUseCase: ForgotPasswordUseCase,
     private readonly resetPasswordUseCase: ResetPasswordUseCase,
+    private readonly verifyLoginChallengeUseCase: VerifyLoginChallengeUseCase,
+    private readonly regenerateRecoveryCodesUseCase: RegenerateRecoveryCodesUseCase,
     private readonly i18n: I18nService,
   ) {}
 
@@ -188,6 +196,47 @@ export class AuthController {
     });
 
     const result = await this.loginUserUseCase.execute(dto.email, dto.password, context);
+
+    const secure = this.shouldUseSecureCookies(req);
+
+    res.cookie('accessToken', result.token, {
+      httpOnly: true,
+      secure,
+      sameSite: 'strict',
+      path: '/',
+      maxAge: 15 * 60 * 1000,
+    });
+
+    res.cookie('refreshToken', result.refreshToken, {
+      httpOnly: true,
+      secure,
+      sameSite: 'strict',
+      path: '/v1/auth',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    return successResponse({
+      message: this.i18n.translate('auth.login_success', this.resolveLanguage(req)),
+    });
+  }
+
+  /**
+   * Resuelve el challenge de step-up auth (`SECURITY_CHALLENGE_REQUIRED`)
+   * emitido por `/login` cuando el usuario tiene 2FA activo o el intento
+   * viene de un dispositivo/país no confiable.
+   */
+  @Post('login/verify-2fa')
+  @VerifyLoginChallengeSwagger()
+  async verifyLoginChallenge(
+    @Body() dto: VerifyLoginChallengeDto,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const result = await this.verifyLoginChallengeUseCase.execute(
+      dto.challengeToken,
+      { totpCode: dto.totpCode, recoveryCode: dto.recoveryCode },
+      { ip: this.resolveClientIp(req) },
+    );
 
     const secure = this.shouldUseSecureCookies(req);
 
@@ -376,6 +425,30 @@ export class AuthController {
       {},
       {
         message: this.i18n.translate('auth.2fa_disable_success', this.resolveLanguage(req)),
+      },
+    );
+  }
+
+  @Post('2fa/recovery-codes/regenerate')
+  @UseGuards(JwtAuthGuard)
+  @RegenerateRecoveryCodesSwagger()
+  async regenerateRecoveryCodes(@Body() dto: RegenerateRecoveryCodesDto, @Req() req: Request) {
+    const userId = req.user!.id;
+
+    const result = await this.regenerateRecoveryCodesUseCase.execute(
+      userId,
+      dto.password,
+      dto.totpCode,
+      {
+        ip: this.resolveClientIp(req),
+        country: this.getHeader(req, 'x-country'),
+      },
+    );
+
+    return successResponse(
+      { recoveryCodes: result.recoveryCodes },
+      {
+        message: this.i18n.translate('auth.recovery_codes_regenerated', this.resolveLanguage(req)),
       },
     );
   }

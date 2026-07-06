@@ -107,4 +107,9 @@ export enum AuthAuditEvent {
    * Verificación 2FA fallida.
    */
   TWO_FACTOR_FAILED = 'AUTH.TWO_FACTOR_FAILED',
+
+  /**
+   * Regeneración de recovery codes de 2FA.
+   */
+  RECOVERY_CODES_REGENERATED = 'AUTH.RECOVERY_CODES_REGENERATED',
 }

@@ -97,6 +97,30 @@ export class DomainErrorFactory {
     );
   }
 
+  static invalidRecoveryCode(): DomainException {
+    return DomainException.create(
+      'auth.invalid_recovery_code',
+      ErrorCode.INVALID_RECOVERY_CODE,
+      401,
+    );
+  }
+
+  static invalidChallengeToken(): DomainException {
+    return DomainException.create(
+      'auth.invalid_challenge_token',
+      ErrorCode.INVALID_CHALLENGE_TOKEN,
+      401,
+    );
+  }
+
+  static twoFactorCredentialRequired(): DomainException {
+    return DomainException.create(
+      'auth.two_factor_credential_required',
+      ErrorCode.TWO_FACTOR_CREDENTIAL_REQUIRED,
+      400,
+    );
+  }
+
   static trustedCountryAlreadyExists(): DomainException {
     return DomainException.create(
       'auth.trusted_country_already_exists',

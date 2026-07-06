@@ -19,6 +19,7 @@ export const envSchema = z.object({
   ACCESS_TOKEN_TTL: z.coerce.number().default(900),
   REFRESH_TOKEN_TTL: z.coerce.number().default(604800),
   REDIS_SESSION_TTL: z.coerce.number().default(900),
+  MFA_CHALLENGE_TTL: z.coerce.number().default(300),
 
   DATABASE_URL: z.string(),
   MONGO_URL: z.string(),

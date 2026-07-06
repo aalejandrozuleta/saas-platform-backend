@@ -1,5 +1,3 @@
-import { randomBytes } from 'node:crypto';
-
 import { Inject } from '@nestjs/common';
 import { SecurityRepository } from '@domain/repositories/security.repository';
 import { SECURITY_REPOSITORY, RECOVERY_CODE_REPOSITORY } from '@domain/token/repositories.tokens';
@@ -10,8 +8,7 @@ import { DomainEventBus } from '@application/events/domain-event.bus';
 import { TotpService } from '@application/ports/totp.service.port';
 import { DomainErrorFactory } from '@domain/errors/domain-error.factory';
 import { TwoFactorVerifiedEvent } from '@application/events/two-factor/two-factor-verified.event';
-
-const RECOVERY_CODE_COUNT = 8;
+import { generateRecoveryCodes } from '@application/services/recovery-code-generator';
 
 /**
  * Confirma el código TOTP y activa 2FA definitivamente.
@@ -55,7 +52,7 @@ export class Verify2faUseCase {
 
     await this.securityRepository.activateTwoFactor(userId);
 
-    const plainCodes = this.generateRecoveryCodes();
+    const plainCodes = generateRecoveryCodes();
     const codeHashes = await Promise.all(plainCodes.map((code) => this.passwordHasher.hash(code)));
 
     await this.recoveryCodeRepository.deleteAllByUser(userId);
@@ -64,15 +61,5 @@ export class Verify2faUseCase {
     this.eventBus.publish(new TwoFactorVerifiedEvent(userId, context));
 
     return { recoveryCodes: plainCodes };
-  }
-
-  private generateRecoveryCodes(): string[] {
-    return Array.from(
-      { length: RECOVERY_CODE_COUNT },
-      () =>
-        randomBytes(4).toString('hex').toUpperCase() +
-        '-' +
-        randomBytes(4).toString('hex').toUpperCase(),
-    );
   }
 }

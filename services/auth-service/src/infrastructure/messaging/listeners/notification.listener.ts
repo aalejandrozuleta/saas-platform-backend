@@ -5,6 +5,7 @@ import { PasswordChangedEvent } from '@application/events/password/password-chan
 import { LoginBlockedEvent } from '@application/events/login/login-blocked.event';
 import { TwoFactorEnabledEvent } from '@application/events/two-factor/two-factor-enabled.event';
 import { TwoFactorDisabledEvent } from '@application/events/two-factor/two-factor-disabled.event';
+import { RecoveryCodesRegeneratedEvent } from '@application/events/two-factor/recovery-codes-regenerated.event';
 import { UserRepository } from '@domain/repositories/user.repository';
 import { USER_REPOSITORY } from '@domain/token/repositories.tokens';
 import { NotificationClient } from '@infrastructure/notifications/notification.client';
@@ -118,6 +119,25 @@ export class NotificationListener {
       variables: {
         email,
         disabledAt: now,
+        ip: event.context.ip,
+        country: event.context.country ?? '—',
+      },
+    });
+  }
+
+  @OnEvent(RecoveryCodesRegeneratedEvent.name)
+  async handleRecoveryCodesRegenerated(event: RecoveryCodesRegeneratedEvent): Promise<void> {
+    const email = await this.resolveEmail(event.userId);
+    if (!email) return;
+
+    const now = new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' });
+    this.notificationClient.sendEmail({
+      to: email,
+      subject: 'Alerta de seguridad — Recovery codes regenerados',
+      template: 'recovery-codes-regenerated',
+      variables: {
+        email,
+        regeneratedAt: now,
         ip: event.context.ip,
         country: event.context.country ?? '—',
       },

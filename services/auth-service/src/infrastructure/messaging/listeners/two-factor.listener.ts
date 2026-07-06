@@ -6,6 +6,7 @@ import { AUDIT_LOGGER } from '@domain/token/services.tokens';
 import { TwoFactorEnabledEvent } from '@application/events/two-factor/two-factor-enabled.event';
 import { TwoFactorVerifiedEvent } from '@application/events/two-factor/two-factor-verified.event';
 import { TwoFactorDisabledEvent } from '@application/events/two-factor/two-factor-disabled.event';
+import { RecoveryCodesRegeneratedEvent } from '@application/events/two-factor/recovery-codes-regenerated.event';
 
 /**
  * Listener de eventos de autenticación de dos factores (2FA).
@@ -49,6 +50,17 @@ export class TwoFactorListener {
   async handleDisabled(event: TwoFactorDisabledEvent): Promise<void> {
     await this.auditLogger.log(
       AuthActivityReportFactory.twoFactorDisabled({
+        userId: event.userId,
+        ip: event.context.ip,
+        country: event.context.country,
+      }),
+    );
+  }
+
+  @OnEvent(RecoveryCodesRegeneratedEvent.name)
+  async handleRecoveryCodesRegenerated(event: RecoveryCodesRegeneratedEvent): Promise<void> {
+    await this.auditLogger.log(
+      AuthActivityReportFactory.recoveryCodesRegenerated({
         userId: event.userId,
         ip: event.context.ip,
         country: event.context.country,

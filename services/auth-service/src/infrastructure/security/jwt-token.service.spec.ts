@@ -19,6 +19,7 @@ describe('JwtTokenService', () => {
         if (key === 'JWT_REFRESH_SECRET') return 'refresh-secret';
         if (key === 'ACCESS_TOKEN_TTL') return 900;
         if (key === 'REFRESH_TOKEN_TTL') return 604800;
+        if (key === 'MFA_CHALLENGE_TTL') return 300;
         return undefined;
       }),
     } as unknown as jest.Mocked<EnvService>;
@@ -112,6 +113,62 @@ describe('JwtTokenService', () => {
       expect(result.jti).toBe('uuid-123');
 
       expect(result.expiresAt.getTime()).toBe(now + 604800 * 1000);
+    });
+  });
+
+  describe('generateChallengeToken', () => {
+    it('debe generar un challenge token con sub, fp, country, reason y audience mfa-challenge', () => {
+      (sign as jest.Mock).mockReturnValue('challenge-token');
+
+      const result = service.generateChallengeToken({
+        userId: 'user-1',
+        deviceFingerprint: 'device-abc',
+        country: 'CO',
+        reason: 'TWO_FACTOR_REQUIRED',
+      });
+
+      expect(sign).toHaveBeenCalledWith(
+        {
+          sub: 'user-1',
+          fp: 'device-abc',
+          country: 'CO',
+          reason: 'TWO_FACTOR_REQUIRED',
+        },
+        'access-secret',
+        {
+          expiresIn: 300,
+          issuer: 'auth-service',
+          audience: 'mfa-challenge',
+        },
+      );
+
+      expect(result).toBe('challenge-token');
+    });
+  });
+
+  describe('verifyChallengeToken', () => {
+    it('debe verificar y retornar el payload del challenge token', () => {
+      (verify as jest.Mock).mockReturnValue({
+        sub: 'user-1',
+        fp: 'device-abc',
+        country: 'CO',
+        reason: 'TWO_FACTOR_REQUIRED',
+      });
+
+      const result = service.verifyChallengeToken('raw-challenge-token');
+
+      expect(verify).toHaveBeenCalledWith('raw-challenge-token', 'access-secret', {
+        algorithms: ['HS256'],
+        audience: 'mfa-challenge',
+        issuer: 'auth-service',
+      });
+
+      expect(result).toEqual({
+        userId: 'user-1',
+        deviceFingerprint: 'device-abc',
+        country: 'CO',
+        reason: 'TWO_FACTOR_REQUIRED',
+      });
     });
   });
 });

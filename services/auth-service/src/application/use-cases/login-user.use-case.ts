@@ -22,7 +22,7 @@ import {
   SESSION_CACHE,
 } from '@domain/token/services.tokens';
 import { UserRepository } from '@domain/repositories/user.repository';
-import { SecurityRepository,LoginSecurityProfile } from '@domain/repositories/security.repository';
+import { SecurityRepository, LoginSecurityProfile } from '@domain/repositories/security.repository';
 import { DeviceRepository } from '@domain/repositories/device.repository';
 import { SessionRepository } from '@application/ports/session.repository';
 import { RefreshTokenRepository } from '@application/ports/refresh-token.repository';
@@ -95,48 +95,34 @@ export class LoginUserUseCase {
     private readonly envService: EnvService,
     private readonly loginSecurityChallengeService: LoginSecurityChallengeService,
     private readonly userPermissionService: UserPermissionService,
-  ) { }
+  ) {}
 
   async execute(
     email: string,
     password: string,
     context: LoginContext,
   ): Promise<{ token: string; refreshToken: string }> {
-    this.eventBus.publish(
-      new LoginAttemptedEvent(email, context),
-    );
+    this.eventBus.publish(new LoginAttemptedEvent(email, context));
 
     this.policy.validateDeviceFingerprint(context.deviceFingerprint);
 
     const user = await this.validateUser(email, password, context);
 
-    await this.validatePassword(
-      user,
-      password,
-      context,
-      email,
-    );
+    await this.validatePassword(user, password, context, email);
 
-    const securityProfile =
-      await this.securityRepository.findByUserId(user.id);
+    const securityProfile = await this.securityRepository.findByUserId(user.id);
 
-    const device = await this.resolveLoginDevice(
-      user,
-      securityProfile,
-      context,
-    );
+    const device = await this.resolveLoginDevice(user, securityProfile, context);
+
+    if (securityProfile?.twoFactorEnabled) {
+      this.throwChallenge(user, securityProfile, context, LoginChallengeReason.TWO_FACTOR_REQUIRED);
+    }
 
     const result = await this.performLogin(user, device, context);
 
     await this.autoRegisterFirstCountry(user.id, securityProfile, context.country);
 
-    this.eventBus.publish(
-      new LoginSucceededEvent(
-        user.id,
-        context,
-        result.sessionId,
-      ),
-    );
+    this.eventBus.publish(new LoginSucceededEvent(user.id, context, result.sessionId));
 
     return {
       token: result.token,
@@ -167,7 +153,6 @@ export class LoginUserUseCase {
     password: string,
     context: LoginContext,
   ): Promise<User> {
-
     const emailVO = EmailVO.create(email);
     const user = await this.userRepository.findByEmail(emailVO);
 
@@ -179,20 +164,12 @@ export class LoginUserUseCase {
         password,
       );
 
-      this.eventBus.publish(
-        new LoginFailedEvent(
-          null,
-          email,
-          context,
-          'INVALID_CREDENTIALS',
-        ),
-      );
+      this.eventBus.publish(new LoginFailedEvent(null, email, context, 'INVALID_CREDENTIALS'));
 
       throw DomainErrorFactory.invalidCredentials();
     }
 
-    const normalizedUser =
-      await this.releaseExpiredTemporaryBlock(user);
+    const normalizedUser = await this.releaseExpiredTemporaryBlock(user);
 
     this.policy.validateUserStatus(normalizedUser.status);
 
@@ -203,18 +180,9 @@ export class LoginUserUseCase {
         this.clock.now(),
       );
     } catch (error) {
-
-      if (
-        error instanceof Error &&
-        'code' in error &&
-        error.code === ErrorCode.USER_BLOCKED
-      ) {
+      if (error instanceof Error && 'code' in error && error.code === ErrorCode.USER_BLOCKED) {
         this.eventBus.publish(
-          new LoginBlockedEvent(
-            normalizedUser.id,
-            context,
-            normalizedUser.blockedUntil,
-          ),
+          new LoginBlockedEvent(normalizedUser.id, context, normalizedUser.blockedUntil),
         );
       }
 
@@ -233,13 +201,9 @@ export class LoginUserUseCase {
     context: LoginContext,
     email: string,
   ): Promise<void> {
-
     const passwordVO = PasswordVO.create(password);
 
-    const valid = await this.passwordHasher.verify(
-      user.passwordHash,
-      passwordVO.getValue(),
-    );
+    const valid = await this.passwordHasher.verify(user.passwordHash, passwordVO.getValue());
 
     if (!valid) {
       await this.securityRepository.registerFailedAttempt(
@@ -249,30 +213,18 @@ export class LoginUserUseCase {
         this.clock.now(),
       );
 
-
-      this.eventBus.publish(
-        new LoginFailedEvent(
-          user.id,
-          email,
-          context,
-          'INVALID_PASSWORD',
-        ),
-      );
+      this.eventBus.publish(new LoginFailedEvent(user.id, email, context, 'INVALID_PASSWORD'));
 
       throw DomainErrorFactory.invalidCredentials();
     }
 
-    await this.securityRepository.resetFailedLoginAttempts(
-      user.id,
-    );
+    await this.securityRepository.resetFailedLoginAttempts(user.id);
   }
 
   /**
    * Libera bloqueos temporales expirados para no dejar cuentas atrapadas.
    */
-  private async releaseExpiredTemporaryBlock(
-    user: User,
-  ): Promise<User> {
+  private async releaseExpiredTemporaryBlock(user: User): Promise<User> {
     if (!user.hasExpiredTemporaryBlock(this.clock.now())) {
       return user;
     }
@@ -285,30 +237,16 @@ export class LoginUserUseCase {
   /**
    * Ejecuta operaciones críticas dentro de transacción.
    */
-  private async performLogin(
-    user: User,
-    device: Device,
-    context: LoginContext,
-  ) {
-
+  private async performLogin(user: User, device: Device, context: LoginContext) {
     return this.uow.execute(async (tx) => {
       device = device.updateLastUsed();
 
       await this.deviceRepository.save(device, tx);
 
-      const activeSessions =
-        await this.sessionRepository.countActiveSessions(
-          user.id,
-          tx,
-        );
+      const activeSessions = await this.sessionRepository.countActiveSessions(user.id, tx);
 
       if (activeSessions >= 3) {
-
-        await this.sessionRepository.revokeOldestActiveSession(
-          user.id,
-          this.clock.now(),
-          tx,
-        );
+        await this.sessionRepository.revokeOldestActiveSession(user.id, this.clock.now(), tx);
       }
 
       const session = await this.sessionRepository.create(
@@ -345,14 +283,17 @@ export class LoginUserUseCase {
 
       const familyId = randomUUID();
 
-      await this.refreshTokenRepository.create({
-        userId: user.id,
-        sessionId: session.id,
-        jti: refresh.jti,
-        familyId,
-        tokenHash: await this.passwordHasher.hash(refresh.token),
-        expiresAt: refresh.expiresAt,
-      }, tx);
+      await this.refreshTokenRepository.create(
+        {
+          userId: user.id,
+          sessionId: session.id,
+          jti: refresh.jti,
+          familyId,
+          tokenHash: await this.passwordHasher.hash(refresh.token),
+          expiresAt: refresh.expiresAt,
+        },
+        tx,
+      );
 
       await this.userRepository.updateLastLogin(user.id, this.clock.now());
 
@@ -375,21 +316,11 @@ export class LoginUserUseCase {
     );
 
     if (!device) {
-      throw this.loginSecurityChallengeService.createChallenge(
-        user,
-        securityProfile,
-        context,
-        LoginChallengeReason.NEW_DEVICE,
-      );
+      this.throwChallenge(user, securityProfile, context, LoginChallengeReason.NEW_DEVICE);
     }
 
     if (!device.isTrusted) {
-      throw this.loginSecurityChallengeService.createChallenge(
-        user,
-        securityProfile,
-        context,
-        LoginChallengeReason.UNTRUSTED_DEVICE,
-      );
+      this.throwChallenge(user, securityProfile, context, LoginChallengeReason.UNTRUSTED_DEVICE);
     }
 
     if (
@@ -397,14 +328,37 @@ export class LoginUserUseCase {
       context.country &&
       !securityProfile.trustedCountries.includes(context.country)
     ) {
-      throw this.loginSecurityChallengeService.createChallenge(
-        user,
-        securityProfile,
-        context,
-        LoginChallengeReason.UNTRUSTED_COUNTRY,
-      );
+      this.throwChallenge(user, securityProfile, context, LoginChallengeReason.UNTRUSTED_COUNTRY);
     }
 
     return device;
+  }
+
+  /**
+   * Genera un challenge token de corta duración y lanza el error de dominio
+   * `SECURITY_CHALLENGE_REQUIRED` correspondiente. Usado tanto por los
+   * chequeos de dispositivo/país no confiable como por el requerimiento de
+   * 2FA en cada login.
+   */
+  private throwChallenge(
+    user: User,
+    securityProfile: LoginSecurityProfile | null,
+    context: LoginContext,
+    reason: LoginChallengeReason,
+  ): never {
+    const challengeToken = this.tokenService.generateChallengeToken({
+      userId: user.id,
+      deviceFingerprint: context.deviceFingerprint,
+      country: context.country,
+      reason,
+    });
+
+    throw this.loginSecurityChallengeService.createChallenge(
+      user,
+      securityProfile,
+      context,
+      reason,
+      challengeToken,
+    );
   }
 }

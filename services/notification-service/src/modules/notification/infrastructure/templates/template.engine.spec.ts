@@ -42,6 +42,7 @@ describe('TemplateEngine', () => {
         'password-reset',
         '2fa-enabled',
         '2fa-disabled',
+        'recovery-codes-regenerated',
         'account-locked',
         'maintenance',
         'otp-code',
@@ -65,6 +66,10 @@ describe('TemplateEngine', () => {
       [
         '2fa-disabled',
         { email: 'ana@example.com', disabledAt: 'hoy', ip: '1.1.1.1', country: 'CO' },
+      ],
+      [
+        'recovery-codes-regenerated',
+        { email: 'ana@example.com', regeneratedAt: 'hoy', ip: '1.1.1.1', country: 'CO' },
       ],
       ['account-locked', { blockedUntil: 'hoy', ip: '1.1.1.1', country: 'CO' }],
       ['maintenance', { message: 'msg', scheduledAt: 'hoy', duration: '1h' }],

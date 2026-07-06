@@ -27,6 +27,8 @@ import { VerifyEmailUseCase } from '@application/use-cases/verify-email.use-case
 import { ResendVerificationUseCase } from '@application/use-cases/resend-verification.use-case';
 import { ForgotPasswordUseCase } from '@application/use-cases/forgot-password.use-case';
 import { ResetPasswordUseCase } from '@application/use-cases/reset-password.use-case';
+import { VerifyLoginChallengeUseCase } from '@application/use-cases/verify-login-challenge.use-case';
+import { RegenerateRecoveryCodesUseCase } from '@application/use-cases/regenerate-recovery-codes.use-case';
 import { JwtAuthGuard } from '@infrastructure/security/jwt-auth.guard';
 import { NotificationClient } from '@infrastructure/notifications/notification.client';
 import { NotificationListener } from '@infrastructure/messaging/listeners/notification.listener';
@@ -57,6 +59,8 @@ import { authProviders } from './auth.providers';
     ResendVerificationUseCase,
     ForgotPasswordUseCase,
     ResetPasswordUseCase,
+    VerifyLoginChallengeUseCase,
+    RegenerateRecoveryCodesUseCase,
     ...authProviders,
     JwtAuthGuard,
     AuthActivityListener,
