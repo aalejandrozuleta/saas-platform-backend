@@ -5,7 +5,10 @@
  * predeterminados de cada rol (RolePermission).
  *
  * Ejecutar:  npx prisma db seed
- * (o automáticamente en prisma migrate deploy en CI)
+ *
+ * `prisma migrate deploy` NO ejecuta el seed automáticamente (a diferencia
+ * de `prisma migrate dev`) — debe invocarse explícitamente después, como
+ * hace docker-entrypoint.sh.
  */
 import { PrismaPg } from '@prisma/adapter-pg';
 
