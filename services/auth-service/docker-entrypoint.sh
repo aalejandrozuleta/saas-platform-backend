@@ -20,6 +20,9 @@ prisma migrate deploy
 echo "[auth-service] Generating Prisma client..."
 prisma generate
 
+echo "[auth-service] Seeding permissions catalog..."
+prisma db seed
+
 echo "[auth-service] Syncing generated client to dist..."
 node -e "const{cpSync}=require('fs');cpSync('src/generated','dist/generated',{recursive:true,filter:s=>!s.includes('node_modules')})"
 
