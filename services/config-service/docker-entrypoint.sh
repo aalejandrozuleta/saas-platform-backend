@@ -20,6 +20,9 @@ prisma migrate deploy
 echo "[config-service] Generating Prisma client..."
 prisma generate
 
+echo "[config-service] Syncing generated client to dist..."
+node -e "const{cpSync}=require('fs');cpSync('src/generated','dist/generated',{recursive:true,filter:s=>!s.includes('node_modules')})"
+
 echo "[config-service] Starting in watch mode..."
 nest start --watch &
 NEST_PID=$!
