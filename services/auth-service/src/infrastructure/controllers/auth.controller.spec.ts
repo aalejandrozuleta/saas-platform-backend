@@ -245,6 +245,8 @@ describe('AuthController', () => {
     loginUserUseCase.execute.mockResolvedValue({
       token: 'access-token',
       refreshToken: 'refresh-token',
+      role: 'CUSTOMER',
+      permissions: ['profile:manage'],
     });
     i18n.translate.mockReturnValue('Inicio de sesión exitoso');
 
@@ -286,8 +288,10 @@ describe('AuthController', () => {
     );
     expect(result).toEqual({
       success: true,
+      message: 'Inicio de sesión exitoso',
       data: {
-        message: 'Inicio de sesión exitoso',
+        role: 'CUSTOMER',
+        permissions: ['profile:manage'],
       },
     });
   });
