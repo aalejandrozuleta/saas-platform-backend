@@ -170,9 +170,15 @@ export class AuthController {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    return successResponse({
-      message: this.i18n.translate('auth.login_success', this.resolveLanguage(req)),
-    });
+    return successResponse(
+      {
+        role: result.role,
+        permissions: result.permissions,
+      },
+      {
+        message: this.i18n.translate('auth.login_success', this.resolveLanguage(req)),
+      },
+    );
   }
 
   @Post('refresh')
