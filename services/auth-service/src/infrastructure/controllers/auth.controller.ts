@@ -197,23 +197,7 @@ export class AuthController {
 
     const result = await this.loginUserUseCase.execute(dto.email, dto.password, context);
 
-    const secure = this.shouldUseSecureCookies(req);
-
-    res.cookie('accessToken', result.token, {
-      httpOnly: true,
-      secure,
-      sameSite: 'strict',
-      path: '/',
-      maxAge: 15 * 60 * 1000,
-    });
-
-    res.cookie('refreshToken', result.refreshToken, {
-      httpOnly: true,
-      secure,
-      sameSite: 'strict',
-      path: '/v1/auth',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+    this.setAuthCookies(res, req, result.token, result.refreshToken);
 
     return successResponse(
       {
@@ -244,23 +228,7 @@ export class AuthController {
       { ip: this.resolveClientIp(req) },
     );
 
-    const secure = this.shouldUseSecureCookies(req);
-
-    res.cookie('accessToken', result.token, {
-      httpOnly: true,
-      secure,
-      sameSite: 'strict',
-      path: '/',
-      maxAge: 15 * 60 * 1000,
-    });
-
-    res.cookie('refreshToken', result.refreshToken, {
-      httpOnly: true,
-      secure,
-      sameSite: 'strict',
-      path: '/v1/auth',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+    this.setAuthCookies(res, req, result.token, result.refreshToken);
 
     return successResponse(
       {
@@ -551,6 +519,31 @@ export class AuthController {
   private shouldUseSecureCookies(req: Request): boolean {
     const forwardedProto = req.get('x-forwarded-proto');
     return req.secure || forwardedProto === 'https';
+  }
+
+  /**
+   * Setea las cookies `accessToken`/`refreshToken` tras un login exitoso.
+   * Usado tanto por `/login` como por `/login/verify-2fa`, ya que ambos
+   * terminan en el mismo estado (sesión creada, tokens emitidos).
+   */
+  private setAuthCookies(res: Response, req: Request, token: string, refreshToken: string): void {
+    const secure = this.shouldUseSecureCookies(req);
+
+    res.cookie('accessToken', token, {
+      httpOnly: true,
+      secure,
+      sameSite: 'strict',
+      path: '/',
+      maxAge: 15 * 60 * 1000,
+    });
+
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure,
+      sameSite: 'strict',
+      path: '/v1/auth',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
   }
 
   /**

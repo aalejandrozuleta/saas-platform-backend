@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { Base } from '../components/Base';
+import { proseStyles } from '../components/proseStyles';
 
 const e = React.createElement;
 
@@ -16,18 +17,8 @@ const s = {
     fontWeight: '500',
     marginBottom: '20px',
   },
-  h1: {
-    fontSize: '22px',
-    fontWeight: '600',
-    color: '#ffffff',
-    margin: '16px 0 12px',
-    letterSpacing: '-0.3px',
-  },
-  body: { fontSize: '15px', lineHeight: '1.7', color: '#9a9a9a', marginBottom: '16px' },
+  ...proseStyles,
   danger: { color: '#e07070' },
-  divider: { border: 'none', borderTop: '1px solid #1e1e1e', margin: '28px 0' },
-  meta: { fontSize: '13px', color: '#555555', lineHeight: '1.6' },
-  label: { color: '#777777' },
 } as const;
 
 /**
