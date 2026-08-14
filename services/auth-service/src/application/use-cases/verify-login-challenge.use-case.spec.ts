@@ -334,6 +334,20 @@ describe('VerifyLoginChallengeUseCase', () => {
 
       expect(sessionRepository.create).not.toHaveBeenCalled();
     });
+
+    it('debe lanzar TWO_FACTOR_CREDENTIAL_REQUIRED si se envían ambos a la vez, sin evaluar ninguno', async () => {
+      await expect(
+        useCase.execute(
+          'challenge-token',
+          { totpCode: '123456', recoveryCode: 'A1B2C3D4-E5F6A7B8' },
+          context,
+        ),
+      ).rejects.toMatchObject({ code: ErrorCode.TWO_FACTOR_CREDENTIAL_REQUIRED });
+
+      expect(securityRepository.getTotpSecret).not.toHaveBeenCalled();
+      expect(recoveryCodeRepository.findUnusedByUser).not.toHaveBeenCalled();
+      expect(sessionRepository.create).not.toHaveBeenCalled();
+    });
   });
 
   describe('límite de sesiones activas', () => {

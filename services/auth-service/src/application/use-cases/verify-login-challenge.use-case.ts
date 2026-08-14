@@ -37,6 +37,7 @@ import { LoginSucceededEvent } from '@application/events/login/login-succeeded.e
 import { Clock } from '@application/ports/clock.port';
 import { EnvService } from '@config/env/env.service';
 import { UserPermissionService } from '@application/services/user-permission.service';
+import { completeLoginSession } from '@application/services/complete-login-session';
 import { DomainErrorFactory } from '@domain/errors/domain-error.factory';
 
 /**
@@ -160,37 +161,44 @@ export class VerifyLoginChallengeUseCase {
   }
 
   /**
-   * Verifica exactamente un factor (TOTP o recovery code). El DTO ya exige
-   * que solo uno de los dos venga presente; este chequeo es defensivo.
+   * Verifica exactamente un factor (TOTP o recovery code). El DTO no impone
+   * esa exclusión mutua (`totpCode`/`recoveryCode` son ambos opcionales, ya
+   * que el cliente elige cuál usar), así que se rechaza explícitamente
+   * tanto la ausencia de ambos como el envío simultáneo de los dos — de lo
+   * contrario `recoveryCode` quedaría ignorado en silencio si venía junto a
+   * un `totpCode`.
    */
   private async verifyFactor(
     userId: string,
     credentials: { totpCode?: string; recoveryCode?: string },
   ): Promise<void> {
-    if (credentials.totpCode) {
+    const hasTotpCode = Boolean(credentials.totpCode);
+    const hasRecoveryCode = Boolean(credentials.recoveryCode);
+
+    if (hasTotpCode === hasRecoveryCode) {
+      throw DomainErrorFactory.twoFactorCredentialRequired();
+    }
+
+    if (hasTotpCode) {
       const secret = await this.securityRepository.getTotpSecret(userId);
 
-      if (!secret || !this.totpService.verifyToken(credentials.totpCode, secret)) {
+      if (!secret || !this.totpService.verifyToken(credentials.totpCode!, secret)) {
         throw DomainErrorFactory.invalidTotpCode();
       }
 
       return;
     }
 
-    if (credentials.recoveryCode) {
-      const candidates = await this.recoveryCodeRepository.findUnusedByUser(userId);
+    const candidates = await this.recoveryCodeRepository.findUnusedByUser(userId);
 
-      for (const candidate of candidates) {
-        if (await this.passwordHasher.verify(candidate.codeHash, credentials.recoveryCode)) {
-          await this.recoveryCodeRepository.markUsed(candidate.id);
-          return;
-        }
+    for (const candidate of candidates) {
+      if (await this.passwordHasher.verify(candidate.codeHash, credentials.recoveryCode!)) {
+        await this.recoveryCodeRepository.markUsed(candidate.id);
+        return;
       }
-
-      throw DomainErrorFactory.invalidRecoveryCode();
     }
 
-    throw DomainErrorFactory.twoFactorCredentialRequired();
+    throw DomainErrorFactory.invalidRecoveryCode();
   }
 
   /**
@@ -241,71 +249,23 @@ export class VerifyLoginChallengeUseCase {
     device: Device,
     context: { ip: string; country?: string },
   ) {
-    return this.uow.execute(async (tx) => {
-      const updatedDevice = device.updateLastUsed();
-
-      await this.deviceRepository.save(updatedDevice, tx);
-
-      const activeSessions = await this.sessionRepository.countActiveSessions(user.id, tx);
-
-      if (activeSessions >= 3) {
-        await this.sessionRepository.revokeOldestActiveSession(user.id, this.clock.now(), tx);
-      }
-
-      const session = await this.sessionRepository.create(
-        {
-          userId: user.id,
-          deviceId: updatedDevice.id,
-          ipAddress: context.ip,
-          country: context.country,
-        },
-        tx,
-      );
-
-      const accessToken = this.tokenService.generateAccessToken({
-        userId: user.id,
-        sessionId: session.id,
-        role: user.role,
-      });
-
-      const permissions = await this.userPermissionService.getEffectivePermissions(
-        user.id,
-        user.role,
-      );
-
-      await this.sessionCache.storeSession(
-        session.id,
-        user.id,
-        updatedDevice.id,
-        this.envService.get('REDIS_SESSION_TTL'),
-        user.role,
-        permissions,
-      );
-
-      const refresh = this.tokenService.generateRefreshToken();
-      const familyId = randomUUID();
-
-      await this.refreshTokenRepository.create(
-        {
-          userId: user.id,
-          sessionId: session.id,
-          jti: refresh.jti,
-          familyId,
-          tokenHash: await this.passwordHasher.hash(refresh.token),
-          expiresAt: refresh.expiresAt,
-        },
-        tx,
-      );
-
-      await this.userRepository.updateLastLogin(user.id, this.clock.now());
-
-      return {
-        token: accessToken,
-        refreshToken: refresh.token,
-        sessionId: session.id,
-        role: user.role,
-        permissions,
-      };
-    });
+    return completeLoginSession(
+      {
+        uow: this.uow,
+        deviceRepository: this.deviceRepository,
+        sessionRepository: this.sessionRepository,
+        refreshTokenRepository: this.refreshTokenRepository,
+        passwordHasher: this.passwordHasher,
+        tokenService: this.tokenService,
+        sessionCache: this.sessionCache,
+        envService: this.envService,
+        userPermissionService: this.userPermissionService,
+        userRepository: this.userRepository,
+        clock: this.clock,
+      },
+      user,
+      device,
+      context,
+    );
   }
 }

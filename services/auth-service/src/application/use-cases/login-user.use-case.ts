@@ -1,5 +1,3 @@
-import { randomUUID } from 'node:crypto';
-
 import { Inject } from '@nestjs/common';
 import { User } from '@domain/entities/user/user.entity';
 import { Device } from '@domain/entities/device/device.entity';
@@ -42,6 +40,7 @@ import { LoginSecurityChallengeService } from '@application/security/login-secur
 import { LoginChallengeReason } from '@application/security/login-challenge.types';
 import { ErrorCode } from '@saas/shared';
 import { UserPermissionService } from '@application/services/user-permission.service';
+import { completeLoginSession } from '@application/services/complete-login-session';
 
 /**
  * Caso de uso encargado de autenticar un usuario en el sistema.
@@ -245,73 +244,24 @@ export class LoginUserUseCase {
    * Ejecuta operaciones críticas dentro de transacción.
    */
   private async performLogin(user: User, device: Device, context: LoginContext) {
-    return this.uow.execute(async (tx) => {
-      device = device.updateLastUsed();
-
-      await this.deviceRepository.save(device, tx);
-
-      const activeSessions = await this.sessionRepository.countActiveSessions(user.id, tx);
-
-      if (activeSessions >= 3) {
-        await this.sessionRepository.revokeOldestActiveSession(user.id, this.clock.now(), tx);
-      }
-
-      const session = await this.sessionRepository.create(
-        {
-          userId: user.id,
-          deviceId: device.id,
-          ipAddress: context.ip,
-          country: context.country,
-        },
-        tx,
-      );
-
-      const accessToken = this.tokenService.generateAccessToken({
-        userId: user.id,
-        sessionId: session.id,
-        role: user.role,
-      });
-
-      const permissions = await this.userPermissionService.getEffectivePermissions(
-        user.id,
-        user.role,
-      );
-
-      await this.sessionCache.storeSession(
-        session.id,
-        user.id,
-        device.id,
-        this.envService.get('REDIS_SESSION_TTL'),
-        user.role,
-        permissions,
-      );
-
-      const refresh = this.tokenService.generateRefreshToken();
-
-      const familyId = randomUUID();
-
-      await this.refreshTokenRepository.create(
-        {
-          userId: user.id,
-          sessionId: session.id,
-          jti: refresh.jti,
-          familyId,
-          tokenHash: await this.passwordHasher.hash(refresh.token),
-          expiresAt: refresh.expiresAt,
-        },
-        tx,
-      );
-
-      await this.userRepository.updateLastLogin(user.id, this.clock.now());
-
-      return {
-        token: accessToken,
-        refreshToken: refresh.token,
-        sessionId: session.id,
-        role: user.role,
-        permissions,
-      };
-    });
+    return completeLoginSession(
+      {
+        uow: this.uow,
+        deviceRepository: this.deviceRepository,
+        sessionRepository: this.sessionRepository,
+        refreshTokenRepository: this.refreshTokenRepository,
+        passwordHasher: this.passwordHasher,
+        tokenService: this.tokenService,
+        sessionCache: this.sessionCache,
+        envService: this.envService,
+        userPermissionService: this.userPermissionService,
+        userRepository: this.userRepository,
+        clock: this.clock,
+      },
+      user,
+      device,
+      context,
+    );
   }
 
   private async resolveLoginDevice(
