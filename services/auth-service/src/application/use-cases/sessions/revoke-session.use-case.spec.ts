@@ -58,9 +58,7 @@ describe('RevokeSessionUseCase', () => {
     expect(sessionRepository.revokeById).toHaveBeenCalledWith('session-2', now);
     expect(refreshTokenRepository.revokeBySession).toHaveBeenCalledWith('session-2');
     expect(sessionCache.revokeSession).toHaveBeenCalledWith('session-2');
-    expect(eventBus.publish).toHaveBeenCalledWith(
-      new LogoutEvent('user-1', 'session-2', context),
-    );
+    expect(eventBus.publish).toHaveBeenCalledWith(new LogoutEvent('user-1', 'session-2', context));
   });
 
   it('debe lanzar error si la sesión no pertenece al usuario', async () => {

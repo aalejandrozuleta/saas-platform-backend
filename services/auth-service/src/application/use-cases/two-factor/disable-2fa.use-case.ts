@@ -2,7 +2,11 @@ import { Inject } from '@nestjs/common';
 import { UserStatus } from '@domain/enums/user-status.enum';
 import { UserRepository } from '@domain/repositories/user.repository';
 import { SecurityRepository } from '@domain/repositories/security.repository';
-import { USER_REPOSITORY, SECURITY_REPOSITORY, RECOVERY_CODE_REPOSITORY } from '@domain/token/repositories.tokens';
+import {
+  USER_REPOSITORY,
+  SECURITY_REPOSITORY,
+  RECOVERY_CODE_REPOSITORY,
+} from '@domain/token/repositories.tokens';
 import { PASSWORD_HASHER, DOMAIN_EVENT_BUS, TOTP_SERVICE } from '@domain/token/services.tokens';
 import { PasswordHasher } from '@application/ports/password-hasher.port';
 import { RecoveryCodeRepository } from '@application/ports/recovery-code.repository';
@@ -50,10 +54,7 @@ export class Disable2faUseCase {
       throw DomainErrorFactory.invalidCurrentPassword();
     }
 
-    const isPasswordValid = await this.passwordHasher.verify(
-      user.passwordHash,
-      password,
-    );
+    const isPasswordValid = await this.passwordHasher.verify(user.passwordHash, password);
 
     if (!isPasswordValid) {
       throw DomainErrorFactory.invalidCurrentPassword();

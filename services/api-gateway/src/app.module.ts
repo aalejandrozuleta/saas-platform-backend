@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AuthModule } from '@modules/auth/auth.module';
+import { UserModule } from '@modules/user/user.module';
 import { ConfigGatewayModule } from '@modules/config/config.module';
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { JwtSessionGuard } from '@infrastructure/security/guards/jwt-session.guard';
@@ -23,6 +24,7 @@ import { MetricsModule } from './infrastructure/metrics/metrics.module';
     EnvModule,
     I18nModule,
     AuthModule,
+    UserModule,
     ConfigGatewayModule,
     MetricsModule,
 

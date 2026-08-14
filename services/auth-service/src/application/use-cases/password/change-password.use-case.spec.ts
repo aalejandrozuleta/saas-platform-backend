@@ -39,10 +39,12 @@ describe('ChangePasswordUseCase', () => {
   // Helpers
   // ──────────────────────────────────────────────────────────────────────────
 
-  const createUser = (overrides?: Partial<{
-    status: UserStatus;
-    passwordHash: string;
-  }>) =>
+  const createUser = (
+    overrides?: Partial<{
+      status: UserStatus;
+      passwordHash: string;
+    }>,
+  ) =>
     User.fromPersistence({
       id: 'user-1',
       email: EmailVO.create('test@example.com'),
@@ -135,17 +137,12 @@ describe('ChangePasswordUseCase', () => {
 
       // Primera llamada a verify → currentPassword válida (true)
       // Segunda llamada a verify → newPassword distinta a la actual (false)
-      passwordHasher.verify
-        .mockResolvedValueOnce(true)
-        .mockResolvedValueOnce(false);
+      passwordHasher.verify.mockResolvedValueOnce(true).mockResolvedValueOnce(false);
 
       passwordHasher.hash.mockResolvedValue('new-hash');
       userRepository.updatePasswordHash.mockResolvedValue();
       securityRepository.updateLastPasswordChange.mockResolvedValue();
-      sessionRepository.revokeAllUserSessions.mockResolvedValue([
-        'session-1',
-        'session-2',
-      ]);
+      sessionRepository.revokeAllUserSessions.mockResolvedValue(['session-1', 'session-2']);
       refreshTokenRepository.revokeAllByUser.mockResolvedValue();
       sessionCache.revokeSession.mockResolvedValue();
     });
@@ -154,31 +151,20 @@ describe('ChangePasswordUseCase', () => {
       await useCase.execute('user-1', 'OldPassword123!', 'NewPassword456@', context);
 
       expect(passwordHasher.hash).toHaveBeenCalledWith('NewPassword456@');
-      expect(userRepository.updatePasswordHash).toHaveBeenCalledWith(
-        'user-1',
-        'new-hash',
-      );
+      expect(userRepository.updatePasswordHash).toHaveBeenCalledWith('user-1', 'new-hash');
     });
 
     it('debe registrar la fecha del último cambio de contraseña', async () => {
       await useCase.execute('user-1', 'OldPassword123!', 'NewPassword456@', context);
 
-      expect(securityRepository.updateLastPasswordChange).toHaveBeenCalledWith(
-        'user-1',
-        NOW,
-      );
+      expect(securityRepository.updateLastPasswordChange).toHaveBeenCalledWith('user-1', NOW);
     });
 
     it('debe revocar todas las sesiones activas en DB y sus refresh tokens en paralelo', async () => {
       await useCase.execute('user-1', 'OldPassword123!', 'NewPassword456@', context);
 
-      expect(sessionRepository.revokeAllUserSessions).toHaveBeenCalledWith(
-        'user-1',
-        NOW,
-      );
-      expect(refreshTokenRepository.revokeAllByUser).toHaveBeenCalledWith(
-        'user-1',
-      );
+      expect(sessionRepository.revokeAllUserSessions).toHaveBeenCalledWith('user-1', NOW);
+      expect(refreshTokenRepository.revokeAllByUser).toHaveBeenCalledWith('user-1');
     });
 
     it('debe limpiar del cache Redis cada sesión revocada', async () => {
@@ -192,9 +178,7 @@ describe('ChangePasswordUseCase', () => {
     it('debe emitir PasswordChangedEvent con userId y contexto', async () => {
       await useCase.execute('user-1', 'OldPassword123!', 'NewPassword456@', context);
 
-      expect(eventBus.publish).toHaveBeenCalledWith(
-        expect.any(PasswordChangedEvent),
-      );
+      expect(eventBus.publish).toHaveBeenCalledWith(expect.any(PasswordChangedEvent));
       expect(eventBus.publish).toHaveBeenCalledWith(
         expect.objectContaining({
           userId: 'user-1',
@@ -241,9 +225,7 @@ describe('ChangePasswordUseCase', () => {
     });
 
     it('debe lanzar INVALID_CURRENT_PASSWORD si el usuario está BLOQUEADO (sin revelar el motivo)', async () => {
-      userRepository.findById.mockResolvedValue(
-        createUser({ status: UserStatus.BLOCKED }),
-      );
+      userRepository.findById.mockResolvedValue(createUser({ status: UserStatus.BLOCKED }));
 
       await expect(
         useCase.execute('user-1', 'OldPassword123!', 'NewPassword456@', context),
@@ -255,9 +237,7 @@ describe('ChangePasswordUseCase', () => {
     });
 
     it('debe lanzar INVALID_CURRENT_PASSWORD si el usuario está PENDIENTE (sin revelar el motivo)', async () => {
-      userRepository.findById.mockResolvedValue(
-        createUser({ status: UserStatus.PENDING }),
-      );
+      userRepository.findById.mockResolvedValue(createUser({ status: UserStatus.PENDING }));
 
       await expect(
         useCase.execute('user-1', 'OldPassword123!', 'NewPassword456@', context),
@@ -327,9 +307,7 @@ describe('ChangePasswordUseCase', () => {
 
       // currentPassword válida → true
       // newPassword igual a la actual → true (mismo hash)
-      passwordHasher.verify
-        .mockResolvedValueOnce(true)
-        .mockResolvedValueOnce(true);
+      passwordHasher.verify.mockResolvedValueOnce(true).mockResolvedValueOnce(true);
 
       await expect(
         useCase.execute('user-1', 'SamePassword1!', 'SamePassword1!', context),
@@ -342,9 +320,7 @@ describe('ChangePasswordUseCase', () => {
 
     it('debe emitir PasswordChangeFailedEvent con razón SAME_PASSWORD_NOT_ALLOWED', async () => {
       userRepository.findById.mockResolvedValue(createUser());
-      passwordHasher.verify
-        .mockResolvedValueOnce(true)
-        .mockResolvedValueOnce(true);
+      passwordHasher.verify.mockResolvedValueOnce(true).mockResolvedValueOnce(true);
 
       await expect(
         useCase.execute('user-1', 'SamePassword1!', 'SamePassword1!', context),
@@ -360,9 +336,7 @@ describe('ChangePasswordUseCase', () => {
 
     it('no debe revocar sesiones si la nueva contraseña es igual a la actual', async () => {
       userRepository.findById.mockResolvedValue(createUser());
-      passwordHasher.verify
-        .mockResolvedValueOnce(true)
-        .mockResolvedValueOnce(true);
+      passwordHasher.verify.mockResolvedValueOnce(true).mockResolvedValueOnce(true);
 
       await expect(
         useCase.execute('user-1', 'SamePassword1!', 'SamePassword1!', context),
@@ -375,9 +349,7 @@ describe('ChangePasswordUseCase', () => {
       userRepository.findById.mockResolvedValue(createUser());
       passwordHasher.verify.mockResolvedValueOnce(true); // currentPassword válida
 
-      await expect(
-        useCase.execute('user-1', 'OldPassword123!', 'weak', context),
-      ).rejects.toThrow();
+      await expect(useCase.execute('user-1', 'OldPassword123!', 'weak', context)).rejects.toThrow();
     });
   });
 
@@ -404,9 +376,7 @@ describe('ChangePasswordUseCase', () => {
       const callOrder: string[] = [];
 
       userRepository.findById.mockResolvedValue(createUser());
-      passwordHasher.verify
-        .mockResolvedValueOnce(true)
-        .mockResolvedValueOnce(false);
+      passwordHasher.verify.mockResolvedValueOnce(true).mockResolvedValueOnce(false);
       passwordHasher.hash.mockResolvedValue('new-hash');
 
       userRepository.updatePasswordHash.mockImplementation(async () => {

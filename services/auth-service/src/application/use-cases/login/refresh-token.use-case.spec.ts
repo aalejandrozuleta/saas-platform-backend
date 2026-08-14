@@ -34,18 +34,13 @@ describe('RefreshTokenUseCase', () => {
     } as any;
 
     sessionCache = {
-      storeSession:    jest.fn(),
-      getSession:      jest.fn(),
+      storeSession: jest.fn(),
+      getSession: jest.fn(),
       isSessionActive: jest.fn(),
-      revokeSession:   jest.fn(),
+      revokeSession: jest.fn(),
     } as any;
 
-    useCase = new RefreshTokenUseCase(
-      tokenService,
-      refreshRepo,
-      passwordHasher,
-      sessionCache,
-    );
+    useCase = new RefreshTokenUseCase(tokenService, refreshRepo, passwordHasher, sessionCache);
   });
 
   it('debe rotar refresh token cuando la sesión sigue activa', async () => {
@@ -60,7 +55,11 @@ describe('RefreshTokenUseCase', () => {
       revokedAt: null,
     });
     passwordHasher.verify.mockResolvedValue(true);
-    sessionCache.getSession.mockResolvedValue({ userId: 'user-1', role: 'EMPLOYEE', permissions: [] });
+    sessionCache.getSession.mockResolvedValue({
+      userId: 'user-1',
+      role: 'EMPLOYEE',
+      permissions: [],
+    });
     tokenService.generateAccessToken.mockReturnValue('access-token');
     tokenService.generateRefreshToken.mockReturnValue({
       token: 'new-refresh-token',
@@ -75,10 +74,7 @@ describe('RefreshTokenUseCase', () => {
       token: 'access-token',
       refreshToken: 'new-refresh-token',
     });
-    expect(refreshRepo.revoke).toHaveBeenCalledWith(
-      'old-jti',
-      'new-jti',
-    );
+    expect(refreshRepo.revoke).toHaveBeenCalledWith('old-jti', 'new-jti');
     expect(refreshRepo.create).toHaveBeenCalledWith(
       expect.objectContaining({
         familyId: 'family-1',
@@ -88,9 +84,7 @@ describe('RefreshTokenUseCase', () => {
   });
 
   it('debe rechazar refresh token faltante o inválido', async () => {
-    await expect(
-      useCase.execute('' as any),
-    ).rejects.toMatchObject({
+    await expect(useCase.execute('' as any)).rejects.toMatchObject({
       code: ErrorCode.INVALID_REFRESH_TOKEN,
     });
 
@@ -98,9 +92,7 @@ describe('RefreshTokenUseCase', () => {
       throw new Error('invalid');
     });
 
-    await expect(
-      useCase.execute('bad-token'),
-    ).rejects.toMatchObject({
+    await expect(useCase.execute('bad-token')).rejects.toMatchObject({
       code: ErrorCode.INVALID_REFRESH_TOKEN,
     });
   });
@@ -109,9 +101,7 @@ describe('RefreshTokenUseCase', () => {
     tokenService.verifyRefreshToken.mockReturnValue({ jti: 'jti-ok' });
     refreshRepo.findByJti.mockResolvedValue(null);
 
-    await expect(
-      useCase.execute('raw-refresh-token'),
-    ).rejects.toMatchObject({
+    await expect(useCase.execute('raw-refresh-token')).rejects.toMatchObject({
       code: ErrorCode.INVALID_REFRESH_TOKEN,
     });
   });
@@ -128,9 +118,7 @@ describe('RefreshTokenUseCase', () => {
       revokedAt: new Date(), // ya revocado
     });
 
-    await expect(
-      useCase.execute('raw-refresh-token'),
-    ).rejects.toMatchObject({
+    await expect(useCase.execute('raw-refresh-token')).rejects.toMatchObject({
       code: ErrorCode.INVALID_REFRESH_TOKEN,
     });
   });
@@ -147,9 +135,7 @@ describe('RefreshTokenUseCase', () => {
       revokedAt: null,
     });
 
-    await expect(
-      useCase.execute('raw-refresh-token'),
-    ).rejects.toMatchObject({
+    await expect(useCase.execute('raw-refresh-token')).rejects.toMatchObject({
       code: ErrorCode.INVALID_REFRESH_TOKEN,
     });
   });
@@ -167,9 +153,7 @@ describe('RefreshTokenUseCase', () => {
     });
     passwordHasher.verify.mockResolvedValue(false);
 
-    await expect(
-      useCase.execute('raw-refresh-token'),
-    ).rejects.toMatchObject({
+    await expect(useCase.execute('raw-refresh-token')).rejects.toMatchObject({
       code: ErrorCode.INVALID_REFRESH_TOKEN,
     });
   });
@@ -188,9 +172,7 @@ describe('RefreshTokenUseCase', () => {
     passwordHasher.verify.mockResolvedValue(true);
     sessionCache.getSession.mockResolvedValue(null);
 
-    await expect(
-      useCase.execute('raw-refresh-token'),
-    ).rejects.toMatchObject({
+    await expect(useCase.execute('raw-refresh-token')).rejects.toMatchObject({
       code: ErrorCode.INVALID_REFRESH_TOKEN,
     });
   });

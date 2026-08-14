@@ -9,11 +9,7 @@ import {
   REFRESH_TOKEN_REPOSITORY,
   SECURITY_REPOSITORY,
 } from '@domain/token/repositories.tokens';
-import {
-  PASSWORD_HASHER,
-  DOMAIN_EVENT_BUS,
-  SESSION_CACHE,
-} from '@domain/token/services.tokens';
+import { PASSWORD_HASHER, DOMAIN_EVENT_BUS, SESSION_CACHE } from '@domain/token/services.tokens';
 import { PasswordHasher } from '@application/ports/password-hasher.port';
 import { SessionRepository } from '@application/ports/session.repository';
 import { RefreshTokenRepository } from '@application/ports/refresh-token.repository';
@@ -69,7 +65,6 @@ export class ChangePasswordUseCase {
     newPassword: string,
     context: { ip: string; country?: string },
   ): Promise<void> {
-
     // ── 1. Verificar existencia y estado del usuario ──────────────────────
     const user = await this.userRepository.findById(userId);
 
@@ -133,8 +128,6 @@ export class ChangePasswordUseCase {
       this.refreshTokenRepository.revokeAllByUser(userId),
     ]);
 
-    await Promise.all(
-      revokedSessionIds.map((id) => this.sessionCache.revokeSession(id)),
-    );
+    await Promise.all(revokedSessionIds.map((id) => this.sessionCache.revokeSession(id)));
   }
 }

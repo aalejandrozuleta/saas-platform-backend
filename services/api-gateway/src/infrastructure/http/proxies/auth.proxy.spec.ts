@@ -83,14 +83,9 @@ describe('AuthProxy', () => {
       });
       mockClient.requestTyped.mockRejectedValue(circuitError);
 
-      await expect(proxy.forward(makeReq(), '/login')).rejects.toThrow(
-        HttpException,
-      );
+      await expect(proxy.forward(makeReq(), '/login')).rejects.toThrow(HttpException);
 
-      expect(logger.warn).toHaveBeenCalledWith(
-        'Auth service circuit open',
-        expect.any(Object),
-      );
+      expect(logger.warn).toHaveBeenCalledWith('Auth service circuit open', expect.any(Object));
     });
 
     it('debe lanzar HttpException con el status del upstream cuando responde 4xx', async () => {
@@ -109,25 +104,18 @@ describe('AuthProxy', () => {
       );
       mockClient.requestTyped.mockRejectedValue(axiosError);
 
-      await expect(proxy.forward(makeReq(), '/login')).rejects.toThrow(
-        HttpException,
-      );
+      await expect(proxy.forward(makeReq(), '/login')).rejects.toThrow(HttpException);
     });
 
     it('debe lanzar HttpException 503 cuando el upstream no responde (sin response)', async () => {
-      const axiosError = new AxiosError(
-        'Network Error',
-        'ECONNREFUSED',
-        { headers: {} } as any,
-        { /* request object */ },
-      );
+      const axiosError = new AxiosError('Network Error', 'ECONNREFUSED', { headers: {} } as any, {
+        /* request object */
+      });
       // Sin response, con request
       Object.defineProperty(axiosError, 'request', { value: {} });
       mockClient.requestTyped.mockRejectedValue(axiosError);
 
-      await expect(proxy.forward(makeReq(), '/login')).rejects.toThrow(
-        HttpException,
-      );
+      await expect(proxy.forward(makeReq(), '/login')).rejects.toThrow(HttpException);
 
       expect(logger.warn).toHaveBeenCalledWith(
         'Auth service upstream no response',
@@ -138,9 +126,7 @@ describe('AuthProxy', () => {
     it('debe lanzar HttpException 502 para error desconocido no-Axios', async () => {
       mockClient.requestTyped.mockRejectedValue(new Error('unknown'));
 
-      await expect(proxy.forward(makeReq(), '/login')).rejects.toThrow(
-        HttpException,
-      );
+      await expect(proxy.forward(makeReq(), '/login')).rejects.toThrow(HttpException);
 
       expect(logger.error).toHaveBeenCalledWith(
         'Auth service upstream unknown failure',
@@ -172,14 +158,55 @@ describe('AuthProxy', () => {
       );
       mockClient.requestTyped.mockRejectedValue(axiosError);
 
-      await expect(proxy.forward(makeReq(), '/login')).rejects.toThrow(
-        HttpException,
+      await expect(proxy.forward(makeReq(), '/login')).rejects.toThrow(HttpException);
+
+      expect(logger.warn).toHaveBeenCalledWith('Auth service upstream 5xx', expect.any(Object));
+    });
+  });
+
+  describe('forwardMultipart', () => {
+    const makeFile = () => ({
+      buffer: Buffer.from('fake-image-bytes'),
+      originalname: 'avatar.png',
+      mimetype: 'image/png',
+    });
+
+    it('debe retornar body y cookies del upstream', async () => {
+      mockClient.requestTyped.mockResolvedValue({
+        data: { success: true },
+        headers: { 'set-cookie': ['token=abc'] },
+      });
+
+      const result = await proxy.forwardMultipart(
+        makeReq(),
+        '/users/me/profile/avatar',
+        makeFile(),
       );
 
-      expect(logger.warn).toHaveBeenCalledWith(
-        'Auth service upstream 5xx',
-        expect.any(Object),
-      );
+      expect(result.body).toEqual({ success: true });
+      expect(result.cookies).toEqual(['token=abc']);
+    });
+
+    it('no debe reenviar el content-type original del cliente (boundary distinto al del nuevo FormData)', async () => {
+      mockClient.requestTyped.mockResolvedValue({ data: {}, headers: {} });
+
+      const req = makeReq({
+        headers: { 'content-type': 'multipart/form-data; boundary=client-boundary-xyz' },
+      });
+
+      await proxy.forwardMultipart(req, '/users/me/profile/avatar', makeFile());
+
+      const sentConfig = mockClient.requestTyped.mock.calls[0][0];
+      expect(sentConfig.headers['content-type']).not.toContain('client-boundary-xyz');
+      expect(sentConfig.headers['content-type']).toContain('multipart/form-data');
+    });
+
+    it('debe traducir errores del upstream igual que forward', async () => {
+      mockClient.requestTyped.mockRejectedValue({ code: 'EOPENBREAKER' });
+
+      await expect(
+        proxy.forwardMultipart(makeReq(), '/users/me/profile/avatar', makeFile()),
+      ).rejects.toThrow(HttpException);
     });
   });
 });

@@ -45,10 +45,7 @@ export class Enable2faUseCase {
       throw DomainErrorFactory.invalidCurrentPassword();
     }
 
-    const isPasswordValid = await this.passwordHasher.verify(
-      user.passwordHash,
-      password,
-    );
+    const isPasswordValid = await this.passwordHasher.verify(user.passwordHash, password);
 
     if (!isPasswordValid) {
       throw DomainErrorFactory.invalidCurrentPassword();
