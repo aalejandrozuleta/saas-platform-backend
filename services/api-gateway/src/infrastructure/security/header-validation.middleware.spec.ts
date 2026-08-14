@@ -11,6 +11,7 @@ describe('headerValidationMiddleware', () => {
   beforeEach(() => {
     req = {
       url: '/auth/login',
+      path: '/auth/login',
       headers: {
         'accept-language': 'es',
       },
@@ -26,11 +27,7 @@ describe('headerValidationMiddleware', () => {
     req.method = 'GET';
     req.headers = {};
 
-    headerValidationMiddleware(
-      req as Request,
-      res as Response,
-      next as NextFunction,
-    );
+    headerValidationMiddleware(req as Request, res as Response, next as NextFunction);
 
     expect(next).toHaveBeenCalled();
   });
@@ -41,11 +38,7 @@ describe('headerValidationMiddleware', () => {
       'content-type': 'application/json',
     };
 
-    headerValidationMiddleware(
-      req as Request,
-      res as Response,
-      next as NextFunction,
-    );
+    headerValidationMiddleware(req as Request, res as Response, next as NextFunction);
 
     expect(next).toHaveBeenCalled();
   });
@@ -56,11 +49,7 @@ describe('headerValidationMiddleware', () => {
       'content-type': 'text/plain',
     };
 
-    headerValidationMiddleware(
-      req as Request,
-      res as Response,
-      next as NextFunction,
-    );
+    headerValidationMiddleware(req as Request, res as Response, next as NextFunction);
 
     expect(res.status).toHaveBeenCalledWith(415);
     expect(res.json).toHaveBeenCalledWith(
@@ -68,8 +57,7 @@ describe('headerValidationMiddleware', () => {
         success: false,
         error: expect.objectContaining({
           code: ErrorCode.UNSUPPORTED_MEDIA_TYPE,
-          message:
-            'El contenido debe enviarse como application/json',
+          message: 'El contenido debe enviarse como application/json',
         }),
         meta: expect.objectContaining({
           path: '/auth/login',
@@ -79,6 +67,47 @@ describe('headerValidationMiddleware', () => {
       }),
     );
 
+    expect(next).not.toHaveBeenCalled();
+  });
+
+  it('debe permitir multipart/form-data en la ruta de subida de avatar', () => {
+    req.method = 'POST';
+    req.url = '/v1/users/me/profile/avatar';
+    (req as any).path = '/v1/users/me/profile/avatar';
+    req.headers = {
+      'content-type': 'multipart/form-data; boundary=----abc123',
+    };
+
+    headerValidationMiddleware(req as Request, res as Response, next as NextFunction);
+
+    expect(next).toHaveBeenCalled();
+  });
+
+  it('debe bloquear application/json en la ruta de subida de avatar', () => {
+    req.method = 'POST';
+    req.url = '/v1/users/me/profile/avatar';
+    (req as any).path = '/v1/users/me/profile/avatar';
+    req.headers = {
+      'content-type': 'application/json',
+    };
+
+    headerValidationMiddleware(req as Request, res as Response, next as NextFunction);
+
+    expect(res.status).toHaveBeenCalledWith(415);
+    expect(next).not.toHaveBeenCalled();
+  });
+
+  it('debe seguir exigiendo application/json en rutas que no son de subida de archivos', () => {
+    req.method = 'POST';
+    req.url = '/v1/users/me/profile';
+    (req as any).path = '/v1/users/me/profile';
+    req.headers = {
+      'content-type': 'multipart/form-data; boundary=----abc123',
+    };
+
+    headerValidationMiddleware(req as Request, res as Response, next as NextFunction);
+
+    expect(res.status).toHaveBeenCalledWith(415);
     expect(next).not.toHaveBeenCalled();
   });
 });

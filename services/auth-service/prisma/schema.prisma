@@ -37,11 +37,36 @@ model User {
 
   // Relaciones
   security         UserSecurity?
+  profile          UserProfile?
   devices          Device[]
   sessions         Session[]
   refreshTokens    RefreshToken[]
   recoveryCodes    RecoveryCode[]
   userPermissions  UserPermission[]
+}
+
+model UserProfile {
+  userId         String        @id
+  firstName      String
+  lastName       String
+  phone          String?
+  documentType   DocumentType?
+  documentNumber String?
+  avatarUrl      String?
+
+  dataProcessingAcceptedAt DateTime
+  termsAcceptedAt          DateTime
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum DocumentType {
+  CC
+  CE
+  PASAPORTE
 }
 
 model UserSecurity {

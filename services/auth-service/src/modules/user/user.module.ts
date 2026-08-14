@@ -1,0 +1,37 @@
+import { Module } from '@nestjs/common';
+import { I18nModule } from '@infrastructure/i18n/i18n.module';
+import { PrismaModule } from '@infrastructure/persistence/prisma/prisma.module';
+import { UserProfileController } from '@infrastructure/controllers/user-profile.controller';
+import { JwtAuthGuard } from '@infrastructure/security/jwt-auth.guard';
+import { CreateUserProfileUseCase } from '@application/use-cases/user-profile/create-user-profile.use-case';
+import { GetUserProfileUseCase } from '@application/use-cases/user-profile/get-user-profile.use-case';
+import { UpdateUserProfileUseCase } from '@application/use-cases/user-profile/update-user-profile.use-case';
+import { UploadProfileImageUseCase } from '@application/use-cases/user-profile/upload-profile-image.use-case';
+
+import { userProviders } from './user.providers';
+
+/**
+ * Módulo de Perfil de Usuario.
+ *
+ * @remarks
+ * Deliberadamente separado de `AuthModule`: agrupa todo lo relacionado a
+ * datos de exhibición/contacto (`UserProfile` — nombre, teléfono,
+ * documento, avatar), sin tocar credenciales ni sesión. Vive en
+ * auth-service porque es información de identidad general, leída con
+ * frecuencia por el resto del sistema (ver memoria de proyecto
+ * `project_saas_entities`), pero su código queda claramente aislado del
+ * de autenticación.
+ */
+@Module({
+  imports: [I18nModule, PrismaModule],
+  controllers: [UserProfileController],
+  providers: [
+    CreateUserProfileUseCase,
+    GetUserProfileUseCase,
+    UpdateUserProfileUseCase,
+    UploadProfileImageUseCase,
+    ...userProviders,
+    JwtAuthGuard,
+  ],
+})
+export class UserModule {}

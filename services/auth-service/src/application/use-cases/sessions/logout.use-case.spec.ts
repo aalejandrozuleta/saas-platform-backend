@@ -80,18 +80,13 @@ describe('LogoutUseCase', () => {
     it('debe revocar la sesión en DB con la marca de tiempo correcta', async () => {
       await useCase.execute('user-1', 'session-1', context);
 
-      expect(sessionRepository.revokeById).toHaveBeenCalledWith(
-        'session-1',
-        NOW,
-      );
+      expect(sessionRepository.revokeById).toHaveBeenCalledWith('session-1', NOW);
     });
 
     it('debe revocar los refresh tokens de la sesión', async () => {
       await useCase.execute('user-1', 'session-1', context);
 
-      expect(refreshTokenRepository.revokeBySession).toHaveBeenCalledWith(
-        'session-1',
-      );
+      expect(refreshTokenRepository.revokeBySession).toHaveBeenCalledWith('session-1');
     });
 
     it('debe eliminar la sesión del cache Redis', async () => {
@@ -125,9 +120,7 @@ describe('LogoutUseCase', () => {
     it('debe emitir LogoutEvent con userId, sessionId y contexto', async () => {
       await useCase.execute('user-1', 'session-abc', context);
 
-      expect(eventBus.publish).toHaveBeenCalledWith(
-        expect.any(LogoutEvent),
-      );
+      expect(eventBus.publish).toHaveBeenCalledWith(expect.any(LogoutEvent));
       expect(eventBus.publish).toHaveBeenCalledWith(
         expect.objectContaining({
           userId: 'user-1',
@@ -140,9 +133,7 @@ describe('LogoutUseCase', () => {
     it('no debe emitir el evento si la revocación falla', async () => {
       sessionRepository.revokeById.mockRejectedValue(new Error('DB error'));
 
-      await expect(
-        useCase.execute('user-1', 'session-1', context),
-      ).rejects.toThrow('DB error');
+      await expect(useCase.execute('user-1', 'session-1', context)).rejects.toThrow('DB error');
 
       expect(eventBus.publish).not.toHaveBeenCalled();
     });
@@ -159,9 +150,7 @@ describe('LogoutUseCase', () => {
       refreshTokenRepository.revokeBySession.mockResolvedValue();
       sessionCache.revokeSession.mockResolvedValue();
 
-      await expect(
-        useCase.execute('user-1', 'already-revoked', context),
-      ).resolves.not.toThrow();
+      await expect(useCase.execute('user-1', 'already-revoked', context)).resolves.not.toThrow();
     });
   });
 });

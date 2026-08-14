@@ -47,6 +47,8 @@ export const HttpErrorMapper: Record<ErrorCode, number> = {
   [ErrorCode.INVALID_VERIFICATION_TOKEN]: 400,
   [ErrorCode.EMAIL_ALREADY_VERIFIED]: 409,
   [ErrorCode.INVALID_PASSWORD_RESET_TOKEN]: 400,
+  [ErrorCode.USER_PROFILE_ALREADY_EXISTS]: 409,
+  [ErrorCode.USER_PROFILE_NOT_FOUND]: 404,
 };
 
 /**

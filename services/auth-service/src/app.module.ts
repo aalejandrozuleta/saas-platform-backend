@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { EnvModule } from '@config/env/env.module';
 import { MetricsModule } from '@infrastructure/metrics/metrics.module';
 import { AuthModule } from '@modules/auth/auth.module';
+import { UserModule } from '@modules/user/user.module';
 import { I18nModule } from '@infrastructure/i18n/i18n.module';
 import { AuditModule } from '@infrastructure/audit/audit.module';
 import { MongoModule } from '@infrastructure/persistence/mongo/mongo.module';
@@ -37,6 +38,7 @@ const APP_FILTER_TOKEN = APP_FILTER;
     MetricsModule,
     AuditModule,
     AuthModule,
+    UserModule,
     I18nModule,
     RedisModule,
   ],
