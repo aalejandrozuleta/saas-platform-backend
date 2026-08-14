@@ -31,25 +31,19 @@ export class UserController {
   @CreateUserProfileGatewaySwagger()
   @Post()
   async create(@Req() req: Request) {
-    this.prepareRequest(req);
-    const { body } = await this.authProxy.forward(req, '/users/me/profile');
-    return body;
+    return this.forwardProfileRequest(req);
   }
 
   @GetUserProfileGatewaySwagger()
   @Get()
   async get(@Req() req: Request) {
-    this.prepareRequest(req);
-    const { body } = await this.authProxy.forward(req, '/users/me/profile');
-    return body;
+    return this.forwardProfileRequest(req);
   }
 
   @UpdateUserProfileGatewaySwagger()
   @Patch()
   async update(@Req() req: Request) {
-    this.prepareRequest(req);
-    const { body } = await this.authProxy.forward(req, '/users/me/profile');
-    return body;
+    return this.forwardProfileRequest(req);
   }
 
   @UploadProfileImageGatewaySwagger()
@@ -67,6 +61,17 @@ export class UserController {
       originalname: file.originalname,
       mimetype: file.mimetype,
     });
+    return body;
+  }
+
+  /**
+   * Reenvía create/get/update — los tres comparten exactamente el mismo
+   * flujo (misma ruta upstream, sin body de retorno propio), solo cambia
+   * el método HTTP/decorador Swagger del endpoint público.
+   */
+  private async forwardProfileRequest(req: Request) {
+    this.prepareRequest(req);
+    const { body } = await this.authProxy.forward(req, '/users/me/profile');
     return body;
   }
 
