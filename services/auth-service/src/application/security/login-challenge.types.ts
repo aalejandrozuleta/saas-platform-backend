@@ -9,6 +9,8 @@ export enum LoginChallengeReason {
   UNTRUSTED_DEVICE = 'UNTRUSTED_DEVICE',
   /** El intento proviene de un país fuera de la lista de países confiables del usuario. */
   UNTRUSTED_COUNTRY = 'UNTRUSTED_COUNTRY',
+  /** El usuario tiene 2FA activado: se exige TOTP o recovery code en cada login. */
+  TWO_FACTOR_REQUIRED = 'TWO_FACTOR_REQUIRED',
 }
 
 /**
@@ -54,4 +56,10 @@ export interface LoginSecurityChallengeMetadata {
   deviceFingerprint?: string;
   country?: string;
   availableMethods: LoginVerificationMethod[];
+  /**
+   * Token de un solo uso, de corta duración, que el cliente reenvía a
+   * `POST /auth/login/verify-2fa` junto al TOTP o recovery code para
+   * completar el login sin repetir la contraseña.
+   */
+  challengeToken: string;
 }

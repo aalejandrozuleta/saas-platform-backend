@@ -15,6 +15,10 @@ import { GetSessionsUseCase } from '@application/use-cases/get-sessions.use-case
 import { RevokeSessionUseCase } from '@application/use-cases/revoke-session.use-case';
 import { VerifyEmailUseCase } from '@application/use-cases/verify-email.use-case';
 import { ResendVerificationUseCase } from '@application/use-cases/resend-verification.use-case';
+import { ForgotPasswordUseCase } from '@application/use-cases/forgot-password.use-case';
+import { ResetPasswordUseCase } from '@application/use-cases/reset-password.use-case';
+import { VerifyLoginChallengeUseCase } from '@application/use-cases/verify-login-challenge.use-case';
+import { RegenerateRecoveryCodesUseCase } from '@application/use-cases/regenerate-recovery-codes.use-case';
 import { I18nService } from '@saas/shared';
 import { type RegisterUserDto } from '@application/dto/register/register-user.dto';
 import { User } from '@domain/entities/user/user.entity';
@@ -41,6 +45,10 @@ describe('AuthController', () => {
   let revokeSessionUseCase: jest.Mocked<RevokeSessionUseCase>;
   let verifyEmailUseCase: jest.Mocked<VerifyEmailUseCase>;
   let resendVerificationUseCase: jest.Mocked<ResendVerificationUseCase>;
+  let forgotPasswordUseCase: jest.Mocked<ForgotPasswordUseCase>;
+  let resetPasswordUseCase: jest.Mocked<ResetPasswordUseCase>;
+  let verifyLoginChallengeUseCase: jest.Mocked<VerifyLoginChallengeUseCase>;
+  let regenerateRecoveryCodesUseCase: jest.Mocked<RegenerateRecoveryCodesUseCase>;
   let i18n: jest.Mocked<I18nService>;
 
   beforeEach(async () => {
@@ -118,6 +126,22 @@ describe('AuthController', () => {
           useValue: { execute: jest.fn() },
         },
         {
+          provide: ForgotPasswordUseCase,
+          useValue: { execute: jest.fn() },
+        },
+        {
+          provide: ResetPasswordUseCase,
+          useValue: { execute: jest.fn() },
+        },
+        {
+          provide: VerifyLoginChallengeUseCase,
+          useValue: { execute: jest.fn() },
+        },
+        {
+          provide: RegenerateRecoveryCodesUseCase,
+          useValue: { execute: jest.fn() },
+        },
+        {
           provide: I18nService,
           useValue: {
             translate: jest.fn((key: string) => key),
@@ -147,6 +171,10 @@ describe('AuthController', () => {
     revokeSessionUseCase = module.get(RevokeSessionUseCase);
     verifyEmailUseCase = module.get(VerifyEmailUseCase);
     resendVerificationUseCase = module.get(ResendVerificationUseCase);
+    forgotPasswordUseCase = module.get(ForgotPasswordUseCase);
+    resetPasswordUseCase = module.get(ResetPasswordUseCase);
+    verifyLoginChallengeUseCase = module.get(VerifyLoginChallengeUseCase);
+    regenerateRecoveryCodesUseCase = module.get(RegenerateRecoveryCodesUseCase);
     i18n = module.get(I18nService);
   });
 
@@ -190,6 +218,57 @@ describe('AuthController', () => {
     expect(result).toEqual({
       success: true,
       message: 'Correo de verificación reenviado',
+      data: {},
+    });
+  });
+
+  // ──────────────────────────────────────────────────
+  // Forgot Password / Reset Password
+  // ──────────────────────────────────────────────────
+
+  it('debe solicitar la recuperación de contraseña', async () => {
+    forgotPasswordUseCase.execute.mockResolvedValue(undefined);
+    i18n.translate.mockReturnValue('Si existe una cuenta, recibirás un enlace de recuperación');
+
+    const req: any = {
+      headers: { 'accept-language': 'es' },
+      get: (key: string) => req.headers[key],
+    };
+
+    const result = await controller.forgotPassword({ email: 'test@example.com' }, req);
+
+    expect(forgotPasswordUseCase.execute).toHaveBeenCalledWith('test@example.com');
+    expect(i18n.translate).toHaveBeenCalledWith('auth.password_reset_email_sent', 'es');
+    expect(result).toEqual({
+      success: true,
+      message: 'Si existe una cuenta, recibirás un enlace de recuperación',
+      data: {},
+    });
+  });
+
+  it('debe completar la recuperación de contraseña con el token recibido', async () => {
+    resetPasswordUseCase.execute.mockResolvedValue(undefined);
+    i18n.translate.mockReturnValue('Contraseña actualizada correctamente');
+
+    const req: any = {
+      ip: '127.0.0.1',
+      headers: { 'accept-language': 'es', 'x-country': 'CO' },
+      get: (key: string) => req.headers[key],
+    };
+
+    const result = await controller.resetPassword(
+      { token: 'reset-token', newPassword: 'NewPassword456@' },
+      req,
+    );
+
+    expect(resetPasswordUseCase.execute).toHaveBeenCalledWith('reset-token', 'NewPassword456@', {
+      ip: '127.0.0.1',
+      country: 'CO',
+    });
+    expect(i18n.translate).toHaveBeenCalledWith('auth.password_reset_success', 'es');
+    expect(result).toEqual({
+      success: true,
+      message: 'Contraseña actualizada correctamente',
       data: {},
     });
   });
@@ -285,6 +364,55 @@ describe('AuthController', () => {
       'refreshToken',
       'refresh-token',
       expect.objectContaining({ secure: true, httpOnly: true }),
+    );
+    expect(result).toEqual({
+      success: true,
+      message: 'Inicio de sesión exitoso',
+      data: {
+        role: 'CUSTOMER',
+        permissions: ['profile:manage'],
+      },
+    });
+  });
+
+  it('debe resolver el challenge de login con TOTP y devolver cookies', async () => {
+    verifyLoginChallengeUseCase.execute.mockResolvedValue({
+      token: 'access-token',
+      refreshToken: 'refresh-token',
+      role: 'CUSTOMER',
+      permissions: ['profile:manage'],
+    });
+    i18n.translate.mockReturnValue('Inicio de sesión exitoso');
+
+    const req: any = {
+      ip: '127.0.0.1',
+      secure: true,
+      headers: { 'accept-language': 'es' },
+      get: (key: string) => req.headers[key],
+    };
+
+    const res: any = { cookie: jest.fn() };
+
+    const result = await controller.verifyLoginChallenge(
+      { challengeToken: 'challenge-token-abc', totpCode: '123456' },
+      req,
+      res,
+    );
+
+    expect(verifyLoginChallengeUseCase.execute).toHaveBeenCalledWith(
+      'challenge-token-abc',
+      { totpCode: '123456', recoveryCode: undefined },
+      { ip: '127.0.0.1' },
+    );
+    expect(res.cookie).toHaveBeenCalledWith(
+      'accessToken',
+      'access-token',
+      expect.objectContaining({ httpOnly: true }),
+    );
+    expect(res.cookie).toHaveBeenCalledWith(
+      'refreshToken',
+      'refresh-token',
+      expect.objectContaining({ httpOnly: true }),
     );
     expect(result).toEqual({
       success: true,
@@ -587,6 +715,37 @@ describe('AuthController', () => {
       success: true,
       message: '2FA desactivado correctamente',
       data: {},
+    });
+  });
+
+  it('debe regenerar los recovery codes y devolverlos', async () => {
+    regenerateRecoveryCodesUseCase.execute.mockResolvedValue({
+      recoveryCodes: ['AAAAAAAA-BBBBBBBB', 'CCCCCCCC-DDDDDDDD'],
+    });
+    i18n.translate.mockReturnValue('Nuevos códigos de recuperación generados');
+
+    const req: any = {
+      ip: '127.0.0.1',
+      user: { id: 'user-1', sessionId: 'session-1', role: 'USER' },
+      headers: { 'accept-language': 'es', 'x-country': 'CO' },
+      get: (key: string) => req.headers[key],
+    };
+
+    const result = await controller.regenerateRecoveryCodes(
+      { password: 'ValidPass123!', totpCode: '123456' },
+      req,
+    );
+
+    expect(regenerateRecoveryCodesUseCase.execute).toHaveBeenCalledWith(
+      'user-1',
+      'ValidPass123!',
+      '123456',
+      { ip: '127.0.0.1', country: 'CO' },
+    );
+    expect(result).toEqual({
+      success: true,
+      message: 'Nuevos códigos de recuperación generados',
+      data: { recoveryCodes: ['AAAAAAAA-BBBBBBBB', 'CCCCCCCC-DDDDDDDD'] },
     });
   });
 

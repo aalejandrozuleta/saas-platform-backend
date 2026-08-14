@@ -3,14 +3,19 @@ import { EmailVO } from '@domain/value-objects/email.vo';
 import { UserRole as DomainUserRole } from '@domain/enums/user-role.enum';
 import { UserStatus as DomainUserStatus } from '@domain/enums/user-status.enum';
 
-import { UserRole as PrismaUserRole, UserStatus as PrismaUserStatus } from '../../../generated/prisma';
+import {
+  UserRole as PrismaUserRole,
+  UserStatus as PrismaUserStatus,
+} from '../../../generated/prisma';
 
 import { UserMapper } from './user.mapper';
 
-const makeRaw = (overrides: Partial<{
-  status: PrismaUserStatus;
-  role: PrismaUserRole;
-}> = {}) => ({
+const makeRaw = (
+  overrides: Partial<{
+    status: PrismaUserStatus;
+    role: PrismaUserRole;
+  }> = {},
+) => ({
   id: 'uuid-1',
   email: 'user@example.com',
   passwordHash: 'hash',
@@ -25,10 +30,12 @@ const makeRaw = (overrides: Partial<{
   ...overrides,
 });
 
-const makeUserEntity = (overrides: Partial<{
-  status: DomainUserStatus;
-  role: DomainUserRole;
-}> = {}) =>
+const makeUserEntity = (
+  overrides: Partial<{
+    status: DomainUserStatus;
+    role: DomainUserRole;
+  }> = {},
+) =>
   User.fromPersistence({
     id: 'uuid-new',
     email: EmailVO.create('new@example.com'),
@@ -62,11 +69,11 @@ describe('UserMapper', () => {
     });
 
     it.each([
-      [PrismaUserRole.SUPER_ADMIN,    DomainUserRole.SUPER_ADMIN],
+      [PrismaUserRole.SUPER_ADMIN, DomainUserRole.SUPER_ADMIN],
       [PrismaUserRole.BUSINESS_OWNER, DomainUserRole.BUSINESS_OWNER],
-      [PrismaUserRole.ACCOUNTANT,     DomainUserRole.ACCOUNTANT],
-      [PrismaUserRole.EMPLOYEE,       DomainUserRole.EMPLOYEE],
-      [PrismaUserRole.CUSTOMER,       DomainUserRole.CUSTOMER],
+      [PrismaUserRole.ACCOUNTANT, DomainUserRole.ACCOUNTANT],
+      [PrismaUserRole.EMPLOYEE, DomainUserRole.EMPLOYEE],
+      [PrismaUserRole.CUSTOMER, DomainUserRole.CUSTOMER],
     ])('debe mapear rol %s desde Prisma a dominio', (prismaRole, domainRole) => {
       const user = UserMapper.toDomain(makeRaw({ role: prismaRole }));
       expect(user.role).toBe(domainRole);
@@ -109,17 +116,19 @@ describe('UserMapper', () => {
         emailVerified: false,
         emailVerificationToken: null,
         emailVerificationExpiresAt: null,
+        passwordResetToken: null,
+        passwordResetExpiresAt: null,
         failedLoginAttempts: 2,
         blockedUntil: undefined,
       });
     });
 
     it.each([
-      [DomainUserRole.SUPER_ADMIN,    PrismaUserRole.SUPER_ADMIN],
+      [DomainUserRole.SUPER_ADMIN, PrismaUserRole.SUPER_ADMIN],
       [DomainUserRole.BUSINESS_OWNER, PrismaUserRole.BUSINESS_OWNER],
-      [DomainUserRole.ACCOUNTANT,     PrismaUserRole.ACCOUNTANT],
-      [DomainUserRole.EMPLOYEE,       PrismaUserRole.EMPLOYEE],
-      [DomainUserRole.CUSTOMER,       PrismaUserRole.CUSTOMER],
+      [DomainUserRole.ACCOUNTANT, PrismaUserRole.ACCOUNTANT],
+      [DomainUserRole.EMPLOYEE, PrismaUserRole.EMPLOYEE],
+      [DomainUserRole.CUSTOMER, PrismaUserRole.CUSTOMER],
     ])('debe mapear rol %s de dominio a Prisma', (domainRole, prismaRole) => {
       const user = makeUserEntity({ role: domainRole });
       expect(UserMapper.toPersistence(user).role).toBe(prismaRole);

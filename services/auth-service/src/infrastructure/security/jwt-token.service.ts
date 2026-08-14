@@ -72,4 +72,54 @@ export class JwtTokenService implements TokenService {
 
     return payload;
   }
+
+  /**
+   * Genera un challenge token de MFA firmado con `JWT_ACCESS_SECRET` pero
+   * con `audience: 'mfa-challenge'` distinto al de los access tokens
+   * (`api-gateway`), de modo que un access token normal nunca pueda
+   * reutilizarse como challenge token ni viceversa.
+   */
+  generateChallengeToken(payload: {
+    userId: string;
+    deviceFingerprint?: string;
+    country?: string;
+    reason: string;
+  }): string {
+    const ttl = Number(this.envService.get('MFA_CHALLENGE_TTL'));
+
+    return sign(
+      {
+        sub: payload.userId,
+        fp: payload.deviceFingerprint,
+        country: payload.country,
+        reason: payload.reason,
+      },
+      this.envService.get('JWT_ACCESS_SECRET'),
+      {
+        expiresIn: ttl,
+        issuer: 'auth-service',
+        audience: 'mfa-challenge',
+      },
+    );
+  }
+
+  verifyChallengeToken(token: string): {
+    userId: string;
+    deviceFingerprint?: string;
+    country?: string;
+    reason: string;
+  } {
+    const payload = verify(token, this.envService.get('JWT_ACCESS_SECRET'), {
+      algorithms: ['HS256'],
+      audience: 'mfa-challenge',
+      issuer: 'auth-service',
+    }) as { sub: string; fp?: string; country?: string; reason: string };
+
+    return {
+      userId: payload.sub,
+      deviceFingerprint: payload.fp,
+      country: payload.country,
+      reason: payload.reason,
+    };
+  }
 }

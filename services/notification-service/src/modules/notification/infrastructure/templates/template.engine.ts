@@ -3,8 +3,10 @@ import { render } from '@react-email/render';
 
 import { WelcomeEmail } from './emails/WelcomeEmail';
 import { PasswordChangedEmail } from './emails/PasswordChangedEmail';
+import { PasswordResetEmail } from './emails/PasswordResetEmail';
 import { TwoFactorEnabledEmail } from './emails/TwoFactorEnabledEmail';
 import { TwoFactorDisabledEmail } from './emails/TwoFactorDisabledEmail';
+import { RecoveryCodesRegeneratedEmail } from './emails/RecoveryCodesRegeneratedEmail';
 import { AccountLockedEmail } from './emails/AccountLockedEmail';
 import { MaintenanceEmail } from './emails/MaintenanceEmail';
 import { OtpCodeEmail } from './emails/OtpCodeEmail';
@@ -44,11 +46,22 @@ const TEMPLATES: Record<string, (v: Vars) => React.ReactElement> = {
   'password-changed': (v) =>
     PasswordChangedEmail(s(v, 'email'), s(v, 'changedAt'), s(v, 'ip'), s(v, 'country')),
 
+  'password-reset': (v) =>
+    PasswordResetEmail(s(v, 'email'), s(v, 'requestedAt'), v['resetUrl'] as string | undefined),
+
   '2fa-enabled': (v) =>
     TwoFactorEnabledEmail(s(v, 'email'), s(v, 'enabledAt'), s(v, 'ip'), s(v, 'country')),
 
   '2fa-disabled': (v) =>
     TwoFactorDisabledEmail(s(v, 'email'), s(v, 'disabledAt'), s(v, 'ip'), s(v, 'country')),
+
+  'recovery-codes-regenerated': (v) =>
+    RecoveryCodesRegeneratedEmail(
+      s(v, 'email'),
+      s(v, 'regeneratedAt'),
+      s(v, 'ip'),
+      s(v, 'country'),
+    ),
 
   'account-locked': (v) =>
     AccountLockedEmail(s(v, 'blockedUntil', 'Próximos 30 minutos'), s(v, 'ip'), s(v, 'country')),

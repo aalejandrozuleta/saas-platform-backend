@@ -5,11 +5,13 @@ import { PasswordChangedEvent } from '@application/events/password/password-chan
 import { LoginBlockedEvent } from '@application/events/login/login-blocked.event';
 import { TwoFactorEnabledEvent } from '@application/events/two-factor/two-factor-enabled.event';
 import { TwoFactorDisabledEvent } from '@application/events/two-factor/two-factor-disabled.event';
+import { RecoveryCodesRegeneratedEvent } from '@application/events/two-factor/recovery-codes-regenerated.event';
 import { UserRepository } from '@domain/repositories/user.repository';
 import { USER_REPOSITORY } from '@domain/token/repositories.tokens';
 import { NotificationClient } from '@infrastructure/notifications/notification.client';
 import { EnvService } from '@config/env/env.service';
 import { VerificationEmailRequestedEvent } from '@application/events/user/verification-email-requested.event';
+import { PasswordResetRequestedEvent } from '@application/events/password/password-reset-requested.event';
 
 /**
  * Escucha eventos de dominio y envía emails vía notification-service.
@@ -123,6 +125,25 @@ export class NotificationListener {
     });
   }
 
+  @OnEvent(RecoveryCodesRegeneratedEvent.name)
+  async handleRecoveryCodesRegenerated(event: RecoveryCodesRegeneratedEvent): Promise<void> {
+    const email = await this.resolveEmail(event.userId);
+    if (!email) return;
+
+    const now = new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' });
+    this.notificationClient.sendEmail({
+      to: email,
+      subject: 'Alerta de seguridad — Recovery codes regenerados',
+      template: 'recovery-codes-regenerated',
+      variables: {
+        email,
+        regeneratedAt: now,
+        ip: event.context.ip,
+        country: event.context.country ?? '—',
+      },
+    });
+  }
+
   @OnEvent(VerificationEmailRequestedEvent.name)
   handleVerificationEmailRequested(event: VerificationEmailRequestedEvent): void {
     const appUrl = this.envService.get('APP_URL');
@@ -141,12 +162,30 @@ export class NotificationListener {
     });
   }
 
+  @OnEvent(PasswordResetRequestedEvent.name)
+  handlePasswordResetRequested(event: PasswordResetRequestedEvent): void {
+    const appUrl = this.envService.get('APP_URL');
+    const resetUrl = `${appUrl}/reset-password?token=${event.resetToken}`;
+    this.notificationClient.sendEmail({
+      to: event.email,
+      subject: 'Recupera tu contraseña — Arlok',
+      template: 'password-reset',
+      variables: {
+        email: event.email,
+        requestedAt: new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' }),
+        resetUrl,
+      },
+    });
+  }
+
   private async resolveEmail(userId: string): Promise<string | null> {
     try {
       const user = await this.userRepository.findById(userId);
       return user?.email.getValue() ?? null;
     } catch (err: unknown) {
-      this.logger.warn(`No se pudo resolver email para userId=${userId}: ${(err as Error).message}`);
+      this.logger.warn(
+        `No se pudo resolver email para userId=${userId}: ${(err as Error).message}`,
+      );
       return null;
     }
   }

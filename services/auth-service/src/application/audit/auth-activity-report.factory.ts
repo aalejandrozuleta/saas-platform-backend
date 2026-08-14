@@ -8,10 +8,7 @@ import { AuthAuditEvent } from './auth-events.enum';
 const AUTH_SERVICE_NAME = 'auth-service';
 
 export class AuthActivityReportFactory {
-  static loginAttempted(
-    email: string,
-    context: LoginContext,
-  ): CreateActivityReport {
+  static loginAttempted(email: string, context: LoginContext): CreateActivityReport {
     return this.createReport({
       action: AuthAuditEvent.LOGIN_ATTEMPT,
       outcome: 'INFO',
@@ -154,10 +151,7 @@ export class AuthActivityReportFactory {
     });
   }
 
-  static deviceNotTrusted(
-    userId: string,
-    context: LoginContext,
-  ): CreateActivityReport {
+  static deviceNotTrusted(userId: string, context: LoginContext): CreateActivityReport {
     return this.createReport({
       action: AuthAuditEvent.LOGIN_DEVICE_NOT_TRUSTED,
       outcome: 'REJECTED',
@@ -170,10 +164,7 @@ export class AuthActivityReportFactory {
     });
   }
 
-  static countryNotTrusted(
-    userId: string,
-    context: LoginContext,
-  ): CreateActivityReport {
+  static countryNotTrusted(userId: string, context: LoginContext): CreateActivityReport {
     return this.createReport({
       action: AuthAuditEvent.LOGIN_COUNTRY_NOT_TRUSTED,
       outcome: 'REJECTED',
@@ -355,6 +346,20 @@ export class AuthActivityReportFactory {
     });
   }
 
+  static recoveryCodesRegenerated(input: {
+    userId: string;
+    ip: string;
+    country?: string;
+  }): CreateActivityReport {
+    return this.createReport({
+      action: AuthAuditEvent.RECOVERY_CODES_REGENERATED,
+      outcome: 'SUCCESS',
+      summary: 'Recovery codes de 2FA regenerados',
+      actor: { type: 'USER', id: input.userId },
+      context: { ip: input.ip, country: input.country },
+    });
+  }
+
   static registerFailed(input: {
     userId?: string | null;
     email: string;
@@ -399,9 +404,7 @@ export class AuthActivityReportFactory {
       outcome: input.outcome,
       summary: input.summary,
       actor: input.actor,
-      context: input.context
-        ? this.normalizeContext(input.context)
-        : undefined,
+      context: input.context ? this.normalizeContext(input.context) : undefined,
       reason: input.reason,
       metadata: input.metadata,
     };

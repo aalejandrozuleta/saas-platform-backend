@@ -152,6 +152,7 @@ describe('LoginUserUseCase', () => {
     tokenService = {
       generateAccessToken: jest.fn(),
       generateRefreshToken: jest.fn(),
+      generateChallengeToken: jest.fn().mockReturnValue('mock-challenge-token'),
     } as any;
 
     uow = {
@@ -336,6 +337,39 @@ describe('LoginUserUseCase', () => {
         reason: LoginChallengeReason.UNTRUSTED_COUNTRY,
       }),
     });
+  });
+
+  it('debe exigir challenge TWO_FACTOR_REQUIRED si 2FA está activo aunque el dispositivo y país sean confiables', async () => {
+    const user = createUser();
+
+    userRepository.findByEmail.mockResolvedValue(user);
+    passwordHasher.verify.mockResolvedValue(true);
+    securityRepository.findByUserId.mockResolvedValue(
+      createSecurityProfile({ twoFactorEnabled: true, twoFactorMethod: 'TOTP' }),
+    );
+    deviceRepository.getByUserIdAndFingerprint.mockResolvedValue({
+      id: 'device-1',
+      isTrusted: true,
+      updateLastUsed: () => ({ id: 'device-1', isTrusted: true }),
+    } as any);
+
+    await expect(useCase.execute('test@test.com', 'Password123!', context)).rejects.toMatchObject({
+      code: ErrorCode.SECURITY_CHALLENGE_REQUIRED,
+      metadata: expect.objectContaining({
+        reason: LoginChallengeReason.TWO_FACTOR_REQUIRED,
+        challengeToken: 'mock-challenge-token',
+      }),
+    });
+
+    expect(sessionRepository.create).not.toHaveBeenCalled();
+  });
+
+  it('no debe exigir challenge de 2FA si twoFactorEnabled es false', async () => {
+    setupSuccessfulLogin();
+
+    await useCase.execute('test@test.com', 'Password123!', context);
+
+    expect(tokenService.generateChallengeToken).not.toHaveBeenCalled();
   });
 
   it('debe revocar sesión más antigua si hay demasiadas sesiones', async () => {

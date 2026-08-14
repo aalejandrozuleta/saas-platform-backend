@@ -41,6 +41,7 @@ describe('LoginSecurityChallengeService', () => {
         null,
         context,
         LoginChallengeReason.NEW_DEVICE,
+        'challenge-token-abc',
       );
 
       expect(exception).toMatchObject({
@@ -50,7 +51,7 @@ describe('LoginSecurityChallengeService', () => {
       const metadata = (exception as any).metadata;
       const methods: any[] = metadata.availableMethods;
 
-      expect(methods.some(m => m.type === LoginVerificationMethodType.EMAIL)).toBe(true);
+      expect(methods.some((m) => m.type === LoginVerificationMethodType.EMAIL)).toBe(true);
     });
 
     it('debe incluir método TOTP si el perfil tiene 2FA con TOTP activado', () => {
@@ -66,6 +67,7 @@ describe('LoginSecurityChallengeService', () => {
         profile,
         context,
         LoginChallengeReason.UNTRUSTED_DEVICE,
+        'challenge-token-abc',
       );
 
       const methods = (exception as any).metadata.availableMethods;
@@ -85,6 +87,7 @@ describe('LoginSecurityChallengeService', () => {
         profile,
         context,
         LoginChallengeReason.NEW_DEVICE,
+        'challenge-token-abc',
       );
 
       const methods = (exception as any).metadata.availableMethods;
@@ -104,12 +107,13 @@ describe('LoginSecurityChallengeService', () => {
         profile,
         context,
         LoginChallengeReason.NEW_DEVICE,
+        'challenge-token-abc',
       );
 
       const methods = (exception as any).metadata.availableMethods;
-      expect(
-        methods.some((m: any) => m.type === LoginVerificationMethodType.RECOVERY_CODE),
-      ).toBe(true);
+      expect(methods.some((m: any) => m.type === LoginVerificationMethodType.RECOVERY_CODE)).toBe(
+        true,
+      );
     });
 
     it('debe enmascarar el email del usuario en el método EMAIL', () => {
@@ -118,6 +122,7 @@ describe('LoginSecurityChallengeService', () => {
         null,
         context,
         LoginChallengeReason.NEW_DEVICE,
+        'challenge-token-abc',
       );
 
       const methods = (exception as any).metadata.availableMethods;
@@ -145,12 +150,44 @@ describe('LoginSecurityChallengeService', () => {
         null,
         context,
         LoginChallengeReason.NEW_DEVICE,
+        'challenge-token-abc',
       );
 
       const methods = (exception as any).metadata.availableMethods;
       const emailMethod = methods.find((m: any) => m.type === LoginVerificationMethodType.EMAIL);
       // email sin @ → se retorna tal cual
       expect(emailMethod.destination).toBe('noemail');
+    });
+
+    it('debe incluir el challengeToken recibido en la metadata', () => {
+      const exception = service.createChallenge(
+        makeUser(),
+        null,
+        context,
+        LoginChallengeReason.NEW_DEVICE,
+        'challenge-token-xyz',
+      );
+
+      expect((exception as any).metadata.challengeToken).toBe('challenge-token-xyz');
+    });
+
+    it('debe soportar la razón TWO_FACTOR_REQUIRED', () => {
+      const profile = {
+        trustedCountries: [],
+        twoFactorEnabled: true,
+        twoFactorMethod: 'TOTP' as const,
+        hasRecoveryCodes: true,
+      };
+
+      const exception = service.createChallenge(
+        makeUser(),
+        profile,
+        context,
+        LoginChallengeReason.TWO_FACTOR_REQUIRED,
+        'challenge-token-abc',
+      );
+
+      expect((exception as any).metadata.reason).toBe(LoginChallengeReason.TWO_FACTOR_REQUIRED);
     });
   });
 });

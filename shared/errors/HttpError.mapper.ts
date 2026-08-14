@@ -36,6 +36,9 @@ export const HttpErrorMapper: Record<ErrorCode, number> = {
   [ErrorCode.TWO_FACTOR_NOT_ENABLED]: 422,
   [ErrorCode.INVALID_TOTP_CODE]: 401,
   [ErrorCode.TWO_FACTOR_SETUP_NOT_INITIATED]: 422,
+  [ErrorCode.INVALID_RECOVERY_CODE]: 401,
+  [ErrorCode.INVALID_CHALLENGE_TOKEN]: 401,
+  [ErrorCode.TWO_FACTOR_CREDENTIAL_REQUIRED]: 400,
   [ErrorCode.TRUSTED_COUNTRY_ALREADY_EXISTS]: 409,
   [ErrorCode.TRUSTED_COUNTRY_NOT_FOUND]: 404,
   [ErrorCode.TRUSTED_COUNTRY_LIMIT_REACHED]: 422,
@@ -43,6 +46,7 @@ export const HttpErrorMapper: Record<ErrorCode, number> = {
   [ErrorCode.EMAIL_NOT_VERIFIED]: 403,
   [ErrorCode.INVALID_VERIFICATION_TOKEN]: 400,
   [ErrorCode.EMAIL_ALREADY_VERIFIED]: 409,
+  [ErrorCode.INVALID_PASSWORD_RESET_TOKEN]: 400,
 };
 
 /**

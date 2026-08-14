@@ -27,4 +27,19 @@ export interface RecoveryCodeRepository {
    * @param userId - Identificador del usuario cuyos códigos se eliminan.
    */
   deleteAllByUser(userId: string): Promise<void>;
+
+  /**
+   * Devuelve los recovery codes sin usar de un usuario (id + hash), para
+   * que el caso de uso los compare uno a uno contra el código recibido.
+   *
+   * @param userId - Identificador del usuario dueño de los códigos.
+   */
+  findUnusedByUser(userId: string): Promise<Array<{ id: string; codeHash: string }>>;
+
+  /**
+   * Marca un recovery code como usado (invariante de un solo uso).
+   *
+   * @param id - Identificador del recovery code consumido.
+   */
+  markUsed(id: string): Promise<void>;
 }

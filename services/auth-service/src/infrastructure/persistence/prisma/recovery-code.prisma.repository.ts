@@ -37,4 +37,29 @@ export class RecoveryCodePrismaRepository implements RecoveryCodeRepository {
   async deleteAllByUser(userId: string): Promise<void> {
     await this.prisma.recoveryCode.deleteMany({ where: { userId } });
   }
+
+  /**
+   * Trae los códigos sin usar (`usedAt: null`) de un usuario.
+   *
+   * @remarks
+   * No se puede buscar por igualdad de hash (el código en claro nunca se
+   * persiste), así que el caso de uso debe iterar y comparar con el
+   * verificador de hashing (bcrypt/argon2) uno a uno.
+   */
+  async findUnusedByUser(userId: string): Promise<Array<{ id: string; codeHash: string }>> {
+    return this.prisma.recoveryCode.findMany({
+      where: { userId, usedAt: null },
+      select: { id: true, codeHash: true },
+    });
+  }
+
+  /**
+   * Marca un recovery code como usado, seteando `usedAt` a la fecha actual.
+   */
+  async markUsed(id: string): Promise<void> {
+    await this.prisma.recoveryCode.update({
+      where: { id },
+      data: { usedAt: new Date() },
+    });
+  }
 }

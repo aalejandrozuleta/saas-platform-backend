@@ -46,6 +46,18 @@ import { VerifyEmailSwagger } from '@infrastructure/swagger/verify-email.swagger
 import { ResendVerificationUseCase } from '@application/use-cases/resend-verification.use-case';
 import { ResendVerificationDto } from '@application/dto/resend-verification/resend-verification.dto';
 import { ResendVerificationSwagger } from '@infrastructure/swagger/resend-verification.swagger';
+import { ForgotPasswordUseCase } from '@application/use-cases/forgot-password.use-case';
+import { ForgotPasswordDto } from '@application/dto/forgot-password/forgot-password.dto';
+import { ForgotPasswordSwagger } from '@infrastructure/swagger/forgot-password.swagger';
+import { ResetPasswordUseCase } from '@application/use-cases/reset-password.use-case';
+import { ResetPasswordDto } from '@application/dto/reset-password/reset-password.dto';
+import { ResetPasswordSwagger } from '@infrastructure/swagger/reset-password.swagger';
+import { VerifyLoginChallengeUseCase } from '@application/use-cases/verify-login-challenge.use-case';
+import { VerifyLoginChallengeDto } from '@application/dto/verify-login-challenge/verify-login-challenge.dto';
+import { VerifyLoginChallengeSwagger } from '@infrastructure/swagger/verify-login-challenge.swagger';
+import { RegenerateRecoveryCodesUseCase } from '@application/use-cases/regenerate-recovery-codes.use-case';
+import { RegenerateRecoveryCodesDto } from '@application/dto/recovery-codes/regenerate-recovery-codes.dto';
+import { RegenerateRecoveryCodesSwagger } from '@infrastructure/swagger/recovery-codes.swagger';
 
 /**
  * Controller de autenticación
@@ -77,6 +89,10 @@ export class AuthController {
     private readonly revokeSessionUseCase: RevokeSessionUseCase,
     private readonly verifyEmailUseCase: VerifyEmailUseCase,
     private readonly resendVerificationUseCase: ResendVerificationUseCase,
+    private readonly forgotPasswordUseCase: ForgotPasswordUseCase,
+    private readonly resetPasswordUseCase: ResetPasswordUseCase,
+    private readonly verifyLoginChallengeUseCase: VerifyLoginChallengeUseCase,
+    private readonly regenerateRecoveryCodesUseCase: RegenerateRecoveryCodesUseCase,
     private readonly i18n: I18nService,
   ) {}
 
@@ -105,6 +121,35 @@ export class AuthController {
       {},
       {
         message: this.i18n.translate('auth.verification_email_sent', this.resolveLanguage(req)),
+      },
+    );
+  }
+
+  @Post('forgot-password')
+  @ForgotPasswordSwagger()
+  async forgotPassword(@Body() dto: ForgotPasswordDto, @Req() req: Request) {
+    await this.forgotPasswordUseCase.execute(dto.email);
+
+    return successResponse(
+      {},
+      {
+        message: this.i18n.translate('auth.password_reset_email_sent', this.resolveLanguage(req)),
+      },
+    );
+  }
+
+  @Post('reset-password')
+  @ResetPasswordSwagger()
+  async resetPassword(@Body() dto: ResetPasswordDto, @Req() req: Request) {
+    await this.resetPasswordUseCase.execute(dto.token, dto.newPassword, {
+      ip: this.resolveClientIp(req),
+      country: this.getHeader(req, 'x-country'),
+    });
+
+    return successResponse(
+      {},
+      {
+        message: this.i18n.translate('auth.password_reset_success', this.resolveLanguage(req)),
       },
     );
   }
@@ -152,23 +197,38 @@ export class AuthController {
 
     const result = await this.loginUserUseCase.execute(dto.email, dto.password, context);
 
-    const secure = this.shouldUseSecureCookies(req);
+    this.setAuthCookies(res, req, result.token, result.refreshToken);
 
-    res.cookie('accessToken', result.token, {
-      httpOnly: true,
-      secure,
-      sameSite: 'strict',
-      path: '/',
-      maxAge: 15 * 60 * 1000,
-    });
+    return successResponse(
+      {
+        role: result.role,
+        permissions: result.permissions,
+      },
+      {
+        message: this.i18n.translate('auth.login_success', this.resolveLanguage(req)),
+      },
+    );
+  }
 
-    res.cookie('refreshToken', result.refreshToken, {
-      httpOnly: true,
-      secure,
-      sameSite: 'strict',
-      path: '/v1/auth',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+  /**
+   * Resuelve el challenge de step-up auth (`SECURITY_CHALLENGE_REQUIRED`)
+   * emitido por `/login` cuando el usuario tiene 2FA activo o el intento
+   * viene de un dispositivo/país no confiable.
+   */
+  @Post('login/verify-2fa')
+  @VerifyLoginChallengeSwagger()
+  async verifyLoginChallenge(
+    @Body() dto: VerifyLoginChallengeDto,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const result = await this.verifyLoginChallengeUseCase.execute(
+      dto.challengeToken,
+      { totpCode: dto.totpCode, recoveryCode: dto.recoveryCode },
+      { ip: this.resolveClientIp(req) },
+    );
+
+    this.setAuthCookies(res, req, result.token, result.refreshToken);
 
     return successResponse(
       {
@@ -349,6 +409,30 @@ export class AuthController {
     );
   }
 
+  @Post('2fa/recovery-codes/regenerate')
+  @UseGuards(JwtAuthGuard)
+  @RegenerateRecoveryCodesSwagger()
+  async regenerateRecoveryCodes(@Body() dto: RegenerateRecoveryCodesDto, @Req() req: Request) {
+    const userId = req.user!.id;
+
+    const result = await this.regenerateRecoveryCodesUseCase.execute(
+      userId,
+      dto.password,
+      dto.totpCode,
+      {
+        ip: this.resolveClientIp(req),
+        country: this.getHeader(req, 'x-country'),
+      },
+    );
+
+    return successResponse(
+      { recoveryCodes: result.recoveryCodes },
+      {
+        message: this.i18n.translate('auth.recovery_codes_regenerated', this.resolveLanguage(req)),
+      },
+    );
+  }
+
   @Get('trusted-countries')
   @UseGuards(JwtAuthGuard)
   @GetTrustedCountriesSwagger()
@@ -435,6 +519,31 @@ export class AuthController {
   private shouldUseSecureCookies(req: Request): boolean {
     const forwardedProto = req.get('x-forwarded-proto');
     return req.secure || forwardedProto === 'https';
+  }
+
+  /**
+   * Setea las cookies `accessToken`/`refreshToken` tras un login exitoso.
+   * Usado tanto por `/login` como por `/login/verify-2fa`, ya que ambos
+   * terminan en el mismo estado (sesión creada, tokens emitidos).
+   */
+  private setAuthCookies(res: Response, req: Request, token: string, refreshToken: string): void {
+    const secure = this.shouldUseSecureCookies(req);
+
+    res.cookie('accessToken', token, {
+      httpOnly: true,
+      secure,
+      sameSite: 'strict',
+      path: '/',
+      maxAge: 15 * 60 * 1000,
+    });
+
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure,
+      sameSite: 'strict',
+      path: '/v1/auth',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
   }
 
   /**

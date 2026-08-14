@@ -19,6 +19,7 @@ export const envSchema = z.object({
   ACCESS_TOKEN_TTL: z.coerce.number().default(900),
   REFRESH_TOKEN_TTL: z.coerce.number().default(604800),
   REDIS_SESSION_TTL: z.coerce.number().default(900),
+  MFA_CHALLENGE_TTL: z.coerce.number().default(300),
 
   DATABASE_URL: z.string(),
   MONGO_URL: z.string(),
@@ -34,6 +35,7 @@ export const envSchema = z.object({
 
   APP_URL: z.string().default('http://localhost:4200'),
   EMAIL_VERIFICATION_TTL: z.coerce.number().default(86400),
+  PASSWORD_RESET_TTL: z.coerce.number().default(1800),
 });
 
 export type EnvVars = z.infer<typeof envSchema>;

@@ -97,6 +97,14 @@ export class User {
     return this.props.emailVerificationExpiresAt;
   }
 
+  get passwordResetToken(): string | undefined {
+    return this.props.passwordResetToken;
+  }
+
+  get passwordResetExpiresAt(): Date | undefined {
+    return this.props.passwordResetExpiresAt;
+  }
+
   // ===== Reglas de dominio =====
 
   /**
@@ -177,6 +185,39 @@ export class User {
   isEmailVerificationTokenExpired(now: Date): boolean {
     if (!this.props.emailVerificationExpiresAt) return true;
     return this.props.emailVerificationExpiresAt <= now;
+  }
+
+  /**
+   * Asigna un nuevo token de recuperación de contraseña con su expiración.
+   * Usado al solicitar "olvidé mi contraseña".
+   */
+  requestPasswordReset(token: string, expiresAt: Date): User {
+    return new User({
+      ...this.props,
+      passwordResetToken: token,
+      passwordResetExpiresAt: expiresAt,
+    });
+  }
+
+  /**
+   * Indica si el token de recuperación de contraseña ya expiró respecto a
+   * `now`. Un usuario sin token asignado se considera expirado.
+   */
+  isPasswordResetTokenExpired(now: Date): boolean {
+    if (!this.props.passwordResetExpiresAt) return true;
+    return this.props.passwordResetExpiresAt <= now;
+  }
+
+  /**
+   * Limpia el token de recuperación de contraseña tras su uso, para que
+   * no pueda reutilizarse (invariante de un solo uso).
+   */
+  consumePasswordReset(): User {
+    return new User({
+      ...this.props,
+      passwordResetToken: undefined,
+      passwordResetExpiresAt: undefined,
+    });
   }
 
   /**
