@@ -227,6 +227,8 @@ describe('LoginUserUseCase', () => {
     expect(result).toEqual({
       token: 'access-token',
       refreshToken: 'refresh-token',
+      role: 'CUSTOMER',
+      permissions: [],
     });
 
     expect(eventBus.publish).toHaveBeenCalledWith(expect.any(LoginAttemptedEvent));

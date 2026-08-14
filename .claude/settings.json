@@ -1,0 +1,49 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git status*)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(git show*)",
+      "Bash(git stash *)",
+      "Bash(git branch*)",
+      "Bash(ls*)",
+      "Bash(cat *)",
+      "Bash(grep *)",
+      "Bash(find *)",
+      "Bash(pnpm test*)",
+      "Bash(pnpm test:cov*)",
+      "Bash(pnpm typecheck*)",
+      "Bash(pnpm lint*)",
+      "Bash(pnpm build*)",
+      "Bash(pnpm exec *)",
+      "Bash(pnpm install *)",
+      "Bash(pnpm --filter * test*)",
+      "Bash(pnpm --filter * typecheck*)",
+      "Bash(pnpm --filter * build*)",
+      "Bash(pnpm --filter * lint*)",
+      "Bash(pnpm --filter * exec tsc *)",
+      "Bash(npx tsc *)",
+      "Bash(npx jest *)",
+      "Bash(npx prisma *)",
+      "Bash(docker compose *ps*)",
+      "Bash(docker compose *logs*)",
+      "Bash(docker ps*)",
+      "Bash(docker logs*)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_response.filePath // .tool_input.file_path' | { read -r f; case \"$f\" in *.ts) pnpm exec eslint --fix \"$f\";; esac; } 2>/dev/null || true",
+            "statusMessage": "Auto-fixing lint on edited file..."
+          }
+        ]
+      }
+    ]
+  }
+}

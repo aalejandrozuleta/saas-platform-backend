@@ -101,7 +101,12 @@ export class VerifyLoginChallengeUseCase {
     challengeToken: string,
     credentials: { totpCode?: string; recoveryCode?: string },
     context: { ip: string },
-  ): Promise<{ token: string; refreshToken: string }> {
+  ): Promise<{
+    token: string;
+    refreshToken: string;
+    role: string;
+    permissions: string[];
+  }> {
     const claims = this.decodeChallengeToken(challengeToken);
 
     const user = await this.userRepository.findById(claims.userId);
@@ -133,7 +138,12 @@ export class VerifyLoginChallengeUseCase {
       ),
     );
 
-    return { token: result.token, refreshToken: result.refreshToken };
+    return {
+      token: result.token,
+      refreshToken: result.refreshToken,
+      role: result.role,
+      permissions: result.permissions,
+    };
   }
 
   private decodeChallengeToken(challengeToken: string): {
@@ -293,6 +303,8 @@ export class VerifyLoginChallengeUseCase {
         token: accessToken,
         refreshToken: refresh.token,
         sessionId: session.id,
+        role: user.role,
+        permissions,
       };
     });
   }

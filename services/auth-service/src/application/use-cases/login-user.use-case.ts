@@ -101,7 +101,12 @@ export class LoginUserUseCase {
     email: string,
     password: string,
     context: LoginContext,
-  ): Promise<{ token: string; refreshToken: string }> {
+  ): Promise<{
+    token: string;
+    refreshToken: string;
+    role: string;
+    permissions: string[];
+  }> {
     this.eventBus.publish(new LoginAttemptedEvent(email, context));
 
     this.policy.validateDeviceFingerprint(context.deviceFingerprint);
@@ -127,6 +132,8 @@ export class LoginUserUseCase {
     return {
       token: result.token,
       refreshToken: result.refreshToken,
+      role: result.role,
+      permissions: result.permissions,
     };
   }
 
@@ -301,6 +308,8 @@ export class LoginUserUseCase {
         token: accessToken,
         refreshToken: refresh.token,
         sessionId: session.id,
+        role: user.role,
+        permissions,
       };
     });
   }

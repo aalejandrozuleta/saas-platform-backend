@@ -174,7 +174,12 @@ describe('VerifyLoginChallengeUseCase', () => {
     it('debe completar el login y devolver tokens', async () => {
       const result = await useCase.execute('challenge-token', { totpCode: '123456' }, context);
 
-      expect(result).toEqual({ token: 'access-token', refreshToken: 'refresh-token' });
+      expect(result).toEqual({
+        token: 'access-token',
+        refreshToken: 'refresh-token',
+        role: UserRole.CUSTOMER,
+        permissions: [],
+      });
     });
 
     it('debe publicar LoginSucceededEvent con el sessionId', async () => {
@@ -216,7 +221,12 @@ describe('VerifyLoginChallengeUseCase', () => {
       );
 
       expect(recoveryCodeRepository.markUsed).toHaveBeenCalledWith('code-2');
-      expect(result).toEqual({ token: 'access-token', refreshToken: 'refresh-token' });
+      expect(result).toEqual({
+        token: 'access-token',
+        refreshToken: 'refresh-token',
+        role: UserRole.CUSTOMER,
+        permissions: [],
+      });
     });
 
     it('debe agregar el país si no está en la lista de confianza', async () => {

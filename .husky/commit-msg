@@ -1,1 +1,9 @@
+if ! command -v pnpm >/dev/null 2>&1; then
+  FNM_PATH="/opt/homebrew/opt/fnm/bin"
+  if [ -d "$FNM_PATH" ]; then
+    export PATH="$FNM_PATH:$PATH"
+    eval "$(fnm env --use-on-cd)"
+  fi
+fi
+
 pnpm exec commitlint --edit "$1"
