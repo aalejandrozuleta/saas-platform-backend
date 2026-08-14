@@ -176,4 +176,16 @@ export class DomainErrorFactory {
       400,
     );
   }
+
+  static userProfileAlreadyExists(): DomainException {
+    return DomainException.create(
+      'user_profile.already_exists',
+      ErrorCode.USER_PROFILE_ALREADY_EXISTS,
+      409,
+    );
+  }
+
+  static userProfileNotFound(): DomainException {
+    return DomainException.create('user_profile.not_found', ErrorCode.USER_PROFILE_NOT_FOUND, 404);
+  }
 }

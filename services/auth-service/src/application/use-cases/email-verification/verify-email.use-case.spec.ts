@@ -19,8 +19,7 @@ describe('VerifyEmailUseCase', () => {
       status: 'PENDING' as any,
       emailVerified: false,
       emailVerificationToken: 'valid-token',
-      emailVerificationExpiresAt:
-        overrides.expiresAt ?? new Date(Date.now() + 60_000),
+      emailVerificationExpiresAt: overrides.expiresAt ?? new Date(Date.now() + 60_000),
       failedLoginAttempts: 0,
       lockoutCount: 0,
       createdAt: new Date(),
@@ -52,10 +51,7 @@ describe('VerifyEmailUseCase', () => {
     expect(userRepository.update).toHaveBeenCalledWith(
       expect.objectContaining({ emailVerified: true }),
     );
-    expect(logger.info).toHaveBeenCalledWith(
-      'Email verificado correctamente',
-      { userId: user.id },
-    );
+    expect(logger.info).toHaveBeenCalledWith('Email verificado correctamente', { userId: user.id });
   });
 
   it('debe lanzar error si el token no corresponde a ningún usuario', async () => {

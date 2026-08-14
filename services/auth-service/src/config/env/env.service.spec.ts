@@ -12,6 +12,10 @@ describe('EnvService', () => {
     REDIS_PORT: '6379',
     REDIS_PASSWORD: 'a'.repeat(16),
     INTERNAL_SERVICE_SECRET: 'a'.repeat(32),
+    STORAGE_ENDPOINT: 'http://localhost:9000',
+    STORAGE_ACCESS_KEY: 'access-key',
+    STORAGE_SECRET_KEY: 'secret-key',
+    STORAGE_PUBLIC_URL: 'http://localhost:9000/user-avatars',
   };
 
   let originalEnv: NodeJS.ProcessEnv;

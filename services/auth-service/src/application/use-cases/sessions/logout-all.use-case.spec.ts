@@ -83,18 +83,13 @@ describe('LogoutAllUseCase', () => {
     it('debe revocar todas las sesiones en DB con la marca de tiempo correcta', async () => {
       await useCase.execute('user-1', context);
 
-      expect(sessionRepository.revokeAllUserSessions).toHaveBeenCalledWith(
-        'user-1',
-        NOW,
-      );
+      expect(sessionRepository.revokeAllUserSessions).toHaveBeenCalledWith('user-1', NOW);
     });
 
     it('debe revocar todos los refresh tokens del usuario', async () => {
       await useCase.execute('user-1', context);
 
-      expect(refreshTokenRepository.revokeAllByUser).toHaveBeenCalledWith(
-        'user-1',
-      );
+      expect(refreshTokenRepository.revokeAllByUser).toHaveBeenCalledWith('user-1');
     });
 
     it('debe revocar cada sesión del cache Redis en paralelo', async () => {
@@ -115,9 +110,7 @@ describe('LogoutAllUseCase', () => {
     it('debe emitir LogoutAllEvent con userId, revokedCount y contexto', async () => {
       await useCase.execute('user-1', context);
 
-      expect(eventBus.publish).toHaveBeenCalledWith(
-        expect.any(LogoutAllEvent),
-      );
+      expect(eventBus.publish).toHaveBeenCalledWith(expect.any(LogoutAllEvent));
       expect(eventBus.publish).toHaveBeenCalledWith(
         expect.objectContaining({
           userId: 'user-1',
@@ -170,9 +163,7 @@ describe('LogoutAllUseCase', () => {
     it('debe emitir LogoutAllEvent con revokedCount = 0', async () => {
       await useCase.execute('user-1', context);
 
-      expect(eventBus.publish).toHaveBeenCalledWith(
-        expect.objectContaining({ revokedCount: 0 }),
-      );
+      expect(eventBus.publish).toHaveBeenCalledWith(expect.objectContaining({ revokedCount: 0 }));
     });
   });
 
@@ -182,14 +173,10 @@ describe('LogoutAllUseCase', () => {
 
   describe('manejo de errores', () => {
     it('no debe emitir el evento si la revocación en DB falla', async () => {
-      sessionRepository.revokeAllUserSessions.mockRejectedValue(
-        new Error('DB error'),
-      );
+      sessionRepository.revokeAllUserSessions.mockRejectedValue(new Error('DB error'));
       refreshTokenRepository.revokeAllByUser.mockResolvedValue();
 
-      await expect(
-        useCase.execute('user-1', context),
-      ).rejects.toThrow('DB error');
+      await expect(useCase.execute('user-1', context)).rejects.toThrow('DB error');
 
       expect(eventBus.publish).not.toHaveBeenCalled();
     });

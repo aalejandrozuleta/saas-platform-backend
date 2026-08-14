@@ -7,8 +7,7 @@ import { type DeviceRepository } from '@domain/repositories/device.repository';
 import { type SecurityRepository } from '@domain/repositories/security.repository';
 import { type DomainEventBus } from '@application/events/domain-event.bus';
 import { type EnvService } from '@config/env/env.service';
-
-import { AuthAuditEvent } from '../audit/auth-events.enum';
+import { AuthAuditEvent } from '@application/audit/auth-events.enum';
 
 import { RegisterUserUseCase } from './register-user.use-case';
 

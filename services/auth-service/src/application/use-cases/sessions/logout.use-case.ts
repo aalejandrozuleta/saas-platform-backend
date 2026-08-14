@@ -1,12 +1,6 @@
 import { Inject } from '@nestjs/common';
-import {
-  SESSION_REPOSITORY,
-  REFRESH_TOKEN_REPOSITORY,
-} from '@domain/token/repositories.tokens';
-import {
-  DOMAIN_EVENT_BUS,
-  SESSION_CACHE,
-} from '@domain/token/services.tokens';
+import { SESSION_REPOSITORY, REFRESH_TOKEN_REPOSITORY } from '@domain/token/repositories.tokens';
+import { DOMAIN_EVENT_BUS, SESSION_CACHE } from '@domain/token/services.tokens';
 import { SessionRepository } from '@application/ports/session.repository';
 import { RefreshTokenRepository } from '@application/ports/refresh-token.repository';
 import { SessionCache } from '@application/ports/session-cache.port';

@@ -36,6 +36,15 @@ export const envSchema = z.object({
   APP_URL: z.string().default('http://localhost:4200'),
   EMAIL_VERIFICATION_TTL: z.coerce.number().default(86400),
   PASSWORD_RESET_TTL: z.coerce.number().default(1800),
+
+  // --- Storage (S3-compatible) para fotos de perfil ---
+  STORAGE_ENDPOINT: z.string(),
+  STORAGE_REGION: z.string().default('us-east-1'),
+  STORAGE_BUCKET: z.string().default('user-avatars'),
+  STORAGE_ACCESS_KEY: z.string(),
+  STORAGE_SECRET_KEY: z.string(),
+  /** Prefijo público desde el que se sirven las imágenes ya subidas (bucket público de solo lectura). */
+  STORAGE_PUBLIC_URL: z.string(),
 });
 
 export type EnvVars = z.infer<typeof envSchema>;

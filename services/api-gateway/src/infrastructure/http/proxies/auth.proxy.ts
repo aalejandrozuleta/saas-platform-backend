@@ -1,14 +1,6 @@
-import {
-  HttpException,
-  HttpStatus,
-  Inject,
-  Injectable,
-} from '@nestjs/common';
-import {
-  AxiosError,
-  type AxiosRequestConfig,
-  type Method,
-} from 'axios';
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { AxiosError, type AxiosRequestConfig, type Method } from 'axios';
+import FormData from 'form-data';
 import type { Request } from 'express';
 import {
   ErrorCode,
@@ -54,10 +46,7 @@ export class AuthProxy {
    * @param req - Petición original del cliente
    * @param path - Sub-ruta del auth-service (ej. `/login`)
    */
-  async forward<T>(
-    req: Request,
-    path: string,
-  ): Promise<{ body: T; cookies?: string[] }> {
+  async forward<T>(req: Request, path: string): Promise<{ body: T; cookies?: string[] }> {
     try {
       const config: AxiosRequestConfig = {
         url: `${this.AUTH_BASE_PATH}${path}`,
@@ -77,11 +66,52 @@ export class AuthProxy {
     }
   }
 
-  private handleForwardError(
+  /**
+   * Reenvía un archivo (multipart/form-data) al auth-service.
+   *
+   * @remarks
+   * No se puede reenviar `req.body` como en {@link forward}: el gateway ya
+   * parseó el multipart entrante a un buffer en memoria (vía
+   * `FileInterceptor`), así que hay que reconstruir un nuevo cuerpo
+   * multipart para el upstream. Por eso tampoco se reenvía el
+   * `content-type` original — traería el boundary del multipart del
+   * cliente, que no coincide con el que genera este `FormData` nuevo.
+   *
+   * @param file - Archivo ya parseado por multer en el gateway.
+   */
+  async forwardMultipart<T>(
     req: Request,
     path: string,
-    error: unknown,
-  ): never {
+    file: { buffer: Buffer; originalname: string; mimetype: string },
+  ): Promise<{ body: T; cookies?: string[] }> {
+    try {
+      const form = new FormData();
+      form.append('file', file.buffer, {
+        filename: file.originalname,
+        contentType: file.mimetype,
+      });
+
+      const { 'content-type': _clientContentType, ...headers } = forwardHeaders(req);
+
+      const config: AxiosRequestConfig = {
+        url: `${this.AUTH_BASE_PATH}${path}`,
+        method: req.method as Method,
+        data: form,
+        headers: { ...headers, ...form.getHeaders() },
+      };
+
+      const response = await this.client.requestTyped<T>(config);
+
+      return {
+        body: response.data,
+        cookies: response.headers['set-cookie'],
+      };
+    } catch (error: unknown) {
+      this.handleForwardError(req, path, error);
+    }
+  }
+
+  private handleForwardError(req: Request, path: string, error: unknown): never {
     if (
       typeof error === 'object' &&
       error !== null &&
@@ -100,12 +130,7 @@ export class AuthProxy {
 
   private handleAxiosError(req: Request, path: string, error: AxiosError): never {
     if (error.response) {
-      this.throwAxiosResponseError(
-        req,
-        path,
-        error.response.status,
-        error.response.data,
-      );
+      this.throwAxiosResponseError(req, path, error.response.status, error.response.data);
     }
 
     if (error.request) {

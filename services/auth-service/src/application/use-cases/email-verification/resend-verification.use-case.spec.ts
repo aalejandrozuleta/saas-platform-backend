@@ -52,9 +52,7 @@ describe('ResendVerificationUseCase', () => {
     expect(userRepository.update).toHaveBeenCalledWith(
       expect.objectContaining({ emailVerificationToken: expect.any(String) }),
     );
-    expect(eventBus.publish).toHaveBeenCalledWith(
-      expect.any(VerificationEmailRequestedEvent),
-    );
+    expect(eventBus.publish).toHaveBeenCalledWith(expect.any(VerificationEmailRequestedEvent));
   });
 
   it('no debe hacer nada si el usuario no existe (evita enumeración de cuentas)', async () => {
