@@ -28,9 +28,10 @@ runs:
         path: |
           services/auth-service/node_modules/.prisma
           services/config-service/node_modules/.prisma
+          services/company-service/node_modules/.prisma
         key: prisma-${{ runner.os }}-${{ hashFiles('**/schema.prisma') }}-${{ hashFiles('pnpm-lock.yaml') }}
 
     - name: Generate Prisma Client
       if: steps.cache-prisma.outputs.cache-hit != 'true'
       shell: bash
-      run: pnpm --filter auth-service exec prisma generate && pnpm --filter config-service exec prisma generate
+      run: pnpm --filter auth-service exec prisma generate && pnpm --filter config-service exec prisma generate && pnpm --filter company-service exec prisma generate
