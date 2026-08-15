@@ -16,8 +16,8 @@ export class UserProfileMapper {
       documentType: (prisma.documentType as DocumentType | null) ?? undefined,
       documentNumber: prisma.documentNumber ?? undefined,
       avatarUrl: prisma.avatarUrl ?? undefined,
-      dataProcessingAcceptedAt: prisma.dataProcessingAcceptedAt,
-      termsAcceptedAt: prisma.termsAcceptedAt,
+      dataProcessingAcceptedAt: prisma.dataProcessingAcceptedAt ?? undefined,
+      termsAcceptedAt: prisma.termsAcceptedAt ?? undefined,
       createdAt: prisma.createdAt,
       updatedAt: prisma.updatedAt,
     });

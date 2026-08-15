@@ -10,6 +10,9 @@ import {
 /** Ruta del endpoint interno de auth-service que resuelve un usuario por email. */
 const USER_LOOKUP_PATH = '/auth/v1/users/lookup';
 
+/** Ruta del endpoint interno de auth-service que provisiona un worker nuevo. */
+const USER_PROVISION_PATH = '/auth/v1/users/provision';
+
 /**
  * Cliente HTTP interno hacia auth-service.
  *
@@ -51,6 +54,22 @@ export class AuthServiceHttpClient implements AuthServiceClientPort {
         return null;
       }
 
+      throw DomainErrorFactory.authServiceUnavailable();
+    }
+  }
+
+  async provisionWorker(input: {
+    firstName: string;
+    lastName: string;
+    contactEmail: string;
+    companyName: string;
+  }): Promise<{ userId: string; loginEmail: string }> {
+    try {
+      const response = await this.http.post(USER_PROVISION_PATH, input);
+      const data = response.data?.data ?? response.data;
+
+      return { userId: data.userId, loginEmail: data.loginEmail };
+    } catch {
       throw DomainErrorFactory.authServiceUnavailable();
     }
   }

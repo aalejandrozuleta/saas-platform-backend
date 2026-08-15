@@ -63,6 +63,21 @@ export function UploadCompanyLogoGatewaySwagger() {
   );
 }
 
+/** Swagger para `POST /v1/companies/:id/workers` */
+export function RegisterWorkerGatewaySwagger() {
+  return applyDecorators(
+    ApiOperation({
+      summary: 'Registrar (provisionar) un trabajador nuevo directamente en la compañía',
+    }),
+    ApiCreatedResponse({ description: 'Trabajador provisionado y membresía creada como ACTIVE.' }),
+    ApiBadRequestResponse({ description: 'Datos inválidos, o rol OWNER no permitido aquí.' }),
+    ApiUnauthorizedResponse({ description: 'No autenticado.' }),
+    ApiForbiddenResponse({ description: 'Solo OWNER/MANAGER pueden registrar trabajadores.' }),
+    ApiNotFoundResponse({ description: 'Compañía no encontrada.' }),
+    ApiServiceUnavailableResponse({ description: 'Company-service no disponible.' }),
+  );
+}
+
 /** Swagger para `POST /v1/companies/:id/members` */
 export function InviteCompanyMemberGatewaySwagger() {
   return applyDecorators(

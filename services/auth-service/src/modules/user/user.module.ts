@@ -10,6 +10,7 @@ import { GetUserProfileUseCase } from '@application/use-cases/user-profile/get-u
 import { UpdateUserProfileUseCase } from '@application/use-cases/user-profile/update-user-profile.use-case';
 import { UploadProfileImageUseCase } from '@application/use-cases/user-profile/upload-profile-image.use-case';
 import { LookupUserByEmailUseCase } from '@application/use-cases/user/lookup-user-by-email.use-case';
+import { ProvisionWorkerUseCase } from '@application/use-cases/user/provision-worker.use-case';
 
 import { userProviders } from './user.providers';
 
@@ -34,6 +35,7 @@ import { userProviders } from './user.providers';
     UpdateUserProfileUseCase,
     UploadProfileImageUseCase,
     LookupUserByEmailUseCase,
+    ProvisionWorkerUseCase,
     ...userProviders,
     JwtAuthGuard,
     InternalServiceGuard,

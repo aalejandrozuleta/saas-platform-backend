@@ -14,6 +14,10 @@ describe('GetCompanyUseCase', () => {
   const company = Company.create({
     id: 'c-1',
     name: 'Acme',
+    email: 'contact@acme.com',
+    phone: '+573001234567',
+    address: 'Calle 123',
+    city: 'Bogotá',
   });
 
   const membership = (status: MembershipStatus) =>

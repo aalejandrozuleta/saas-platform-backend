@@ -5,8 +5,8 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-    provider = "prisma-client-js"
-    output   = "../src/generated/prisma"
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
 }
 
 datasource db {
@@ -25,6 +25,8 @@ model User {
   blockedUntil        DateTime?
   lockoutCount        Int       @default(0)
 
+  mustChangePassword Boolean @default(false)
+
   emailVerificationToken     String?   @unique
   emailVerificationExpiresAt DateTime?
 
@@ -36,13 +38,13 @@ model User {
   updatedAt   DateTime  @updatedAt
 
   // Relaciones
-  security         UserSecurity?
-  profile          UserProfile?
-  devices          Device[]
-  sessions         Session[]
-  refreshTokens    RefreshToken[]
-  recoveryCodes    RecoveryCode[]
-  userPermissions  UserPermission[]
+  security        UserSecurity?
+  profile         UserProfile?
+  devices         Device[]
+  sessions        Session[]
+  refreshTokens   RefreshToken[]
+  recoveryCodes   RecoveryCode[]
+  userPermissions UserPermission[]
 }
 
 model UserProfile {
@@ -54,8 +56,8 @@ model UserProfile {
   documentNumber String?
   avatarUrl      String?
 
-  dataProcessingAcceptedAt DateTime
-  termsAcceptedAt          DateTime
+  dataProcessingAcceptedAt DateTime?
+  termsAcceptedAt          DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -70,12 +72,12 @@ enum DocumentType {
 }
 
 model UserSecurity {
-  userId              String           @id
-  twoFactorEnabled    Boolean          @default(false)
-  twoFactorMethod     TwoFactorMethod?
-  totpSecret          String?
-  totpPendingSecret   String?
-  trustedCountries    String[]
+  userId            String           @id
+  twoFactorEnabled  Boolean          @default(false)
+  twoFactorMethod   TwoFactorMethod?
+  totpSecret        String?
+  totpPendingSecret String?
+  trustedCountries  String[]
 
   lastPasswordChange DateTime?
 
@@ -146,20 +148,23 @@ model RefreshToken {
   @@index([familyId])
 }
 
-
 // ─── Sistema de permisos ─────────────────────────────────────────────────────
 
-/** Catálogo de todos los permisos disponibles en el sistema */
+/**
+ * Catálogo de todos los permisos disponibles en el sistema
+ */
 model Permission {
-  code        String  @id          // "invoice:delete"
+  code        String @id // "invoice:delete"
   description String
-  module      String               // "invoice" | "sale" | "finance" | "platform" …
+  module      String // "invoice" | "sale" | "finance" | "platform" …
 
   rolePermissions RolePermission[]
   userPermissions UserPermission[]
 }
 
-/** Permisos predeterminados de cada rol (seed automático en migración) */
+/**
+ * Permisos predeterminados de cada rol (seed automático en migración)
+ */
 model RolePermission {
   role           UserRole
   permissionCode String
@@ -169,12 +174,14 @@ model RolePermission {
   @@index([role])
 }
 
-/** Overrides por usuario: concede permisos extra o revoca permisos del rol */
+/**
+ * Overrides por usuario: concede permisos extra o revoca permisos del rol
+ */
 model UserPermission {
   userId         String
   permissionCode String
-  granted        Boolean  // true = conceder extra, false = revocar
-  grantedBy      String   // userId de quien hizo el cambio
+  granted        Boolean // true = conceder extra, false = revocar
+  grantedBy      String // userId de quien hizo el cambio
   createdAt      DateTime @default(now())
 
   user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)

@@ -61,6 +61,15 @@ export class DomainErrorFactory {
     );
   }
 
+  static passwordChangeRequired(metadata: Record<string, unknown>): DomainException {
+    return DomainException.create(
+      'auth.password_change_required',
+      ErrorCode.PASSWORD_CHANGE_REQUIRED,
+      403,
+      metadata,
+    );
+  }
+
   static samePasswordNotAllowed(): DomainException {
     return DomainException.create(
       'auth.same_password_not_allowed',

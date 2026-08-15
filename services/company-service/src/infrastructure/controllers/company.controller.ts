@@ -18,13 +18,17 @@ import { JwtAuthGuard } from '@infrastructure/security/jwt-auth.guard';
 import { CreateCompanyUseCase } from '@application/use-cases/company/create-company.use-case';
 import { GetCompanyUseCase } from '@application/use-cases/company/get-company.use-case';
 import { UploadCompanyLogoUseCase } from '@application/use-cases/company/upload-company-logo.use-case';
+import { RegisterWorkerUseCase } from '@application/use-cases/company-membership/register-worker.use-case';
 import { CreateCompanyDto } from '@application/dto/company/create-company.dto';
+import { RegisterWorkerDto } from '@application/dto/company-membership/register-worker.dto';
 import { type Company } from '@domain/entities/company/company.entity';
+import { type CompanyMembership } from '@domain/entities/company-membership/company-membership.entity';
 import {
   CreateCompanySwagger,
   GetCompanySwagger,
   UploadCompanyLogoSwagger,
 } from '@infrastructure/swagger/company.swagger';
+import { RegisterWorkerSwagger } from '@infrastructure/swagger/company-membership.swagger';
 
 const MAX_LOGO_SIZE_BYTES = 5 * 1024 * 1024;
 
@@ -39,6 +43,7 @@ export class CompanyController {
     private readonly createCompanyUseCase: CreateCompanyUseCase,
     private readonly getCompanyUseCase: GetCompanyUseCase,
     private readonly uploadCompanyLogoUseCase: UploadCompanyLogoUseCase,
+    private readonly registerWorkerUseCase: RegisterWorkerUseCase,
     private readonly i18n: I18nService,
   ) {}
 
@@ -80,6 +85,41 @@ export class CompanyController {
     return successResponse(this.toResponse(company), {
       message: this.i18n.translate('company.logo_updated_success', this.resolveLanguage(req)),
     });
+  }
+
+  @Post(':id/workers')
+  @RegisterWorkerSwagger()
+  async registerWorker(
+    @Param('id') id: string,
+    @Body() dto: RegisterWorkerDto,
+    @Req() req: Request,
+  ) {
+    const { membership, loginEmail } = await this.registerWorkerUseCase.execute(
+      req.user!.id,
+      id,
+      dto,
+    );
+
+    return successResponse(
+      { ...this.toMembershipResponse(membership), loginEmail },
+      {
+        message: this.i18n.translate(
+          'membership.worker_registered_success',
+          this.resolveLanguage(req),
+        ),
+      },
+    );
+  }
+
+  private toMembershipResponse(membership: CompanyMembership) {
+    return {
+      id: membership.id,
+      companyId: membership.companyId,
+      userId: membership.userId,
+      role: membership.role,
+      status: membership.status,
+      createdAt: membership.createdAt,
+    };
   }
 
   private toResponse(company: Company) {

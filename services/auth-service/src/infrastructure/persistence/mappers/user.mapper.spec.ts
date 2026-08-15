@@ -24,6 +24,7 @@ const makeRaw = (
   emailVerified: false,
   failedLoginAttempts: 0,
   lockoutCount: 0,
+  mustChangePassword: false,
   lastLoginAt: null,
   blockedUntil: null,
   createdAt: new Date('2026-01-01'),
@@ -45,6 +46,7 @@ const makeUserEntity = (
     emailVerified: false,
     failedLoginAttempts: 2,
     lockoutCount: 0,
+    mustChangePassword: false,
     blockedUntil: undefined,
     createdAt: new Date(),
     ...overrides,
@@ -120,6 +122,7 @@ describe('UserMapper', () => {
         passwordResetExpiresAt: null,
         failedLoginAttempts: 2,
         blockedUntil: undefined,
+        mustChangePassword: false,
       });
     });
 

@@ -10,6 +10,7 @@ import { UploadCompanyLogoUseCase } from '@application/use-cases/company/upload-
 import { InviteMemberUseCase } from '@application/use-cases/company-membership/invite-member.use-case';
 import { ListMembersUseCase } from '@application/use-cases/company-membership/list-members.use-case';
 import { UpdateMemberUseCase } from '@application/use-cases/company-membership/update-member.use-case';
+import { RegisterWorkerUseCase } from '@application/use-cases/company-membership/register-worker.use-case';
 
 import { companyProviders } from './company.providers';
 
@@ -31,6 +32,7 @@ import { companyProviders } from './company.providers';
     InviteMemberUseCase,
     ListMembersUseCase,
     UpdateMemberUseCase,
+    RegisterWorkerUseCase,
     ...companyProviders,
     JwtAuthGuard,
   ],

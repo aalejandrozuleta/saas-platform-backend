@@ -12,6 +12,7 @@ import { NotificationClient } from '@infrastructure/notifications/notification.c
 import { EnvService } from '@config/env/env.service';
 import { VerificationEmailRequestedEvent } from '@application/events/user/verification-email-requested.event';
 import { PasswordResetRequestedEvent } from '@application/events/password/password-reset-requested.event';
+import { WorkerProvisionedEvent } from '@application/events/user/worker-provisioned.event';
 
 /**
  * Escucha eventos de dominio y envía emails vía notification-service.
@@ -158,6 +159,22 @@ export class NotificationListener {
         ip: '—',
         country: '—',
         verificationUrl,
+      },
+    });
+  }
+
+  @OnEvent(WorkerProvisionedEvent.name)
+  handleWorkerProvisioned(event: WorkerProvisionedEvent): void {
+    this.notificationClient.sendEmail({
+      to: event.contactEmail,
+      subject: `Tu cuenta de trabajo en ${event.companyName} fue creada`,
+      template: 'worker-provisioned',
+      variables: {
+        firstName: event.firstName,
+        companyName: event.companyName,
+        loginEmail: event.loginEmail,
+        tempPassword: event.tempPassword,
+        appUrl: this.envService.get('APP_URL'),
       },
     });
   }

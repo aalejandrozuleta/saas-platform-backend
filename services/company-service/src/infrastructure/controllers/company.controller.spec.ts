@@ -1,4 +1,7 @@
 import { Company } from '@domain/entities/company/company.entity';
+import { CompanyMembership } from '@domain/entities/company-membership/company-membership.entity';
+import { MembershipRole } from '@domain/enums/membership-role.enum';
+import { MembershipStatus } from '@domain/enums/membership-status.enum';
 
 import { CompanyController } from './company.controller';
 
@@ -7,6 +10,7 @@ describe('CompanyController', () => {
   let createCompanyUseCase: any;
   let getCompanyUseCase: any;
   let uploadCompanyLogoUseCase: any;
+  let registerWorkerUseCase: any;
   let i18n: any;
 
   const validInput = {
@@ -27,6 +31,18 @@ describe('CompanyController', () => {
     uploadCompanyLogoUseCase = {
       execute: jest.fn().mockResolvedValue(company.updateLogo('https://storage/logos/c-1.webp')),
     };
+    registerWorkerUseCase = {
+      execute: jest.fn().mockResolvedValue({
+        membership: CompanyMembership.create({
+          id: 'm-1',
+          companyId: 'c-1',
+          userId: 'u-2',
+          role: MembershipRole.WORKER,
+          status: MembershipStatus.ACTIVE,
+        }),
+        loginEmail: 'juana.perez@acme.trabajadores.local',
+      }),
+    };
     i18n = {
       translate: jest.fn().mockReturnValue('Empresa creada correctamente'),
       resolveLanguage: jest.fn().mockReturnValue('es'),
@@ -36,6 +52,7 @@ describe('CompanyController', () => {
       createCompanyUseCase,
       getCompanyUseCase,
       uploadCompanyLogoUseCase,
+      registerWorkerUseCase,
       i18n,
     );
   });
@@ -65,6 +82,25 @@ describe('CompanyController', () => {
     });
     expect(result.data.logoUrl).toBe('https://storage/logos/c-1.webp');
     expect(i18n.translate).toHaveBeenCalledWith('company.logo_updated_success', 'es');
+  });
+
+  it('registerWorker delega en el use case y responde con el mensaje traducido', async () => {
+    const dto: any = {
+      firstName: 'Juana',
+      lastName: 'Pérez',
+      contactEmail: 'juana@example.com',
+      role: MembershipRole.WORKER,
+    };
+
+    const result: any = await controller.registerWorker('c-1', dto, req);
+
+    expect(registerWorkerUseCase.execute).toHaveBeenCalledWith('u-1', 'c-1', dto);
+    expect(result.data).toMatchObject({
+      id: 'm-1',
+      userId: 'u-2',
+      loginEmail: 'juana.perez@acme.trabajadores.local',
+    });
+    expect(i18n.translate).toHaveBeenCalledWith('membership.worker_registered_success', 'es');
   });
 
   it('resuelve el idioma en inglés cuando el header lo indica', async () => {

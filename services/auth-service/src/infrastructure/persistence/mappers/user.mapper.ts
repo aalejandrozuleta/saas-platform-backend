@@ -33,6 +33,7 @@ export class UserMapper {
     emailVerificationExpiresAt?: Date | null;
     passwordResetToken?: string | null;
     passwordResetExpiresAt?: Date | null;
+    mustChangePassword?: boolean;
   }): User {
     const props: UserProps = {
       id: raw.id,
@@ -50,6 +51,7 @@ export class UserMapper {
       emailVerificationExpiresAt: raw.emailVerificationExpiresAt ?? undefined,
       passwordResetToken: raw.passwordResetToken ?? undefined,
       passwordResetExpiresAt: raw.passwordResetExpiresAt ?? undefined,
+      mustChangePassword: raw.mustChangePassword ?? false,
     };
 
     return User.fromPersistence(props);
@@ -71,6 +73,7 @@ export class UserMapper {
     emailVerificationExpiresAt?: Date | null;
     passwordResetToken?: string | null;
     passwordResetExpiresAt?: Date | null;
+    mustChangePassword: boolean;
   } {
     return {
       id: user.id,
@@ -85,6 +88,7 @@ export class UserMapper {
       emailVerificationExpiresAt: user.emailVerificationExpiresAt ?? null,
       passwordResetToken: user.passwordResetToken ?? null,
       passwordResetExpiresAt: user.passwordResetExpiresAt ?? null,
+      mustChangePassword: user.mustChangePassword,
     };
   }
 

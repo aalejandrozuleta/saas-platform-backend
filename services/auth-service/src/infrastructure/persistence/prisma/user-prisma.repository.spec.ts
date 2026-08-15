@@ -44,6 +44,7 @@ describe('UserPrismaRepository', () => {
         emailVerified: false,
         failedLoginAttempts: 0,
         lockoutCount: 0,
+        mustChangePassword: false,
         blockedUntil: null,
         createdAt: new Date(),
       };
@@ -57,6 +58,7 @@ describe('UserPrismaRepository', () => {
         emailVerified: false,
         failedLoginAttempts: 0,
         lockoutCount: 0,
+        mustChangePassword: false,
         blockedUntil: undefined,
         createdAt: prismaUser.createdAt,
       });
@@ -98,6 +100,7 @@ describe('UserPrismaRepository', () => {
         emailVerified: true,
         failedLoginAttempts: 0,
         lockoutCount: 0,
+        mustChangePassword: false,
         blockedUntil: null,
         createdAt: new Date(),
       };
@@ -111,6 +114,7 @@ describe('UserPrismaRepository', () => {
         emailVerified: true,
         failedLoginAttempts: 0,
         lockoutCount: 0,
+        mustChangePassword: false,
         blockedUntil: undefined,
         createdAt: prismaUser.createdAt,
       });
@@ -148,6 +152,7 @@ describe('UserPrismaRepository', () => {
         emailVerificationToken: 'token-abc',
         failedLoginAttempts: 0,
         lockoutCount: 0,
+        mustChangePassword: false,
         blockedUntil: null,
         createdAt: new Date(),
       };
@@ -161,6 +166,7 @@ describe('UserPrismaRepository', () => {
         emailVerified: false,
         failedLoginAttempts: 0,
         lockoutCount: 0,
+        mustChangePassword: false,
         blockedUntil: undefined,
         createdAt: prismaUser.createdAt,
       });
@@ -198,6 +204,7 @@ describe('UserPrismaRepository', () => {
         passwordResetToken: 'reset-token-abc',
         failedLoginAttempts: 0,
         lockoutCount: 0,
+        mustChangePassword: false,
         blockedUntil: null,
         createdAt: new Date(),
       };
@@ -211,6 +218,7 @@ describe('UserPrismaRepository', () => {
         emailVerified: true,
         failedLoginAttempts: 0,
         lockoutCount: 0,
+        mustChangePassword: false,
         blockedUntil: undefined,
         createdAt: prismaUser.createdAt,
       });
@@ -252,6 +260,7 @@ describe('UserPrismaRepository', () => {
         emailVerified: false,
         failedLoginAttempts: 0,
         lockoutCount: 0,
+        mustChangePassword: false,
         blockedUntil: undefined,
       };
 
@@ -297,6 +306,7 @@ describe('UserPrismaRepository', () => {
         emailVerified: false,
         failedLoginAttempts: 0,
         lockoutCount: 0,
+        mustChangePassword: false,
         blockedUntil: undefined,
       };
 

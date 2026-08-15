@@ -13,6 +13,26 @@ import {
 import { MembershipResponseDto } from '@application/dto/company-membership/membership-response.dto';
 
 /**
+ * Decorador Swagger para `POST /companies/:id/workers`.
+ */
+export function RegisterWorkerSwagger() {
+  return applyDecorators(
+    ApiOperation({
+      summary: 'Registrar (provisionar) un trabajador nuevo directamente en la empresa',
+    }),
+    ApiParam({ name: 'id', description: 'Id de la empresa' }),
+    ApiCreatedResponse({
+      description: 'Trabajador provisionado y membresía creada como ACTIVE.',
+      type: MembershipResponseDto,
+    }),
+    ApiBadRequestResponse({ description: 'Datos inválidos, o rol OWNER no permitido aquí.' }),
+    ApiUnauthorizedResponse({ description: 'No autenticado.' }),
+    ApiForbiddenResponse({ description: 'El solicitante no es OWNER/MANAGER de la empresa.' }),
+    ApiNotFoundResponse({ description: 'La empresa no existe.' }),
+  );
+}
+
+/**
  * Decorador Swagger para `POST /companies/:id/members`.
  */
 export function InviteMemberSwagger() {

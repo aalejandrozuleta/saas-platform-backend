@@ -32,6 +32,7 @@ export const HttpErrorMapper: Record<ErrorCode, number> = {
   [ErrorCode.INVALID_REFRESH_TOKEN]: 401,
   [ErrorCode.INVALID_CURRENT_PASSWORD]: 401,
   [ErrorCode.SAME_PASSWORD_NOT_ALLOWED]: 422,
+  [ErrorCode.PASSWORD_CHANGE_REQUIRED]: 403,
   [ErrorCode.TWO_FACTOR_ALREADY_ENABLED]: 409,
   [ErrorCode.TWO_FACTOR_NOT_ENABLED]: 422,
   [ErrorCode.INVALID_TOTP_CODE]: 401,

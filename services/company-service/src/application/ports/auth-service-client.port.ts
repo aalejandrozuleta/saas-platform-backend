@@ -21,4 +21,16 @@ export interface AuthServiceClientPort {
    * @returns el usuario, o `null` si auth-service no lo conoce (404).
    */
   lookupUserByEmail(email: string): Promise<LookedUpUser | null>;
+
+  /**
+   * Provisiona un usuario worker nuevo directamente en auth-service.
+   *
+   * @returns el `userId` creado y el login email generado.
+   */
+  provisionWorker(input: {
+    firstName: string;
+    lastName: string;
+    contactEmail: string;
+    companyName: string;
+  }): Promise<{ userId: string; loginEmail: string }>;
 }

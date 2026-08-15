@@ -59,4 +59,13 @@ export class DomainErrorFactory {
   static invalidLogoType(): DomainException {
     return DomainException.create('company.invalid_logo_type', ErrorCode.VALIDATION_ERROR, 400);
   }
+
+  /** No se puede registrar un trabajador directamente como OWNER. */
+  static ownerRoleNotAllowed(): DomainException {
+    return DomainException.create(
+      'membership.owner_role_not_allowed',
+      ErrorCode.VALIDATION_ERROR,
+      400,
+    );
+  }
 }

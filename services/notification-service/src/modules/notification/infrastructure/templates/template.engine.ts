@@ -10,6 +10,7 @@ import { RecoveryCodesRegeneratedEmail } from './emails/RecoveryCodesRegenerated
 import { AccountLockedEmail } from './emails/AccountLockedEmail';
 import { MaintenanceEmail } from './emails/MaintenanceEmail';
 import { OtpCodeEmail } from './emails/OtpCodeEmail';
+import { WorkerProvisionedEmail } from './emails/WorkerProvisionedEmail';
 
 type Vars = Record<string, unknown>;
 
@@ -74,6 +75,15 @@ const TEMPLATES: Record<string, (v: Vars) => React.ReactElement> = {
     ),
 
   'otp-code': (v) => OtpCodeEmail(s(v, 'code', '------'), s(v, 'expiresIn', '10')),
+
+  'worker-provisioned': (v) =>
+    WorkerProvisionedEmail(
+      s(v, 'firstName'),
+      s(v, 'companyName'),
+      s(v, 'loginEmail'),
+      s(v, 'tempPassword'),
+      v['appUrl'] as string | undefined,
+    ),
 };
 
 /**

@@ -40,6 +40,7 @@ describe('VerifyLoginChallengeUseCase', () => {
       emailVerified: true,
       failedLoginAttempts: 0,
       lockoutCount: 0,
+      mustChangePassword: false,
       createdAt: new Date(),
       ...overrides,
     });

@@ -22,6 +22,7 @@ import {
   ListCompanyMembersGatewaySwagger,
   UpdateCompanyMemberGatewaySwagger,
   UploadCompanyLogoGatewaySwagger,
+  RegisterWorkerGatewaySwagger,
 } from '@infrastructure/swagger/company.swagger';
 
 const MAX_LOGO_SIZE_BYTES = 5 * 1024 * 1024;
@@ -75,6 +76,14 @@ export class CompanyController {
       originalname: file.originalname,
       mimetype: file.mimetype,
     });
+    return body;
+  }
+
+  @RegisterWorkerGatewaySwagger()
+  @Post(':id/workers')
+  async registerWorker(@Req() req: Request, @Param('id') id: string) {
+    this.prepareRequest(req);
+    const { body } = await this.companyProxy.forward(req, `/companies/${id}/workers`);
     return body;
   }
 

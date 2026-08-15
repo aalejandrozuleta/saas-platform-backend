@@ -56,6 +56,44 @@ export class UserProfile {
     return new UserProfile(props);
   }
 
+  /**
+   * Fábrica para perfiles provisionados directamente por una empresa
+   * (`ProvisionWorkerUseCase`), sin que el trabajador haya interactuado
+   * todavía con la plataforma.
+   *
+   * @remarks
+   * A diferencia de `create()`, deliberadamente NO exige consentimiento:
+   * el trabajador nunca vio una pantalla de registro, así que no pudo
+   * aceptar nada. `dataProcessingAcceptedAt`/`termsAcceptedAt` quedan
+   * `undefined` hasta que el trabajador los acepte explícitamente en su
+   * primer login (`acceptConsent()`, vía `CompleteFirstLoginUseCase`).
+   */
+  static createProvisioned(props: {
+    userId: string;
+    firstName: string;
+    lastName: string;
+  }): UserProfile {
+    if (!props.firstName.trim()) {
+      throw new Error('USER_PROFILE_FIRST_NAME_REQUIRED');
+    }
+
+    if (!props.lastName.trim()) {
+      throw new Error('USER_PROFILE_LAST_NAME_REQUIRED');
+    }
+
+    const now = new Date();
+
+    return new UserProfile({
+      userId: props.userId,
+      firstName: props.firstName,
+      lastName: props.lastName,
+      dataProcessingAcceptedAt: undefined,
+      termsAcceptedAt: undefined,
+      createdAt: now,
+      updatedAt: now,
+    });
+  }
+
   // ======================
   // Getters
   // ======================
@@ -88,11 +126,11 @@ export class UserProfile {
     return this.props.avatarUrl;
   }
 
-  get dataProcessingAcceptedAt(): Date {
+  get dataProcessingAcceptedAt(): Date | undefined {
     return this.props.dataProcessingAcceptedAt;
   }
 
-  get termsAcceptedAt(): Date {
+  get termsAcceptedAt(): Date | undefined {
     return this.props.termsAcceptedAt;
   }
 
@@ -151,6 +189,24 @@ export class UserProfile {
       ...this.props,
       avatarUrl,
       updatedAt: new Date(),
+    });
+  }
+
+  /**
+   * Registra la aceptación del tratamiento de datos personales y de los
+   * términos y condiciones al momento actual. Usado por
+   * `CompleteFirstLoginUseCase` cuando un worker provisionado
+   * (`createProvisioned()`, sin consentimiento previo) completa su primer
+   * login.
+   */
+  acceptConsent(): UserProfile {
+    const now = new Date();
+
+    return new UserProfile({
+      ...this.props,
+      dataProcessingAcceptedAt: now,
+      termsAcceptedAt: now,
+      updatedAt: now,
     });
   }
 }
