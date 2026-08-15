@@ -7,9 +7,8 @@ solo referencia usuarios que ya existen ahí.
 
 ## Responsabilidades
 
-- Crear una empresa (tenant), con perfil de operación completo — quien la crea queda como `OWNER`/`ACTIVE`.
+- Crear una empresa (tenant) — quien la crea queda como `OWNER`/`ACTIVE`.
 - Consultar una empresa.
-- Subir/reemplazar el logo de la empresa.
 - Invitar a un usuario **ya registrado** en auth-service a una empresa, por email.
 - Listar y actualizar (rol/estado) los miembros de una empresa.
 
@@ -20,37 +19,10 @@ proyecto): `Producto`, `Compra`, `Factura`, `FieldDefinition` (custom fields).
 
 Arquitectura hexagonal, igual que `auth-service`:
 
-- **`infrastructure/controllers/`** — `CompanyController` (`POST /companies`, `GET /companies/:id`, `POST /companies/:id/logo`), `CompanyMembershipController` (`POST/GET /companies/:id/members`, `PATCH /companies/:id/members/:membershipId`).
-- **`infrastructure/persistence/prisma/`** — única persistencia relacional del servicio (PostgreSQL, `company-postgres`, instancia dedicada). Sin MongoDB/Redis todavía — no hay audit log ni cache.
-- **`infrastructure/storage/`** — `S3ImageStorageService` + `SharpImageProcessorService`, mismo patrón que el avatar de usuario en auth-service (bucket propio en la misma instancia de MinIO — ver "Logo de la empresa" abajo).
+- **`infrastructure/controllers/`** — `CompanyController` (`POST /companies`, `GET /companies/:id`), `CompanyMembershipController` (`POST/GET /companies/:id/members`, `PATCH /companies/:id/members/:membershipId`).
+- **`infrastructure/persistence/prisma/`** — única persistencia del servicio (PostgreSQL, `company-postgres`, instancia dedicada). Sin MongoDB/Redis en este primer corte — no hay audit log ni cache todavía.
 - **`infrastructure/security/jwt-auth.guard.ts`** — verifica la cookie `accessToken` **localmente**, con el mismo `JWT_ACCESS_SECRET` que auth-service (mismo issuer/audience). Defensa en profundidad: el gateway ya valida la sesión antes de reenviar.
 - **`infrastructure/http/auth-service.client.ts`** — cliente HTTP saliente hacia auth-service (ver "Comunicación con auth-service" abajo).
-
-## Perfil de la empresa
-
-`Company` guarda datos de operación reales, no solo el nombre — confirmado
-2026-08-14 porque una empresa necesita esta información para facturar y
-para que el resto de la plataforma la muestre correctamente:
-
-- **Obligatorios en `POST /v1/companies`**: `email` (contacto de la
-  empresa, no del `OWNER`), `phone`, `address`, `city`. `country` es
-  opcional con default `'CO'` dado el contexto del proyecto.
-- **`taxId`** sigue opcional (ya existía) — no todas las empresas facturan desde el día uno.
-- **`logoUrl`** nunca se acepta en el create — se sube después vía su
-  propio endpoint (mismo criterio "progresivo" que el avatar de usuario en
-  auth-service: subir un archivo no encaja en un POST JSON).
-
-### Logo de la empresa
-
-`POST /v1/companies/:id/logo` (multipart, campo `file`, máx. 5MB,
-PNG/JPEG/WEBP) — solo `OWNER`/`MANAGER` de esa empresa pueden subirlo
-(`403 FORBIDDEN` si no). Reutiliza la misma instancia de MinIO que
-auth-service usa para avatares, en un bucket separado `company-logos`
-(`STORAGE_*` env vars propias de company-service, mismas credenciales).
-`SharpImageProcessorService` re-decodifica/re-codifica la imagen a WebP
-(nunca confía en el `mimetype` reportado por el cliente) con
-`fit: 'contain'` — a diferencia del avatar (`fit: 'cover'`), un logo no
-debe recortarse.
 
 ## Reglas de dominio relevantes
 
