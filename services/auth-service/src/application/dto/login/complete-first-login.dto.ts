@@ -18,7 +18,7 @@ export class CompleteFirstLoginDto {
   changeToken!: string;
 
   @ApiProperty({
-    example: 'NewSecurePass456@',
+    example: 'NewPass456@Secure',
     description: 'Nueva contraseña, en reemplazo de la contraseña temporal',
     minLength: 12,
   })

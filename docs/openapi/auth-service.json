@@ -65,6 +65,58 @@
         "tags": ["Auth"]
       }
     },
+    "/auth/v1/forgot-password": {
+      "post": {
+        "operationId": "AuthController_forgotPassword_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ForgotPasswordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Email de recuperación enviado si la cuenta existe"
+          }
+        },
+        "summary": "Solicita un enlace de recuperación de contraseña por email",
+        "tags": ["Auth"]
+      }
+    },
+    "/auth/v1/reset-password": {
+      "post": {
+        "operationId": "AuthController_resetPassword_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetPasswordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Contraseña actualizada correctamente"
+          },
+          "400": {
+            "description": "Token inválido o expirado"
+          },
+          "422": {
+            "description": "La nueva contraseña no cumple los requisitos o es igual a la actual"
+          }
+        },
+        "summary": "Completa la recuperación de contraseña con el token enviado por email",
+        "tags": ["Auth"]
+      }
+    },
     "/auth/v1/register": {
       "post": {
         "operationId": "AuthController_register_v1",
@@ -134,6 +186,64 @@
           }
         },
         "summary": "Autenticar usuario",
+        "tags": ["Auth"]
+      }
+    },
+    "/auth/v1/login/verify-2fa": {
+      "post": {
+        "operationId": "AuthController_verifyLoginChallenge_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyLoginChallengeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login completado. Tokens enviados en cookies HttpOnly (path=/v1/auth).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginUserResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "No se proporcionó ni totpCode ni recoveryCode."
+          },
+          "401": {
+            "description": "Challenge token inválido/expirado, código TOTP inválido o recovery code inválido/ya usado."
+          }
+        },
+        "summary": "Resolver el challenge de login con TOTP o recovery code",
+        "tags": ["Auth"]
+      }
+    },
+    "/auth/v1/complete-first-login": {
+      "post": {
+        "operationId": "AuthController_completeFirstLogin_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompleteFirstLoginDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
         "tags": ["Auth"]
       }
     },
@@ -311,6 +421,42 @@
         "tags": ["Auth"]
       }
     },
+    "/auth/v1/2fa/recovery-codes/regenerate": {
+      "post": {
+        "operationId": "AuthController_regenerateRecoveryCodes_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegenerateRecoveryCodesDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Nuevo lote de recovery codes generado. El anterior queda invalidado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Verify2faResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Contraseña o código TOTP incorrecto."
+          },
+          "422": {
+            "description": "2FA no está habilitado para este usuario."
+          }
+        },
+        "summary": "Regenerar el lote de recovery codes de 2FA",
+        "tags": ["Auth"]
+      }
+    },
     "/auth/v1/trusted-countries": {
       "get": {
         "operationId": "AuthController_getTrustedCountries_v1",
@@ -455,6 +601,194 @@
         "summary": "Revocar una sesión activa por ID",
         "tags": ["Auth"]
       }
+    },
+    "/auth/v1/users/me/profile": {
+      "post": {
+        "operationId": "UserProfileController_create_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserProfileDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Perfil creado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserProfileResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos inválidos o no se aceptaron los consentimientos."
+          },
+          "401": {
+            "description": "No autenticado."
+          },
+          "409": {
+            "description": "El usuario ya tiene un perfil creado."
+          }
+        },
+        "summary": "Crear el perfil del usuario autenticado",
+        "tags": ["User Profile"]
+      },
+      "get": {
+        "operationId": "UserProfileController_get_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Perfil del usuario.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserProfileResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado."
+          },
+          "404": {
+            "description": "El usuario todavía no ha creado su perfil."
+          }
+        },
+        "summary": "Obtener el perfil del usuario autenticado",
+        "tags": ["User Profile"]
+      },
+      "patch": {
+        "operationId": "UserProfileController_update_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserProfileDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Perfil actualizado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserProfileResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos inválidos."
+          },
+          "401": {
+            "description": "No autenticado."
+          },
+          "404": {
+            "description": "El usuario todavía no ha creado su perfil."
+          }
+        },
+        "summary": "Actualizar (parcialmente) el perfil del usuario autenticado",
+        "tags": ["User Profile"]
+      }
+    },
+    "/auth/v1/users/me/profile/avatar": {
+      "post": {
+        "operationId": "UserProfileController_uploadAvatar_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Foto de perfil actualizada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserProfileResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Formato de imagen no soportado."
+          },
+          "401": {
+            "description": "No autenticado."
+          },
+          "404": {
+            "description": "El usuario todavía no ha creado su perfil."
+          }
+        },
+        "summary": "Subir/reemplazar la foto de perfil",
+        "tags": ["User Profile"]
+      }
+    },
+    "/auth/v1/users/lookup": {
+      "get": {
+        "operationId": "InternalUserController_lookup_v1",
+        "parameters": [
+          {
+            "name": "email",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["Internal"]
+      }
+    },
+    "/auth/v1/users/provision": {
+      "post": {
+        "operationId": "InternalUserController_provision_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProvisionWorkerDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": ["Internal"]
+      }
     }
   },
   "info": {
@@ -495,6 +829,34 @@
           }
         },
         "required": ["email"]
+      },
+      "ForgotPasswordDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "usuario@ejemplo.com",
+            "description": "Correo electrónico de la cuenta a recuperar"
+          }
+        },
+        "required": ["email"]
+      },
+      "ResetPasswordDto": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "example": "a3f8e1b2c4d5e6f7a3f8e1b2c4d5e6f7a3f8e1b2c4d5e6f7a3f8e1b2c4d5e6f7",
+            "description": "Token de recuperación enviado al correo electrónico"
+          },
+          "newPassword": {
+            "type": "string",
+            "example": "NewPass456@Secure",
+            "description": "Nueva contraseña de la cuenta",
+            "minLength": 12
+          }
+        },
+        "required": ["token", "newPassword"]
       },
       "RegisterUserDto": {
         "type": "object",
@@ -553,9 +915,68 @@
             "type": "string",
             "example": "Inicio de sesión exitoso",
             "description": "Mensaje de confirmación"
+          },
+          "role": {
+            "type": "string",
+            "example": "SUPER_ADMIN",
+            "description": "Rol del usuario autenticado"
+          },
+          "permissions": {
+            "example": ["platform:maintenance", "platform:feature-flags"],
+            "description": "Permisos efectivos del usuario (rol + overrides), solo para gating de UI",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         },
-        "required": ["message"]
+        "required": ["message", "role", "permissions"]
+      },
+      "VerifyLoginChallengeDto": {
+        "type": "object",
+        "properties": {
+          "challengeToken": {
+            "type": "string",
+            "description": "Challenge token de corta duración recibido en la respuesta 403 del login"
+          },
+          "totpCode": {
+            "type": "string",
+            "example": "123456",
+            "description": "Código TOTP de 6 dígitos generado por la app autenticadora"
+          },
+          "recoveryCode": {
+            "type": "string",
+            "example": "A1B2C3D4-E5F6A7B8",
+            "description": "Recovery code de un solo uso (formato XXXXXXXX-XXXXXXXX)"
+          }
+        },
+        "required": ["challengeToken"]
+      },
+      "CompleteFirstLoginDto": {
+        "type": "object",
+        "properties": {
+          "changeToken": {
+            "type": "string",
+            "description": "Challenge token de corta duración recibido en la respuesta 403 del login"
+          },
+          "newPassword": {
+            "type": "string",
+            "example": "NewPass456@Secure",
+            "description": "Nueva contraseña, en reemplazo de la contraseña temporal",
+            "minLength": 12
+          },
+          "dataProcessingAccepted": {
+            "type": "boolean",
+            "example": true,
+            "description": "Autorización de tratamiento de datos personales (Ley 1581 de 2012). Debe ser true."
+          },
+          "termsAccepted": {
+            "type": "boolean",
+            "example": true,
+            "description": "Aceptación de términos y condiciones. Debe ser true."
+          }
+        },
+        "required": ["changeToken", "newPassword", "dataProcessingAccepted", "termsAccepted"]
       },
       "ChangePasswordDto": {
         "type": "object",
@@ -653,6 +1074,25 @@
         },
         "required": ["password", "totpCode"]
       },
+      "RegenerateRecoveryCodesDto": {
+        "type": "object",
+        "properties": {
+          "password": {
+            "type": "string",
+            "example": "CurrentPass123!",
+            "description": "Contraseña actual del usuario",
+            "minLength": 12
+          },
+          "totpCode": {
+            "type": "string",
+            "example": "123456",
+            "description": "Código TOTP de 6 dígitos para confirmar la regeneración",
+            "minLength": 6,
+            "maxLength": 6
+          }
+        },
+        "required": ["password", "totpCode"]
+      },
       "AddTrustedCountryDto": {
         "type": "object",
         "properties": {
@@ -663,6 +1103,123 @@
           }
         },
         "required": ["country"]
+      },
+      "CreateUserProfileDto": {
+        "type": "object",
+        "properties": {
+          "firstName": {
+            "type": "string",
+            "example": "Juan",
+            "description": "Nombre(s)"
+          },
+          "lastName": {
+            "type": "string",
+            "example": "Pérez",
+            "description": "Apellido(s)"
+          },
+          "dataProcessingAccepted": {
+            "type": "boolean",
+            "example": true,
+            "description": "Autorización de tratamiento de datos personales (Ley 1581 de 2012). Debe ser true."
+          },
+          "termsAccepted": {
+            "type": "boolean",
+            "example": true,
+            "description": "Aceptación de términos y condiciones. Debe ser true."
+          }
+        },
+        "required": ["firstName", "lastName", "dataProcessingAccepted", "termsAccepted"]
+      },
+      "UserProfileResponseDto": {
+        "type": "object",
+        "properties": {
+          "firstName": {
+            "type": "string",
+            "example": "Juan"
+          },
+          "lastName": {
+            "type": "string",
+            "example": "Pérez"
+          },
+          "phone": {
+            "type": "string",
+            "example": "3001234567"
+          },
+          "documentType": {
+            "type": "string",
+            "enum": ["CC", "CE", "PASAPORTE"]
+          },
+          "documentNumber": {
+            "type": "string",
+            "example": "123456789"
+          },
+          "avatarUrl": {
+            "type": "string",
+            "example": "https://storage.example.com/avatars/user-1.png"
+          },
+          "isCompleteForTransactions": {
+            "type": "boolean",
+            "example": true,
+            "description": "true si ya tiene teléfono y documento — requisito para pagar/facturar"
+          }
+        },
+        "required": ["firstName", "lastName", "isCompleteForTransactions"]
+      },
+      "UpdateUserProfileDto": {
+        "type": "object",
+        "properties": {
+          "firstName": {
+            "type": "string",
+            "example": "Juan",
+            "description": "Nombre(s)"
+          },
+          "lastName": {
+            "type": "string",
+            "example": "Pérez",
+            "description": "Apellido(s)"
+          },
+          "phone": {
+            "type": "string",
+            "example": "3001234567",
+            "description": "Teléfono de contacto"
+          },
+          "documentType": {
+            "type": "string",
+            "enum": ["CC", "CE", "PASAPORTE"],
+            "description": "Tipo de documento de identidad"
+          },
+          "documentNumber": {
+            "type": "string",
+            "example": "123456789",
+            "description": "Número de documento"
+          }
+        }
+      },
+      "ProvisionWorkerDto": {
+        "type": "object",
+        "properties": {
+          "firstName": {
+            "type": "string",
+            "example": "María",
+            "description": "Nombre(s) del worker"
+          },
+          "lastName": {
+            "type": "string",
+            "example": "Pérez",
+            "description": "Apellido(s) del worker"
+          },
+          "contactEmail": {
+            "type": "string",
+            "example": "contacto@empresa.com",
+            "description": "Email real al que se envían las credenciales generadas"
+          },
+          "companyName": {
+            "type": "string",
+            "example": "Acme Corp",
+            "description": "Nombre de la empresa que provisiona al worker"
+          }
+        },
+        "required": ["firstName", "lastName", "contactEmail", "companyName"]
       }
     }
   }

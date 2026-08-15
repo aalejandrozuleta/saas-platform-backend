@@ -366,6 +366,115 @@
         "tags": ["Auth"]
       }
     },
+    "/v1/users/me/profile": {
+      "post": {
+        "operationId": "UserController_create_v1",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "Perfil creado."
+          },
+          "400": {
+            "description": "Datos inválidos o consentimientos no aceptados."
+          },
+          "401": {
+            "description": "No autenticado."
+          },
+          "409": {
+            "description": "El usuario ya tiene un perfil creado."
+          },
+          "503": {
+            "description": "Auth-service no disponible."
+          }
+        },
+        "summary": "Crear el perfil del usuario autenticado",
+        "tags": ["User Profile"]
+      },
+      "get": {
+        "operationId": "UserController_get_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Perfil del usuario."
+          },
+          "401": {
+            "description": "No autenticado."
+          },
+          "404": {
+            "description": "El usuario todavía no ha creado su perfil."
+          },
+          "503": {
+            "description": "Auth-service no disponible."
+          }
+        },
+        "summary": "Obtener el perfil del usuario autenticado",
+        "tags": ["User Profile"]
+      },
+      "patch": {
+        "operationId": "UserController_update_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Perfil actualizado."
+          },
+          "400": {
+            "description": "Datos inválidos."
+          },
+          "401": {
+            "description": "No autenticado."
+          },
+          "404": {
+            "description": "El usuario todavía no ha creado su perfil."
+          },
+          "503": {
+            "description": "Auth-service no disponible."
+          }
+        },
+        "summary": "Actualizar (parcialmente) el perfil del usuario autenticado",
+        "tags": ["User Profile"]
+      }
+    },
+    "/v1/users/me/profile/avatar": {
+      "post": {
+        "operationId": "UserController_uploadAvatar_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Foto de perfil actualizada."
+          },
+          "400": {
+            "description": "Formato de imagen no soportado."
+          },
+          "401": {
+            "description": "No autenticado."
+          },
+          "404": {
+            "description": "El usuario todavía no ha creado su perfil."
+          },
+          "503": {
+            "description": "Auth-service no disponible."
+          }
+        },
+        "summary": "Subir/reemplazar la foto de perfil",
+        "tags": ["User Profile"]
+      }
+    },
     "/v1/config/maintenance/status": {
       "get": {
         "operationId": "ConfigController_maintenanceStatus_get",
@@ -540,6 +649,269 @@
           }
         },
         "tags": ["Config"]
+      }
+    },
+    "/v1/companies": {
+      "post": {
+        "operationId": "CompanyController_create_v1",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "Compañía creada."
+          },
+          "400": {
+            "description": "Datos inválidos."
+          },
+          "401": {
+            "description": "No autenticado."
+          },
+          "503": {
+            "description": "Company-service no disponible."
+          }
+        },
+        "summary": "Crear una compañía; el usuario autenticado queda como OWNER",
+        "tags": ["Companies"]
+      }
+    },
+    "/v1/companies/{id}": {
+      "get": {
+        "operationId": "CompanyController_get_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Compañía encontrada."
+          },
+          "401": {
+            "description": "No autenticado."
+          },
+          "403": {
+            "description": "El usuario no tiene membresía activa en la compañía."
+          },
+          "404": {
+            "description": "Compañía no encontrada."
+          },
+          "503": {
+            "description": "Company-service no disponible."
+          }
+        },
+        "summary": "Obtener una compañía por id",
+        "tags": ["Companies"]
+      }
+    },
+    "/v1/companies/{id}/logo": {
+      "post": {
+        "operationId": "CompanyController_uploadLogo_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Logo actualizado."
+          },
+          "400": {
+            "description": "Formato de imagen no soportado."
+          },
+          "401": {
+            "description": "No autenticado."
+          },
+          "403": {
+            "description": "Solo OWNER/MANAGER pueden actualizar el logo."
+          },
+          "404": {
+            "description": "Compañía no encontrada."
+          },
+          "503": {
+            "description": "Company-service no disponible."
+          }
+        },
+        "summary": "Subir/reemplazar el logo de la compañía",
+        "tags": ["Companies"]
+      }
+    },
+    "/v1/companies/{id}/workers": {
+      "post": {
+        "operationId": "CompanyController_registerWorker_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Trabajador provisionado y membresía creada como ACTIVE."
+          },
+          "400": {
+            "description": "Datos inválidos, o rol OWNER no permitido aquí."
+          },
+          "401": {
+            "description": "No autenticado."
+          },
+          "403": {
+            "description": "Solo OWNER/MANAGER pueden registrar trabajadores."
+          },
+          "404": {
+            "description": "Compañía no encontrada."
+          },
+          "503": {
+            "description": "Company-service no disponible."
+          }
+        },
+        "summary": "Registrar (provisionar) un trabajador nuevo directamente en la compañía",
+        "tags": ["Companies"]
+      }
+    },
+    "/v1/companies/{id}/members": {
+      "post": {
+        "operationId": "CompanyController_inviteMember_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Membresía creada en estado INVITED."
+          },
+          "400": {
+            "description": "Datos inválidos."
+          },
+          "401": {
+            "description": "No autenticado."
+          },
+          "403": {
+            "description": "Solo OWNER/MANAGER pueden invitar miembros."
+          },
+          "404": {
+            "description": "No existe un usuario con ese email en auth-service."
+          },
+          "409": {
+            "description": "El usuario ya es miembro de la compañía."
+          },
+          "503": {
+            "description": "Company-service no disponible."
+          }
+        },
+        "summary": "Invitar (por email) a un worker existente a la compañía",
+        "tags": ["Companies"]
+      },
+      "get": {
+        "operationId": "CompanyController_listMembers_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Listado de membresías."
+          },
+          "401": {
+            "description": "No autenticado."
+          },
+          "403": {
+            "description": "El usuario no tiene membresía activa en la compañía."
+          },
+          "404": {
+            "description": "Compañía no encontrada."
+          },
+          "503": {
+            "description": "Company-service no disponible."
+          }
+        },
+        "summary": "Listar los miembros de una compañía",
+        "tags": ["Companies"]
+      }
+    },
+    "/v1/companies/{id}/members/{membershipId}": {
+      "patch": {
+        "operationId": "CompanyController_updateMember_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "membershipId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Membresía actualizada."
+          },
+          "400": {
+            "description": "Datos inválidos."
+          },
+          "401": {
+            "description": "No autenticado."
+          },
+          "403": {
+            "description": "Solo OWNER/MANAGER pueden actualizar miembros."
+          },
+          "404": {
+            "description": "Compañía o membresía no encontrada."
+          },
+          "503": {
+            "description": "Company-service no disponible."
+          }
+        },
+        "summary": "Actualizar el rol/estado de un miembro de la compañía",
+        "tags": ["Companies"]
       }
     },
     "/v1/metrics": {
