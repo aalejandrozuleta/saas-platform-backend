@@ -1,4 +1,4 @@
-import { randomBytes } from 'node:crypto';
+import { randomInt } from 'node:crypto';
 
 /**
  * Conjuntos de caracteres usados para construir la contraseña temporal.
@@ -16,7 +16,7 @@ const PASSWORD_LENGTH = 16;
 
 /**
  * Genera una contraseña temporal aleatoria criptográficamente segura
- * (`node:crypto.randomBytes`, no `Math.random`), garantizada a cumplir los
+ * (`node:crypto.randomInt`, no `Math.random`), garantizada a cumplir los
  * requisitos de {@link PasswordVO} (mínimo 12 caracteres, al menos una
  * minúscula, una mayúscula, un dígito y un carácter especial).
  *
@@ -42,19 +42,20 @@ export function generateTempPassword(): string {
 }
 
 function pickRandom(charset: string): string {
-  const index = randomBytes(1)[0] % charset.length;
+  const index = randomInt(charset.length);
   return charset[index];
 }
 
 /**
- * Fisher-Yates shuffle usando bytes aleatorios criptográficos, para que la
- * posición de los caracteres "garantizados" no sea siempre la misma.
+ * Fisher-Yates shuffle usando `randomInt` (sin sesgo, a diferencia de
+ * `randomBytes(1)[0] % n`), para que la posición de los caracteres
+ * "garantizados" no sea siempre la misma.
  */
 function shuffle(chars: string[]): string[] {
   const result = [...chars];
 
   for (let i = result.length - 1; i > 0; i--) {
-    const j = randomBytes(1)[0] % (i + 1);
+    const j = randomInt(i + 1);
     [result[i], result[j]] = [result[j], result[i]];
   }
 
