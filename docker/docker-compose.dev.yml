@@ -182,6 +182,75 @@ services:
     networks:
       - saas-dev
 
+  company-service:
+    container_name: company-service-dev
+    init: true
+    restart: unless-stopped
+    build:
+      context: ..
+      dockerfile: services/company-service/Dockerfile.dev
+    env_file:
+      - ../services/company-service/.env
+    volumes:
+      - ../services/company-service:/app/services/company-service
+      - /app/services/company-service/node_modules
+      - ../shared:/app/shared
+      - /app/node_modules
+      - pnpm-store:/pnpm-store
+    environment:
+      PNPM_STORE_PATH: /pnpm-store
+      SERVICE_NAME: company-service
+      # Override .env DATABASE_URL so Prisma uses the Docker internal hostname, not localhost
+      DATABASE_URL: postgresql://company_user:company_pass@company-postgres:5432/company_db
+      AUTH_SERVICE_URL: http://auth-service:3001
+      # Debe coincidir con el valor de auth-service (ver InternalServiceGuard)
+      INTERNAL_SERVICE_SECRET: ${INTERNAL_SERVICE_SECRET:-dev-only-internal-secret-do-not-use-in-prod}
+    ports:
+      - '3004:3004'
+    depends_on:
+      company-postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', 'wget', '-qO-', 'http://localhost:3004/company/v1/metrics']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    stop_grace_period: 15s
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 768M
+    logging: *default-logging
+    networks:
+      - saas-dev
+
+  company-postgres:
+    image: ${POSTGRES_IMAGE:-postgres:17-alpine}
+    container_name: company-postgres-dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: company_db
+      POSTGRES_USER: company_user
+      POSTGRES_PASSWORD: company_pass
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U company_user -d company_db']
+      interval: 5s
+      retries: 5
+    volumes:
+      - company-postgres-data:/var/lib/postgresql/data
+    ports:
+      - '127.0.0.1:5435:5432'
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+    logging: *default-logging
+    networks:
+      - saas-dev
+
   auth-service:
     container_name: auth-service-dev
     init: true
@@ -650,6 +719,7 @@ networks:
 
 volumes:
   auth-postgres-data:
+  company-postgres-data:
   config-postgres-data:
   redis-data:
   mongo-data:

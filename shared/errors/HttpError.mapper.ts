@@ -49,6 +49,10 @@ export const HttpErrorMapper: Record<ErrorCode, number> = {
   [ErrorCode.INVALID_PASSWORD_RESET_TOKEN]: 400,
   [ErrorCode.USER_PROFILE_ALREADY_EXISTS]: 409,
   [ErrorCode.USER_PROFILE_NOT_FOUND]: 404,
+  [ErrorCode.COMPANY_NOT_FOUND]: 404,
+  [ErrorCode.MEMBERSHIP_ALREADY_EXISTS]: 409,
+  [ErrorCode.MEMBERSHIP_NOT_FOUND]: 404,
+  [ErrorCode.USER_NOT_FOUND]: 404,
 };
 
 /**

@@ -188,4 +188,13 @@ export class DomainErrorFactory {
   static userProfileNotFound(): DomainException {
     return DomainException.create('user_profile.not_found', ErrorCode.USER_PROFILE_NOT_FOUND, 404);
   }
+
+  /**
+   * Usuario no encontrado por email en el lookup interno
+   * (`GET /v1/users/lookup`, consumido por otros servicios como
+   * `company-service` para resolver invitaciones).
+   */
+  static userNotFound(): DomainException {
+    return DomainException.create('user.not_found', ErrorCode.USER_NOT_FOUND, 404);
+  }
 }

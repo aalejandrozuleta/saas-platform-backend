@@ -1,0 +1,55 @@
+// Esquema Prisma de company-service (tenant: empresas + membresías).
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+    provider = "prisma-client-js"
+    output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum CompanyPlan {
+  STARTER
+  PRO
+  BUSINESS
+}
+
+enum MembershipRole {
+  OWNER
+  MANAGER
+  WORKER
+}
+
+enum MembershipStatus {
+  INVITED
+  ACTIVE
+  SUSPENDED
+}
+
+model Company {
+  id                   String      @id @default(uuid())
+  name                 String
+  taxId                String?
+  plan                 CompanyPlan @default(STARTER)
+  subscriptionStatus   String
+  stripeCustomerId     String?
+  stripeSubscriptionId String?
+  memberships          CompanyMembership[]
+  createdAt            DateTime    @default(now())
+  updatedAt            DateTime    @updatedAt
+}
+
+model CompanyMembership {
+  id        String           @id @default(uuid())
+  companyId String
+  userId    String // cross-service ref a auth-service User, sin FK real
+  role      MembershipRole
+  status    MembershipStatus @default(INVITED)
+  company   Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  @@unique([companyId, userId])
+}

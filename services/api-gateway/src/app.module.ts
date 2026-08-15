@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { AuthModule } from '@modules/auth/auth.module';
 import { UserModule } from '@modules/user/user.module';
 import { ConfigGatewayModule } from '@modules/config/config.module';
+import { CompanyModule } from '@modules/company/company.module';
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { JwtSessionGuard } from '@infrastructure/security/guards/jwt-session.guard';
 import { MaintenanceGuard } from '@infrastructure/security/guards/maintenance.guard';
@@ -26,6 +27,7 @@ import { MetricsModule } from './infrastructure/metrics/metrics.module';
     AuthModule,
     UserModule,
     ConfigGatewayModule,
+    CompanyModule,
     MetricsModule,
 
     RedisModule.forRootAsync({

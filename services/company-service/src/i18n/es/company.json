@@ -1,0 +1,12 @@
+{
+  "company.created_success": "Empresa creada correctamente",
+  "company.not_found": "No se encontró la empresa",
+  "company.not_owner": "No tienes permisos para gestionar los miembros de esta empresa",
+  "company.auth_service_unavailable": "No se pudo contactar el servicio de autenticación. Inténtalo de nuevo.",
+  "membership.invited_success": "Invitación enviada correctamente",
+  "membership.updated_success": "Miembro actualizado correctamente",
+  "membership.already_exists": "Ese usuario ya es miembro de la empresa",
+  "membership.not_found": "No se encontró la membresía",
+  "membership.last_owner": "La empresa debe conservar al menos un propietario activo",
+  "membership.user_not_found": "No existe un usuario registrado con ese email"
+}

@@ -1,0 +1,4 @@
+{
+  "common.internal_error": "Ocurrió un error interno. Inténtalo de nuevo.",
+  "common.validation_error": "La solicitud contiene datos inválidos"
+}

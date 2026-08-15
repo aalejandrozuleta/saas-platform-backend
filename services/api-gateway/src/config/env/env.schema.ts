@@ -17,6 +17,10 @@ export const envSchema = z.object({
   CONFIG_SERVICE_URL: z.string(),
   CONFIG_SERVICE_TIMEOUT: z.coerce.number().default(5000),
   CONFIG_SERVICE_CIRCUIT_TIMEOUT: z.coerce.number().default(10000),
+
+  COMPANY_SERVICE_URL: z.string(),
+  COMPANY_SERVICE_TIMEOUT: z.coerce.number().default(5000),
+  COMPANY_SERVICE_CIRCUIT_TIMEOUT: z.coerce.number().default(10000),
   /** Secreto compartido enviado a config-service; ver InternalServiceGuard. */
   INTERNAL_SERVICE_SECRET: z.string().min(32),
   JWT_ACCESS_SECRET: z.string().min(32),

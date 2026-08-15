@@ -45,6 +45,9 @@ services:
       AUTH_SERVICE_RETRIES: ${AUTH_SERVICE_RETRIES:-2}
       AUTH_SERVICE_CIRCUIT_TIMEOUT: ${AUTH_SERVICE_CIRCUIT_TIMEOUT:-10000}
       CONFIG_SERVICE_URL: http://config-service:3002
+      COMPANY_SERVICE_URL: http://company-service:3004
+      COMPANY_SERVICE_TIMEOUT: ${COMPANY_SERVICE_TIMEOUT:-5000}
+      COMPANY_SERVICE_CIRCUIT_TIMEOUT: ${COMPANY_SERVICE_CIRCUIT_TIMEOUT:-10000}
       # Debe coincidir con el INTERNAL_SERVICE_SECRET de config-service (ver InternalServiceGuard)
       INTERNAL_SERVICE_SECRET: ${INTERNAL_SERVICE_SECRET:?INTERNAL_SERVICE_SECRET is required}
       JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:?JWT_ACCESS_SECRET is required}
@@ -62,6 +65,8 @@ services:
       auth-service:
         condition: service_healthy
       config-service:
+        condition: service_healthy
+      company-service:
         condition: service_healthy
       redis:
         condition: service_healthy
@@ -209,6 +214,69 @@ services:
       retries: 5
     volumes:
       - config-postgres-prod-data:/var/lib/postgresql/data
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+    networks:
+      - saas-data
+
+  company-service:
+    container_name: company-service-prod
+    build:
+      context: ..
+      dockerfile: services/company-service/Dockerfile.prod
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      SERVICE_NAME: company-service
+      PORT: 3004
+      DATABASE_URL: postgresql://${COMPANY_POSTGRES_USER:-company_user}:${COMPANY_POSTGRES_PASSWORD:?COMPANY_POSTGRES_PASSWORD is required}@company-postgres:5432/${COMPANY_POSTGRES_DB:-company_db}
+      AUTH_SERVICE_URL: http://auth-service:3001
+      AUTH_SERVICE_TIMEOUT: ${AUTH_SERVICE_TIMEOUT:-5000}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:?JWT_ACCESS_SECRET is required}
+      # Debe coincidir con el INTERNAL_SERVICE_SECRET de auth-service (ver InternalServiceGuard)
+      INTERNAL_SERVICE_SECRET: ${INTERNAL_SERVICE_SECRET:?INTERNAL_SERVICE_SECRET is required}
+    depends_on:
+      company-postgres:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -qO- http://127.0.0.1:3004/company/v1/metrics >/dev/null']
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+    networks:
+      - saas-internal
+      - saas-data
+
+  company-postgres:
+    image: postgres:17-alpine
+    container_name: company-postgres-prod
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${COMPANY_POSTGRES_DB:-company_db}
+      POSTGRES_USER: ${COMPANY_POSTGRES_USER:-company_user}
+      POSTGRES_PASSWORD: ${COMPANY_POSTGRES_PASSWORD:?COMPANY_POSTGRES_PASSWORD is required}
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'pg_isready -U ${COMPANY_POSTGRES_USER:-company_user} -d ${COMPANY_POSTGRES_DB:-company_db}',
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - company-postgres-prod-data:/var/lib/postgresql/data
     deploy:
       resources:
         limits:
@@ -438,6 +506,30 @@ services:
       - saas-data
 
   # =====================
+  # POSTGRES EXPORTER (company-postgres)
+  # =====================
+  postgres-exporter-company:
+    image: quay.io/prometheuscommunity/postgres-exporter:v0.18.0
+    container_name: postgres-exporter-company-prod
+    restart: unless-stopped
+    profiles: ['observability']
+    environment:
+      DATA_SOURCE_URI: company-postgres:5432/${COMPANY_POSTGRES_DB:-company_db}?sslmode=disable
+      DATA_SOURCE_USER: ${COMPANY_POSTGRES_USER:-company_user}
+      DATA_SOURCE_PASS: ${COMPANY_POSTGRES_PASSWORD:?COMPANY_POSTGRES_PASSWORD is required}
+    depends_on:
+      company-postgres:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 64M
+    networks:
+      - saas-internal
+      - saas-data
+
+  # =====================
   # REDIS EXPORTER
   # =====================
   redis-exporter:
@@ -493,13 +585,13 @@ networks:
   # notification-service, bypassing api-gateway for that one route.
   saas-edge:
     driver: bridge
-  # Service-to-service tier: api-gateway, auth-service, config-service, notification-service,
-  # redis, observability, and nginx (only for the /socket.io/ WebSocket proxy).
+  # Service-to-service tier: api-gateway, auth-service, config-service, company-service,
+  # notification-service, redis, observability, and nginx (only for the /socket.io/ WebSocket proxy).
   # Deliberately excludes the data tier so api-gateway/nginx cannot reach the databases directly.
   # Not marked `internal: true` because prometheus/loki/grafana publish ports to the host.
   saas-internal:
     driver: bridge
-  # Private data tier: only auth-service, config-service, and their postgres
+  # Private data tier: only auth-service, config-service, company-service, and their postgres
   # exporters (metrics-only, read via pg_stat views) may reach it.
   # No container on this network publishes host ports, so it's fully isolated from outside.
   saas-data:
@@ -508,6 +600,7 @@ networks:
 
 volumes:
   auth-postgres-prod-data:
+  company-postgres-prod-data:
   config-postgres-prod-data:
   redis-prod-data:
   mongo-prod-data:

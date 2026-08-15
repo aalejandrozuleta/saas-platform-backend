@@ -12,6 +12,7 @@ C4Context
     System(auth, "Auth Service", "Registro, login, sesiones, 2FA, tokens")
     System(config, "Config Service", "Feature flags, mantenimiento, tenants, políticas")
     System(notification, "Notification Service", "Email transaccional y WebSocket en tiempo real")
+    System(company, "Company Service", "Empresas (tenant) y membresía de trabajadores")
   }
 
   System_Ext(resend, "Resend", "Proveedor de envío de emails")
@@ -21,12 +22,15 @@ C4Context
   Rel(admin, gateway, "HTTPS (rutas de administración)")
   Rel(gateway, auth, "HTTP interno /auth/v1/*")
   Rel(gateway, config, "HTTP interno /config/v1/*")
+  Rel(gateway, company, "HTTP interno /company/v1/*")
+  Rel(company, auth, "HTTP interno — lookup de userId por email")
   Rel(auth, notification, "HTTP interno — dispara emails transaccionales")
   Rel(notification, resend, "API HTTPS")
   Rel(gateway, observability, "métricas + logs")
   Rel(auth, observability, "métricas + logs")
   Rel(config, observability, "métricas + logs")
   Rel(notification, observability, "métricas + logs")
+  Rel(company, observability, "métricas + logs")
 ```
 
 ## Actores
@@ -40,5 +44,6 @@ C4Context
 - **Auth Service** — dueño del dominio de identidad y sesiones.
 - **Config Service** — configuración operativa transversal, consultada por el gateway (ej. modo mantenimiento) y por otros servicios.
 - **Notification Service** — desacoplado vía colas BullMQ; otros servicios lo invocan por HTTP para encolar un email o notificación WS, y el envío real ocurre de forma asíncrona.
+- **Company Service** — dueño del tenant (`Company`) y de la membresía de trabajadores (`CompanyMembership`); referencia usuarios de Auth Service por `userId`, nunca crea cuentas.
 
 Ver [system-containers.md](system-containers.md) para el detalle de infraestructura por contenedor.

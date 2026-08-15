@@ -15,6 +15,8 @@ describe('envSchema', () => {
 
     CONFIG_SERVICE_URL: 'http://localhost:3002',
 
+    COMPANY_SERVICE_URL: 'http://localhost:3004',
+
     INTERNAL_SERVICE_SECRET: 'a'.repeat(32),
 
     JWT_ACCESS_SECRET: 'super-secret-jwt-key-with-32-chars',
