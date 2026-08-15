@@ -6,6 +6,10 @@ const validProps = {
   id: 'c-1',
   name: '  Acme S.A.S.  ',
   taxId: '900-1',
+  email: 'contacto@acme.com',
+  phone: '+57 3001234567',
+  address: 'Calle 123',
+  city: 'Bogotá',
 };
 
 describe('Company entity', () => {
@@ -16,6 +20,12 @@ describe('Company entity', () => {
       expect(company.id).toBe('c-1');
       expect(company.name).toBe('Acme S.A.S.');
       expect(company.taxId).toBe('900-1');
+      expect(company.email).toBe('contacto@acme.com');
+      expect(company.phone).toBe('+57 3001234567');
+      expect(company.address).toBe('Calle 123');
+      expect(company.city).toBe('Bogotá');
+      expect(company.country).toBe('CO');
+      expect(company.logoUrl).toBeUndefined();
       expect(company.plan).toBe(CompanyPlan.STARTER);
       expect(company.subscriptionStatus).toBe(DEFAULT_SUBSCRIPTION_STATUS);
       expect(company.stripeCustomerId).toBeUndefined();
@@ -30,8 +40,42 @@ describe('Company entity', () => {
       expect(company.taxId).toBeUndefined();
     });
 
+    it('usa el country explícito si se provee', () => {
+      const company = Company.create({ ...validProps, country: 'US' });
+
+      expect(company.country).toBe('US');
+    });
+
+    it('usa CO como default si country llega vacío', () => {
+      const company = Company.create({ ...validProps, country: '   ' });
+
+      expect(company.country).toBe('CO');
+    });
+
     it('lanza COMPANY_NAME_REQUIRED si el nombre está vacío', () => {
       expect(() => Company.create({ ...validProps, name: '   ' })).toThrow('COMPANY_NAME_REQUIRED');
+    });
+
+    it('lanza COMPANY_EMAIL_REQUIRED si el email está vacío', () => {
+      expect(() => Company.create({ ...validProps, email: '   ' })).toThrow(
+        'COMPANY_EMAIL_REQUIRED',
+      );
+    });
+
+    it('lanza COMPANY_PHONE_REQUIRED si el teléfono está vacío', () => {
+      expect(() => Company.create({ ...validProps, phone: '   ' })).toThrow(
+        'COMPANY_PHONE_REQUIRED',
+      );
+    });
+
+    it('lanza COMPANY_ADDRESS_REQUIRED si la dirección está vacía', () => {
+      expect(() => Company.create({ ...validProps, address: '   ' })).toThrow(
+        'COMPANY_ADDRESS_REQUIRED',
+      );
+    });
+
+    it('lanza COMPANY_CITY_REQUIRED si la ciudad está vacía', () => {
+      expect(() => Company.create({ ...validProps, city: '   ' })).toThrow('COMPANY_CITY_REQUIRED');
     });
   });
 
@@ -43,6 +87,12 @@ describe('Company entity', () => {
         id: 'c-1',
         name: '',
         taxId: undefined,
+        email: 'contacto@acme.com',
+        phone: '+57 3001234567',
+        address: 'Calle 123',
+        city: 'Bogotá',
+        country: 'CO',
+        logoUrl: 'https://storage.example.com/logos/c-1.webp',
         plan: CompanyPlan.BUSINESS,
         subscriptionStatus: 'past_due',
         stripeCustomerId: 'cus_1',
@@ -52,6 +102,7 @@ describe('Company entity', () => {
       });
 
       expect(company.name).toBe('');
+      expect(company.logoUrl).toBe('https://storage.example.com/logos/c-1.webp');
       expect(company.plan).toBe(CompanyPlan.BUSINESS);
       expect(company.subscriptionStatus).toBe('past_due');
       expect(company.stripeCustomerId).toBe('cus_1');
@@ -75,6 +126,18 @@ describe('Company entity', () => {
       const company = Company.create(validProps);
 
       expect(() => company.rename('  ')).toThrow('COMPANY_NAME_REQUIRED');
+    });
+  });
+
+  describe('updateLogo', () => {
+    it('devuelve una nueva instancia con logoUrl actualizado', () => {
+      const company = Company.create(validProps);
+      const updated = company.updateLogo('https://storage.example.com/logos/c-1.webp');
+
+      expect(updated).not.toBe(company);
+      expect(updated.logoUrl).toBe('https://storage.example.com/logos/c-1.webp');
+      expect(company.logoUrl).toBeUndefined();
+      expect(updated.updatedAt.getTime()).toBeGreaterThanOrEqual(company.updatedAt.getTime());
     });
   });
 });

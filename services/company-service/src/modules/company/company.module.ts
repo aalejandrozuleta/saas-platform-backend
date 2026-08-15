@@ -6,6 +6,7 @@ import { CompanyMembershipController } from '@infrastructure/controllers/company
 import { JwtAuthGuard } from '@infrastructure/security/jwt-auth.guard';
 import { CreateCompanyUseCase } from '@application/use-cases/company/create-company.use-case';
 import { GetCompanyUseCase } from '@application/use-cases/company/get-company.use-case';
+import { UploadCompanyLogoUseCase } from '@application/use-cases/company/upload-company-logo.use-case';
 import { InviteMemberUseCase } from '@application/use-cases/company-membership/invite-member.use-case';
 import { ListMembersUseCase } from '@application/use-cases/company-membership/list-members.use-case';
 import { UpdateMemberUseCase } from '@application/use-cases/company-membership/update-member.use-case';
@@ -26,6 +27,7 @@ import { companyProviders } from './company.providers';
   providers: [
     CreateCompanyUseCase,
     GetCompanyUseCase,
+    UploadCompanyLogoUseCase,
     InviteMemberUseCase,
     ListMembersUseCase,
     UpdateMemberUseCase,

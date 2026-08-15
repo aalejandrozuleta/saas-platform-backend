@@ -3,6 +3,8 @@
   "company.not_found": "No se encontró la empresa",
   "company.not_owner": "No tienes permisos para gestionar los miembros de esta empresa",
   "company.auth_service_unavailable": "No se pudo contactar el servicio de autenticación. Inténtalo de nuevo.",
+  "company.invalid_logo_type": "Formato de imagen no soportado para el logo",
+  "company.logo_updated_success": "Logo actualizado correctamente",
   "membership.invited_success": "Invitación enviada correctamente",
   "membership.updated_success": "Miembro actualizado correctamente",
   "membership.already_exists": "Ese usuario ya es miembro de la empresa",

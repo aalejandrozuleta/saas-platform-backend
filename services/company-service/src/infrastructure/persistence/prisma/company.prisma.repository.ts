@@ -25,6 +25,13 @@ export class CompanyPrismaRepository implements CompanyRepository {
     await this.prisma.company.create({ data: CompanyMapper.toPersistence(company) });
   }
 
+  async update(company: Company): Promise<void> {
+    await this.prisma.company.update({
+      where: { id: company.id },
+      data: CompanyMapper.toPersistence(company),
+    });
+  }
+
   /**
    * Crea empresa + membresía OWNER dentro de una única transacción
    * (forma de array de `$transaction`: dos escrituras independientes que

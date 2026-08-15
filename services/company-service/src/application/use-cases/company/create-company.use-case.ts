@@ -24,11 +24,27 @@ export class CreateCompanyUseCase {
     private readonly companyRepository: CompanyRepository,
   ) {}
 
-  async execute(userId: string, input: { name: string; taxId?: string }): Promise<Company> {
+  async execute(
+    userId: string,
+    input: {
+      name: string;
+      taxId?: string;
+      email: string;
+      phone: string;
+      address: string;
+      city: string;
+      country?: string;
+    },
+  ): Promise<Company> {
     const company = Company.create({
       id: randomUUID(),
       name: input.name,
       taxId: input.taxId,
+      email: input.email,
+      phone: input.phone,
+      address: input.address,
+      city: input.city,
+      country: input.country,
     });
 
     const ownerMembership = CompanyMembership.create({

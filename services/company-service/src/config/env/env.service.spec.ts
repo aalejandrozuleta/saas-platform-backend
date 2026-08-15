@@ -8,6 +8,10 @@ const validEnv = {
   AUTH_SERVICE_URL: 'http://auth-service:3001',
   AUTH_SERVICE_TIMEOUT: '5000',
   INTERNAL_SERVICE_SECRET: 'b'.repeat(40),
+  STORAGE_ENDPOINT: 'http://localhost:9000',
+  STORAGE_ACCESS_KEY: 'access-key',
+  STORAGE_SECRET_KEY: 'secret-key',
+  STORAGE_PUBLIC_URL: 'http://localhost:9000/company-logos',
 };
 
 describe('EnvService', () => {

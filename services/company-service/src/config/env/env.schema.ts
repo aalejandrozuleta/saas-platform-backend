@@ -23,6 +23,15 @@ export const envSchema = z.object({
 
   /** Secreto compartido con auth-service; ver InternalServiceGuard. */
   INTERNAL_SERVICE_SECRET: z.string().min(32),
+
+  // --- Storage (S3-compatible, MinIO en dev) para el logo de la empresa ---
+  STORAGE_ENDPOINT: z.string(),
+  STORAGE_REGION: z.string().default('us-east-1'),
+  STORAGE_BUCKET: z.string().default('company-logos'),
+  STORAGE_ACCESS_KEY: z.string(),
+  STORAGE_SECRET_KEY: z.string(),
+  /** Prefijo público desde el que se sirven las imágenes ya subidas (bucket público de solo lectura). */
+  STORAGE_PUBLIC_URL: z.string(),
 });
 
 export type EnvVars = z.infer<typeof envSchema>;

@@ -12,6 +12,10 @@ describe('CompanyPrismaRepository', () => {
   const company = Company.create({
     id: 'c-1',
     name: 'Acme',
+    email: 'contacto@acme.com',
+    phone: '+57 3001234567',
+    address: 'Calle 123',
+    city: 'Bogotá',
   });
   const membership = CompanyMembership.create({
     id: 'm-1',
@@ -23,7 +27,7 @@ describe('CompanyPrismaRepository', () => {
 
   beforeEach(() => {
     prisma = {
-      company: { findUnique: jest.fn(), create: jest.fn() },
+      company: { findUnique: jest.fn(), create: jest.fn(), update: jest.fn() },
       companyMembership: { create: jest.fn() },
       $transaction: jest.fn().mockResolvedValue([]),
     };
@@ -61,6 +65,17 @@ describe('CompanyPrismaRepository', () => {
 
     expect(prisma.company.create).toHaveBeenCalledWith({
       data: expect.objectContaining({ id: 'c-1', name: 'Acme' }),
+    });
+  });
+
+  it('update actualiza la empresa existente', async () => {
+    const updated = company.updateLogo('https://storage.example.com/logos/c-1.webp');
+
+    await repository.update(updated);
+
+    expect(prisma.company.update).toHaveBeenCalledWith({
+      where: { id: 'c-1' },
+      data: expect.objectContaining({ logoUrl: 'https://storage.example.com/logos/c-1.webp' }),
     });
   });
 

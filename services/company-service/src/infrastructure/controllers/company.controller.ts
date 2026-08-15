@@ -1,13 +1,32 @@
-import { Body, Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { memoryStorage } from 'multer';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Req,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags } from '@nestjs/swagger';
 import { I18nService, successResponse } from '@saas/shared';
 import { Request } from 'express';
 import { JwtAuthGuard } from '@infrastructure/security/jwt-auth.guard';
 import { CreateCompanyUseCase } from '@application/use-cases/company/create-company.use-case';
 import { GetCompanyUseCase } from '@application/use-cases/company/get-company.use-case';
+import { UploadCompanyLogoUseCase } from '@application/use-cases/company/upload-company-logo.use-case';
 import { CreateCompanyDto } from '@application/dto/company/create-company.dto';
 import { type Company } from '@domain/entities/company/company.entity';
-import { CreateCompanySwagger, GetCompanySwagger } from '@infrastructure/swagger/company.swagger';
+import {
+  CreateCompanySwagger,
+  GetCompanySwagger,
+  UploadCompanyLogoSwagger,
+} from '@infrastructure/swagger/company.swagger';
+
+const MAX_LOGO_SIZE_BYTES = 5 * 1024 * 1024;
 
 /**
  * Controller de empresas (tenant).
@@ -19,6 +38,7 @@ export class CompanyController {
   constructor(
     private readonly createCompanyUseCase: CreateCompanyUseCase,
     private readonly getCompanyUseCase: GetCompanyUseCase,
+    private readonly uploadCompanyLogoUseCase: UploadCompanyLogoUseCase,
     private readonly i18n: I18nService,
   ) {}
 
@@ -40,11 +60,39 @@ export class CompanyController {
     return successResponse(this.toResponse(company));
   }
 
+  @Post(':id/logo')
+  @UploadCompanyLogoSwagger()
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: memoryStorage(),
+      limits: { fileSize: MAX_LOGO_SIZE_BYTES },
+    }),
+  )
+  async uploadLogo(
+    @Param('id') id: string,
+    @UploadedFile() file: Express.Multer.File,
+    @Req() req: Request,
+  ) {
+    const company = await this.uploadCompanyLogoUseCase.execute(req.user!.id, id, {
+      buffer: file.buffer,
+    });
+
+    return successResponse(this.toResponse(company), {
+      message: this.i18n.translate('company.logo_updated_success', this.resolveLanguage(req)),
+    });
+  }
+
   private toResponse(company: Company) {
     return {
       id: company.id,
       name: company.name,
       taxId: company.taxId,
+      email: company.email,
+      phone: company.phone,
+      address: company.address,
+      city: company.city,
+      country: company.country,
+      logoUrl: company.logoUrl,
       plan: company.plan,
       subscriptionStatus: company.subscriptionStatus,
       createdAt: company.createdAt,

@@ -29,9 +29,34 @@ export class Company {
    * Reglas: el nombre es obligatorio y no puede ser espacios en blanco.
    * Toda empresa nace en plan `STARTER` y suscripción activa.
    */
-  static create(props: { id: string; name: string; taxId?: string }): Company {
+  static create(props: {
+    id: string;
+    name: string;
+    taxId?: string;
+    email: string;
+    phone: string;
+    address: string;
+    city: string;
+    country?: string;
+  }): Company {
     if (!props.name.trim()) {
       throw new Error('COMPANY_NAME_REQUIRED');
+    }
+
+    if (!props.email.trim()) {
+      throw new Error('COMPANY_EMAIL_REQUIRED');
+    }
+
+    if (!props.phone.trim()) {
+      throw new Error('COMPANY_PHONE_REQUIRED');
+    }
+
+    if (!props.address.trim()) {
+      throw new Error('COMPANY_ADDRESS_REQUIRED');
+    }
+
+    if (!props.city.trim()) {
+      throw new Error('COMPANY_CITY_REQUIRED');
     }
 
     const now = new Date();
@@ -40,6 +65,11 @@ export class Company {
       id: props.id,
       name: props.name.trim(),
       taxId: props.taxId,
+      email: props.email.trim(),
+      phone: props.phone.trim(),
+      address: props.address.trim(),
+      city: props.city.trim(),
+      country: props.country?.trim() ? props.country.trim() : 'CO',
       plan: CompanyPlan.STARTER,
       subscriptionStatus: DEFAULT_SUBSCRIPTION_STATUS,
       createdAt: now,
@@ -69,6 +99,30 @@ export class Company {
 
   get taxId(): string | undefined {
     return this.props.taxId;
+  }
+
+  get email(): string {
+    return this.props.email;
+  }
+
+  get phone(): string {
+    return this.props.phone;
+  }
+
+  get address(): string {
+    return this.props.address;
+  }
+
+  get city(): string {
+    return this.props.city;
+  }
+
+  get country(): string {
+    return this.props.country;
+  }
+
+  get logoUrl(): string | undefined {
+    return this.props.logoUrl;
   }
 
   get plan(): CompanyPlan {
@@ -111,6 +165,19 @@ export class Company {
     return new Company({
       ...this.props,
       name: name.trim(),
+      updatedAt: new Date(),
+    });
+  }
+
+  /**
+   * Actualiza la URL del logo devolviendo una nueva instancia (entidad
+   * inmutable, mismo patrón que `rename()` / `UserProfile.updateAvatar()`
+   * en auth-service).
+   */
+  updateLogo(logoUrl: string): Company {
+    return new Company({
+      ...this.props,
+      logoUrl,
       updatedAt: new Date(),
     });
   }

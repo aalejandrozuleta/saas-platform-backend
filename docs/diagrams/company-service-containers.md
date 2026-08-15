@@ -4,6 +4,7 @@
 flowchart LR
     gateway["API Gateway"] -->|"HTTP /company/v1/*"| api["API NestJS<br/>company-service :3004"]
     api -->|"GET /auth/v1/users/lookup<br/>x-internal-api-key"| auth["Auth Service :3001"]
+    api -->|"PutObject<br/>bucket company-logos"| minio[("MinIO<br/>compartido con auth-service")]
 
     subgraph company-service
         api --> pg[("PostgreSQL<br/>company-postgres<br/>Company, CompanyMembership")]
@@ -12,8 +13,9 @@ flowchart LR
 
 ## Contenedores principales
 
-- **API NestJS** — expone `/company/v1/*`: crear/consultar empresa, invitar/listar/actualizar miembros.
+- **API NestJS** — expone `/company/v1/*`: crear/consultar empresa, subir logo, invitar/listar/actualizar miembros.
 - **PostgreSQL** (`company-postgres`) — instancia dedicada, separada de `auth-postgres`/`config-postgres`, vía Prisma.
+- **MinIO** (`bucket company-logos`) — misma instancia/contenedor que ya usa auth-service para avatares (`minio-dev`), solo un bucket adicional creado por `minio-init`. Sin contenedor propio.
 
 Sin MongoDB ni Redis en este primer corte (sin audit log ni cache todavía —
 decisión deliberada, ver [../architecture/company-service.md](../architecture/company-service.md)).

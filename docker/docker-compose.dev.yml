@@ -205,11 +205,17 @@ services:
       AUTH_SERVICE_URL: http://auth-service:3001
       # Debe coincidir con el valor de auth-service (ver InternalServiceGuard)
       INTERNAL_SERVICE_SECRET: ${INTERNAL_SERVICE_SECRET:-dev-only-internal-secret-do-not-use-in-prod}
+      STORAGE_ENDPOINT: http://minio:9000
+      STORAGE_ACCESS_KEY: ${MINIO_ROOT_USER:-dev-minio-user}
+      STORAGE_SECRET_KEY: ${MINIO_ROOT_PASSWORD:-dev-only-minio-password-change-me}
+      STORAGE_PUBLIC_URL: http://localhost:9000/company-logos
     ports:
       - '3004:3004'
     depends_on:
       company-postgres:
         condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
     healthcheck:
       test: ['CMD', 'wget', '-qO-', 'http://localhost:3004/company/v1/metrics']
       interval: 10s
@@ -371,6 +377,8 @@ services:
       mc alias set local http://minio:9000 ${MINIO_ROOT_USER:-dev-minio-user} ${MINIO_ROOT_PASSWORD:-dev-only-minio-password-change-me};
       mc mb -p local/user-avatars;
       mc anonymous set download local/user-avatars;
+      mc mb -p local/company-logos;
+      mc anonymous set download local/company-logos;
       "
     networks:
       - saas-dev

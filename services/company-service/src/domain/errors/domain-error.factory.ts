@@ -54,4 +54,9 @@ export class DomainErrorFactory {
       503,
     );
   }
+
+  /** El archivo subido como logo no decodifica como una imagen soportada. */
+  static invalidLogoType(): DomainException {
+    return DomainException.create('company.invalid_logo_type', ErrorCode.VALIDATION_ERROR, 400);
+  }
 }

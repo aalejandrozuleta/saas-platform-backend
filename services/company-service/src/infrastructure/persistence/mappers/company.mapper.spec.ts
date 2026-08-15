@@ -9,6 +9,10 @@ const validCreateProps = {
   id: 'c-1',
   name: 'Acme',
   taxId: '900-1',
+  email: 'contacto@acme.com',
+  phone: '+57 3001234567',
+  address: 'Calle 123',
+  city: 'Bogotá',
 };
 
 describe('CompanyMapper', () => {
@@ -17,6 +21,12 @@ describe('CompanyMapper', () => {
       id: 'c-1',
       name: 'Acme',
       taxId: null,
+      email: 'contacto@acme.com',
+      phone: '+57 3001234567',
+      address: 'Calle 123',
+      city: 'Bogotá',
+      country: 'CO',
+      logoUrl: null,
       plan: 'PRO',
       subscriptionStatus: 'active',
       stripeCustomerId: null,
@@ -27,6 +37,7 @@ describe('CompanyMapper', () => {
 
     expect(company.id).toBe('c-1');
     expect(company.taxId).toBeUndefined();
+    expect(company.logoUrl).toBeUndefined();
     expect(company.plan).toBe(CompanyPlan.PRO);
     expect(company.stripeCustomerId).toBeUndefined();
     expect(company.stripeSubscriptionId).toBeUndefined();
@@ -37,6 +48,12 @@ describe('CompanyMapper', () => {
       id: 'c-1',
       name: 'Acme',
       taxId: '900-1',
+      email: 'contacto@acme.com',
+      phone: '+57 3001234567',
+      address: 'Calle 123',
+      city: 'Bogotá',
+      country: 'US',
+      logoUrl: 'https://storage.example.com/logos/c-1.webp',
       plan: 'BUSINESS',
       subscriptionStatus: 'past_due',
       stripeCustomerId: 'cus_1',
@@ -46,6 +63,12 @@ describe('CompanyMapper', () => {
     } as any);
 
     expect(company.taxId).toBe('900-1');
+    expect(company.email).toBe('contacto@acme.com');
+    expect(company.phone).toBe('+57 3001234567');
+    expect(company.address).toBe('Calle 123');
+    expect(company.city).toBe('Bogotá');
+    expect(company.country).toBe('US');
+    expect(company.logoUrl).toBe('https://storage.example.com/logos/c-1.webp');
     expect(company.stripeCustomerId).toBe('cus_1');
     expect(company.stripeSubscriptionId).toBe('sub_1');
   });
@@ -57,6 +80,12 @@ describe('CompanyMapper', () => {
       id: 'c-1',
       name: 'Acme',
       taxId: '900-1',
+      email: 'contacto@acme.com',
+      phone: '+57 3001234567',
+      address: 'Calle 123',
+      city: 'Bogotá',
+      country: 'CO',
+      logoUrl: null,
       plan: CompanyPlan.STARTER,
       stripeCustomerId: null,
       stripeSubscriptionId: null,
@@ -68,6 +97,12 @@ describe('CompanyMapper', () => {
       id: 'c-1',
       name: 'Acme',
       taxId: '900-1',
+      email: 'contacto@acme.com',
+      phone: '+57 3001234567',
+      address: 'Calle 123',
+      city: 'Bogotá',
+      country: 'CO',
+      logoUrl: 'https://storage.example.com/logos/c-1.webp',
       plan: CompanyPlan.PRO,
       subscriptionStatus: 'active',
       stripeCustomerId: 'cus_1',
@@ -78,6 +113,7 @@ describe('CompanyMapper', () => {
 
     expect(CompanyMapper.toPersistence(company)).toMatchObject({
       taxId: '900-1',
+      logoUrl: 'https://storage.example.com/logos/c-1.webp',
       stripeCustomerId: 'cus_1',
       stripeSubscriptionId: 'sub_1',
     });
@@ -90,5 +126,10 @@ describe('CompanyMapper', () => {
     expect(roundTrip.id).toBe(original.id);
     expect(roundTrip.name).toBe(original.name);
     expect(roundTrip.taxId).toBe(original.taxId);
+    expect(roundTrip.email).toBe(original.email);
+    expect(roundTrip.phone).toBe(original.phone);
+    expect(roundTrip.address).toBe(original.address);
+    expect(roundTrip.city).toBe(original.city);
+    expect(roundTrip.country).toBe(original.country);
   });
 });

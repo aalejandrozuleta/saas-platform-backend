@@ -13,6 +13,24 @@ export interface CompanyProps {
   /** NIT / identificación tributaria (opcional hasta facturar) */
   readonly taxId?: string;
 
+  /** Email de contacto operativo de la empresa */
+  readonly email: string;
+
+  /** Teléfono de contacto operativo de la empresa */
+  readonly phone: string;
+
+  /** Dirección física de la empresa */
+  readonly address: string;
+
+  /** Ciudad donde opera la empresa */
+  readonly city: string;
+
+  /** País donde opera la empresa (código ISO de 2 letras, default `CO`) */
+  readonly country: string;
+
+  /** URL pública del logo, poblada solo vía el endpoint de upload */
+  readonly logoUrl?: string;
+
   /** Plan contratado del SaaS */
   readonly plan: CompanyPlan;
 

@@ -9,6 +9,8 @@ export interface CompanyRepository {
 
   save(company: Company): Promise<void>;
 
+  update(company: Company): Promise<void>;
+
   /**
    * Crea la empresa y la membresía `OWNER` de quien la creó de forma
    * atómica: una empresa sin dueño sería un tenant huérfano e inaccesible.

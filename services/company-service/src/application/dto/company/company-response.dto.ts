@@ -14,6 +14,24 @@ export class CompanyResponseDto {
   @ApiPropertyOptional({ example: '900123456-7' })
   taxId?: string;
 
+  @ApiProperty({ example: 'contacto@elsol.com' })
+  email!: string;
+
+  @ApiProperty({ example: '+57 3001234567' })
+  phone!: string;
+
+  @ApiProperty({ example: 'Calle 123 # 45-67' })
+  address!: string;
+
+  @ApiProperty({ example: 'Bogotá' })
+  city!: string;
+
+  @ApiProperty({ example: 'CO' })
+  country!: string;
+
+  @ApiPropertyOptional({ example: 'http://localhost:9000/company-logos/logos/c-1.webp' })
+  logoUrl?: string;
+
   @ApiProperty({ enum: CompanyPlan, example: CompanyPlan.STARTER })
   plan!: CompanyPlan;
 

@@ -3,6 +3,8 @@
   "company.not_found": "Company not found",
   "company.not_owner": "You don't have permission to manage this company's members",
   "company.auth_service_unavailable": "The authentication service could not be reached. Please try again.",
+  "company.invalid_logo_type": "Unsupported image format for the company logo",
+  "company.logo_updated_success": "Logo updated successfully",
   "membership.invited_success": "Invitation sent successfully",
   "membership.updated_success": "Member updated successfully",
   "membership.already_exists": "That user is already a member of the company",
