@@ -77,6 +77,28 @@ describe('Company entity', () => {
     it('lanza COMPANY_CITY_REQUIRED si la ciudad está vacía', () => {
       expect(() => Company.create({ ...validProps, city: '   ' })).toThrow('COMPANY_CITY_REQUIRED');
     });
+
+    it('lanza COMPANY_EMAIL_REQUIRED si el email está vacío', () => {
+      expect(() => Company.create({ ...validProps, email: '   ' })).toThrow(
+        'COMPANY_EMAIL_REQUIRED',
+      );
+    });
+
+    it('lanza COMPANY_PHONE_REQUIRED si el teléfono está vacío', () => {
+      expect(() => Company.create({ ...validProps, phone: '   ' })).toThrow(
+        'COMPANY_PHONE_REQUIRED',
+      );
+    });
+
+    it('lanza COMPANY_ADDRESS_REQUIRED si la dirección está vacía', () => {
+      expect(() => Company.create({ ...validProps, address: '   ' })).toThrow(
+        'COMPANY_ADDRESS_REQUIRED',
+      );
+    });
+
+    it('lanza COMPANY_CITY_REQUIRED si la ciudad está vacía', () => {
+      expect(() => Company.create({ ...validProps, city: '   ' })).toThrow('COMPANY_CITY_REQUIRED');
+    });
   });
 
   describe('fromPersistence', () => {

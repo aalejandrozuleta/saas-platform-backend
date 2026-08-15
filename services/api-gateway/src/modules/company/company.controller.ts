@@ -1,6 +1,17 @@
 import { randomUUID } from 'node:crypto';
 
-import { Controller, Get, Param, Patch, Post, Req } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Req,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { memoryStorage } from 'multer';
 import type { Request } from 'express';
 import { ApiTags } from '@nestjs/swagger';
 import { CompanyProxy } from '@infrastructure/http/proxies/company.proxy';
@@ -10,7 +21,10 @@ import {
   InviteCompanyMemberGatewaySwagger,
   ListCompanyMembersGatewaySwagger,
   UpdateCompanyMemberGatewaySwagger,
+  UploadCompanyLogoGatewaySwagger,
 } from '@infrastructure/swagger/company.swagger';
+
+const MAX_LOGO_SIZE_BYTES = 5 * 1024 * 1024;
 
 /**
  * Controller de Compañías/Membresías en el API Gateway.
@@ -39,6 +53,28 @@ export class CompanyController {
   async get(@Req() req: Request, @Param('id') id: string) {
     this.prepareRequest(req);
     const { body } = await this.companyProxy.forward(req, `/companies/${id}`);
+    return body;
+  }
+
+  @UploadCompanyLogoGatewaySwagger()
+  @Post(':id/logo')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: memoryStorage(),
+      limits: { fileSize: MAX_LOGO_SIZE_BYTES },
+    }),
+  )
+  async uploadLogo(
+    @UploadedFile() file: Express.Multer.File,
+    @Req() req: Request,
+    @Param('id') id: string,
+  ) {
+    this.prepareRequest(req);
+    const { body } = await this.companyProxy.forwardMultipart(req, `/companies/${id}/logo`, {
+      buffer: file.buffer,
+      originalname: file.originalname,
+      mimetype: file.mimetype,
+    });
     return body;
   }
 

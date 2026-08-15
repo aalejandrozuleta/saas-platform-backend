@@ -23,7 +23,7 @@ describe('CompanyController (api-gateway)', () => {
       providers: [
         {
           provide: CompanyProxy,
-          useValue: { forward: jest.fn() },
+          useValue: { forward: jest.fn(), forwardMultipart: jest.fn() },
         },
       ],
     }).compile();
@@ -54,6 +54,25 @@ describe('CompanyController (api-gateway)', () => {
 
     expect(companyProxy.forward).toHaveBeenCalledWith(req, '/companies/company-1');
     expect(result).toEqual({ success: true, data: {} });
+  });
+
+  it('debe reenviar POST /companies/:id/logo como multipart', async () => {
+    companyProxy.forwardMultipart.mockResolvedValue({ body: { success: true } });
+    const req = makeReq();
+    const file: any = {
+      buffer: Buffer.from('img'),
+      originalname: 'logo.png',
+      mimetype: 'image/png',
+    };
+
+    const result = await controller.uploadLogo(file, req, 'company-1');
+
+    expect(companyProxy.forwardMultipart).toHaveBeenCalledWith(req, '/companies/company-1/logo', {
+      buffer: file.buffer,
+      originalname: 'logo.png',
+      mimetype: 'image/png',
+    });
+    expect(result).toEqual({ success: true });
   });
 
   it('debe reenviar POST /companies/:id/members al company-service', async () => {

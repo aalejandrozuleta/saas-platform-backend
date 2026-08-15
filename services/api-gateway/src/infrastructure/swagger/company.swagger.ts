@@ -9,6 +9,8 @@ import {
   ApiConflictResponse,
   ApiNotFoundResponse,
   ApiServiceUnavailableResponse,
+  ApiConsumes,
+  ApiBody,
 } from '@nestjs/swagger';
 
 /**
@@ -36,6 +38,26 @@ export function GetCompanyGatewaySwagger() {
     ApiOkResponse({ description: 'Compañía encontrada.' }),
     ApiUnauthorizedResponse({ description: 'No autenticado.' }),
     ApiForbiddenResponse({ description: 'El usuario no tiene membresía activa en la compañía.' }),
+    ApiNotFoundResponse({ description: 'Compañía no encontrada.' }),
+    ApiServiceUnavailableResponse({ description: 'Company-service no disponible.' }),
+  );
+}
+
+/** Swagger para `POST /v1/companies/:id/logo` */
+export function UploadCompanyLogoGatewaySwagger() {
+  return applyDecorators(
+    ApiOperation({ summary: 'Subir/reemplazar el logo de la compañía' }),
+    ApiConsumes('multipart/form-data'),
+    ApiBody({
+      schema: {
+        type: 'object',
+        properties: { file: { type: 'string', format: 'binary' } },
+      },
+    }),
+    ApiOkResponse({ description: 'Logo actualizado.' }),
+    ApiBadRequestResponse({ description: 'Formato de imagen no soportado.' }),
+    ApiUnauthorizedResponse({ description: 'No autenticado.' }),
+    ApiForbiddenResponse({ description: 'Solo OWNER/MANAGER pueden actualizar el logo.' }),
     ApiNotFoundResponse({ description: 'Compañía no encontrada.' }),
     ApiServiceUnavailableResponse({ description: 'Company-service no disponible.' }),
   );

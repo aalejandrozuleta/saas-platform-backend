@@ -149,4 +149,45 @@ describe('CompanyProxy', () => {
       expect(logger.warn).toHaveBeenCalledWith('Company service upstream 5xx', expect.any(Object));
     });
   });
+
+  describe('forwardMultipart', () => {
+    const makeFile = () => ({
+      buffer: Buffer.from('fake-image-bytes'),
+      originalname: 'logo.png',
+      mimetype: 'image/png',
+    });
+
+    it('debe retornar el body del upstream', async () => {
+      mockClient.requestTyped.mockResolvedValue({
+        data: { success: true },
+        headers: {},
+      });
+
+      const result = await proxy.forwardMultipart(makeReq(), '/companies/1/logo', makeFile());
+
+      expect(result.body).toEqual({ success: true });
+    });
+
+    it('no debe reenviar el content-type original del cliente (boundary distinto al del nuevo FormData)', async () => {
+      mockClient.requestTyped.mockResolvedValue({ data: {}, headers: {} });
+
+      const req = makeReq({
+        headers: { 'content-type': 'multipart/form-data; boundary=client-boundary-xyz' },
+      });
+
+      await proxy.forwardMultipart(req, '/companies/1/logo', makeFile());
+
+      const sentConfig = mockClient.requestTyped.mock.calls[0][0];
+      expect(sentConfig.headers['content-type']).not.toContain('client-boundary-xyz');
+      expect(sentConfig.headers['content-type']).toContain('multipart/form-data');
+    });
+
+    it('debe traducir errores del upstream igual que forward', async () => {
+      mockClient.requestTyped.mockRejectedValue({ code: 'EOPENBREAKER' });
+
+      await expect(
+        proxy.forwardMultipart(makeReq(), '/companies/1/logo', makeFile()),
+      ).rejects.toThrow(HttpException);
+    });
+  });
 });

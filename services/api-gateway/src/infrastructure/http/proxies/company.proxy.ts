@@ -1,5 +1,6 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { AxiosError, type AxiosRequestConfig, type Method } from 'axios';
+import FormData from 'form-data';
 import type { Request } from 'express';
 import {
   ErrorCode,
@@ -52,6 +53,48 @@ export class CompanyProxy {
         method: req.method as Method,
         data: req.body,
         headers: forwardHeaders(req),
+      };
+
+      const response = await this.client.requestTyped<T>(config);
+
+      return {
+        body: response.data,
+      };
+    } catch (error: unknown) {
+      this.handleForwardError(req, path, error);
+    }
+  }
+
+  /**
+   * Reenvía un archivo (multipart/form-data) al company-service.
+   *
+   * @remarks
+   * Mismo criterio que `AuthProxy.forwardMultipart`: el gateway ya parseó el
+   * multipart entrante a un buffer en memoria (vía `FileInterceptor`), así
+   * que se reconstruye un nuevo cuerpo multipart para el upstream en vez de
+   * reenviar `req.body`.
+   *
+   * @param file - Archivo ya parseado por multer en el gateway.
+   */
+  async forwardMultipart<T>(
+    req: Request,
+    path: string,
+    file: { buffer: Buffer; originalname: string; mimetype: string },
+  ): Promise<{ body: T }> {
+    try {
+      const form = new FormData();
+      form.append('file', file.buffer, {
+        filename: file.originalname,
+        contentType: file.mimetype,
+      });
+
+      const { 'content-type': _clientContentType, ...headers } = forwardHeaders(req);
+
+      const config: AxiosRequestConfig = {
+        url: `${this.COMPANY_BASE_PATH}${path}`,
+        method: req.method as Method,
+        data: form,
+        headers: { ...headers, ...form.getHeaders() },
       };
 
       const response = await this.client.requestTyped<T>(config);
