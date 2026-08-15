@@ -1,8 +1,6 @@
-import { randomUUID } from 'node:crypto';
-
 import { Inject } from '@nestjs/common';
 import { User } from '@domain/entities/user/user.entity';
-import { Device } from '@domain/entities/device/device.entity';
+import { type Device } from '@domain/entities/device/device.entity';
 import { LoginContext } from '@domain/value-objects/login-context.vo';
 import { UserRepository } from '@domain/repositories/user.repository';
 import { UserProfileRepository } from '@domain/repositories/user-profile.repository';
@@ -33,6 +31,7 @@ import { Clock } from '@application/ports/clock.port';
 import { EnvService } from '@config/env/env.service';
 import { UserPermissionService } from '@application/services/user-permission.service';
 import { completeLoginSession } from '@application/services/complete-login-session';
+import { resolveTrustedDevice } from '@application/services/resolve-trusted-device';
 import { DomainErrorFactory } from '@domain/errors/domain-error.factory';
 
 const PASSWORD_CHANGE_REQUIRED_REASON = 'PASSWORD_CHANGE_REQUIRED';
@@ -118,7 +117,8 @@ export class CompleteFirstLoginUseCase {
 
     await this.acceptProfileConsent(updatedUser.id);
 
-    const device = await this.resolveTrustedDevice(
+    const device = await resolveTrustedDevice(
+      this.deviceRepository,
       updatedUser.id,
       claims.deviceFingerprint,
       context,
@@ -184,33 +184,6 @@ export class CompleteFirstLoginUseCase {
     }
 
     await this.userProfileRepository.update(profile.acceptConsent());
-  }
-
-  /**
-   * Confía el dispositivo del challenge: lo crea si nunca existió o lo
-   * marca confiable si ya existía. Superar el cambio de contraseña
-   * obligatorio es prueba suficiente de legitimidad, igual que superar un
-   * challenge de 2FA en `VerifyLoginChallengeUseCase`.
-   */
-  private async resolveTrustedDevice(
-    userId: string,
-    deviceFingerprint: string | undefined,
-    context: { ip: string },
-  ): Promise<Device> {
-    const existing = deviceFingerprint
-      ? await this.deviceRepository.getByUserIdAndFingerprint(userId, deviceFingerprint)
-      : null;
-
-    return existing
-      ? existing.markAsTrusted()
-      : Device.create({
-          id: randomUUID(),
-          userId,
-          fingerprint: deviceFingerprint!,
-          ipAddress: context.ip,
-          isTrusted: true,
-          createdAt: new Date(),
-        });
   }
 
   private async completeLogin(

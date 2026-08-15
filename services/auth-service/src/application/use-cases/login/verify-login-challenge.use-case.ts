@@ -1,5 +1,3 @@
-import { randomUUID } from 'node:crypto';
-
 import { Inject } from '@nestjs/common';
 import { User } from '@domain/entities/user/user.entity';
 import { Device } from '@domain/entities/device/device.entity';
@@ -38,6 +36,7 @@ import { Clock } from '@application/ports/clock.port';
 import { EnvService } from '@config/env/env.service';
 import { UserPermissionService } from '@application/services/user-permission.service';
 import { completeLoginSession } from '@application/services/complete-login-session';
+import { resolveTrustedDevice } from '@application/services/resolve-trusted-device';
 import { DomainErrorFactory } from '@domain/errors/domain-error.factory';
 
 /**
@@ -118,7 +117,12 @@ export class VerifyLoginChallengeUseCase {
 
     await this.verifyFactor(user.id, credentials);
 
-    const device = await this.resolveTrustedDevice(user.id, claims.deviceFingerprint, context);
+    const device = await resolveTrustedDevice(
+      this.deviceRepository,
+      user.id,
+      claims.deviceFingerprint,
+      context,
+    );
 
     await this.trustCountryIfNeeded(user.id, claims.country);
 
@@ -199,35 +203,6 @@ export class VerifyLoginChallengeUseCase {
     }
 
     throw DomainErrorFactory.invalidRecoveryCode();
-  }
-
-  /**
-   * Confía el dispositivo del challenge: lo crea si nunca existió (caso
-   * `NEW_DEVICE`) o lo marca confiable si ya existía (`UNTRUSTED_DEVICE` /
-   * `TWO_FACTOR_REQUIRED`). Superar el segundo factor es prueba suficiente
-   * de que el dispositivo es legítimo.
-   */
-  private async resolveTrustedDevice(
-    userId: string,
-    deviceFingerprint: string | undefined,
-    context: { ip: string },
-  ): Promise<Device> {
-    const existing = deviceFingerprint
-      ? await this.deviceRepository.getByUserIdAndFingerprint(userId, deviceFingerprint)
-      : null;
-
-    const device = existing
-      ? existing.markAsTrusted()
-      : Device.create({
-          id: randomUUID(),
-          userId,
-          fingerprint: deviceFingerprint!,
-          ipAddress: context.ip,
-          isTrusted: true,
-          createdAt: new Date(),
-        });
-
-    return device;
   }
 
   private async trustCountryIfNeeded(userId: string, country?: string): Promise<void> {
