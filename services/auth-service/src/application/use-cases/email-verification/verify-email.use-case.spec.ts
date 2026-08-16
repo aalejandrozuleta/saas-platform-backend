@@ -22,6 +22,7 @@ describe('VerifyEmailUseCase', () => {
       emailVerificationExpiresAt: overrides.expiresAt ?? new Date(Date.now() + 60_000),
       failedLoginAttempts: 0,
       lockoutCount: 0,
+      mustChangePassword: false,
       createdAt: new Date(),
     });
 

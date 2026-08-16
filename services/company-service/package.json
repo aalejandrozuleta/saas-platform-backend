@@ -1,0 +1,72 @@
+{
+  "name": "company-service",
+  "version": "0.0.1",
+  "description": "Microservicio de empresas (tenant) y membresías de la plataforma SaaS",
+  "author": "",
+  "private": true,
+  "license": "UNLICENSED",
+  "scripts": {
+    "build": "nest build && node -e \"const{cpSync}=require('fs');cpSync('src/generated','dist/generated',{recursive:true,filter:s=>!s.includes('node_modules')})\"",
+    "start": "node dist/main.js",
+    "dev": "prisma generate && nest start --watch",
+    "start:debug": "nest start --debug --watch",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "typecheck": "tsc --noEmit",
+    "test:cov": "jest --config jest.config.cjs --coverage",
+    "test": "jest --config jest.config.cjs",
+    "test:watch": "jest --watch --config jest.config.cjs",
+    "test:watch:cov": "jest --watch --coverage --config jest.config.cjs",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:studio": "prisma studio",
+    "docs": "typedoc --options typedoc.json"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.1109.0",
+    "@nestjs/common": "11.1.18",
+    "@nestjs/config": "4.0.3",
+    "@nestjs/core": "11.1.18",
+    "@nestjs/platform-express": "11.1.18",
+    "@nestjs/swagger": "^11.2.6",
+    "@prisma/adapter-pg": "^7.3.0",
+    "@prisma/client": "^7.6.0",
+    "@saas/shared": "workspace:*",
+    "axios": "^1.16.0",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.15.1",
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^17.2.4",
+    "express": "^5.2.1",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.3",
+    "multer": "^2.2.0",
+    "pg": "^8.18.0",
+    "prom-client": "^15.1.3",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.2",
+    "sharp": "^0.35.3",
+    "swagger-ui-express": "^5.0.1",
+    "zod": "^4.3.6"
+  },
+  "dependenciesMeta": {
+    "@saas/shared": {
+      "injected": true
+    }
+  },
+  "devDependencies": {
+    "@nestjs/cli": "^11.0.16",
+    "@nestjs/testing": "11.1.18",
+    "@types/cookie-parser": "^1.4.10",
+    "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/multer": "^2.2.0",
+    "prisma": "^7.6.0",
+    "typescript": "^5.9.3"
+  },
+  "files": [
+    "dist",
+    "prisma",
+    "package.json",
+    "pnpm-lock.yaml"
+  ]
+}

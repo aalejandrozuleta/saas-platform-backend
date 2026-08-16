@@ -8,6 +8,8 @@
   "common.gateway_timeout": "El gateway agot\u00f3 el tiempo de espera al procesar la solicitud",
   "common.auth_service_temporarily_unavailable": "El servicio de autenticaci\u00f3n est\u00e1 temporalmente no disponible",
   "common.auth_service_unavailable": "No fue posible contactar el servicio de autenticaci\u00f3n",
+  "common.company_service_temporarily_unavailable": "El servicio de compa\u00f1\u00edas est\u00e1 temporalmente no disponible",
+  "common.company_service_unavailable": "No fue posible contactar el servicio de compa\u00f1\u00edas",
   "common.gateway_upstream_failure": "Ocurri\u00f3 un error al comunicarse con un servicio interno",
   "common.upstream_error": "El servicio interno rechaz\u00f3 la solicitud",
   "common.missing_access_token": "Autenticaci\u00f3n requerida. No se proporcion\u00f3 token de acceso.",

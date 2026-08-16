@@ -33,6 +33,14 @@ export interface UserProps {
   /** Número de veces que la cuenta ha sido bloqueada (progressive lockout) */
   lockoutCount: number;
 
+  /**
+   * Indica si el usuario debe cambiar su contraseña antes de poder usar el
+   * sistema normalmente. Se activa al provisionar un worker con contraseña
+   * temporal (`ProvisionWorkerUseCase`); se limpia con
+   * `changePasswordAndClearRequirement()`.
+   */
+  readonly mustChangePassword: boolean;
+
   /** Último login exitoso */
   lastLoginAt?: Date;
 

@@ -23,6 +23,7 @@ const SERVICES = [
   { name: 'auth-service', port: 3001 },
   { name: 'config-service', port: 3002 },
   { name: 'notification-service', port: 3003 },
+  { name: 'company-service', port: 3004 },
 ];
 
 async function exportOne(service) {

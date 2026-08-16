@@ -11,6 +11,13 @@ import { buildGatewayErrorResponse } from '@infrastructure/errors/gateway-error-
 const MULTIPART_ROUTES = new Set(['/v1/users/me/profile/avatar']);
 
 /**
+ * Variante de {@link MULTIPART_ROUTES} para rutas con parámetros dinámicos
+ * (no se pueden listar como string exacto en el Set). Misma allowlist
+ * cerrada, cada patrón debe agregarse a propósito.
+ */
+const MULTIPART_ROUTE_PATTERNS = [/^\/v1\/companies\/[^/]+\/logo$/];
+
+/**
  * Exige `Content-Type: application/json` en métodos que llevan body — con
  * la excepción explícita de {@link MULTIPART_ROUTES}, que exigen
  * `multipart/form-data` en su lugar.
@@ -29,7 +36,9 @@ const MULTIPART_ROUTES = new Set(['/v1/users/me/profile/avatar']);
 export function headerValidationMiddleware(req: Request, res: Response, next: NextFunction): void {
   const methodRequiresBody = ['POST', 'PUT', 'PATCH'].includes(req.method);
   const contentType = req.headers['content-type'] ?? '';
-  const expectsMultipart = MULTIPART_ROUTES.has(req.path);
+  const expectsMultipart =
+    MULTIPART_ROUTES.has(req.path) ||
+    MULTIPART_ROUTE_PATTERNS.some((pattern) => pattern.test(req.path));
 
   const isValid = expectsMultipart
     ? contentType.startsWith('multipart/form-data')

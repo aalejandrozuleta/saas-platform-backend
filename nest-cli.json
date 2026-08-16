@@ -27,6 +27,16 @@
         "deleteOutDir": true
       }
     },
+    "company-service": {
+      "type": "application",
+      "root": "services/company-service",
+      "entryFile": "main",
+      "sourceRoot": "services/company-service/src",
+      "compilerOptions": {
+        "tsConfigPath": "services/company-service/tsconfig.json",
+        "deleteOutDir": true
+      }
+    },
     "config-service": {
       "type": "application",
       "root": "services/config-service",

@@ -55,6 +55,8 @@ import { ResetPasswordSwagger } from '@infrastructure/swagger/reset-password.swa
 import { VerifyLoginChallengeUseCase } from '@application/use-cases/login/verify-login-challenge.use-case';
 import { VerifyLoginChallengeDto } from '@application/dto/verify-login-challenge/verify-login-challenge.dto';
 import { VerifyLoginChallengeSwagger } from '@infrastructure/swagger/verify-login-challenge.swagger';
+import { CompleteFirstLoginUseCase } from '@application/use-cases/login/complete-first-login.use-case';
+import { CompleteFirstLoginDto } from '@application/dto/login/complete-first-login.dto';
 import { RegenerateRecoveryCodesUseCase } from '@application/use-cases/two-factor/regenerate-recovery-codes.use-case';
 import { RegenerateRecoveryCodesDto } from '@application/dto/recovery-codes/regenerate-recovery-codes.dto';
 import { RegenerateRecoveryCodesSwagger } from '@infrastructure/swagger/recovery-codes.swagger';
@@ -92,6 +94,7 @@ export class AuthController {
     private readonly forgotPasswordUseCase: ForgotPasswordUseCase,
     private readonly resetPasswordUseCase: ResetPasswordUseCase,
     private readonly verifyLoginChallengeUseCase: VerifyLoginChallengeUseCase,
+    private readonly completeFirstLoginUseCase: CompleteFirstLoginUseCase,
     private readonly regenerateRecoveryCodesUseCase: RegenerateRecoveryCodesUseCase,
     private readonly i18n: I18nService,
   ) {}
@@ -227,6 +230,36 @@ export class AuthController {
       { totpCode: dto.totpCode, recoveryCode: dto.recoveryCode },
       { ip: this.resolveClientIp(req) },
     );
+
+    this.setAuthCookies(res, req, result.token, result.refreshToken);
+
+    return successResponse(
+      {
+        role: result.role,
+        permissions: result.permissions,
+      },
+      {
+        message: this.i18n.translate('auth.login_success', this.resolveLanguage(req)),
+      },
+    );
+  }
+
+  /**
+   * Resuelve el challenge `PASSWORD_CHANGE_REQUIRED` emitido por `/login`
+   * cuando un worker provisionado por su empresa (ver
+   * `ProvisionWorkerUseCase`) inicia sesión con su contraseña temporal.
+   * Cambia la contraseña, registra el consentimiento y completa el login
+   * en una sola llamada.
+   */
+  @Post('complete-first-login')
+  async completeFirstLogin(
+    @Body() dto: CompleteFirstLoginDto,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const result = await this.completeFirstLoginUseCase.execute(dto.changeToken, dto.newPassword, {
+      ip: this.resolveClientIp(req),
+    });
 
     this.setAuthCookies(res, req, result.token, result.refreshToken);
 

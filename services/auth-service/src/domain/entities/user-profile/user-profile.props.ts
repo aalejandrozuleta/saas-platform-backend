@@ -25,11 +25,17 @@ export interface UserProfileProps {
   /** URL pública de la foto de perfil */
   readonly avatarUrl?: string;
 
-  /** Momento en que aceptó el tratamiento de datos personales (Ley 1581 de 2012) */
-  readonly dataProcessingAcceptedAt: Date;
+  /**
+   * Momento en que aceptó el tratamiento de datos personales (Ley 1581 de
+   * 2012). `undefined` en perfiles provisionados por una empresa
+   * (`UserProfile.createProvisioned()`), donde el trabajador aún no ha
+   * podido aceptar nada — se completa recién en `acceptConsent()`, durante
+   * `CompleteFirstLoginUseCase`.
+   */
+  readonly dataProcessingAcceptedAt: Date | undefined;
 
-  /** Momento en que aceptó los términos y condiciones */
-  readonly termsAcceptedAt: Date;
+  /** Momento en que aceptó los términos y condiciones (ver nota arriba) */
+  readonly termsAcceptedAt: Date | undefined;
 
   readonly createdAt: Date;
   readonly updatedAt: Date;

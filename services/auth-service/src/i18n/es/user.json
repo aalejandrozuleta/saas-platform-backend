@@ -4,5 +4,6 @@
   "user_profile.not_found": "Aún no has creado tu perfil",
   "user_profile.updated_success": "Perfil actualizado correctamente",
   "user_profile.avatar_updated_success": "Foto de perfil actualizada correctamente",
-  "user_profile.invalid_avatar_type": "Formato de imagen no soportado. Usa PNG, JPEG o WEBP"
+  "user_profile.invalid_avatar_type": "Formato de imagen no soportado. Usa PNG, JPEG o WEBP",
+  "user.not_found": "No se encontró un usuario con ese email"
 }

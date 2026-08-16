@@ -1,8 +1,4 @@
-import { randomUUID } from 'node:crypto';
-
 import { Inject } from '@nestjs/common';
-import { User } from '@domain/entities/user/user.entity';
-import { Device } from '@domain/entities/device/device.entity';
 import { UserStatus } from '@domain/enums/user-status.enum';
 import { LoginContext } from '@domain/value-objects/login-context.vo';
 import { UserRepository } from '@domain/repositories/user.repository';
@@ -37,7 +33,11 @@ import { LoginSucceededEvent } from '@application/events/login/login-succeeded.e
 import { Clock } from '@application/ports/clock.port';
 import { EnvService } from '@config/env/env.service';
 import { UserPermissionService } from '@application/services/user-permission.service';
-import { completeLoginSession } from '@application/services/complete-login-session';
+import {
+  completeLoginSession,
+  type CompleteLoginSessionDeps,
+} from '@application/services/complete-login-session';
+import { resolveTrustedDevice } from '@application/services/resolve-trusted-device';
 import { DomainErrorFactory } from '@domain/errors/domain-error.factory';
 
 /**
@@ -118,14 +118,21 @@ export class VerifyLoginChallengeUseCase {
 
     await this.verifyFactor(user.id, credentials);
 
-    const device = await this.resolveTrustedDevice(user.id, claims.deviceFingerprint, context);
+    const device = await resolveTrustedDevice(
+      this.deviceRepository,
+      user.id,
+      claims.deviceFingerprint,
+      context,
+    );
 
     await this.trustCountryIfNeeded(user.id, claims.country);
 
-    const result = await this.completeLogin(user, device, {
-      ip: context.ip,
-      country: claims.country,
-    });
+    const result = await completeLoginSession(
+      this as unknown as CompleteLoginSessionDeps,
+      user,
+      device,
+      { ip: context.ip, country: claims.country },
+    );
 
     this.eventBus.publish(
       new LoginSucceededEvent(
@@ -201,35 +208,6 @@ export class VerifyLoginChallengeUseCase {
     throw DomainErrorFactory.invalidRecoveryCode();
   }
 
-  /**
-   * Confía el dispositivo del challenge: lo crea si nunca existió (caso
-   * `NEW_DEVICE`) o lo marca confiable si ya existía (`UNTRUSTED_DEVICE` /
-   * `TWO_FACTOR_REQUIRED`). Superar el segundo factor es prueba suficiente
-   * de que el dispositivo es legítimo.
-   */
-  private async resolveTrustedDevice(
-    userId: string,
-    deviceFingerprint: string | undefined,
-    context: { ip: string },
-  ): Promise<Device> {
-    const existing = deviceFingerprint
-      ? await this.deviceRepository.getByUserIdAndFingerprint(userId, deviceFingerprint)
-      : null;
-
-    const device = existing
-      ? existing.markAsTrusted()
-      : Device.create({
-          id: randomUUID(),
-          userId,
-          fingerprint: deviceFingerprint!,
-          ipAddress: context.ip,
-          isTrusted: true,
-          createdAt: new Date(),
-        });
-
-    return device;
-  }
-
   private async trustCountryIfNeeded(userId: string, country?: string): Promise<void> {
     if (!country) return;
 
@@ -238,34 +216,5 @@ export class VerifyLoginChallengeUseCase {
     if (!profile?.trustedCountries.includes(country)) {
       await this.securityRepository.addTrustedCountry(userId, country);
     }
-  }
-
-  /**
-   * Completa el login: crea sesión + tokens dentro de una transacción.
-   * Misma lógica que `LoginUserUseCase.performLogin`.
-   */
-  private async completeLogin(
-    user: User,
-    device: Device,
-    context: { ip: string; country?: string },
-  ) {
-    return completeLoginSession(
-      {
-        uow: this.uow,
-        deviceRepository: this.deviceRepository,
-        sessionRepository: this.sessionRepository,
-        refreshTokenRepository: this.refreshTokenRepository,
-        passwordHasher: this.passwordHasher,
-        tokenService: this.tokenService,
-        sessionCache: this.sessionCache,
-        envService: this.envService,
-        userPermissionService: this.userPermissionService,
-        userRepository: this.userRepository,
-        clock: this.clock,
-      },
-      user,
-      device,
-      context,
-    );
   }
 }

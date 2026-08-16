@@ -54,6 +54,7 @@ describe('ChangePasswordUseCase', () => {
       emailVerified: true,
       failedLoginAttempts: 0,
       lockoutCount: 0,
+      mustChangePassword: false,
       blockedUntil: undefined,
       createdAt: new Date(),
       ...overrides,

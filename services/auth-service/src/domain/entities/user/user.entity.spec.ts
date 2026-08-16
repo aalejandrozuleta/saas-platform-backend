@@ -23,6 +23,7 @@ describe('User entity', () => {
       emailVerified: false,
       failedLoginAttempts: 0,
       lockoutCount: 0,
+      mustChangePassword: false,
       blockedUntil: undefined,
       createdAt: new Date(),
       ...overrides,
@@ -56,6 +57,53 @@ describe('User entity', () => {
         role,
       });
       expect(user.role).toBe(role);
+    });
+
+    it('debe tener mustChangePassword=false por defecto', () => {
+      const user = User.create({
+        id: 'new-id',
+        email: EmailVO.create('new@example.com'),
+        passwordHash: 'hash',
+      });
+
+      expect(user.mustChangePassword).toBe(false);
+    });
+
+    it('debe respetar mustChangePassword=true cuando se especifica (worker provisionado)', () => {
+      const user = User.create({
+        id: 'new-id',
+        email: EmailVO.create('worker@example.com'),
+        passwordHash: 'hash',
+        mustChangePassword: true,
+      });
+
+      expect(user.mustChangePassword).toBe(true);
+    });
+  });
+
+  describe('getter mustChangePassword', () => {
+    it('debe devolver el valor asignado', () => {
+      const user = makeUser();
+      expect(user.mustChangePassword).toBe(false);
+    });
+  });
+
+  describe('changePasswordAndClearRequirement', () => {
+    it('debe reemplazar el passwordHash y limpiar mustChangePassword', () => {
+      const user = User.create({
+        id: 'new-id',
+        email: EmailVO.create('worker@example.com'),
+        passwordHash: 'temp-hash',
+        mustChangePassword: true,
+      });
+
+      const updated = user.changePasswordAndClearRequirement('new-hash');
+
+      expect(updated.passwordHash).toBe('new-hash');
+      expect(updated.mustChangePassword).toBe(false);
+      // inmutabilidad
+      expect(user.passwordHash).toBe('temp-hash');
+      expect(user.mustChangePassword).toBe(true);
     });
   });
 

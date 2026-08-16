@@ -12,7 +12,7 @@ Este directorio contiene el spec OpenAPI 3.0 exportado de cada microservicio, ge
    ```bash
    pnpm docs:openapi
    ```
-   Esto escribe/actualiza `api-gateway.json`, `auth-service.json`, `config-service.json` y `notification-service.json` en este directorio.
+   Esto escribe/actualiza `api-gateway.json`, `auth-service.json`, `config-service.json`, `notification-service.json` y `company-service.json` en este directorio.
 3. Para exportar un único servicio: `node scripts/export-openapi.mjs auth-service`.
 
 ## Uso
@@ -27,3 +27,4 @@ Este directorio contiene el spec OpenAPI 3.0 exportado de cada microservicio, ge
 | auth-service         | 3001   | `/auth`          |
 | config-service       | 3002   | `/config`        |
 | notification-service | 3003   | `/notifications` |
+| company-service      | 3004   | `/company`       |

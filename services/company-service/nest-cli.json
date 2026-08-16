@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "assets": [
+      {
+        "include": "generated/**/*",
+        "exclude": "**/node_modules/**",
+        "watchAssets": true
+      }
+    ]
+  }
+}

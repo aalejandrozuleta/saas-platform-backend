@@ -46,6 +46,7 @@ describe('TemplateEngine', () => {
         'account-locked',
         'maintenance',
         'otp-code',
+        'worker-provisioned',
       ]);
     });
   });
@@ -74,6 +75,16 @@ describe('TemplateEngine', () => {
       ['account-locked', { blockedUntil: 'hoy', ip: '1.1.1.1', country: 'CO' }],
       ['maintenance', { message: 'msg', scheduledAt: 'hoy', duration: '1h' }],
       ['otp-code', { code: '123456', expiresIn: '10' }],
+      [
+        'worker-provisioned',
+        {
+          firstName: 'Juana',
+          companyName: 'Acme',
+          loginEmail: 'juana.perez@acme.trabajadores.local',
+          tempPassword: 'TempPass123@',
+          appUrl: 'https://arlok.dev/login',
+        },
+      ],
     ])('debe renderizar el template "%s" a un string HTML', async (template, variables) => {
       const html = await engine.render(template, variables);
 

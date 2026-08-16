@@ -1,0 +1,16 @@
+{
+  "company.created_success": "Company created successfully",
+  "company.not_found": "Company not found",
+  "company.not_owner": "You don't have permission to manage this company's members",
+  "company.auth_service_unavailable": "The authentication service could not be reached. Please try again.",
+  "company.logo_updated_success": "Logo updated successfully",
+  "company.invalid_logo_type": "The file is not a valid image",
+  "membership.invited_success": "Invitation sent successfully",
+  "membership.updated_success": "Member updated successfully",
+  "membership.already_exists": "That user is already a member of the company",
+  "membership.not_found": "Membership not found",
+  "membership.last_owner": "The company must keep at least one active owner",
+  "membership.user_not_found": "No registered user was found with that email",
+  "membership.owner_role_not_allowed": "A worker cannot be registered directly as an owner",
+  "membership.worker_registered_success": "Worker registered successfully"
+}

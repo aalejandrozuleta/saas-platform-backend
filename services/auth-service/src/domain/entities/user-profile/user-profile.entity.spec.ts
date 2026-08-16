@@ -57,6 +57,83 @@ describe('UserProfile entity', () => {
     });
   });
 
+  describe('createProvisioned', () => {
+    it('debe crear un perfil sin consentimiento (dataProcessingAcceptedAt/termsAcceptedAt undefined)', () => {
+      const profile = UserProfile.createProvisioned({
+        userId: 'user-2',
+        firstName: 'Carlos',
+        lastName: 'Gómez',
+      });
+
+      expect(profile.userId).toBe('user-2');
+      expect(profile.firstName).toBe('Carlos');
+      expect(profile.lastName).toBe('Gómez');
+      expect(profile.dataProcessingAcceptedAt).toBeUndefined();
+      expect(profile.termsAcceptedAt).toBeUndefined();
+    });
+
+    it('debe setear createdAt/updatedAt automáticamente', () => {
+      const before = new Date();
+      const profile = UserProfile.createProvisioned({
+        userId: 'user-2',
+        firstName: 'Carlos',
+        lastName: 'Gómez',
+      });
+      const after = new Date();
+
+      expect(profile.createdAt.getTime()).toBeGreaterThanOrEqual(before.getTime());
+      expect(profile.createdAt.getTime()).toBeLessThanOrEqual(after.getTime());
+      expect(profile.updatedAt.getTime()).toEqual(profile.createdAt.getTime());
+    });
+
+    it('debe lanzar error si firstName está vacío', () => {
+      expect(() =>
+        UserProfile.createProvisioned({ userId: 'user-2', firstName: '  ', lastName: 'Gómez' }),
+      ).toThrow('USER_PROFILE_FIRST_NAME_REQUIRED');
+    });
+
+    it('debe lanzar error si lastName está vacío', () => {
+      expect(() =>
+        UserProfile.createProvisioned({ userId: 'user-2', firstName: 'Carlos', lastName: '' }),
+      ).toThrow('USER_PROFILE_LAST_NAME_REQUIRED');
+    });
+  });
+
+  describe('acceptConsent', () => {
+    it('debe registrar dataProcessingAcceptedAt/termsAcceptedAt al momento actual', () => {
+      const profile = UserProfile.createProvisioned({
+        userId: 'user-2',
+        firstName: 'Carlos',
+        lastName: 'Gómez',
+      });
+
+      const before = new Date();
+      const accepted = profile.acceptConsent();
+      const after = new Date();
+
+      expect(accepted.dataProcessingAcceptedAt).toBeDefined();
+      expect(accepted.termsAcceptedAt).toBeDefined();
+      expect(accepted.dataProcessingAcceptedAt!.getTime()).toBeGreaterThanOrEqual(before.getTime());
+      expect(accepted.dataProcessingAcceptedAt!.getTime()).toBeLessThanOrEqual(after.getTime());
+      expect(accepted.termsAcceptedAt).toEqual(accepted.dataProcessingAcceptedAt);
+      // inmutabilidad
+      expect(profile.dataProcessingAcceptedAt).toBeUndefined();
+    });
+
+    it('debe actualizar updatedAt', () => {
+      const profile = UserProfile.createProvisioned({
+        userId: 'user-2',
+        firstName: 'Carlos',
+        lastName: 'Gómez',
+      });
+      const before = new Date();
+
+      const accepted = profile.acceptConsent();
+
+      expect(accepted.updatedAt.getTime()).toBeGreaterThanOrEqual(before.getTime());
+    });
+  });
+
   describe('isCompleteForTransactions', () => {
     it('debe ser false si falta teléfono o documento', () => {
       const profile = UserProfile.create(baseProps);

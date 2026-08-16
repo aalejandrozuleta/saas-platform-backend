@@ -18,20 +18,24 @@ export class User {
     email: EmailVO;
     passwordHash: string;
     role?: UserRole;
+    status?: UserStatus;
+    emailVerified?: boolean;
     emailVerificationToken?: string;
     emailVerificationExpiresAt?: Date;
+    mustChangePassword?: boolean;
   }): User {
     return new User({
       id: params.id,
       email: params.email,
       passwordHash: params.passwordHash,
       role: params.role ?? UserRole.CUSTOMER,
-      status: UserStatus.PENDING,
-      emailVerified: false,
+      status: params.status ?? UserStatus.PENDING,
+      emailVerified: params.emailVerified ?? false,
       emailVerificationToken: params.emailVerificationToken,
       emailVerificationExpiresAt: params.emailVerificationExpiresAt,
       failedLoginAttempts: 0,
       lockoutCount: 0,
+      mustChangePassword: params.mustChangePassword ?? false,
       createdAt: new Date(),
     });
   }
@@ -103,6 +107,10 @@ export class User {
 
   get passwordResetExpiresAt(): Date | undefined {
     return this.props.passwordResetExpiresAt;
+  }
+
+  get mustChangePassword(): boolean {
+    return this.props.mustChangePassword;
   }
 
   // ===== Reglas de dominio =====
@@ -217,6 +225,25 @@ export class User {
       ...this.props,
       passwordResetToken: undefined,
       passwordResetExpiresAt: undefined,
+    });
+  }
+
+  /**
+   * Reemplaza el hash de contraseña y limpia el flag `mustChangePassword`.
+   * Usado por `CompleteFirstLoginUseCase` al resolver el cambio de
+   * contraseña obligatorio de un worker recién provisionado.
+   *
+   * @remarks
+   * Por simetría con `consumePasswordReset()`, solo toca los campos
+   * directamente relacionados (hash + flag); no limpia intentos fallidos ni
+   * bloqueos temporales, ya que esos son responsabilidad de
+   * `resetFailedAttempts()`/`releaseTemporaryBlock()`.
+   */
+  changePasswordAndClearRequirement(newPasswordHash: string): User {
+    return new User({
+      ...this.props,
+      passwordHash: newPasswordHash,
+      mustChangePassword: false,
     });
   }
 

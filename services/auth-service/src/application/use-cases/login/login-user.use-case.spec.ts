@@ -66,6 +66,7 @@ describe('LoginUserUseCase', () => {
       emailVerified: true,
       failedLoginAttempts: 0,
       lockoutCount: 0,
+      mustChangePassword: false,
       blockedUntil: undefined,
       createdAt: new Date(),
       ...overrides,
@@ -364,6 +365,34 @@ describe('LoginUserUseCase', () => {
     expect(sessionRepository.create).not.toHaveBeenCalled();
   });
 
+  it('debe lanzar PASSWORD_CHANGE_REQUIRED antes de resolver dispositivo/2FA cuando mustChangePassword es true', async () => {
+    const user = createUser({ mustChangePassword: true });
+
+    userRepository.findByEmail.mockResolvedValue(user);
+    passwordHasher.verify.mockResolvedValue(true);
+
+    await expect(useCase.execute('test@test.com', 'Password123!', context)).rejects.toMatchObject({
+      code: ErrorCode.PASSWORD_CHANGE_REQUIRED,
+      metadata: expect.objectContaining({
+        userId: 'user-1',
+        email: 'test@test.com',
+        changeToken: 'mock-challenge-token',
+      }),
+    });
+
+    expect(securityRepository.findByUserId).not.toHaveBeenCalled();
+    expect(deviceRepository.getByUserIdAndFingerprint).not.toHaveBeenCalled();
+    expect(sessionRepository.create).not.toHaveBeenCalled();
+  });
+
+  it('no debe exigir cambio de contraseña cuando mustChangePassword es false', async () => {
+    setupSuccessfulLogin();
+
+    await useCase.execute('test@test.com', 'Password123!', context);
+
+    expect(tokenService.generateChallengeToken).not.toHaveBeenCalled();
+  });
+
   it('no debe exigir challenge de 2FA si twoFactorEnabled es false', async () => {
     setupSuccessfulLogin();
 
@@ -387,6 +416,7 @@ describe('LoginUserUseCase', () => {
       status: UserStatus.BLOCKED,
       failedLoginAttempts: 3,
       lockoutCount: 0,
+      mustChangePassword: false,
       blockedUntil: expiredDate,
     });
 
@@ -405,6 +435,7 @@ describe('LoginUserUseCase', () => {
     const user = createUser({
       failedLoginAttempts: 2,
       lockoutCount: 0,
+      mustChangePassword: false,
     });
 
     userRepository.findByEmail.mockResolvedValue(user);

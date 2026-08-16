@@ -61,6 +61,15 @@ export class DomainErrorFactory {
     );
   }
 
+  static passwordChangeRequired(metadata: Record<string, unknown>): DomainException {
+    return DomainException.create(
+      'auth.password_change_required',
+      ErrorCode.PASSWORD_CHANGE_REQUIRED,
+      403,
+      metadata,
+    );
+  }
+
   static samePasswordNotAllowed(): DomainException {
     return DomainException.create(
       'auth.same_password_not_allowed',
@@ -187,5 +196,14 @@ export class DomainErrorFactory {
 
   static userProfileNotFound(): DomainException {
     return DomainException.create('user_profile.not_found', ErrorCode.USER_PROFILE_NOT_FOUND, 404);
+  }
+
+  /**
+   * Usuario no encontrado por email en el lookup interno
+   * (`GET /v1/users/lookup`, consumido por otros servicios como
+   * `company-service` para resolver invitaciones).
+   */
+  static userNotFound(): DomainException {
+    return DomainException.create('user.not_found', ErrorCode.USER_NOT_FOUND, 404);
   }
 }

@@ -114,6 +114,8 @@ export class LoginUserUseCase {
 
     await this.validatePassword(user, password, context, email);
 
+    this.guardMustChangePassword(user, context);
+
     const securityProfile = await this.securityRepository.findByUserId(user.id);
 
     const device = await this.resolveLoginDevice(user, securityProfile, context);
@@ -225,6 +227,31 @@ export class LoginUserUseCase {
     }
 
     await this.securityRepository.resetFailedLoginAttempts(user.id);
+  }
+
+  /**
+   * Corta el flujo de login si el usuario tiene una contraseña temporal
+   * pendiente de cambio (worker recién provisionado por su empresa, ver
+   * `ProvisionWorkerUseCase`). Se evalúa antes de resolver dispositivo/2FA
+   * porque el cliente debe resolver el cambio de contraseña primero — no
+   * tiene sentido pedirle 2FA a una cuenta que ni siquiera terminó de
+   * activarse.
+   */
+  private guardMustChangePassword(user: User, context: LoginContext): void {
+    if (!user.mustChangePassword) return;
+
+    const changeToken = this.tokenService.generateChallengeToken({
+      userId: user.id,
+      deviceFingerprint: context.deviceFingerprint,
+      country: context.country,
+      reason: 'PASSWORD_CHANGE_REQUIRED',
+    });
+
+    throw DomainErrorFactory.passwordChangeRequired({
+      userId: user.id,
+      email: user.email.getValue(),
+      changeToken,
+    });
   }
 
   /**

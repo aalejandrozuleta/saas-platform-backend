@@ -97,6 +97,33 @@ describe('headerValidationMiddleware', () => {
     expect(next).not.toHaveBeenCalled();
   });
 
+  it('debe permitir multipart/form-data en la ruta de subida de logo de compañía (id dinámico)', () => {
+    req.method = 'POST';
+    req.url = '/v1/companies/company-1/logo';
+    (req as any).path = '/v1/companies/company-1/logo';
+    req.headers = {
+      'content-type': 'multipart/form-data; boundary=----abc123',
+    };
+
+    headerValidationMiddleware(req as Request, res as Response, next as NextFunction);
+
+    expect(next).toHaveBeenCalled();
+  });
+
+  it('debe bloquear application/json en la ruta de subida de logo de compañía', () => {
+    req.method = 'POST';
+    req.url = '/v1/companies/company-1/logo';
+    (req as any).path = '/v1/companies/company-1/logo';
+    req.headers = {
+      'content-type': 'application/json',
+    };
+
+    headerValidationMiddleware(req as Request, res as Response, next as NextFunction);
+
+    expect(res.status).toHaveBeenCalledWith(415);
+    expect(next).not.toHaveBeenCalled();
+  });
+
   it('debe seguir exigiendo application/json en rutas que no son de subida de archivos', () => {
     req.method = 'POST';
     req.url = '/v1/users/me/profile';

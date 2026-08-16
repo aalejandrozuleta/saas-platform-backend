@@ -4,7 +4,7 @@ Resumen de los cuatro mecanismos que usan los servicios para hablar entre sí.
 
 ## 1. HTTP resiliente (proxy síncrono)
 
-**Quién lo usa**: API Gateway → auth-service / config-service.
+**Quién lo usa**: API Gateway → auth-service / config-service / company-service.
 
 `ResilientHttpClient` (Axios + circuit breaker `opossum`):
 
@@ -30,6 +30,20 @@ Ver [notification-flows.md](notification-flows.md) para el detalle de colas, rei
 
 - **Sesiones** (auth-service): revocación inmediata de tokens sin esperar expiración natural del JWT.
 - **Estado de mantenimiento** (api-gateway): `MaintenanceGuard` cachea la respuesta de `config-service` por 30s (`gateway:maintenance:status`) para no consultarlo en cada request.
+
+## 5. Lookup interno síncrono (sin circuit breaker)
+
+**Quién lo usa**: company-service → auth-service.
+
+`AuthServiceHttpClient` (`axios` simple, sin `opossum`): al invitar a un
+miembro, company-service hace `GET /auth/v1/users/lookup?email=...` con
+header `x-internal-api-key` (mismo `INTERNAL_SERVICE_SECRET` compartido que
+usa notification-service↔auth-service) para resolver el `userId` del email
+invitado. Un `404` del lookup se traduce a `USER_NOT_FOUND` (dominio); un
+timeout o `5xx` se traduce a un `503` de dominio sin filtrar detalles del
+upstream. A diferencia del proxy del gateway (#1), esta llamada es
+**bloqueante**: el caso de uso `InviteMemberUseCase` espera la respuesta
+antes de crear la `CompanyMembership`. Ver [invite-worker-flow.md](invite-worker-flow.md).
 
 ## Eventos de dominio (intra-servicio)
 

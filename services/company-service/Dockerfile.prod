@@ -1,0 +1,37 @@
+FROM node:24-alpine AS base
+
+ENV PNPM_HOME=/pnpm
+ENV PATH=$PNPM_HOME:$PATH
+
+RUN corepack enable
+
+WORKDIR /app
+
+FROM base AS build
+
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml nest-cli.json ./
+COPY .npmrc ./
+COPY tsconfig.base.json ./
+COPY services ./services
+COPY shared ./shared
+
+RUN pnpm install --frozen-lockfile --ignore-scripts \
+    && pnpm --filter @saas/shared build \
+    && pnpm --filter company-service exec prisma generate \
+    && pnpm --filter company-service build \
+    && pnpm deploy --filter company-service --prod /prod/company-service
+# i18n files are not in dist/ — copy them explicitly so the loader finds them at runtime
+COPY services/company-service/src/i18n /prod/company-service/src/i18n
+
+FROM node:24-alpine AS runtime
+
+WORKDIR /app
+ENV NODE_ENV=production
+
+COPY --from=build --chown=node:node /prod/company-service ./
+
+USER node
+
+EXPOSE 3004
+
+CMD ["node", "dist/main.js"]

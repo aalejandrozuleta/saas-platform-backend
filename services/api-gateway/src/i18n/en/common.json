@@ -8,6 +8,8 @@
   "common.gateway_timeout": "The gateway timed out while processing the request",
   "common.auth_service_temporarily_unavailable": "The authentication service is temporarily unavailable",
   "common.auth_service_unavailable": "The authentication service could not be reached",
+  "common.company_service_temporarily_unavailable": "The company service is temporarily unavailable",
+  "common.company_service_unavailable": "The company service could not be reached",
   "common.gateway_upstream_failure": "An error occurred while communicating with an internal service",
   "common.upstream_error": "The internal service rejected the request",
   "common.missing_access_token": "Authentication required. No access token provided.",

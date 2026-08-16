@@ -18,6 +18,7 @@ import { ResendVerificationUseCase } from '@application/use-cases/email-verifica
 import { ForgotPasswordUseCase } from '@application/use-cases/password/forgot-password.use-case';
 import { ResetPasswordUseCase } from '@application/use-cases/password/reset-password.use-case';
 import { VerifyLoginChallengeUseCase } from '@application/use-cases/login/verify-login-challenge.use-case';
+import { CompleteFirstLoginUseCase } from '@application/use-cases/login/complete-first-login.use-case';
 import { RegenerateRecoveryCodesUseCase } from '@application/use-cases/two-factor/regenerate-recovery-codes.use-case';
 import { I18nService } from '@saas/shared';
 import { type RegisterUserDto } from '@application/dto/register/register-user.dto';
@@ -48,6 +49,7 @@ describe('AuthController', () => {
   let forgotPasswordUseCase: jest.Mocked<ForgotPasswordUseCase>;
   let resetPasswordUseCase: jest.Mocked<ResetPasswordUseCase>;
   let verifyLoginChallengeUseCase: jest.Mocked<VerifyLoginChallengeUseCase>;
+  let completeFirstLoginUseCase: jest.Mocked<CompleteFirstLoginUseCase>;
   let regenerateRecoveryCodesUseCase: jest.Mocked<RegenerateRecoveryCodesUseCase>;
   let i18n: jest.Mocked<I18nService>;
 
@@ -138,6 +140,10 @@ describe('AuthController', () => {
           useValue: { execute: jest.fn() },
         },
         {
+          provide: CompleteFirstLoginUseCase,
+          useValue: { execute: jest.fn() },
+        },
+        {
           provide: RegenerateRecoveryCodesUseCase,
           useValue: { execute: jest.fn() },
         },
@@ -174,6 +180,7 @@ describe('AuthController', () => {
     forgotPasswordUseCase = module.get(ForgotPasswordUseCase);
     resetPasswordUseCase = module.get(ResetPasswordUseCase);
     verifyLoginChallengeUseCase = module.get(VerifyLoginChallengeUseCase);
+    completeFirstLoginUseCase = module.get(CompleteFirstLoginUseCase);
     regenerateRecoveryCodesUseCase = module.get(RegenerateRecoveryCodesUseCase);
     i18n = module.get(I18nService);
   });
@@ -420,6 +427,60 @@ describe('AuthController', () => {
       data: {
         role: 'CUSTOMER',
         permissions: ['profile:manage'],
+      },
+    });
+  });
+
+  it('debe completar el primer login (cambio de contraseña) y devolver cookies', async () => {
+    completeFirstLoginUseCase.execute.mockResolvedValue({
+      token: 'access-token',
+      refreshToken: 'refresh-token',
+      role: 'EMPLOYEE',
+      permissions: ['invoice:create'],
+    });
+    i18n.translate.mockReturnValue('Inicio de sesión exitoso');
+
+    const req: any = {
+      ip: '127.0.0.1',
+      secure: true,
+      headers: { 'accept-language': 'es' },
+      get: (key: string) => req.headers[key],
+    };
+
+    const res: any = { cookie: jest.fn() };
+
+    const result = await controller.completeFirstLogin(
+      {
+        changeToken: 'change-token-abc',
+        newPassword: 'NewSecurePass456@',
+        dataProcessingAccepted: true,
+        termsAccepted: true,
+      },
+      req,
+      res,
+    );
+
+    expect(completeFirstLoginUseCase.execute).toHaveBeenCalledWith(
+      'change-token-abc',
+      'NewSecurePass456@',
+      { ip: '127.0.0.1' },
+    );
+    expect(res.cookie).toHaveBeenCalledWith(
+      'accessToken',
+      'access-token',
+      expect.objectContaining({ httpOnly: true }),
+    );
+    expect(res.cookie).toHaveBeenCalledWith(
+      'refreshToken',
+      'refresh-token',
+      expect.objectContaining({ httpOnly: true }),
+    );
+    expect(result).toEqual({
+      success: true,
+      message: 'Inicio de sesión exitoso',
+      data: {
+        role: 'EMPLOYEE',
+        permissions: ['invoice:create'],
       },
     });
   });
