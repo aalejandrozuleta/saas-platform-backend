@@ -1,6 +1,5 @@
 import { Inject } from '@nestjs/common';
 import { User } from '@domain/entities/user/user.entity';
-import { type Device } from '@domain/entities/device/device.entity';
 import { LoginContext } from '@domain/value-objects/login-context.vo';
 import { UserRepository } from '@domain/repositories/user.repository';
 import { UserProfileRepository } from '@domain/repositories/user-profile.repository';
@@ -30,7 +29,10 @@ import { LoginSucceededEvent } from '@application/events/login/login-succeeded.e
 import { Clock } from '@application/ports/clock.port';
 import { EnvService } from '@config/env/env.service';
 import { UserPermissionService } from '@application/services/user-permission.service';
-import { completeLoginSession } from '@application/services/complete-login-session';
+import {
+  completeLoginSession,
+  type CompleteLoginSessionDeps,
+} from '@application/services/complete-login-session';
 import { resolveTrustedDevice } from '@application/services/resolve-trusted-device';
 import { DomainErrorFactory } from '@domain/errors/domain-error.factory';
 
@@ -124,10 +126,12 @@ export class CompleteFirstLoginUseCase {
       context,
     );
 
-    const result = await this.completeLogin(updatedUser, device, {
-      ip: context.ip,
-      country: claims.country,
-    });
+    const result = await completeLoginSession(
+      this as unknown as CompleteLoginSessionDeps,
+      updatedUser,
+      device,
+      { ip: context.ip, country: claims.country },
+    );
 
     this.eventBus.publish(
       new LoginSucceededEvent(
@@ -184,30 +188,5 @@ export class CompleteFirstLoginUseCase {
     }
 
     await this.userProfileRepository.update(profile.acceptConsent());
-  }
-
-  private async completeLogin(
-    user: User,
-    device: Device,
-    context: { ip: string; country?: string },
-  ) {
-    return completeLoginSession(
-      {
-        uow: this.uow,
-        deviceRepository: this.deviceRepository,
-        sessionRepository: this.sessionRepository,
-        refreshTokenRepository: this.refreshTokenRepository,
-        passwordHasher: this.passwordHasher,
-        tokenService: this.tokenService,
-        sessionCache: this.sessionCache,
-        envService: this.envService,
-        userPermissionService: this.userPermissionService,
-        userRepository: this.userRepository,
-        clock: this.clock,
-      },
-      user,
-      device,
-      context,
-    );
   }
 }

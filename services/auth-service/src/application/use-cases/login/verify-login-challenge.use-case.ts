@@ -1,6 +1,4 @@
 import { Inject } from '@nestjs/common';
-import { User } from '@domain/entities/user/user.entity';
-import { Device } from '@domain/entities/device/device.entity';
 import { UserStatus } from '@domain/enums/user-status.enum';
 import { LoginContext } from '@domain/value-objects/login-context.vo';
 import { UserRepository } from '@domain/repositories/user.repository';
@@ -35,7 +33,10 @@ import { LoginSucceededEvent } from '@application/events/login/login-succeeded.e
 import { Clock } from '@application/ports/clock.port';
 import { EnvService } from '@config/env/env.service';
 import { UserPermissionService } from '@application/services/user-permission.service';
-import { completeLoginSession } from '@application/services/complete-login-session';
+import {
+  completeLoginSession,
+  type CompleteLoginSessionDeps,
+} from '@application/services/complete-login-session';
 import { resolveTrustedDevice } from '@application/services/resolve-trusted-device';
 import { DomainErrorFactory } from '@domain/errors/domain-error.factory';
 
@@ -126,10 +127,12 @@ export class VerifyLoginChallengeUseCase {
 
     await this.trustCountryIfNeeded(user.id, claims.country);
 
-    const result = await this.completeLogin(user, device, {
-      ip: context.ip,
-      country: claims.country,
-    });
+    const result = await completeLoginSession(
+      this as unknown as CompleteLoginSessionDeps,
+      user,
+      device,
+      { ip: context.ip, country: claims.country },
+    );
 
     this.eventBus.publish(
       new LoginSucceededEvent(
@@ -213,34 +216,5 @@ export class VerifyLoginChallengeUseCase {
     if (!profile?.trustedCountries.includes(country)) {
       await this.securityRepository.addTrustedCountry(userId, country);
     }
-  }
-
-  /**
-   * Completa el login: crea sesión + tokens dentro de una transacción.
-   * Misma lógica que `LoginUserUseCase.performLogin`.
-   */
-  private async completeLogin(
-    user: User,
-    device: Device,
-    context: { ip: string; country?: string },
-  ) {
-    return completeLoginSession(
-      {
-        uow: this.uow,
-        deviceRepository: this.deviceRepository,
-        sessionRepository: this.sessionRepository,
-        refreshTokenRepository: this.refreshTokenRepository,
-        passwordHasher: this.passwordHasher,
-        tokenService: this.tokenService,
-        sessionCache: this.sessionCache,
-        envService: this.envService,
-        userPermissionService: this.userPermissionService,
-        userRepository: this.userRepository,
-        clock: this.clock,
-      },
-      user,
-      device,
-      context,
-    );
   }
 }
