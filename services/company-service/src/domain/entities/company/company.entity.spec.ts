@@ -162,4 +162,70 @@ describe('Company entity', () => {
       expect(updated.updatedAt.getTime()).toBeGreaterThanOrEqual(company.updatedAt.getTime());
     });
   });
+
+  describe('removeLogo', () => {
+    it('devuelve una nueva instancia sin logoUrl', () => {
+      const company = Company.create(validProps).updateLogo(
+        'https://storage.example.com/logos/c-1.webp',
+      );
+      const updated = company.removeLogo();
+
+      expect(updated).not.toBe(company);
+      expect(updated.logoUrl).toBeUndefined();
+      expect(company.logoUrl).toBe('https://storage.example.com/logos/c-1.webp');
+    });
+  });
+
+  describe('updateProfile', () => {
+    it('actualiza solo los campos enviados en el patch', () => {
+      const company = Company.create(validProps);
+      const updated = company.updateProfile({ name: '  Nueva Acme  ', city: 'Medellín' });
+
+      expect(updated).not.toBe(company);
+      expect(updated.name).toBe('Nueva Acme');
+      expect(updated.city).toBe('Medellín');
+      expect(updated.email).toBe(company.email);
+      expect(updated.phone).toBe(company.phone);
+      expect(updated.address).toBe(company.address);
+      expect(updated.country).toBe(company.country);
+      expect(company.name).toBe('Acme S.A.S.');
+    });
+
+    it('permite limpiar taxId enviando undefined explícito no cambia el valor existente', () => {
+      const company = Company.create(validProps);
+      const updated = company.updateProfile({ taxId: 'NEW-TAX-ID' });
+
+      expect(updated.taxId).toBe('NEW-TAX-ID');
+    });
+
+    it('lanza COMPANY_NAME_REQUIRED si el nuevo nombre viene vacío', () => {
+      const company = Company.create(validProps);
+
+      expect(() => company.updateProfile({ name: '   ' })).toThrow('COMPANY_NAME_REQUIRED');
+    });
+
+    it('lanza COMPANY_EMAIL_REQUIRED si el nuevo email viene vacío', () => {
+      const company = Company.create(validProps);
+
+      expect(() => company.updateProfile({ email: '   ' })).toThrow('COMPANY_EMAIL_REQUIRED');
+    });
+
+    it('lanza COMPANY_PHONE_REQUIRED si el nuevo teléfono viene vacío', () => {
+      const company = Company.create(validProps);
+
+      expect(() => company.updateProfile({ phone: '   ' })).toThrow('COMPANY_PHONE_REQUIRED');
+    });
+
+    it('lanza COMPANY_ADDRESS_REQUIRED si la nueva dirección viene vacía', () => {
+      const company = Company.create(validProps);
+
+      expect(() => company.updateProfile({ address: '   ' })).toThrow('COMPANY_ADDRESS_REQUIRED');
+    });
+
+    it('lanza COMPANY_CITY_REQUIRED si la nueva ciudad viene vacía', () => {
+      const company = Company.create(validProps);
+
+      expect(() => company.updateProfile({ city: '   ' })).toThrow('COMPANY_CITY_REQUIRED');
+    });
+  });
 });

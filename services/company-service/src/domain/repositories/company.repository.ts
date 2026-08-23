@@ -7,9 +7,15 @@ import { type CompanyMembership } from '../entities/company-membership/company-m
 export interface CompanyRepository {
   findById(id: string): Promise<Company | null>;
 
+  /** Empresas cuyos ids están en `ids` (usado para "mis empresas": una consulta batch en vez de N). */
+  findByIds(ids: string[]): Promise<Company[]>;
+
   save(company: Company): Promise<void>;
 
   update(company: Company): Promise<void>;
+
+  /** Elimina la empresa (y, vía cascade en la base de datos, sus membresías). */
+  delete(id: string): Promise<void>;
 
   /**
    * Crea la empresa y la membresía `OWNER` de quien la creó de forma

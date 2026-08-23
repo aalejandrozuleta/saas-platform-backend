@@ -21,6 +21,10 @@ export const envSchema = z.object({
   AUTH_SERVICE_URL: z.string().default('http://auth-service:3001'), // NOSONAR: internal Docker network address (service-to-service), not exposed externally
   AUTH_SERVICE_TIMEOUT: z.coerce.number().default(5000),
 
+  /** notification-service: envía el email de invitación cuando se invita a un miembro. */
+  NOTIFICATION_SERVICE_URL: z.string().default('http://notification-service:3003'), // NOSONAR: internal Docker network address (service-to-service), not exposed externally
+  NOTIFICATION_SERVICE_TIMEOUT: z.coerce.number().default(5000),
+
   /** Secreto compartido con auth-service; ver InternalServiceGuard. */
   INTERNAL_SERVICE_SECRET: z.string().min(32),
 

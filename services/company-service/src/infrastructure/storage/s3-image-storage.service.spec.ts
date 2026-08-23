@@ -7,6 +7,7 @@ const sendMock = jest.fn();
 jest.mock('@aws-sdk/client-s3', () => ({
   S3Client: jest.fn().mockImplementation(() => ({ send: sendMock })),
   PutObjectCommand: jest.fn().mockImplementation((input) => ({ input })),
+  DeleteObjectCommand: jest.fn().mockImplementation((input) => ({ input })),
 }));
 
 describe('S3ImageStorageService', () => {
@@ -39,6 +40,24 @@ describe('S3ImageStorageService', () => {
 
       expect(sendMock).toHaveBeenCalledTimes(1);
       expect(url).toBe('http://localhost:9000/company-logos/logos/c-1.png');
+    });
+  });
+
+  describe('deleteByUrl', () => {
+    it('traduce la URL pública a key y borra el objeto', async () => {
+      await service.deleteByUrl('http://localhost:9000/company-logos/logos/c-1.png');
+
+      expect(sendMock).toHaveBeenCalledTimes(1);
+      expect(sendMock.mock.calls[0][0].input).toMatchObject({
+        Bucket: 'company-logos',
+        Key: 'logos/c-1.png',
+      });
+    });
+
+    it('ignora URLs con un prefijo distinto al publicUrl configurado, sin llamar a S3', async () => {
+      await service.deleteByUrl('https://otro-storage.example.com/logos/c-1.png');
+
+      expect(sendMock).not.toHaveBeenCalled();
     });
   });
 });

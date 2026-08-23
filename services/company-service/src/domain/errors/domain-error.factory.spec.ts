@@ -21,6 +21,17 @@ describe('DomainErrorFactory', () => {
       503,
       'company.auth_service_unavailable',
     ],
+    ['ownerRoleRequiresOwner', ErrorCode.FORBIDDEN, 403, 'membership.owner_role_requires_owner'],
+    ['logoFileRequired', ErrorCode.VALIDATION_ERROR, 400, 'company.logo_file_required'],
+    [
+      'taxIdAlreadyRegistered',
+      ErrorCode.TAX_ID_ALREADY_REGISTERED,
+      409,
+      'company.tax_id_already_registered',
+    ],
+    ['invitationNotPending', ErrorCode.CONFLICT, 409, 'membership.invitation_not_pending'],
+    ['cannotRemoveOwner', ErrorCode.FORBIDDEN, 403, 'membership.cannot_remove_owner'],
+    ['companyDeletionRequiresOwner', ErrorCode.FORBIDDEN, 403, 'company.deletion_requires_owner'],
   ])('%s produce el código/status/clave esperados', (method, code, status, messageKey) => {
     const error = (DomainErrorFactory as unknown as Record<string, () => Error>)[method]();
 

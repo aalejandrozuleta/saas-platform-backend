@@ -9,7 +9,11 @@ describe('CompanyController', () => {
   let controller: CompanyController;
   let createCompanyUseCase: any;
   let getCompanyUseCase: any;
+  let updateCompanyUseCase: any;
+  let deleteCompanyUseCase: any;
+  let listMyCompaniesUseCase: any;
   let uploadCompanyLogoUseCase: any;
+  let removeCompanyLogoUseCase: any;
   let registerWorkerUseCase: any;
   let i18n: any;
 
@@ -28,9 +32,22 @@ describe('CompanyController', () => {
   beforeEach(() => {
     createCompanyUseCase = { execute: jest.fn().mockResolvedValue(company) };
     getCompanyUseCase = { execute: jest.fn().mockResolvedValue(company) };
+    updateCompanyUseCase = { execute: jest.fn().mockResolvedValue(company) };
+    deleteCompanyUseCase = { execute: jest.fn().mockResolvedValue(undefined) };
+    listMyCompaniesUseCase = {
+      execute: jest.fn().mockResolvedValue([
+        {
+          company,
+          membershipId: 'm-1',
+          role: MembershipRole.OWNER,
+          status: MembershipStatus.ACTIVE,
+        },
+      ]),
+    };
     uploadCompanyLogoUseCase = {
       execute: jest.fn().mockResolvedValue(company.updateLogo('https://storage/logos/c-1.webp')),
     };
+    removeCompanyLogoUseCase = { execute: jest.fn().mockResolvedValue(company) };
     registerWorkerUseCase = {
       execute: jest.fn().mockResolvedValue({
         membership: CompanyMembership.create({
@@ -51,7 +68,11 @@ describe('CompanyController', () => {
     controller = new CompanyController(
       createCompanyUseCase,
       getCompanyUseCase,
+      updateCompanyUseCase,
+      deleteCompanyUseCase,
+      listMyCompaniesUseCase,
       uploadCompanyLogoUseCase,
+      removeCompanyLogoUseCase,
       registerWorkerUseCase,
       i18n,
     );
@@ -72,6 +93,36 @@ describe('CompanyController', () => {
     expect(result.data).toMatchObject({ id: 'c-1' });
   });
 
+  it('update delega en el use case y responde con el mensaje traducido', async () => {
+    const dto: any = { name: 'Acme Nueva' };
+    const result: any = await controller.update('c-1', dto, req);
+
+    expect(updateCompanyUseCase.execute).toHaveBeenCalledWith('u-1', 'c-1', dto);
+    expect(result.data).toMatchObject({ id: 'c-1' });
+    expect(i18n.translate).toHaveBeenCalledWith('company.updated_success', 'es');
+  });
+
+  it('remove delega en el use case y responde con el mensaje traducido', async () => {
+    const result: any = await controller.remove('c-1', req);
+
+    expect(deleteCompanyUseCase.execute).toHaveBeenCalledWith('u-1', 'c-1');
+    expect(result.data).toEqual({});
+    expect(i18n.translate).toHaveBeenCalledWith('company.deleted_success', 'es');
+  });
+
+  it('listMine devuelve las empresas del usuario con rol y estado', async () => {
+    const result: any = await controller.listMine(req);
+
+    expect(listMyCompaniesUseCase.execute).toHaveBeenCalledWith('u-1');
+    expect(result.data).toHaveLength(1);
+    expect(result.data[0]).toMatchObject({
+      membershipId: 'm-1',
+      role: MembershipRole.OWNER,
+      status: MembershipStatus.ACTIVE,
+      company: { id: 'c-1' },
+    });
+  });
+
   it('uploadLogo delega en el use case y responde con el mensaje traducido', async () => {
     const file: any = { buffer: Buffer.from('raw-upload') };
 
@@ -82,6 +133,22 @@ describe('CompanyController', () => {
     });
     expect(result.data.logoUrl).toBe('https://storage/logos/c-1.webp');
     expect(i18n.translate).toHaveBeenCalledWith('company.logo_updated_success', 'es');
+  });
+
+  it('uploadLogo lanza VALIDATION_ERROR si no se adjunta archivo', async () => {
+    await expect(controller.uploadLogo('c-1', undefined as any, req)).rejects.toMatchObject({
+      code: 'VALIDATION_ERROR',
+    });
+
+    expect(uploadCompanyLogoUseCase.execute).not.toHaveBeenCalled();
+  });
+
+  it('removeLogo delega en el use case y responde con el mensaje traducido', async () => {
+    const result: any = await controller.removeLogo('c-1', req);
+
+    expect(removeCompanyLogoUseCase.execute).toHaveBeenCalledWith('u-1', 'c-1');
+    expect(result.data).toMatchObject({ id: 'c-1' });
+    expect(i18n.translate).toHaveBeenCalledWith('company.logo_removed_success', 'es');
   });
 
   it('registerWorker delega en el use case y responde con el mensaje traducido', async () => {

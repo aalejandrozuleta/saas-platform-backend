@@ -41,6 +41,8 @@ describe('EnvService', () => {
     expect(service.get('PORT')).toBe(3004);
     expect(service.get('AUTH_SERVICE_URL')).toBe('http://auth-service:3001');
     expect(service.get('AUTH_SERVICE_TIMEOUT')).toBe(5000);
+    expect(service.get('NOTIFICATION_SERVICE_URL')).toBe('http://notification-service:3003');
+    expect(service.get('NOTIFICATION_SERVICE_TIMEOUT')).toBe(5000);
   });
 
   it('falla si falta o es inválida alguna variable', () => {

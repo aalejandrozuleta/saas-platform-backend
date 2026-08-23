@@ -68,4 +68,50 @@ export class DomainErrorFactory {
       400,
     );
   }
+
+  /**
+   * Solo un OWNER puede otorgar el rol OWNER a otro miembro (por invitación
+   * o edición). Evita que un MANAGER se auto-ascienda o ascienda a un
+   * cómplice para tomar control total del tenant.
+   */
+  static ownerRoleRequiresOwner(): DomainException {
+    return DomainException.create('membership.owner_role_requires_owner', ErrorCode.FORBIDDEN, 403);
+  }
+
+  /** El endpoint de logo requiere un archivo adjunto. */
+  static logoFileRequired(): DomainException {
+    return DomainException.create('company.logo_file_required', ErrorCode.VALIDATION_ERROR, 400);
+  }
+
+  /** Ya existe una empresa registrada con ese NIT/taxId en el mismo país. */
+  static taxIdAlreadyRegistered(): DomainException {
+    return DomainException.create(
+      'company.tax_id_already_registered',
+      ErrorCode.TAX_ID_ALREADY_REGISTERED,
+      409,
+    );
+  }
+
+  /** Solo se puede aceptar/rechazar una membresía que sigue en estado INVITED. */
+  static invitationNotPending(): DomainException {
+    return DomainException.create('membership.invitation_not_pending', ErrorCode.CONFLICT, 409);
+  }
+
+  /**
+   * Solo un OWNER puede remover a otro OWNER de la empresa. Mismo espíritu
+   * que `ownerRoleRequiresOwner()`, pero para la baja en vez del ascenso: un
+   * MANAGER no puede expulsar a los dueños del tenant.
+   */
+  static cannotRemoveOwner(): DomainException {
+    return DomainException.create('membership.cannot_remove_owner', ErrorCode.FORBIDDEN, 403);
+  }
+
+  /**
+   * Eliminar la empresa completa exige ser OWNER — `canManageMembers()`
+   * (que también acepta MANAGER) no basta para una operación irreversible
+   * de este calibre.
+   */
+  static companyDeletionRequiresOwner(): DomainException {
+    return DomainException.create('company.deletion_requires_owner', ErrorCode.FORBIDDEN, 403);
+  }
 }
