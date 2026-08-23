@@ -14,6 +14,9 @@ export interface CompanyRepository {
 
   update(company: Company): Promise<void>;
 
+  /** Elimina la empresa (y, vía cascade en la base de datos, sus membresías). */
+  delete(id: string): Promise<void>;
+
   /**
    * Crea la empresa y la membresía `OWNER` de quien la creó de forma
    * atómica: una empresa sin dueño sería un tenant huérfano e inaccesible.

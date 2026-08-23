@@ -30,7 +30,13 @@ describe('CompanyPrismaRepository', () => {
 
   beforeEach(() => {
     prisma = {
-      company: { findUnique: jest.fn(), findMany: jest.fn(), create: jest.fn(), update: jest.fn() },
+      company: {
+        findUnique: jest.fn(),
+        findMany: jest.fn(),
+        create: jest.fn(),
+        update: jest.fn(),
+        delete: jest.fn(),
+      },
       companyMembership: { create: jest.fn() },
       $transaction: jest.fn().mockResolvedValue([]),
     };
@@ -115,6 +121,12 @@ describe('CompanyPrismaRepository', () => {
       where: { id: 'c-1' },
       data: expect.objectContaining({ logoUrl: 'https://storage.example.com/logos/c-1.webp' }),
     });
+  });
+
+  it('delete elimina la empresa por id', async () => {
+    await repository.delete('c-1');
+
+    expect(prisma.company.delete).toHaveBeenCalledWith({ where: { id: 'c-1' } });
   });
 
   it('save traduce la violación del índice único (country, taxId) a TAX_ID_ALREADY_REGISTERED', async () => {

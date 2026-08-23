@@ -65,13 +65,33 @@ describe('CompanyMembershipController', () => {
     const query = { page: 1, limit: 20 } as any;
     const result: any = await controller.list('c-1', query, req);
 
-    expect(listMembersUseCase.execute).toHaveBeenCalledWith('u-1', 'c-1', {
-      page: 1,
-      limit: 20,
-    });
+    expect(listMembersUseCase.execute).toHaveBeenCalledWith(
+      'u-1',
+      'c-1',
+      { page: 1, limit: 20 },
+      { role: undefined, status: undefined },
+    );
     expect(result.data.items).toHaveLength(1);
     expect(result.data.items[0]).toMatchObject({ id: 'm-1', role: MembershipRole.WORKER });
     expect(result.data).toMatchObject({ page: 1, limit: 20, total: 1 });
+  });
+
+  it('list pasa los filtros role/status al use case', async () => {
+    const query = {
+      page: 1,
+      limit: 20,
+      role: MembershipRole.WORKER,
+      status: MembershipStatus.INVITED,
+    } as any;
+
+    await controller.list('c-1', query, req);
+
+    expect(listMembersUseCase.execute).toHaveBeenCalledWith(
+      'u-1',
+      'c-1',
+      { page: 1, limit: 20 },
+      { role: MembershipRole.WORKER, status: MembershipStatus.INVITED },
+    );
   });
 
   it('update delega en el use case', async () => {

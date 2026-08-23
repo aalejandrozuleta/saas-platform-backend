@@ -62,6 +62,19 @@ describe('CompanyProxy', () => {
 
       expect(result.body).toEqual({ success: true });
     });
+
+    it('debe reenviar la query string original (paginación/filtros)', async () => {
+      mockClient.requestTyped.mockResolvedValue({ data: { success: true }, headers: {} });
+
+      await proxy.forward(
+        makeReq({ query: { page: '2', role: 'WORKER' } }),
+        '/companies/1/members',
+      );
+
+      expect(mockClient.requestTyped).toHaveBeenCalledWith(
+        expect.objectContaining({ params: { page: '2', role: 'WORKER' } }),
+      );
+    });
   });
 
   describe('forward — errores del upstream', () => {

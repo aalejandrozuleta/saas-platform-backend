@@ -21,5 +21,8 @@
   "company.updated_success": "Empresa actualizada correctamente",
   "membership.invitation_accepted_success": "Invitación aceptada correctamente",
   "membership.invitation_declined_success": "Invitación rechazada correctamente",
-  "membership.removed_success": "Miembro eliminado correctamente"
+  "membership.removed_success": "Miembro eliminado correctamente",
+  "company.deletion_requires_owner": "Solo un propietario puede eliminar la empresa",
+  "company.deleted_success": "Empresa eliminada correctamente",
+  "company.logo_removed_success": "Logo eliminado correctamente"
 }

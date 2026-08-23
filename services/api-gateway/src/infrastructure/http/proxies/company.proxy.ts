@@ -52,6 +52,10 @@ export class CompanyProxy {
         url: `${this.COMPANY_BASE_PATH}${path}`,
         method: req.method as Method,
         data: req.body,
+        // Reenvía la query string original (ej. page/limit/role/status en
+        // GET .../members): sin esto, los filtros y la paginación se
+        // perdían silenciosamente al pasar por el gateway.
+        params: req.query,
         headers: forwardHeaders(req),
       };
 

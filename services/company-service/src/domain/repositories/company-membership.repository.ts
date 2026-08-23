@@ -1,9 +1,17 @@
+import { type MembershipRole } from '../enums/membership-role.enum';
+import { type MembershipStatus } from '../enums/membership-status.enum';
 import { type CompanyMembership } from '../entities/company-membership/company-membership.entity';
 
 /** Página de resultados de `findByCompanyIdPaged`. */
 export interface PagedMemberships {
   items: CompanyMembership[];
   total: number;
+}
+
+/** Filtros opcionales de `findByCompanyIdPaged`. */
+export interface MembershipListFilters {
+  role?: MembershipRole;
+  status?: MembershipStatus;
 }
 
 /**
@@ -16,10 +24,15 @@ export interface CompanyMembershipRepository {
   /** Todas las membresías de una empresa, sin paginar (uso interno / invariantes). */
   findByCompanyId(companyId: string): Promise<CompanyMembership[]>;
 
-  /** Miembros de una empresa paginados, más el total para construir metadata de paginación. */
+  /**
+   * Miembros de una empresa paginados, más el total para construir metadata
+   * de paginación. `filters` acota por `role` y/o `status` (ej. solo
+   * `INVITED`, para ver invitaciones pendientes).
+   */
   findByCompanyIdPaged(
     companyId: string,
     pagination: { skip: number; take: number },
+    filters?: MembershipListFilters,
   ): Promise<PagedMemberships>;
 
   /** Membresía por su id (usada al editar un miembro puntual). */

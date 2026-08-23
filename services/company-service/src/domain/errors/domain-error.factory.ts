@@ -105,4 +105,13 @@ export class DomainErrorFactory {
   static cannotRemoveOwner(): DomainException {
     return DomainException.create('membership.cannot_remove_owner', ErrorCode.FORBIDDEN, 403);
   }
+
+  /**
+   * Eliminar la empresa completa exige ser OWNER — `canManageMembers()`
+   * (que también acepta MANAGER) no basta para una operación irreversible
+   * de este calibre.
+   */
+  static companyDeletionRequiresOwner(): DomainException {
+    return DomainException.create('company.deletion_requires_owner', ErrorCode.FORBIDDEN, 403);
+  }
 }

@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 
 import {
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
@@ -17,11 +18,18 @@ import { ApiTags } from '@nestjs/swagger';
 import { CompanyProxy } from '@infrastructure/http/proxies/company.proxy';
 import {
   CreateCompanyGatewaySwagger,
+  ListMyCompaniesGatewaySwagger,
   GetCompanyGatewaySwagger,
+  UpdateCompanyGatewaySwagger,
+  DeleteCompanyGatewaySwagger,
   InviteCompanyMemberGatewaySwagger,
   ListCompanyMembersGatewaySwagger,
   UpdateCompanyMemberGatewaySwagger,
+  AcceptInvitationGatewaySwagger,
+  DeclineInvitationGatewaySwagger,
+  RemoveCompanyMemberGatewaySwagger,
   UploadCompanyLogoGatewaySwagger,
+  RemoveCompanyLogoGatewaySwagger,
   RegisterWorkerGatewaySwagger,
 } from '@infrastructure/swagger/company.swagger';
 
@@ -49,9 +57,33 @@ export class CompanyController {
     return body;
   }
 
+  @ListMyCompaniesGatewaySwagger()
+  @Get()
+  async listMine(@Req() req: Request) {
+    this.prepareRequest(req);
+    const { body } = await this.companyProxy.forward(req, '/companies');
+    return body;
+  }
+
   @GetCompanyGatewaySwagger()
   @Get(':id')
   async get(@Req() req: Request, @Param('id') id: string) {
+    this.prepareRequest(req);
+    const { body } = await this.companyProxy.forward(req, `/companies/${id}`);
+    return body;
+  }
+
+  @UpdateCompanyGatewaySwagger()
+  @Patch(':id')
+  async update(@Req() req: Request, @Param('id') id: string) {
+    this.prepareRequest(req);
+    const { body } = await this.companyProxy.forward(req, `/companies/${id}`);
+    return body;
+  }
+
+  @DeleteCompanyGatewaySwagger()
+  @Delete(':id')
+  async remove(@Req() req: Request, @Param('id') id: string) {
     this.prepareRequest(req);
     const { body } = await this.companyProxy.forward(req, `/companies/${id}`);
     return body;
@@ -76,6 +108,14 @@ export class CompanyController {
       originalname: file.originalname,
       mimetype: file.mimetype,
     });
+    return body;
+  }
+
+  @RemoveCompanyLogoGatewaySwagger()
+  @Delete(':id/logo')
+  async removeLogo(@Req() req: Request, @Param('id') id: string) {
+    this.prepareRequest(req);
+    const { body } = await this.companyProxy.forward(req, `/companies/${id}/logo`);
     return body;
   }
 
@@ -106,6 +146,51 @@ export class CompanyController {
   @UpdateCompanyMemberGatewaySwagger()
   @Patch(':id/members/:membershipId')
   async updateMember(
+    @Req() req: Request,
+    @Param('id') id: string,
+    @Param('membershipId') membershipId: string,
+  ) {
+    this.prepareRequest(req);
+    const { body } = await this.companyProxy.forward(
+      req,
+      `/companies/${id}/members/${membershipId}`,
+    );
+    return body;
+  }
+
+  @AcceptInvitationGatewaySwagger()
+  @Post(':id/members/:membershipId/accept')
+  async acceptInvitation(
+    @Req() req: Request,
+    @Param('id') id: string,
+    @Param('membershipId') membershipId: string,
+  ) {
+    this.prepareRequest(req);
+    const { body } = await this.companyProxy.forward(
+      req,
+      `/companies/${id}/members/${membershipId}/accept`,
+    );
+    return body;
+  }
+
+  @DeclineInvitationGatewaySwagger()
+  @Post(':id/members/:membershipId/decline')
+  async declineInvitation(
+    @Req() req: Request,
+    @Param('id') id: string,
+    @Param('membershipId') membershipId: string,
+  ) {
+    this.prepareRequest(req);
+    const { body } = await this.companyProxy.forward(
+      req,
+      `/companies/${id}/members/${membershipId}/decline`,
+    );
+    return body;
+  }
+
+  @RemoveCompanyMemberGatewaySwagger()
+  @Delete(':id/members/:membershipId')
+  async removeMember(
     @Req() req: Request,
     @Param('id') id: string,
     @Param('membershipId') membershipId: string,

@@ -78,6 +78,24 @@ export function UpdateCompanySwagger() {
 }
 
 /**
+ * Decorador Swagger para `DELETE /companies/:id`.
+ */
+export function DeleteCompanySwagger() {
+  return applyDecorators(
+    ApiOperation({
+      summary: 'Eliminar una empresa completa',
+      description:
+        'Operación irreversible: solo un OWNER activo puede ejecutarla (MANAGER no basta). Todas las membresías se eliminan en cascada junto con la empresa.',
+    }),
+    ApiParam({ name: 'id', description: 'Id de la empresa' }),
+    ApiOkResponse({ description: 'Empresa eliminada.' }),
+    ApiUnauthorizedResponse({ description: 'No autenticado.' }),
+    ApiForbiddenResponse({ description: 'Solo un OWNER activo puede eliminar la empresa.' }),
+    ApiNotFoundResponse({ description: 'La empresa no existe.' }),
+  );
+}
+
+/**
  * Decorador Swagger para `POST /companies/:id/logo`.
  */
 export function UploadCompanyLogoSwagger() {
@@ -93,6 +111,25 @@ export function UploadCompanyLogoSwagger() {
     }),
     ApiOkResponse({ description: 'Logo actualizado.', type: CompanyResponseDto }),
     ApiBadRequestResponse({ description: 'Formato de imagen no soportado.' }),
+    ApiUnauthorizedResponse({ description: 'No autenticado.' }),
+    ApiForbiddenResponse({
+      description: 'El usuario no tiene permisos para gestionar el logo de esta empresa.',
+    }),
+    ApiNotFoundResponse({ description: 'La empresa no existe.' }),
+  );
+}
+
+/**
+ * Decorador Swagger para `DELETE /companies/:id/logo`.
+ */
+export function RemoveCompanyLogoSwagger() {
+  return applyDecorators(
+    ApiOperation({ summary: 'Quitar el logo de la empresa sin reemplazarlo' }),
+    ApiParam({ name: 'id', description: 'Id de la empresa' }),
+    ApiOkResponse({
+      description: 'Logo eliminado (o la empresa ya no tenía uno).',
+      type: CompanyResponseDto,
+    }),
     ApiUnauthorizedResponse({ description: 'No autenticado.' }),
     ApiForbiddenResponse({
       description: 'El usuario no tiene permisos para gestionar el logo de esta empresa.',

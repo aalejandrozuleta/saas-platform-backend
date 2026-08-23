@@ -182,6 +182,15 @@ export class Company {
     });
   }
 
+  /** Quita el logo (sin reemplazarlo) devolviendo una nueva instancia. */
+  removeLogo(): Company {
+    return new Company({
+      ...this.props,
+      logoUrl: undefined,
+      updatedAt: new Date(),
+    });
+  }
+
   /**
    * Actualiza el perfil de la empresa (los mismos campos que se capturan en
    * `create()`, todos opcionales) devolviendo una nueva instancia. Los

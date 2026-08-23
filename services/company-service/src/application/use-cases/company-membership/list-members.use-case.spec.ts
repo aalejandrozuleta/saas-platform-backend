@@ -34,10 +34,11 @@ describe('ListMembersUseCase', () => {
     membershipRepository.findByCompanyIdPaged.mockResolvedValue(page);
 
     await expect(useCase.execute('u-1', 'c-1', { page: 1, limit: 20 })).resolves.toBe(page);
-    expect(membershipRepository.findByCompanyIdPaged).toHaveBeenCalledWith('c-1', {
-      skip: 0,
-      take: 20,
-    });
+    expect(membershipRepository.findByCompanyIdPaged).toHaveBeenCalledWith(
+      'c-1',
+      { skip: 0, take: 20 },
+      undefined,
+    );
   });
 
   it('calcula el skip a partir de la página solicitada', async () => {
@@ -46,10 +47,29 @@ describe('ListMembersUseCase', () => {
 
     await useCase.execute('u-1', 'c-1', { page: 3, limit: 10 });
 
-    expect(membershipRepository.findByCompanyIdPaged).toHaveBeenCalledWith('c-1', {
-      skip: 20,
-      take: 10,
-    });
+    expect(membershipRepository.findByCompanyIdPaged).toHaveBeenCalledWith(
+      'c-1',
+      { skip: 20, take: 10 },
+      undefined,
+    );
+  });
+
+  it('pasa los filtros de role/status al repositorio', async () => {
+    membershipRepository.findByCompanyAndUser.mockResolvedValue(requester(MembershipStatus.ACTIVE));
+    membershipRepository.findByCompanyIdPaged.mockResolvedValue({ items: [], total: 0 });
+
+    await useCase.execute(
+      'u-1',
+      'c-1',
+      { page: 1, limit: 20 },
+      { role: MembershipRole.WORKER, status: MembershipStatus.INVITED },
+    );
+
+    expect(membershipRepository.findByCompanyIdPaged).toHaveBeenCalledWith(
+      'c-1',
+      { skip: 0, take: 20 },
+      { role: MembershipRole.WORKER, status: MembershipStatus.INVITED },
+    );
   });
 
   it('lanza COMPANY_NOT_FOUND si no tiene membresía', async () => {

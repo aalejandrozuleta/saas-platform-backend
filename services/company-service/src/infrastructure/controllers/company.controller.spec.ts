@@ -10,8 +10,10 @@ describe('CompanyController', () => {
   let createCompanyUseCase: any;
   let getCompanyUseCase: any;
   let updateCompanyUseCase: any;
+  let deleteCompanyUseCase: any;
   let listMyCompaniesUseCase: any;
   let uploadCompanyLogoUseCase: any;
+  let removeCompanyLogoUseCase: any;
   let registerWorkerUseCase: any;
   let i18n: any;
 
@@ -31,21 +33,21 @@ describe('CompanyController', () => {
     createCompanyUseCase = { execute: jest.fn().mockResolvedValue(company) };
     getCompanyUseCase = { execute: jest.fn().mockResolvedValue(company) };
     updateCompanyUseCase = { execute: jest.fn().mockResolvedValue(company) };
+    deleteCompanyUseCase = { execute: jest.fn().mockResolvedValue(undefined) };
     listMyCompaniesUseCase = {
-      execute: jest
-        .fn()
-        .mockResolvedValue([
-          {
-            company,
-            membershipId: 'm-1',
-            role: MembershipRole.OWNER,
-            status: MembershipStatus.ACTIVE,
-          },
-        ]),
+      execute: jest.fn().mockResolvedValue([
+        {
+          company,
+          membershipId: 'm-1',
+          role: MembershipRole.OWNER,
+          status: MembershipStatus.ACTIVE,
+        },
+      ]),
     };
     uploadCompanyLogoUseCase = {
       execute: jest.fn().mockResolvedValue(company.updateLogo('https://storage/logos/c-1.webp')),
     };
+    removeCompanyLogoUseCase = { execute: jest.fn().mockResolvedValue(company) };
     registerWorkerUseCase = {
       execute: jest.fn().mockResolvedValue({
         membership: CompanyMembership.create({
@@ -67,8 +69,10 @@ describe('CompanyController', () => {
       createCompanyUseCase,
       getCompanyUseCase,
       updateCompanyUseCase,
+      deleteCompanyUseCase,
       listMyCompaniesUseCase,
       uploadCompanyLogoUseCase,
+      removeCompanyLogoUseCase,
       registerWorkerUseCase,
       i18n,
     );
@@ -96,6 +100,14 @@ describe('CompanyController', () => {
     expect(updateCompanyUseCase.execute).toHaveBeenCalledWith('u-1', 'c-1', dto);
     expect(result.data).toMatchObject({ id: 'c-1' });
     expect(i18n.translate).toHaveBeenCalledWith('company.updated_success', 'es');
+  });
+
+  it('remove delega en el use case y responde con el mensaje traducido', async () => {
+    const result: any = await controller.remove('c-1', req);
+
+    expect(deleteCompanyUseCase.execute).toHaveBeenCalledWith('u-1', 'c-1');
+    expect(result.data).toEqual({});
+    expect(i18n.translate).toHaveBeenCalledWith('company.deleted_success', 'es');
   });
 
   it('listMine devuelve las empresas del usuario con rol y estado', async () => {
@@ -129,6 +141,14 @@ describe('CompanyController', () => {
     });
 
     expect(uploadCompanyLogoUseCase.execute).not.toHaveBeenCalled();
+  });
+
+  it('removeLogo delega en el use case y responde con el mensaje traducido', async () => {
+    const result: any = await controller.removeLogo('c-1', req);
+
+    expect(removeCompanyLogoUseCase.execute).toHaveBeenCalledWith('u-1', 'c-1');
+    expect(result.data).toMatchObject({ id: 'c-1' });
+    expect(i18n.translate).toHaveBeenCalledWith('company.logo_removed_success', 'es');
   });
 
   it('registerWorker delega en el use case y responde con el mensaje traducido', async () => {

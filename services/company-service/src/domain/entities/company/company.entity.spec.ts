@@ -163,6 +163,19 @@ describe('Company entity', () => {
     });
   });
 
+  describe('removeLogo', () => {
+    it('devuelve una nueva instancia sin logoUrl', () => {
+      const company = Company.create(validProps).updateLogo(
+        'https://storage.example.com/logos/c-1.webp',
+      );
+      const updated = company.removeLogo();
+
+      expect(updated).not.toBe(company);
+      expect(updated.logoUrl).toBeUndefined();
+      expect(company.logoUrl).toBe('https://storage.example.com/logos/c-1.webp');
+    });
+  });
+
   describe('updateProfile', () => {
     it('actualiza solo los campos enviados en el patch', () => {
       const company = Company.create(validProps);

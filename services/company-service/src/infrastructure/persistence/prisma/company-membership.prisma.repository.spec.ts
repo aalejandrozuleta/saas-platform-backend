@@ -138,6 +138,33 @@ describe('CompanyMembershipPrismaRepository', () => {
     expect(page.items[0].id).toBe('m-1');
     expect(prisma.$transaction).toHaveBeenCalledTimes(1);
     expect(prisma.$transaction.mock.calls[0][0]).toHaveLength(2);
+    expect(prisma.companyMembership.findMany).toHaveBeenCalledWith({
+      where: { companyId: 'c-1' },
+      orderBy: { createdAt: 'asc' },
+      skip: 20,
+      take: 10,
+    });
+    expect(prisma.companyMembership.count).toHaveBeenCalledWith({ where: { companyId: 'c-1' } });
+  });
+
+  it('findByCompanyIdPaged aplica los filtros de role/status al where', async () => {
+    prisma.$transaction.mockResolvedValue([[row], 1]);
+
+    await repository.findByCompanyIdPaged(
+      'c-1',
+      { skip: 0, take: 20 },
+      { role: MembershipRole.WORKER, status: MembershipStatus.INVITED },
+    );
+
+    expect(prisma.companyMembership.findMany).toHaveBeenCalledWith({
+      where: { companyId: 'c-1', role: MembershipRole.WORKER, status: MembershipStatus.INVITED },
+      orderBy: { createdAt: 'asc' },
+      skip: 0,
+      take: 20,
+    });
+    expect(prisma.companyMembership.count).toHaveBeenCalledWith({
+      where: { companyId: 'c-1', role: MembershipRole.WORKER, status: MembershipStatus.INVITED },
+    });
   });
 
   it('updateAndCountActiveOwners escribe y cuenta OWNERs activos en una transacción SERIALIZABLE', async () => {

@@ -1,12 +1,15 @@
 import { Type } from 'class-transformer';
-import { IsInt, IsOptional, Max, Min } from 'class-validator';
+import { IsEnum, IsInt, IsOptional, Max, Min } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
+import { MembershipRole } from '@domain/enums/membership-role.enum';
+import { MembershipStatus } from '@domain/enums/membership-status.enum';
 
 export const DEFAULT_MEMBERS_PAGE_SIZE = 20;
 export const MAX_MEMBERS_PAGE_SIZE = 100;
 
 /**
- * Query params de paginación para `GET /companies/:id/members`.
+ * Query params de `GET /companies/:id/members`: paginación y filtros
+ * opcionales por rol/estado.
  *
  * @remarks
  * Sin paginación, una empresa con cientos de miembros devolvía la lista
@@ -33,4 +36,17 @@ export class ListMembersQueryDto {
   @Min(1)
   @Max(MAX_MEMBERS_PAGE_SIZE)
   limit: number = DEFAULT_MEMBERS_PAGE_SIZE;
+
+  @ApiPropertyOptional({ enum: MembershipRole, description: 'Filtra por rol' })
+  @IsOptional()
+  @IsEnum(MembershipRole)
+  role?: MembershipRole;
+
+  @ApiPropertyOptional({
+    enum: MembershipStatus,
+    description: 'Filtra por estado (ej. INVITED para ver invitaciones pendientes)',
+  })
+  @IsOptional()
+  @IsEnum(MembershipStatus)
+  status?: MembershipStatus;
 }

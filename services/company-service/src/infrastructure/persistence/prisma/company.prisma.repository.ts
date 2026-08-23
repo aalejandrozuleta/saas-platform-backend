@@ -50,6 +50,10 @@ export class CompanyPrismaRepository implements CompanyRepository {
     );
   }
 
+  async delete(id: string): Promise<void> {
+    await this.prisma.company.delete({ where: { id } });
+  }
+
   /**
    * Crea empresa + membresía OWNER dentro de una única transacción
    * (forma de array de `$transaction`: dos escrituras independientes que

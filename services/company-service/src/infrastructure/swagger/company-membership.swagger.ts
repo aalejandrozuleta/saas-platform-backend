@@ -12,6 +12,8 @@ import {
   ApiQuery,
 } from '@nestjs/swagger';
 import { MembershipResponseDto } from '@application/dto/company-membership/membership-response.dto';
+import { MembershipRole } from '@domain/enums/membership-role.enum';
+import { MembershipStatus } from '@domain/enums/membership-status.enum';
 
 /**
  * Decorador Swagger para `POST /companies/:id/workers`.
@@ -64,6 +66,18 @@ export function ListMembersSwagger() {
       required: false,
       type: Number,
       description: 'Tamaño de página (default: 20, máx. 100)',
+    }),
+    ApiQuery({
+      name: 'role',
+      required: false,
+      enum: MembershipRole,
+      description: 'Filtra por rol',
+    }),
+    ApiQuery({
+      name: 'status',
+      required: false,
+      enum: MembershipStatus,
+      description: 'Filtra por estado (ej. INVITED para ver invitaciones pendientes)',
     }),
     ApiOkResponse({
       description: 'Página de miembros de la empresa.',

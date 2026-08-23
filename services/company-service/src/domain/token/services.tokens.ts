@@ -6,3 +6,4 @@
 export const AUTH_SERVICE_CLIENT = Symbol('AUTH_SERVICE_CLIENT');
 export const IMAGE_STORAGE = Symbol('IMAGE_STORAGE');
 export const IMAGE_PROCESSOR = Symbol('IMAGE_PROCESSOR');
+export const NOTIFICATION_CLIENT = Symbol('NOTIFICATION_CLIENT');

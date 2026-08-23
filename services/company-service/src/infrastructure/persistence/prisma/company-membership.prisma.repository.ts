@@ -4,6 +4,7 @@ import { MembershipRole } from '@domain/enums/membership-role.enum';
 import { MembershipStatus } from '@domain/enums/membership-status.enum';
 import {
   type CompanyMembershipRepository,
+  type MembershipListFilters,
   type PagedMemberships,
 } from '@domain/repositories/company-membership.repository';
 import { DomainErrorFactory } from '@domain/errors/domain-error.factory';
@@ -40,15 +41,22 @@ export class CompanyMembershipPrismaRepository implements CompanyMembershipRepos
   async findByCompanyIdPaged(
     companyId: string,
     pagination: { skip: number; take: number },
+    filters?: MembershipListFilters,
   ): Promise<PagedMemberships> {
+    const where = {
+      companyId,
+      ...(filters?.role ? { role: filters.role } : {}),
+      ...(filters?.status ? { status: filters.status } : {}),
+    };
+
     const [rows, total] = await this.prisma.$transaction([
       this.prisma.companyMembership.findMany({
-        where: { companyId },
+        where,
         orderBy: { createdAt: 'asc' },
         skip: pagination.skip,
         take: pagination.take,
       }),
-      this.prisma.companyMembership.count({ where: { companyId } }),
+      this.prisma.companyMembership.count({ where }),
     ]);
 
     return {

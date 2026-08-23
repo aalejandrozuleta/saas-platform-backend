@@ -11,6 +11,7 @@ import { AccountLockedEmail } from './emails/AccountLockedEmail';
 import { MaintenanceEmail } from './emails/MaintenanceEmail';
 import { OtpCodeEmail } from './emails/OtpCodeEmail';
 import { WorkerProvisionedEmail } from './emails/WorkerProvisionedEmail';
+import { MembershipInvitedEmail } from './emails/MembershipInvitedEmail';
 
 type Vars = Record<string, unknown>;
 
@@ -84,6 +85,9 @@ const TEMPLATES: Record<string, (v: Vars) => React.ReactElement> = {
       s(v, 'tempPassword'),
       v['appUrl'] as string | undefined,
     ),
+
+  'membership-invited': (v) =>
+    MembershipInvitedEmail(s(v, 'companyName'), s(v, 'role'), v['appUrl'] as string | undefined),
 };
 
 /**

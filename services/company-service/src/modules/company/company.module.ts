@@ -7,8 +7,10 @@ import { JwtAuthGuard } from '@infrastructure/security/jwt-auth.guard';
 import { CreateCompanyUseCase } from '@application/use-cases/company/create-company.use-case';
 import { GetCompanyUseCase } from '@application/use-cases/company/get-company.use-case';
 import { UpdateCompanyUseCase } from '@application/use-cases/company/update-company.use-case';
+import { DeleteCompanyUseCase } from '@application/use-cases/company/delete-company.use-case';
 import { ListMyCompaniesUseCase } from '@application/use-cases/company/list-my-companies.use-case';
 import { UploadCompanyLogoUseCase } from '@application/use-cases/company/upload-company-logo.use-case';
+import { RemoveCompanyLogoUseCase } from '@application/use-cases/company/remove-company-logo.use-case';
 import { InviteMemberUseCase } from '@application/use-cases/company-membership/invite-member.use-case';
 import { ListMembersUseCase } from '@application/use-cases/company-membership/list-members.use-case';
 import { UpdateMemberUseCase } from '@application/use-cases/company-membership/update-member.use-case';
@@ -34,8 +36,10 @@ import { companyProviders } from './company.providers';
     CreateCompanyUseCase,
     GetCompanyUseCase,
     UpdateCompanyUseCase,
+    DeleteCompanyUseCase,
     ListMyCompaniesUseCase,
     UploadCompanyLogoUseCase,
+    RemoveCompanyLogoUseCase,
     InviteMemberUseCase,
     ListMembersUseCase,
     UpdateMemberUseCase,

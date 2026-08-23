@@ -72,10 +72,12 @@ export class CompanyMembershipController {
     @Query() query: ListMembersQueryDto,
     @Req() req: Request,
   ) {
-    const { items, total } = await this.listMembersUseCase.execute(req.user!.id, companyId, {
-      page: query.page,
-      limit: query.limit,
-    });
+    const { items, total } = await this.listMembersUseCase.execute(
+      req.user!.id,
+      companyId,
+      { page: query.page, limit: query.limit },
+      { role: query.role, status: query.status },
+    );
 
     return successResponse({
       items: items.map((membership) => this.toResponse(membership)),

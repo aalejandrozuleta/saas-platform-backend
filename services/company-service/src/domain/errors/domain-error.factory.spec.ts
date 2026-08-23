@@ -31,6 +31,7 @@ describe('DomainErrorFactory', () => {
     ],
     ['invitationNotPending', ErrorCode.CONFLICT, 409, 'membership.invitation_not_pending'],
     ['cannotRemoveOwner', ErrorCode.FORBIDDEN, 403, 'membership.cannot_remove_owner'],
+    ['companyDeletionRequiresOwner', ErrorCode.FORBIDDEN, 403, 'company.deletion_requires_owner'],
   ])('%s produce el código/status/clave esperados', (method, code, status, messageKey) => {
     const error = (DomainErrorFactory as unknown as Record<string, () => Error>)[method]();
 
