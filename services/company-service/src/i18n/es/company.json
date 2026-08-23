@@ -12,5 +12,8 @@
   "membership.last_owner": "La empresa debe conservar al menos un propietario activo",
   "membership.user_not_found": "No existe un usuario registrado con ese email",
   "membership.owner_role_not_allowed": "No se puede registrar un trabajador directamente como propietario",
-  "membership.worker_registered_success": "Trabajador registrado correctamente"
+  "membership.owner_role_requires_owner": "Solo un propietario puede asignar el rol de propietario a otro miembro",
+  "membership.worker_registered_success": "Trabajador registrado correctamente",
+  "company.logo_file_required": "Debes adjuntar un archivo de imagen",
+  "company.tax_id_already_registered": "Ya existe una empresa registrada con ese NIT en este país"
 }

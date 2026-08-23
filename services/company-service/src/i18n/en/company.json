@@ -12,5 +12,8 @@
   "membership.last_owner": "The company must keep at least one active owner",
   "membership.user_not_found": "No registered user was found with that email",
   "membership.owner_role_not_allowed": "A worker cannot be registered directly as an owner",
-  "membership.worker_registered_success": "Worker registered successfully"
+  "membership.owner_role_requires_owner": "Only an owner can grant the owner role to another member",
+  "membership.worker_registered_success": "Worker registered successfully",
+  "company.logo_file_required": "You must attach an image file",
+  "company.tax_id_already_registered": "A company with that tax id is already registered in this country"
 }

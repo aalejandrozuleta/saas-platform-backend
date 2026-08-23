@@ -1,7 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { type CompanyMembership } from '@domain/entities/company-membership/company-membership.entity';
-import { type CompanyMembershipRepository } from '@domain/repositories/company-membership.repository';
+import { MembershipRole } from '@domain/enums/membership-role.enum';
+import { MembershipStatus } from '@domain/enums/membership-status.enum';
+import {
+  type CompanyMembershipRepository,
+  type PagedMemberships,
+} from '@domain/repositories/company-membership.repository';
+import { DomainErrorFactory } from '@domain/errors/domain-error.factory';
 
+import { Prisma } from '../../../generated/prisma';
 import { CompanyMembershipMapper } from '../mappers/company-membership.mapper';
 
 import { PrismaService } from './prisma.service';
@@ -30,6 +37,26 @@ export class CompanyMembershipPrismaRepository implements CompanyMembershipRepos
     return memberships.map((membership) => CompanyMembershipMapper.toDomain(membership));
   }
 
+  async findByCompanyIdPaged(
+    companyId: string,
+    pagination: { skip: number; take: number },
+  ): Promise<PagedMemberships> {
+    const [rows, total] = await this.prisma.$transaction([
+      this.prisma.companyMembership.findMany({
+        where: { companyId },
+        orderBy: { createdAt: 'asc' },
+        skip: pagination.skip,
+        take: pagination.take,
+      }),
+      this.prisma.companyMembership.count({ where: { companyId } }),
+    ]);
+
+    return {
+      items: rows.map((membership) => CompanyMembershipMapper.toDomain(membership)),
+      total,
+    };
+  }
+
   async findById(id: string): Promise<CompanyMembership | null> {
     const membership = await this.prisma.companyMembership.findUnique({ where: { id } });
 
@@ -47,5 +74,30 @@ export class CompanyMembershipPrismaRepository implements CompanyMembershipRepos
       where: { id: membership.id },
       data: CompanyMembershipMapper.toPersistence(membership),
     });
+  }
+
+  async updateAndCountActiveOwners(
+    companyId: string,
+    membership: CompanyMembership,
+  ): Promise<{ updated: CompanyMembership; activeOwners: number }> {
+    return this.prisma.$transaction(
+      async (tx) => {
+        const updatedRow = await tx.companyMembership.update({
+          where: { id: membership.id },
+          data: CompanyMembershipMapper.toPersistence(membership),
+        });
+
+        const activeOwners = await tx.companyMembership.count({
+          where: { companyId, role: MembershipRole.OWNER, status: MembershipStatus.ACTIVE },
+        });
+
+        if (activeOwners < 1) {
+          throw DomainErrorFactory.lastOwnerCannotBeDemoted();
+        }
+
+        return { updated: CompanyMembershipMapper.toDomain(updatedRow), activeOwners };
+      },
+      { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+    );
   }
 }

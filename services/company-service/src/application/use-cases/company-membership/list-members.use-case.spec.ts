@@ -21,30 +21,45 @@ describe('ListMembersUseCase', () => {
   beforeEach(() => {
     membershipRepository = {
       findByCompanyAndUser: jest.fn(),
-      findByCompanyId: jest.fn(),
+      findByCompanyIdPaged: jest.fn(),
     };
 
     useCase = new ListMembersUseCase(membershipRepository);
   });
 
-  it('devuelve los miembros si el solicitante es miembro activo', async () => {
-    const members = [requester(MembershipStatus.ACTIVE)];
+  it('devuelve la página de miembros si el solicitante es miembro activo', async () => {
+    const page = { items: [requester(MembershipStatus.ACTIVE)], total: 1 };
 
     membershipRepository.findByCompanyAndUser.mockResolvedValue(requester(MembershipStatus.ACTIVE));
-    membershipRepository.findByCompanyId.mockResolvedValue(members);
+    membershipRepository.findByCompanyIdPaged.mockResolvedValue(page);
 
-    await expect(useCase.execute('u-1', 'c-1')).resolves.toBe(members);
-    expect(membershipRepository.findByCompanyId).toHaveBeenCalledWith('c-1');
+    await expect(useCase.execute('u-1', 'c-1', { page: 1, limit: 20 })).resolves.toBe(page);
+    expect(membershipRepository.findByCompanyIdPaged).toHaveBeenCalledWith('c-1', {
+      skip: 0,
+      take: 20,
+    });
+  });
+
+  it('calcula el skip a partir de la página solicitada', async () => {
+    membershipRepository.findByCompanyAndUser.mockResolvedValue(requester(MembershipStatus.ACTIVE));
+    membershipRepository.findByCompanyIdPaged.mockResolvedValue({ items: [], total: 0 });
+
+    await useCase.execute('u-1', 'c-1', { page: 3, limit: 10 });
+
+    expect(membershipRepository.findByCompanyIdPaged).toHaveBeenCalledWith('c-1', {
+      skip: 20,
+      take: 10,
+    });
   });
 
   it('lanza COMPANY_NOT_FOUND si no tiene membresía', async () => {
     membershipRepository.findByCompanyAndUser.mockResolvedValue(null);
 
-    await expect(useCase.execute('u-1', 'c-1')).rejects.toMatchObject({
+    await expect(useCase.execute('u-1', 'c-1', { page: 1, limit: 20 })).rejects.toMatchObject({
       code: ErrorCode.COMPANY_NOT_FOUND,
     });
 
-    expect(membershipRepository.findByCompanyId).not.toHaveBeenCalled();
+    expect(membershipRepository.findByCompanyIdPaged).not.toHaveBeenCalled();
   });
 
   it('lanza COMPANY_NOT_FOUND si la membresía no está activa', async () => {
@@ -52,7 +67,7 @@ describe('ListMembersUseCase', () => {
       requester(MembershipStatus.SUSPENDED),
     );
 
-    await expect(useCase.execute('u-1', 'c-1')).rejects.toMatchObject({
+    await expect(useCase.execute('u-1', 'c-1', { page: 1, limit: 20 })).rejects.toMatchObject({
       code: ErrorCode.COMPANY_NOT_FOUND,
     });
   });

@@ -24,6 +24,7 @@ const build = (
   });
 
 const owner = build({ id: 'm-owner', userId: 'u-owner', role: MembershipRole.OWNER });
+const manager = build({ id: 'm-manager', userId: 'u-manager', role: MembershipRole.MANAGER });
 
 describe('UpdateMemberUseCase', () => {
   let useCase: UpdateMemberUseCase;
@@ -33,8 +34,8 @@ describe('UpdateMemberUseCase', () => {
     membershipRepository = {
       findByCompanyAndUser: jest.fn().mockResolvedValue(owner),
       findById: jest.fn(),
-      findByCompanyId: jest.fn(),
       update: jest.fn().mockResolvedValue(undefined),
+      updateAndCountActiveOwners: jest.fn(),
     };
 
     useCase = new UpdateMemberUseCase(membershipRepository);
@@ -50,6 +51,7 @@ describe('UpdateMemberUseCase', () => {
     expect(updated.role).toBe(MembershipRole.MANAGER);
     expect(updated.status).toBe(MembershipStatus.ACTIVE);
     expect(membershipRepository.update).toHaveBeenCalledWith(updated);
+    expect(membershipRepository.updateAndCountActiveOwners).not.toHaveBeenCalled();
   });
 
   it('cambia el estado de un miembro', async () => {
@@ -83,6 +85,26 @@ describe('UpdateMemberUseCase', () => {
     expect(membershipRepository.findById).not.toHaveBeenCalled();
   });
 
+  it('lanza FORBIDDEN si un MANAGER intenta asignar el rol OWNER', async () => {
+    membershipRepository.findByCompanyAndUser.mockResolvedValue(manager);
+
+    await expect(
+      useCase.execute('u-manager', 'c-1', 'm-1', { role: MembershipRole.OWNER }),
+    ).rejects.toMatchObject({ code: ErrorCode.FORBIDDEN });
+
+    expect(membershipRepository.findById).not.toHaveBeenCalled();
+  });
+
+  it('permite a un OWNER asignar el rol OWNER a otro miembro', async () => {
+    membershipRepository.findById.mockResolvedValue(build());
+
+    const updated = await useCase.execute('u-owner', 'c-1', 'm-1', {
+      role: MembershipRole.OWNER,
+    });
+
+    expect(updated.role).toBe(MembershipRole.OWNER);
+  });
+
   it('lanza MEMBERSHIP_NOT_FOUND si la membresía no existe', async () => {
     membershipRepository.findById.mockResolvedValue(null);
 
@@ -99,9 +121,11 @@ describe('UpdateMemberUseCase', () => {
     ).rejects.toMatchObject({ code: ErrorCode.MEMBERSHIP_NOT_FOUND });
   });
 
-  it('impide degradar el rol del único OWNER activo', async () => {
+  it('impide degradar el rol del único OWNER activo (conflicto detectado en la transacción)', async () => {
     membershipRepository.findById.mockResolvedValue(owner);
-    membershipRepository.findByCompanyId.mockResolvedValue([owner, build()]);
+    membershipRepository.updateAndCountActiveOwners.mockRejectedValue(
+      Object.assign(new Error('membership.last_owner'), { code: ErrorCode.CONFLICT }),
+    );
 
     await expect(
       useCase.execute('u-owner', 'c-1', 'm-owner', { role: MembershipRole.MANAGER }),
@@ -110,9 +134,11 @@ describe('UpdateMemberUseCase', () => {
     expect(membershipRepository.update).not.toHaveBeenCalled();
   });
 
-  it('impide suspender al único OWNER activo', async () => {
+  it('impide suspender al único OWNER activo (conflicto detectado en la transacción)', async () => {
     membershipRepository.findById.mockResolvedValue(owner);
-    membershipRepository.findByCompanyId.mockResolvedValue([owner]);
+    membershipRepository.updateAndCountActiveOwners.mockRejectedValue(
+      Object.assign(new Error('membership.last_owner'), { code: ErrorCode.CONFLICT }),
+    );
 
     await expect(
       useCase.execute('u-owner', 'c-1', 'm-owner', { status: MembershipStatus.SUSPENDED }),
@@ -120,29 +146,35 @@ describe('UpdateMemberUseCase', () => {
   });
 
   it('permite degradar a un OWNER si queda otro OWNER activo', async () => {
-    const secondOwner = build({ id: 'm-owner-2', userId: 'u-owner-2', role: MembershipRole.OWNER });
-
     membershipRepository.findById.mockResolvedValue(owner);
-    membershipRepository.findByCompanyId.mockResolvedValue([owner, secondOwner]);
+    membershipRepository.updateAndCountActiveOwners.mockResolvedValue({
+      updated: owner.changeRole(MembershipRole.MANAGER),
+      activeOwners: 1,
+    });
 
     const updated = await useCase.execute('u-owner', 'c-1', 'm-owner', {
       role: MembershipRole.MANAGER,
     });
 
     expect(updated.role).toBe(MembershipRole.MANAGER);
+    expect(membershipRepository.updateAndCountActiveOwners).toHaveBeenCalledWith(
+      'c-1',
+      expect.objectContaining({ role: MembershipRole.MANAGER }),
+    );
   });
 
-  it('no consulta el conteo de OWNERs si el objetivo no es OWNER activo', async () => {
+  it('no usa la transacción de conteo si el objetivo no es OWNER activo', async () => {
     membershipRepository.findById.mockResolvedValue(
       build({ role: MembershipRole.OWNER, status: MembershipStatus.INVITED }),
     );
 
     await useCase.execute('u-owner', 'c-1', 'm-1', { role: MembershipRole.WORKER });
 
-    expect(membershipRepository.findByCompanyId).not.toHaveBeenCalled();
+    expect(membershipRepository.updateAndCountActiveOwners).not.toHaveBeenCalled();
+    expect(membershipRepository.update).toHaveBeenCalled();
   });
 
-  it('no consulta el conteo de OWNERs si el OWNER sigue siendo OWNER activo', async () => {
+  it('no usa la transacción de conteo si el OWNER sigue siendo OWNER activo', async () => {
     membershipRepository.findById.mockResolvedValue(owner);
 
     await useCase.execute('u-owner', 'c-1', 'm-owner', {
@@ -150,6 +182,6 @@ describe('UpdateMemberUseCase', () => {
       status: MembershipStatus.ACTIVE,
     });
 
-    expect(membershipRepository.findByCompanyId).not.toHaveBeenCalled();
+    expect(membershipRepository.updateAndCountActiveOwners).not.toHaveBeenCalled();
   });
 });

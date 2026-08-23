@@ -1,4 +1,15 @@
-import { Body, Controller, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Patch,
+  Post,
+  Query,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { I18nService, successResponse } from '@saas/shared';
 import { Request } from 'express';
@@ -8,6 +19,7 @@ import { ListMembersUseCase } from '@application/use-cases/company-membership/li
 import { UpdateMemberUseCase } from '@application/use-cases/company-membership/update-member.use-case';
 import { InviteMemberDto } from '@application/dto/company-membership/invite-member.dto';
 import { UpdateMemberDto } from '@application/dto/company-membership/update-member.dto';
+import { ListMembersQueryDto } from '@application/dto/company-membership/list-members-query.dto';
 import { type CompanyMembership } from '@domain/entities/company-membership/company-membership.entity';
 import {
   InviteMemberSwagger,
@@ -31,7 +43,11 @@ export class CompanyMembershipController {
 
   @Post()
   @InviteMemberSwagger()
-  async invite(@Param('id') companyId: string, @Body() dto: InviteMemberDto, @Req() req: Request) {
+  async invite(
+    @Param('id', new ParseUUIDPipe()) companyId: string,
+    @Body() dto: InviteMemberDto,
+    @Req() req: Request,
+  ) {
     const membership = await this.inviteMemberUseCase.execute(req.user!.id, companyId, dto);
 
     return successResponse(this.toResponse(membership), {
@@ -41,17 +57,29 @@ export class CompanyMembershipController {
 
   @Get()
   @ListMembersSwagger()
-  async list(@Param('id') companyId: string, @Req() req: Request) {
-    const memberships = await this.listMembersUseCase.execute(req.user!.id, companyId);
+  async list(
+    @Param('id', new ParseUUIDPipe()) companyId: string,
+    @Query() query: ListMembersQueryDto,
+    @Req() req: Request,
+  ) {
+    const { items, total } = await this.listMembersUseCase.execute(req.user!.id, companyId, {
+      page: query.page,
+      limit: query.limit,
+    });
 
-    return successResponse(memberships.map((membership) => this.toResponse(membership)));
+    return successResponse({
+      items: items.map((membership) => this.toResponse(membership)),
+      page: query.page,
+      limit: query.limit,
+      total,
+    });
   }
 
   @Patch(':membershipId')
   @UpdateMemberSwagger()
   async update(
-    @Param('id') companyId: string,
-    @Param('membershipId') membershipId: string,
+    @Param('id', new ParseUUIDPipe()) companyId: string,
+    @Param('membershipId', new ParseUUIDPipe()) membershipId: string,
     @Body() dto: UpdateMemberDto,
     @Req() req: Request,
   ) {

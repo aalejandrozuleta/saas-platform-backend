@@ -10,7 +10,9 @@ import { DomainErrorFactory } from '@domain/errors/domain-error.factory';
  * Caso de uso: cambiar el rol y/o el estado de un miembro de la empresa.
  *
  * @remarks
- * Solo `OWNER`/`MANAGER` activos pueden hacerlo. Además se protege una
+ * Solo `OWNER`/`MANAGER` activos pueden hacerlo, y solo un `OWNER` puede
+ * otorgar el rol `OWNER` a otro miembro (un `MANAGER` no puede
+ * auto-ascenderse ni ascender a un tercero). Además se protege una
  * invariante del tenant: la empresa nunca puede quedarse sin ningún
  * `OWNER` activo (ni degradando su rol ni suspendiéndolo).
  */
@@ -35,14 +37,14 @@ export class UpdateMemberUseCase {
       throw DomainErrorFactory.notCompanyOwner();
     }
 
+    if (input.role === MembershipRole.OWNER && !requesterMembership.isOwner()) {
+      throw DomainErrorFactory.ownerRoleRequiresOwner();
+    }
+
     const target = await this.companyMembershipRepository.findById(membershipId);
 
     if (!target || target.companyId !== companyId) {
       throw DomainErrorFactory.membershipNotFound();
-    }
-
-    if (this.wouldRemoveLastOwner(target, input)) {
-      await this.assertNotLastOwner(companyId);
     }
 
     let updated = target;
@@ -55,37 +57,32 @@ export class UpdateMemberUseCase {
       updated = updated.changeStatus(input.status);
     }
 
+    if (this.leavesOwnerCondition(target, updated)) {
+      /**
+       * Camino transaccional: escribe y recuenta los OWNER activos
+       * restantes en la misma transacción SERIALIZABLE, para que dos
+       * degradaciones concurrentes al último y penúltimo OWNER activo no
+       * puedan colarse ambas (ver `updateAndCountActiveOwners`).
+       */
+      const { updated: persisted } =
+        await this.companyMembershipRepository.updateAndCountActiveOwners(companyId, updated);
+
+      return persisted;
+    }
+
     await this.companyMembershipRepository.update(updated);
 
     return updated;
   }
 
   /**
-   * `true` si el cambio solicitado le quitaría la condición de OWNER activo
-   * al miembro objetivo (degradación de rol o pérdida del estado ACTIVE).
+   * `true` si el miembro objetivo era OWNER activo antes del cambio y deja
+   * de serlo después (degradación de rol o pérdida del estado ACTIVE).
    */
-  private wouldRemoveLastOwner(
-    target: CompanyMembership,
-    input: { role?: MembershipRole; status?: MembershipStatus },
-  ): boolean {
-    if (!target.isOwner() || !target.isActive()) {
-      return false;
-    }
+  private leavesOwnerCondition(target: CompanyMembership, updated: CompanyMembership): boolean {
+    const wasActiveOwner = target.isOwner() && target.isActive();
+    const staysActiveOwner = updated.isOwner() && updated.isActive();
 
-    const losesOwnerRole = input.role !== undefined && input.role !== MembershipRole.OWNER;
-    const losesActiveStatus =
-      input.status !== undefined && input.status !== MembershipStatus.ACTIVE;
-
-    return losesOwnerRole || losesActiveStatus;
-  }
-
-  /** Falla si el miembro objetivo es el único OWNER activo de la empresa. */
-  private async assertNotLastOwner(companyId: string): Promise<void> {
-    const memberships = await this.companyMembershipRepository.findByCompanyId(companyId);
-    const activeOwners = memberships.filter((m) => m.isOwner() && m.isActive());
-
-    if (activeOwners.length <= 1) {
-      throw DomainErrorFactory.lastOwnerCannotBeDemoted();
-    }
+    return wasActiveOwner && !staysActiveOwner;
   }
 }

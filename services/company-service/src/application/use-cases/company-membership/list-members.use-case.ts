@@ -1,11 +1,13 @@
 import { Inject } from '@nestjs/common';
-import { type CompanyMembership } from '@domain/entities/company-membership/company-membership.entity';
-import { type CompanyMembershipRepository } from '@domain/repositories/company-membership.repository';
+import {
+  type CompanyMembershipRepository,
+  type PagedMemberships,
+} from '@domain/repositories/company-membership.repository';
 import { COMPANY_MEMBERSHIP_REPOSITORY } from '@domain/token/repositories.tokens';
 import { DomainErrorFactory } from '@domain/errors/domain-error.factory';
 
 /**
- * Caso de uso: listar los miembros de una empresa.
+ * Caso de uso: listar los miembros de una empresa (paginado).
  *
  * @remarks
  * Cualquier miembro **activo** puede ver la lista (no solo OWNER/MANAGER).
@@ -18,7 +20,11 @@ export class ListMembersUseCase {
     private readonly companyMembershipRepository: CompanyMembershipRepository,
   ) {}
 
-  async execute(requesterUserId: string, companyId: string): Promise<CompanyMembership[]> {
+  async execute(
+    requesterUserId: string,
+    companyId: string,
+    pagination: { page: number; limit: number },
+  ): Promise<PagedMemberships> {
     const requesterMembership = await this.companyMembershipRepository.findByCompanyAndUser(
       companyId,
       requesterUserId,
@@ -28,6 +34,9 @@ export class ListMembersUseCase {
       throw DomainErrorFactory.companyNotFound();
     }
 
-    return this.companyMembershipRepository.findByCompanyId(companyId);
+    return this.companyMembershipRepository.findByCompanyIdPaged(companyId, {
+      skip: (pagination.page - 1) * pagination.limit,
+      take: pagination.limit,
+    });
   }
 }

@@ -81,6 +81,32 @@ describe('InviteMemberUseCase', () => {
     ).rejects.toMatchObject({ code: ErrorCode.FORBIDDEN });
   });
 
+  it('lanza FORBIDDEN si un MANAGER intenta invitar con rol OWNER', async () => {
+    membershipRepository.findByCompanyAndUser.mockResolvedValue(
+      buildMembership(MembershipRole.MANAGER, MembershipStatus.ACTIVE),
+    );
+
+    await expect(
+      useCase.execute('u-req', 'c-1', { email: 'a@b.com', role: MembershipRole.OWNER }),
+    ).rejects.toMatchObject({ code: ErrorCode.FORBIDDEN });
+
+    expect(authServiceClient.lookupUserByEmail).not.toHaveBeenCalled();
+  });
+
+  it('permite a un OWNER invitar con rol OWNER', async () => {
+    membershipRepository.findByCompanyAndUser
+      .mockResolvedValueOnce(buildMembership(MembershipRole.OWNER, MembershipStatus.ACTIVE))
+      .mockResolvedValueOnce(null);
+    authServiceClient.lookupUserByEmail.mockResolvedValue({ userId: 'u-2', email: 'a@b.com' });
+
+    const membership = await useCase.execute('u-req', 'c-1', {
+      email: 'a@b.com',
+      role: MembershipRole.OWNER,
+    });
+
+    expect(membership.role).toBe(MembershipRole.OWNER);
+  });
+
   it('lanza USER_NOT_FOUND si auth-service no conoce el email', async () => {
     membershipRepository.findByCompanyAndUser.mockResolvedValueOnce(
       buildMembership(MembershipRole.OWNER, MembershipStatus.ACTIVE),

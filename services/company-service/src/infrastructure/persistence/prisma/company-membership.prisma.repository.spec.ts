@@ -1,6 +1,9 @@
+import { ErrorCode } from '@saas/shared';
 import { CompanyMembership } from '@domain/entities/company-membership/company-membership.entity';
 import { MembershipRole } from '@domain/enums/membership-role.enum';
 import { MembershipStatus } from '@domain/enums/membership-status.enum';
+
+import { Prisma } from '../../../generated/prisma';
 
 import { CompanyMembershipPrismaRepository } from './company-membership.prisma.repository';
 
@@ -25,7 +28,9 @@ describe('CompanyMembershipPrismaRepository', () => {
         findMany: jest.fn(),
         create: jest.fn(),
         update: jest.fn(),
+        count: jest.fn(),
       },
+      $transaction: jest.fn(),
     };
 
     repository = new CompanyMembershipPrismaRepository(prisma);
@@ -98,6 +103,69 @@ describe('CompanyMembershipPrismaRepository', () => {
     expect(prisma.companyMembership.update).toHaveBeenCalledWith({
       where: { id: 'm-1' },
       data: expect.objectContaining({ role: MembershipRole.MANAGER }),
+    });
+  });
+
+  it('findByCompanyIdPaged devuelve la página y el total en una sola transacción', async () => {
+    prisma.$transaction.mockResolvedValue([[row], 5]);
+
+    const page = await repository.findByCompanyIdPaged('c-1', { skip: 20, take: 10 });
+
+    expect(page.total).toBe(5);
+    expect(page.items).toHaveLength(1);
+    expect(page.items[0].id).toBe('m-1');
+    expect(prisma.$transaction).toHaveBeenCalledTimes(1);
+    expect(prisma.$transaction.mock.calls[0][0]).toHaveLength(2);
+  });
+
+  it('updateAndCountActiveOwners escribe y cuenta OWNERs activos en una transacción SERIALIZABLE', async () => {
+    const membership = CompanyMembership.create({
+      id: 'm-1',
+      companyId: 'c-1',
+      userId: 'u-1',
+      role: MembershipRole.MANAGER,
+      status: MembershipStatus.ACTIVE,
+    });
+
+    const tx = {
+      companyMembership: {
+        update: jest.fn().mockResolvedValue({ ...row, role: 'MANAGER' }),
+        count: jest.fn().mockResolvedValue(1),
+      },
+    };
+    prisma.$transaction.mockImplementation(async (fn: any, options: any) => {
+      expect(options).toEqual({ isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
+      return fn(tx);
+    });
+
+    const result = await repository.updateAndCountActiveOwners('c-1', membership);
+
+    expect(result.activeOwners).toBe(1);
+    expect(result.updated.role).toBe(MembershipRole.MANAGER);
+    expect(tx.companyMembership.count).toHaveBeenCalledWith({
+      where: { companyId: 'c-1', role: MembershipRole.OWNER, status: MembershipStatus.ACTIVE },
+    });
+  });
+
+  it('updateAndCountActiveOwners lanza CONFLICT si no queda ningún OWNER activo', async () => {
+    const membership = CompanyMembership.create({
+      id: 'm-1',
+      companyId: 'c-1',
+      userId: 'u-1',
+      role: MembershipRole.MANAGER,
+      status: MembershipStatus.ACTIVE,
+    });
+
+    const tx = {
+      companyMembership: {
+        update: jest.fn().mockResolvedValue(row),
+        count: jest.fn().mockResolvedValue(0),
+      },
+    };
+    prisma.$transaction.mockImplementation(async (fn: any) => fn(tx));
+
+    await expect(repository.updateAndCountActiveOwners('c-1', membership)).rejects.toMatchObject({
+      code: ErrorCode.CONFLICT,
     });
   });
 });

@@ -21,6 +21,14 @@ describe('DomainErrorFactory', () => {
       503,
       'company.auth_service_unavailable',
     ],
+    ['ownerRoleRequiresOwner', ErrorCode.FORBIDDEN, 403, 'membership.owner_role_requires_owner'],
+    ['logoFileRequired', ErrorCode.VALIDATION_ERROR, 400, 'company.logo_file_required'],
+    [
+      'taxIdAlreadyRegistered',
+      ErrorCode.TAX_ID_ALREADY_REGISTERED,
+      409,
+      'company.tax_id_already_registered',
+    ],
   ])('%s produce el código/status/clave esperados', (method, code, status, messageKey) => {
     const error = (DomainErrorFactory as unknown as Record<string, () => Error>)[method]();
 

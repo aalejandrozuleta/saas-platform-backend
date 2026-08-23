@@ -4,6 +4,7 @@ import {
   Controller,
   Get,
   Param,
+  ParseUUIDPipe,
   Post,
   Req,
   UploadedFile,
@@ -23,6 +24,7 @@ import { CreateCompanyDto } from '@application/dto/company/create-company.dto';
 import { RegisterWorkerDto } from '@application/dto/company-membership/register-worker.dto';
 import { type Company } from '@domain/entities/company/company.entity';
 import { type CompanyMembership } from '@domain/entities/company-membership/company-membership.entity';
+import { DomainErrorFactory } from '@domain/errors/domain-error.factory';
 import {
   CreateCompanySwagger,
   GetCompanySwagger,
@@ -59,7 +61,7 @@ export class CompanyController {
 
   @Get(':id')
   @GetCompanySwagger()
-  async get(@Param('id') id: string, @Req() req: Request) {
+  async get(@Param('id', new ParseUUIDPipe()) id: string, @Req() req: Request) {
     const company = await this.getCompanyUseCase.execute(req.user!.id, id);
 
     return successResponse(this.toResponse(company));
@@ -74,10 +76,14 @@ export class CompanyController {
     }),
   )
   async uploadLogo(
-    @Param('id') id: string,
-    @UploadedFile() file: Express.Multer.File,
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @UploadedFile() file: Express.Multer.File | undefined,
     @Req() req: Request,
   ) {
+    if (!file) {
+      throw DomainErrorFactory.logoFileRequired();
+    }
+
     const company = await this.uploadCompanyLogoUseCase.execute(req.user!.id, id, {
       buffer: file.buffer,
     });
@@ -90,7 +96,7 @@ export class CompanyController {
   @Post(':id/workers')
   @RegisterWorkerSwagger()
   async registerWorker(
-    @Param('id') id: string,
+    @Param('id', new ParseUUIDPipe()) id: string,
     @Body() dto: RegisterWorkerDto,
     @Req() req: Request,
   ) {

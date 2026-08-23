@@ -68,4 +68,27 @@ export class DomainErrorFactory {
       400,
     );
   }
+
+  /**
+   * Solo un OWNER puede otorgar el rol OWNER a otro miembro (por invitación
+   * o edición). Evita que un MANAGER se auto-ascienda o ascienda a un
+   * cómplice para tomar control total del tenant.
+   */
+  static ownerRoleRequiresOwner(): DomainException {
+    return DomainException.create('membership.owner_role_requires_owner', ErrorCode.FORBIDDEN, 403);
+  }
+
+  /** El endpoint de logo requiere un archivo adjunto. */
+  static logoFileRequired(): DomainException {
+    return DomainException.create('company.logo_file_required', ErrorCode.VALIDATION_ERROR, 400);
+  }
+
+  /** Ya existe una empresa registrada con ese NIT/taxId en el mismo país. */
+  static taxIdAlreadyRegistered(): DomainException {
+    return DomainException.create(
+      'company.tax_id_already_registered',
+      ErrorCode.TAX_ID_ALREADY_REGISTERED,
+      409,
+    );
+  }
 }

@@ -1,7 +1,10 @@
+import { ErrorCode } from '@saas/shared';
 import { Company } from '@domain/entities/company/company.entity';
 import { CompanyMembership } from '@domain/entities/company-membership/company-membership.entity';
 import { MembershipRole } from '@domain/enums/membership-role.enum';
 import { MembershipStatus } from '@domain/enums/membership-status.enum';
+
+import { Prisma } from '../../../generated/prisma';
 
 import { CompanyPrismaRepository } from './company.prisma.repository';
 
@@ -77,6 +80,27 @@ describe('CompanyPrismaRepository', () => {
       where: { id: 'c-1' },
       data: expect.objectContaining({ logoUrl: 'https://storage.example.com/logos/c-1.webp' }),
     });
+  });
+
+  it('save traduce la violación del índice único (country, taxId) a TAX_ID_ALREADY_REGISTERED', async () => {
+    prisma.company.create.mockRejectedValue(
+      new Prisma.PrismaClientKnownRequestError('Unique constraint failed', {
+        code: 'P2002',
+        clientVersion: 'test',
+        meta: { target: ['country', 'taxId'] },
+      }),
+    );
+
+    await expect(repository.save(company)).rejects.toMatchObject({
+      code: ErrorCode.TAX_ID_ALREADY_REGISTERED,
+    });
+  });
+
+  it('save relanza otros errores de Prisma sin traducirlos', async () => {
+    const unrelated = new Error('connection lost');
+    prisma.company.create.mockRejectedValue(unrelated);
+
+    await expect(repository.save(company)).rejects.toBe(unrelated);
   });
 
   it('createWithOwnerMembership persiste ambas filas en una transacción', async () => {

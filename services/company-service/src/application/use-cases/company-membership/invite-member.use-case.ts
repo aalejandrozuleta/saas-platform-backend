@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 
 import { Inject } from '@nestjs/common';
 import { CompanyMembership } from '@domain/entities/company-membership/company-membership.entity';
-import { type MembershipRole } from '@domain/enums/membership-role.enum';
+import { MembershipRole } from '@domain/enums/membership-role.enum';
 import { MembershipStatus } from '@domain/enums/membership-status.enum';
 import { type CompanyMembershipRepository } from '@domain/repositories/company-membership.repository';
 import { COMPANY_MEMBERSHIP_REPOSITORY } from '@domain/token/repositories.tokens';
@@ -39,6 +39,10 @@ export class InviteMemberUseCase {
 
     if (!requesterMembership?.canManageMembers()) {
       throw DomainErrorFactory.notCompanyOwner();
+    }
+
+    if (input.role === MembershipRole.OWNER && !requesterMembership.isOwner()) {
+      throw DomainErrorFactory.ownerRoleRequiresOwner();
     }
 
     const user = await this.authServiceClient.lookupUserByEmail(input.email);

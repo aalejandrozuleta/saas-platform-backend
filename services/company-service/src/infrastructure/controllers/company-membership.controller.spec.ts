@@ -22,7 +22,9 @@ describe('CompanyMembershipController', () => {
 
   beforeEach(() => {
     inviteMemberUseCase = { execute: jest.fn().mockResolvedValue(membership) };
-    listMembersUseCase = { execute: jest.fn().mockResolvedValue([membership]) };
+    listMembersUseCase = {
+      execute: jest.fn().mockResolvedValue({ items: [membership], total: 1 }),
+    };
     updateMemberUseCase = {
       execute: jest.fn().mockResolvedValue(membership.changeStatus(MembershipStatus.ACTIVE)),
     };
@@ -48,12 +50,17 @@ describe('CompanyMembershipController', () => {
     expect(i18n.translate).toHaveBeenCalledWith('membership.invited_success', 'es');
   });
 
-  it('list devuelve todos los miembros mapeados', async () => {
-    const result: any = await controller.list('c-1', req);
+  it('list devuelve los miembros paginados', async () => {
+    const query = { page: 1, limit: 20 } as any;
+    const result: any = await controller.list('c-1', query, req);
 
-    expect(listMembersUseCase.execute).toHaveBeenCalledWith('u-1', 'c-1');
-    expect(result.data).toHaveLength(1);
-    expect(result.data[0]).toMatchObject({ id: 'm-1', role: MembershipRole.WORKER });
+    expect(listMembersUseCase.execute).toHaveBeenCalledWith('u-1', 'c-1', {
+      page: 1,
+      limit: 20,
+    });
+    expect(result.data.items).toHaveLength(1);
+    expect(result.data.items[0]).toMatchObject({ id: 'm-1', role: MembershipRole.WORKER });
+    expect(result.data).toMatchObject({ page: 1, limit: 20, total: 1 });
   });
 
   it('update delega en el use case', async () => {

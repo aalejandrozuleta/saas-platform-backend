@@ -84,6 +84,14 @@ describe('CompanyController', () => {
     expect(i18n.translate).toHaveBeenCalledWith('company.logo_updated_success', 'es');
   });
 
+  it('uploadLogo lanza VALIDATION_ERROR si no se adjunta archivo', async () => {
+    await expect(controller.uploadLogo('c-1', undefined as any, req)).rejects.toMatchObject({
+      code: 'VALIDATION_ERROR',
+    });
+
+    expect(uploadCompanyLogoUseCase.execute).not.toHaveBeenCalled();
+  });
+
   it('registerWorker delega en el use case y responde con el mensaje traducido', async () => {
     const dto: any = {
       firstName: 'Juana',
