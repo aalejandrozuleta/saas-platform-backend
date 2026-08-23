@@ -5,6 +5,7 @@ import {
   Get,
   Param,
   ParseUUIDPipe,
+  Patch,
   Post,
   Req,
   UploadedFile,
@@ -18,9 +19,15 @@ import { Request } from 'express';
 import { JwtAuthGuard } from '@infrastructure/security/jwt-auth.guard';
 import { CreateCompanyUseCase } from '@application/use-cases/company/create-company.use-case';
 import { GetCompanyUseCase } from '@application/use-cases/company/get-company.use-case';
+import { UpdateCompanyUseCase } from '@application/use-cases/company/update-company.use-case';
+import {
+  ListMyCompaniesUseCase,
+  type MyCompanyMembership,
+} from '@application/use-cases/company/list-my-companies.use-case';
 import { UploadCompanyLogoUseCase } from '@application/use-cases/company/upload-company-logo.use-case';
 import { RegisterWorkerUseCase } from '@application/use-cases/company-membership/register-worker.use-case';
 import { CreateCompanyDto } from '@application/dto/company/create-company.dto';
+import { UpdateCompanyDto } from '@application/dto/company/update-company.dto';
 import { RegisterWorkerDto } from '@application/dto/company-membership/register-worker.dto';
 import { type Company } from '@domain/entities/company/company.entity';
 import { type CompanyMembership } from '@domain/entities/company-membership/company-membership.entity';
@@ -28,6 +35,8 @@ import { DomainErrorFactory } from '@domain/errors/domain-error.factory';
 import {
   CreateCompanySwagger,
   GetCompanySwagger,
+  UpdateCompanySwagger,
+  ListMyCompaniesSwagger,
   UploadCompanyLogoSwagger,
 } from '@infrastructure/swagger/company.swagger';
 import { RegisterWorkerSwagger } from '@infrastructure/swagger/company-membership.swagger';
@@ -44,6 +53,8 @@ export class CompanyController {
   constructor(
     private readonly createCompanyUseCase: CreateCompanyUseCase,
     private readonly getCompanyUseCase: GetCompanyUseCase,
+    private readonly updateCompanyUseCase: UpdateCompanyUseCase,
+    private readonly listMyCompaniesUseCase: ListMyCompaniesUseCase,
     private readonly uploadCompanyLogoUseCase: UploadCompanyLogoUseCase,
     private readonly registerWorkerUseCase: RegisterWorkerUseCase,
     private readonly i18n: I18nService,
@@ -59,12 +70,34 @@ export class CompanyController {
     });
   }
 
+  @Get()
+  @ListMyCompaniesSwagger()
+  async listMine(@Req() req: Request) {
+    const rows = await this.listMyCompaniesUseCase.execute(req.user!.id);
+
+    return successResponse(rows.map((row) => this.toMyCompanyResponse(row)));
+  }
+
   @Get(':id')
   @GetCompanySwagger()
   async get(@Param('id', new ParseUUIDPipe()) id: string, @Req() req: Request) {
     const company = await this.getCompanyUseCase.execute(req.user!.id, id);
 
     return successResponse(this.toResponse(company));
+  }
+
+  @Patch(':id')
+  @UpdateCompanySwagger()
+  async update(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Body() dto: UpdateCompanyDto,
+    @Req() req: Request,
+  ) {
+    const company = await this.updateCompanyUseCase.execute(req.user!.id, id, dto);
+
+    return successResponse(this.toResponse(company), {
+      message: this.i18n.translate('company.updated_success', this.resolveLanguage(req)),
+    });
   }
 
   @Post(':id/logo')
@@ -125,6 +158,15 @@ export class CompanyController {
       role: membership.role,
       status: membership.status,
       createdAt: membership.createdAt,
+    };
+  }
+
+  private toMyCompanyResponse(row: MyCompanyMembership) {
+    return {
+      membershipId: row.membershipId,
+      role: row.role,
+      status: row.status,
+      company: this.toResponse(row.company),
     };
   }
 

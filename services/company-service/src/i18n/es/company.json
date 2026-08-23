@@ -15,5 +15,11 @@
   "membership.owner_role_requires_owner": "Solo un propietario puede asignar el rol de propietario a otro miembro",
   "membership.worker_registered_success": "Trabajador registrado correctamente",
   "company.logo_file_required": "Debes adjuntar un archivo de imagen",
-  "company.tax_id_already_registered": "Ya existe una empresa registrada con ese NIT en este país"
+  "company.tax_id_already_registered": "Ya existe una empresa registrada con ese NIT en este país",
+  "membership.invitation_not_pending": "Esta membresía ya no está pendiente de aceptación",
+  "membership.cannot_remove_owner": "Solo un propietario puede remover a otro propietario de la empresa",
+  "company.updated_success": "Empresa actualizada correctamente",
+  "membership.invitation_accepted_success": "Invitación aceptada correctamente",
+  "membership.invitation_declined_success": "Invitación rechazada correctamente",
+  "membership.removed_success": "Miembro eliminado correctamente"
 }

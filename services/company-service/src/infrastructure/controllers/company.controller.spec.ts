@@ -9,6 +9,8 @@ describe('CompanyController', () => {
   let controller: CompanyController;
   let createCompanyUseCase: any;
   let getCompanyUseCase: any;
+  let updateCompanyUseCase: any;
+  let listMyCompaniesUseCase: any;
   let uploadCompanyLogoUseCase: any;
   let registerWorkerUseCase: any;
   let i18n: any;
@@ -28,6 +30,19 @@ describe('CompanyController', () => {
   beforeEach(() => {
     createCompanyUseCase = { execute: jest.fn().mockResolvedValue(company) };
     getCompanyUseCase = { execute: jest.fn().mockResolvedValue(company) };
+    updateCompanyUseCase = { execute: jest.fn().mockResolvedValue(company) };
+    listMyCompaniesUseCase = {
+      execute: jest
+        .fn()
+        .mockResolvedValue([
+          {
+            company,
+            membershipId: 'm-1',
+            role: MembershipRole.OWNER,
+            status: MembershipStatus.ACTIVE,
+          },
+        ]),
+    };
     uploadCompanyLogoUseCase = {
       execute: jest.fn().mockResolvedValue(company.updateLogo('https://storage/logos/c-1.webp')),
     };
@@ -51,6 +66,8 @@ describe('CompanyController', () => {
     controller = new CompanyController(
       createCompanyUseCase,
       getCompanyUseCase,
+      updateCompanyUseCase,
+      listMyCompaniesUseCase,
       uploadCompanyLogoUseCase,
       registerWorkerUseCase,
       i18n,
@@ -70,6 +87,28 @@ describe('CompanyController', () => {
 
     expect(getCompanyUseCase.execute).toHaveBeenCalledWith('u-1', 'c-1');
     expect(result.data).toMatchObject({ id: 'c-1' });
+  });
+
+  it('update delega en el use case y responde con el mensaje traducido', async () => {
+    const dto: any = { name: 'Acme Nueva' };
+    const result: any = await controller.update('c-1', dto, req);
+
+    expect(updateCompanyUseCase.execute).toHaveBeenCalledWith('u-1', 'c-1', dto);
+    expect(result.data).toMatchObject({ id: 'c-1' });
+    expect(i18n.translate).toHaveBeenCalledWith('company.updated_success', 'es');
+  });
+
+  it('listMine devuelve las empresas del usuario con rol y estado', async () => {
+    const result: any = await controller.listMine(req);
+
+    expect(listMyCompaniesUseCase.execute).toHaveBeenCalledWith('u-1');
+    expect(result.data).toHaveLength(1);
+    expect(result.data[0]).toMatchObject({
+      membershipId: 'm-1',
+      role: MembershipRole.OWNER,
+      status: MembershipStatus.ACTIVE,
+      company: { id: 'c-1' },
+    });
   });
 
   it('uploadLogo delega en el use case y responde con el mensaje traducido', async () => {

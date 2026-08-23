@@ -15,5 +15,11 @@
   "membership.owner_role_requires_owner": "Only an owner can grant the owner role to another member",
   "membership.worker_registered_success": "Worker registered successfully",
   "company.logo_file_required": "You must attach an image file",
-  "company.tax_id_already_registered": "A company with that tax id is already registered in this country"
+  "company.tax_id_already_registered": "A company with that tax id is already registered in this country",
+  "membership.invitation_not_pending": "This membership is no longer pending acceptance",
+  "membership.cannot_remove_owner": "Only an owner can remove another owner from the company",
+  "company.updated_success": "Company updated successfully",
+  "membership.invitation_accepted_success": "Invitation accepted successfully",
+  "membership.invitation_declined_success": "Invitation declined successfully",
+  "membership.removed_success": "Member removed successfully"
 }

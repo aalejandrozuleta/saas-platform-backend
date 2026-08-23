@@ -99,3 +99,63 @@ export function UpdateMemberSwagger() {
     ApiConflictResponse({ description: 'La empresa debe conservar al menos un OWNER activo.' }),
   );
 }
+
+/**
+ * Decorador Swagger para `POST /companies/:id/members/:membershipId/accept`.
+ */
+export function AcceptInvitationSwagger() {
+  return applyDecorators(
+    ApiOperation({ summary: 'Aceptar la invitación propia a la empresa' }),
+    ApiParam({ name: 'id', description: 'Id de la empresa' }),
+    ApiParam({ name: 'membershipId', description: 'Id de la membresía (debe ser la propia)' }),
+    ApiOkResponse({
+      description: 'Invitación aceptada, membresía queda ACTIVE.',
+      type: MembershipResponseDto,
+    }),
+    ApiUnauthorizedResponse({ description: 'No autenticado.' }),
+    ApiNotFoundResponse({
+      description: 'La membresía no existe o no pertenece al usuario autenticado.',
+    }),
+    ApiConflictResponse({ description: 'La membresía ya no está pendiente de aceptación.' }),
+  );
+}
+
+/**
+ * Decorador Swagger para `POST /companies/:id/members/:membershipId/decline`.
+ */
+export function DeclineInvitationSwagger() {
+  return applyDecorators(
+    ApiOperation({ summary: 'Rechazar la invitación propia a la empresa' }),
+    ApiParam({ name: 'id', description: 'Id de la empresa' }),
+    ApiParam({ name: 'membershipId', description: 'Id de la membresía (debe ser la propia)' }),
+    ApiOkResponse({ description: 'Invitación rechazada; la membresía se elimina.' }),
+    ApiUnauthorizedResponse({ description: 'No autenticado.' }),
+    ApiNotFoundResponse({
+      description: 'La membresía no existe o no pertenece al usuario autenticado.',
+    }),
+    ApiConflictResponse({ description: 'La membresía ya no está pendiente de aceptación.' }),
+  );
+}
+
+/**
+ * Decorador Swagger para `DELETE /companies/:id/members/:membershipId`.
+ */
+export function RemoveMemberSwagger() {
+  return applyDecorators(
+    ApiOperation({
+      summary: 'Eliminar un miembro de la empresa',
+      description:
+        'Un miembro siempre puede eliminarse a sí mismo (salir de la empresa). OWNER/MANAGER puede eliminar a otros miembros o cancelar invitaciones pendientes; un MANAGER no puede eliminar a un OWNER.',
+    }),
+    ApiParam({ name: 'id', description: 'Id de la empresa' }),
+    ApiParam({ name: 'membershipId', description: 'Id de la membresía' }),
+    ApiOkResponse({ description: 'Miembro eliminado.' }),
+    ApiUnauthorizedResponse({ description: 'No autenticado.' }),
+    ApiForbiddenResponse({
+      description:
+        'El solicitante no tiene permisos para eliminar a este miembro (no es OWNER/MANAGER, o intenta eliminar a un OWNER sin serlo).',
+    }),
+    ApiNotFoundResponse({ description: 'La membresía no existe en esta empresa.' }),
+    ApiConflictResponse({ description: 'La empresa debe conservar al menos un OWNER activo.' }),
+  );
+}

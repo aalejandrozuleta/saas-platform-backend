@@ -9,6 +9,9 @@ describe('CompanyMembershipController', () => {
   let inviteMemberUseCase: any;
   let listMembersUseCase: any;
   let updateMemberUseCase: any;
+  let acceptInvitationUseCase: any;
+  let declineInvitationUseCase: any;
+  let removeMemberUseCase: any;
   let i18n: any;
 
   const membership = CompanyMembership.create({
@@ -28,6 +31,11 @@ describe('CompanyMembershipController', () => {
     updateMemberUseCase = {
       execute: jest.fn().mockResolvedValue(membership.changeStatus(MembershipStatus.ACTIVE)),
     };
+    acceptInvitationUseCase = {
+      execute: jest.fn().mockResolvedValue(membership.changeStatus(MembershipStatus.ACTIVE)),
+    };
+    declineInvitationUseCase = { execute: jest.fn().mockResolvedValue(undefined) };
+    removeMemberUseCase = { execute: jest.fn().mockResolvedValue(undefined) };
     i18n = {
       translate: jest.fn().mockReturnValue('ok'),
       resolveLanguage: jest.fn().mockReturnValue('es'),
@@ -37,6 +45,9 @@ describe('CompanyMembershipController', () => {
       inviteMemberUseCase,
       listMembersUseCase,
       updateMemberUseCase,
+      acceptInvitationUseCase,
+      declineInvitationUseCase,
+      removeMemberUseCase,
       i18n,
     );
   });
@@ -70,5 +81,29 @@ describe('CompanyMembershipController', () => {
     expect(updateMemberUseCase.execute).toHaveBeenCalledWith('u-1', 'c-1', 'm-1', dto);
     expect(result.data).toMatchObject({ status: MembershipStatus.ACTIVE });
     expect(i18n.translate).toHaveBeenCalledWith('membership.updated_success', 'es');
+  });
+
+  it('accept delega en el use case y responde con el mensaje traducido', async () => {
+    const result: any = await controller.accept('c-1', 'm-1', req);
+
+    expect(acceptInvitationUseCase.execute).toHaveBeenCalledWith('u-1', 'c-1', 'm-1');
+    expect(result.data).toMatchObject({ status: MembershipStatus.ACTIVE });
+    expect(i18n.translate).toHaveBeenCalledWith('membership.invitation_accepted_success', 'es');
+  });
+
+  it('decline delega en el use case y responde con el mensaje traducido', async () => {
+    const result: any = await controller.decline('c-1', 'm-1', req);
+
+    expect(declineInvitationUseCase.execute).toHaveBeenCalledWith('u-1', 'c-1', 'm-1');
+    expect(result.data).toEqual({});
+    expect(i18n.translate).toHaveBeenCalledWith('membership.invitation_declined_success', 'es');
+  });
+
+  it('remove delega en el use case y responde con el mensaje traducido', async () => {
+    const result: any = await controller.remove('c-1', 'm-1', req);
+
+    expect(removeMemberUseCase.execute).toHaveBeenCalledWith('u-1', 'c-1', 'm-1');
+    expect(result.data).toEqual({});
+    expect(i18n.translate).toHaveBeenCalledWith('membership.removed_success', 'es');
   });
 });

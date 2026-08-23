@@ -25,9 +25,15 @@ export interface CompanyMembershipRepository {
   /** Membresía por su id (usada al editar un miembro puntual). */
   findById(id: string): Promise<CompanyMembership | null>;
 
+  /** Todas las membresías (en cualquier empresa) de un usuario — soporta "mis empresas". */
+  findByUserId(userId: string): Promise<CompanyMembership[]>;
+
   save(membership: CompanyMembership): Promise<void>;
 
   update(membership: CompanyMembership): Promise<void>;
+
+  /** Elimina una membresía por su id (baja definitiva, no un cambio de status). */
+  delete(id: string): Promise<void>;
 
   /**
    * Igual que `update`, pero ejecuta la escritura y el conteo de OWNER
@@ -46,4 +52,15 @@ export interface CompanyMembershipRepository {
     companyId: string,
     membership: CompanyMembership,
   ): Promise<{ updated: CompanyMembership; activeOwners: number }>;
+
+  /**
+   * Igual que `delete`, pero ejecuta el borrado y el conteo de OWNER
+   * activos restantes dentro de la misma transacción SERIALIZABLE que
+   * `updateAndCountActiveOwners`, por la misma razón: quitar (en vez de
+   * degradar) al penúltimo OWNER activo tiene la misma ventana de carrera.
+   */
+  deleteAndCountActiveOwners(
+    companyId: string,
+    membershipId: string,
+  ): Promise<{ activeOwners: number }>;
 }

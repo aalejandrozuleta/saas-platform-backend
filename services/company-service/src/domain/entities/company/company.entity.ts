@@ -181,4 +181,57 @@ export class Company {
       updatedAt: new Date(),
     });
   }
+
+  /**
+   * Actualiza el perfil de la empresa (los mismos campos que se capturan en
+   * `create()`, todos opcionales) devolviendo una nueva instancia. Los
+   * campos requeridos (`name`, `email`, `phone`, `address`, `city`) no
+   * pueden vaciarse si se envían: si el caller no quiere tocar un campo,
+   * simplemente lo omite del patch en vez de mandarlo vacío.
+   */
+  updateProfile(patch: {
+    name?: string;
+    taxId?: string;
+    email?: string;
+    phone?: string;
+    address?: string;
+    city?: string;
+    country?: string;
+  }): Company {
+    const next = {
+      name: patch.name !== undefined ? patch.name.trim() : this.props.name,
+      taxId: patch.taxId !== undefined ? patch.taxId : this.props.taxId,
+      email: patch.email !== undefined ? patch.email.trim() : this.props.email,
+      phone: patch.phone !== undefined ? patch.phone.trim() : this.props.phone,
+      address: patch.address !== undefined ? patch.address.trim() : this.props.address,
+      city: patch.city !== undefined ? patch.city.trim() : this.props.city,
+      country: patch.country !== undefined ? patch.country.trim() : this.props.country,
+    };
+
+    if (!next.name) {
+      throw new Error('COMPANY_NAME_REQUIRED');
+    }
+
+    if (!next.email) {
+      throw new Error('COMPANY_EMAIL_REQUIRED');
+    }
+
+    if (!next.phone) {
+      throw new Error('COMPANY_PHONE_REQUIRED');
+    }
+
+    if (!next.address) {
+      throw new Error('COMPANY_ADDRESS_REQUIRED');
+    }
+
+    if (!next.city) {
+      throw new Error('COMPANY_CITY_REQUIRED');
+    }
+
+    return new Company({
+      ...this.props,
+      ...next,
+      updatedAt: new Date(),
+    });
+  }
 }

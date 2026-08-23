@@ -25,6 +25,16 @@ export class CompanyPrismaRepository implements CompanyRepository {
     return company ? CompanyMapper.toDomain(company) : null;
   }
 
+  async findByIds(ids: string[]): Promise<Company[]> {
+    if (ids.length === 0) {
+      return [];
+    }
+
+    const companies = await this.prisma.company.findMany({ where: { id: { in: ids } } });
+
+    return companies.map((company) => CompanyMapper.toDomain(company));
+  }
+
   async save(company: Company): Promise<void> {
     await this.runGuardingTaxIdUniqueness(() =>
       this.prisma.company.create({ data: CompanyMapper.toPersistence(company) }),
@@ -32,10 +42,12 @@ export class CompanyPrismaRepository implements CompanyRepository {
   }
 
   async update(company: Company): Promise<void> {
-    await this.prisma.company.update({
-      where: { id: company.id },
-      data: CompanyMapper.toPersistence(company),
-    });
+    await this.runGuardingTaxIdUniqueness(() =>
+      this.prisma.company.update({
+        where: { id: company.id },
+        data: CompanyMapper.toPersistence(company),
+      }),
+    );
   }
 
   /**

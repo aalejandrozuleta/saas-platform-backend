@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseUUIDPipe,
@@ -17,6 +18,9 @@ import { JwtAuthGuard } from '@infrastructure/security/jwt-auth.guard';
 import { InviteMemberUseCase } from '@application/use-cases/company-membership/invite-member.use-case';
 import { ListMembersUseCase } from '@application/use-cases/company-membership/list-members.use-case';
 import { UpdateMemberUseCase } from '@application/use-cases/company-membership/update-member.use-case';
+import { AcceptInvitationUseCase } from '@application/use-cases/company-membership/accept-invitation.use-case';
+import { DeclineInvitationUseCase } from '@application/use-cases/company-membership/decline-invitation.use-case';
+import { RemoveMemberUseCase } from '@application/use-cases/company-membership/remove-member.use-case';
 import { InviteMemberDto } from '@application/dto/company-membership/invite-member.dto';
 import { UpdateMemberDto } from '@application/dto/company-membership/update-member.dto';
 import { ListMembersQueryDto } from '@application/dto/company-membership/list-members-query.dto';
@@ -25,6 +29,9 @@ import {
   InviteMemberSwagger,
   ListMembersSwagger,
   UpdateMemberSwagger,
+  AcceptInvitationSwagger,
+  DeclineInvitationSwagger,
+  RemoveMemberSwagger,
 } from '@infrastructure/swagger/company-membership.swagger';
 
 /**
@@ -38,6 +45,9 @@ export class CompanyMembershipController {
     private readonly inviteMemberUseCase: InviteMemberUseCase,
     private readonly listMembersUseCase: ListMembersUseCase,
     private readonly updateMemberUseCase: UpdateMemberUseCase,
+    private readonly acceptInvitationUseCase: AcceptInvitationUseCase,
+    private readonly declineInvitationUseCase: DeclineInvitationUseCase,
+    private readonly removeMemberUseCase: RemoveMemberUseCase,
     private readonly i18n: I18nService,
   ) {}
 
@@ -93,6 +103,62 @@ export class CompanyMembershipController {
     return successResponse(this.toResponse(membership), {
       message: this.i18n.translate('membership.updated_success', this.resolveLanguage(req)),
     });
+  }
+
+  @Post(':membershipId/accept')
+  @AcceptInvitationSwagger()
+  async accept(
+    @Param('id', new ParseUUIDPipe()) companyId: string,
+    @Param('membershipId', new ParseUUIDPipe()) membershipId: string,
+    @Req() req: Request,
+  ) {
+    const membership = await this.acceptInvitationUseCase.execute(
+      req.user!.id,
+      companyId,
+      membershipId,
+    );
+
+    return successResponse(this.toResponse(membership), {
+      message: this.i18n.translate(
+        'membership.invitation_accepted_success',
+        this.resolveLanguage(req),
+      ),
+    });
+  }
+
+  @Post(':membershipId/decline')
+  @DeclineInvitationSwagger()
+  async decline(
+    @Param('id', new ParseUUIDPipe()) companyId: string,
+    @Param('membershipId', new ParseUUIDPipe()) membershipId: string,
+    @Req() req: Request,
+  ) {
+    await this.declineInvitationUseCase.execute(req.user!.id, companyId, membershipId);
+
+    return successResponse(
+      {},
+      {
+        message: this.i18n.translate(
+          'membership.invitation_declined_success',
+          this.resolveLanguage(req),
+        ),
+      },
+    );
+  }
+
+  @Delete(':membershipId')
+  @RemoveMemberSwagger()
+  async remove(
+    @Param('id', new ParseUUIDPipe()) companyId: string,
+    @Param('membershipId', new ParseUUIDPipe()) membershipId: string,
+    @Req() req: Request,
+  ) {
+    await this.removeMemberUseCase.execute(req.user!.id, companyId, membershipId);
+
+    return successResponse(
+      {},
+      { message: this.i18n.translate('membership.removed_success', this.resolveLanguage(req)) },
+    );
   }
 
   private toResponse(membership: CompanyMembership) {

@@ -30,7 +30,7 @@ describe('CompanyPrismaRepository', () => {
 
   beforeEach(() => {
     prisma = {
-      company: { findUnique: jest.fn(), create: jest.fn(), update: jest.fn() },
+      company: { findUnique: jest.fn(), findMany: jest.fn(), create: jest.fn(), update: jest.fn() },
       companyMembership: { create: jest.fn() },
       $transaction: jest.fn().mockResolvedValue([]),
     };
@@ -63,6 +63,41 @@ describe('CompanyPrismaRepository', () => {
     await expect(repository.findById('c-1')).resolves.toBeNull();
   });
 
+  it('findByIds mapea las empresas encontradas', async () => {
+    prisma.company.findMany.mockResolvedValue([
+      {
+        id: 'c-1',
+        name: 'Acme',
+        taxId: null,
+        email: 'contacto@acme.com',
+        phone: '+57 3001234567',
+        address: 'Calle 123',
+        city: 'Bogotá',
+        country: 'CO',
+        logoUrl: null,
+        plan: 'STARTER',
+        subscriptionStatus: 'active',
+        stripeCustomerId: null,
+        stripeSubscriptionId: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    ]);
+
+    const found = await repository.findByIds(['c-1']);
+
+    expect(found).toHaveLength(1);
+    expect(found[0].id).toBe('c-1');
+    expect(prisma.company.findMany).toHaveBeenCalledWith({ where: { id: { in: ['c-1'] } } });
+  });
+
+  it('findByIds devuelve vacío sin consultar Prisma si no recibe ids', async () => {
+    const found = await repository.findByIds([]);
+
+    expect(found).toEqual([]);
+    expect(prisma.company.findMany).not.toHaveBeenCalled();
+  });
+
   it('save persiste la empresa', async () => {
     await repository.save(company);
 
@@ -92,6 +127,20 @@ describe('CompanyPrismaRepository', () => {
     );
 
     await expect(repository.save(company)).rejects.toMatchObject({
+      code: ErrorCode.TAX_ID_ALREADY_REGISTERED,
+    });
+  });
+
+  it('update traduce la violación del índice único (country, taxId) a TAX_ID_ALREADY_REGISTERED', async () => {
+    prisma.company.update.mockRejectedValue(
+      new Prisma.PrismaClientKnownRequestError('Unique constraint failed', {
+        code: 'P2002',
+        clientVersion: 'test',
+        meta: { target: ['country', 'taxId'] },
+      }),
+    );
+
+    await expect(repository.update(company)).rejects.toMatchObject({
       code: ErrorCode.TAX_ID_ALREADY_REGISTERED,
     });
   });

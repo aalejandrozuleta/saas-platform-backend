@@ -63,6 +63,15 @@ export class CompanyMembershipPrismaRepository implements CompanyMembershipRepos
     return membership ? CompanyMembershipMapper.toDomain(membership) : null;
   }
 
+  async findByUserId(userId: string): Promise<CompanyMembership[]> {
+    const memberships = await this.prisma.companyMembership.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'asc' },
+    });
+
+    return memberships.map((membership) => CompanyMembershipMapper.toDomain(membership));
+  }
+
   async save(membership: CompanyMembership): Promise<void> {
     await this.prisma.companyMembership.create({
       data: CompanyMembershipMapper.toPersistence(membership),
@@ -74,6 +83,10 @@ export class CompanyMembershipPrismaRepository implements CompanyMembershipRepos
       where: { id: membership.id },
       data: CompanyMembershipMapper.toPersistence(membership),
     });
+  }
+
+  async delete(id: string): Promise<void> {
+    await this.prisma.companyMembership.delete({ where: { id } });
   }
 
   async updateAndCountActiveOwners(
@@ -96,6 +109,28 @@ export class CompanyMembershipPrismaRepository implements CompanyMembershipRepos
         }
 
         return { updated: CompanyMembershipMapper.toDomain(updatedRow), activeOwners };
+      },
+      { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+    );
+  }
+
+  async deleteAndCountActiveOwners(
+    companyId: string,
+    membershipId: string,
+  ): Promise<{ activeOwners: number }> {
+    return this.prisma.$transaction(
+      async (tx) => {
+        await tx.companyMembership.delete({ where: { id: membershipId } });
+
+        const activeOwners = await tx.companyMembership.count({
+          where: { companyId, role: MembershipRole.OWNER, status: MembershipStatus.ACTIVE },
+        });
+
+        if (activeOwners < 1) {
+          throw DomainErrorFactory.lastOwnerCannotBeDemoted();
+        }
+
+        return { activeOwners };
       },
       { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
     );

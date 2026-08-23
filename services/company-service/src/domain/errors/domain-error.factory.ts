@@ -91,4 +91,18 @@ export class DomainErrorFactory {
       409,
     );
   }
+
+  /** Solo se puede aceptar/rechazar una membresía que sigue en estado INVITED. */
+  static invitationNotPending(): DomainException {
+    return DomainException.create('membership.invitation_not_pending', ErrorCode.CONFLICT, 409);
+  }
+
+  /**
+   * Solo un OWNER puede remover a otro OWNER de la empresa. Mismo espíritu
+   * que `ownerRoleRequiresOwner()`, pero para la baja en vez del ascenso: un
+   * MANAGER no puede expulsar a los dueños del tenant.
+   */
+  static cannotRemoveOwner(): DomainException {
+    return DomainException.create('membership.cannot_remove_owner', ErrorCode.FORBIDDEN, 403);
+  }
 }

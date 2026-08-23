@@ -28,6 +28,7 @@ describe('CompanyMembershipPrismaRepository', () => {
         findMany: jest.fn(),
         create: jest.fn(),
         update: jest.fn(),
+        delete: jest.fn(),
         count: jest.fn(),
       },
       $transaction: jest.fn(),
@@ -106,6 +107,27 @@ describe('CompanyMembershipPrismaRepository', () => {
     });
   });
 
+  it('findByUserId mapea todas las membresías del usuario', async () => {
+    prisma.companyMembership.findMany.mockResolvedValue([
+      row,
+      { ...row, id: 'm-2', companyId: 'c-2' },
+    ]);
+
+    const found = await repository.findByUserId('u-1');
+
+    expect(found).toHaveLength(2);
+    expect(prisma.companyMembership.findMany).toHaveBeenCalledWith({
+      where: { userId: 'u-1' },
+      orderBy: { createdAt: 'asc' },
+    });
+  });
+
+  it('delete elimina por id', async () => {
+    await repository.delete('m-1');
+
+    expect(prisma.companyMembership.delete).toHaveBeenCalledWith({ where: { id: 'm-1' } });
+  });
+
   it('findByCompanyIdPaged devuelve la página y el total en una sola transacción', async () => {
     prisma.$transaction.mockResolvedValue([[row], 5]);
 
@@ -165,6 +187,41 @@ describe('CompanyMembershipPrismaRepository', () => {
     prisma.$transaction.mockImplementation(async (fn: any) => fn(tx));
 
     await expect(repository.updateAndCountActiveOwners('c-1', membership)).rejects.toMatchObject({
+      code: ErrorCode.CONFLICT,
+    });
+  });
+
+  it('deleteAndCountActiveOwners borra y cuenta OWNERs activos en una transacción SERIALIZABLE', async () => {
+    const tx = {
+      companyMembership: {
+        delete: jest.fn().mockResolvedValue(row),
+        count: jest.fn().mockResolvedValue(1),
+      },
+    };
+    prisma.$transaction.mockImplementation(async (fn: any, options: any) => {
+      expect(options).toEqual({ isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
+      return fn(tx);
+    });
+
+    const result = await repository.deleteAndCountActiveOwners('c-1', 'm-1');
+
+    expect(result.activeOwners).toBe(1);
+    expect(tx.companyMembership.delete).toHaveBeenCalledWith({ where: { id: 'm-1' } });
+    expect(tx.companyMembership.count).toHaveBeenCalledWith({
+      where: { companyId: 'c-1', role: MembershipRole.OWNER, status: MembershipStatus.ACTIVE },
+    });
+  });
+
+  it('deleteAndCountActiveOwners lanza CONFLICT si no queda ningún OWNER activo', async () => {
+    const tx = {
+      companyMembership: {
+        delete: jest.fn().mockResolvedValue(row),
+        count: jest.fn().mockResolvedValue(0),
+      },
+    };
+    prisma.$transaction.mockImplementation(async (fn: any) => fn(tx));
+
+    await expect(repository.deleteAndCountActiveOwners('c-1', 'm-1')).rejects.toMatchObject({
       code: ErrorCode.CONFLICT,
     });
   });

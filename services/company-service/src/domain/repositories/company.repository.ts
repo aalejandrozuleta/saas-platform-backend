@@ -7,6 +7,9 @@ import { type CompanyMembership } from '../entities/company-membership/company-m
 export interface CompanyRepository {
   findById(id: string): Promise<Company | null>;
 
+  /** Empresas cuyos ids están en `ids` (usado para "mis empresas": una consulta batch en vez de N). */
+  findByIds(ids: string[]): Promise<Company[]>;
+
   save(company: Company): Promise<void>;
 
   update(company: Company): Promise<void>;
