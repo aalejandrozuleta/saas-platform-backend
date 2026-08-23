@@ -1,5 +1,18 @@
-import { IsEmail, IsOptional, IsString, Length, MaxLength, MinLength } from 'class-validator';
+import {
+  IsEmail,
+  IsIn,
+  IsOptional,
+  IsString,
+  Matches,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+
+import { ISO_COUNTRY_CODES } from './iso-country-codes';
+
+/** Dígitos, espacios, guiones, paréntesis y un `+` inicial opcional (formato flexible internacional). */
+const PHONE_REGEX = /^\+?[0-9()\-\s]{7,20}$/;
 
 /**
  * DTO para crear una empresa (tenant). Quien la crea queda como `OWNER`.
@@ -23,8 +36,7 @@ export class CreateCompanyDto {
 
   @ApiProperty({ example: '+57 3001234567', description: 'Teléfono de contacto de la empresa' })
   @IsString()
-  @MinLength(7)
-  @MaxLength(20)
+  @Matches(PHONE_REGEX, { message: 'phone must be a valid phone number' })
   phone!: string;
 
   @ApiProperty({ example: 'Calle 123 # 45-67', description: 'Dirección física de la empresa' })
@@ -39,10 +51,10 @@ export class CreateCompanyDto {
 
   @ApiPropertyOptional({
     example: 'CO',
-    description: 'País donde opera la empresa (código ISO de 2 letras). Default: CO',
+    enum: ISO_COUNTRY_CODES,
+    description: 'País donde opera la empresa (código ISO 3166-1 alpha-2). Default: CO',
   })
   @IsOptional()
-  @IsString()
-  @Length(2, 2)
+  @IsIn(ISO_COUNTRY_CODES)
   country?: string;
 }

@@ -46,6 +46,16 @@ describe('CompanyController (api-gateway)', () => {
     expect(req.headers['accept-language']).toBe('es');
   });
 
+  it('debe reenviar GET /companies al company-service (mis compañías)', async () => {
+    companyProxy.forward.mockResolvedValue({ body: { success: true, data: [] } });
+    const req = makeReq({ method: 'GET' });
+
+    const result = await controller.listMine(req);
+
+    expect(companyProxy.forward).toHaveBeenCalledWith(req, '/companies');
+    expect(result).toEqual({ success: true, data: [] });
+  });
+
   it('debe reenviar GET /companies/:id al company-service', async () => {
     companyProxy.forward.mockResolvedValue({ body: { success: true, data: {} } });
     const req = makeReq({ method: 'GET' });
@@ -54,6 +64,36 @@ describe('CompanyController (api-gateway)', () => {
 
     expect(companyProxy.forward).toHaveBeenCalledWith(req, '/companies/company-1');
     expect(result).toEqual({ success: true, data: {} });
+  });
+
+  it('debe reenviar PATCH /companies/:id al company-service', async () => {
+    companyProxy.forward.mockResolvedValue({ body: { success: true } });
+    const req = makeReq({ method: 'PATCH' });
+
+    const result = await controller.update(req, 'company-1');
+
+    expect(companyProxy.forward).toHaveBeenCalledWith(req, '/companies/company-1');
+    expect(result).toEqual({ success: true });
+  });
+
+  it('debe reenviar DELETE /companies/:id al company-service', async () => {
+    companyProxy.forward.mockResolvedValue({ body: { success: true } });
+    const req = makeReq({ method: 'DELETE' });
+
+    const result = await controller.remove(req, 'company-1');
+
+    expect(companyProxy.forward).toHaveBeenCalledWith(req, '/companies/company-1');
+    expect(result).toEqual({ success: true });
+  });
+
+  it('debe reenviar DELETE /companies/:id/logo al company-service', async () => {
+    companyProxy.forward.mockResolvedValue({ body: { success: true } });
+    const req = makeReq({ method: 'DELETE' });
+
+    const result = await controller.removeLogo(req, 'company-1');
+
+    expect(companyProxy.forward).toHaveBeenCalledWith(req, '/companies/company-1/logo');
+    expect(result).toEqual({ success: true });
   });
 
   it('debe reenviar POST /companies/:id/logo como multipart', async () => {
@@ -72,6 +112,16 @@ describe('CompanyController (api-gateway)', () => {
       originalname: 'logo.png',
       mimetype: 'image/png',
     });
+    expect(result).toEqual({ success: true });
+  });
+
+  it('debe reenviar POST /companies/:id/workers al company-service', async () => {
+    companyProxy.forward.mockResolvedValue({ body: { success: true } });
+    const req = makeReq();
+
+    const result = await controller.registerWorker(req, 'company-1');
+
+    expect(companyProxy.forward).toHaveBeenCalledWith(req, '/companies/company-1/workers');
     expect(result).toEqual({ success: true });
   });
 
@@ -100,6 +150,45 @@ describe('CompanyController (api-gateway)', () => {
     const req = makeReq({ method: 'PATCH' });
 
     const result = await controller.updateMember(req, 'company-1', 'membership-1');
+
+    expect(companyProxy.forward).toHaveBeenCalledWith(
+      req,
+      '/companies/company-1/members/membership-1',
+    );
+    expect(result).toEqual({ success: true });
+  });
+
+  it('debe reenviar POST /companies/:id/members/:membershipId/accept al company-service', async () => {
+    companyProxy.forward.mockResolvedValue({ body: { success: true } });
+    const req = makeReq();
+
+    const result = await controller.acceptInvitation(req, 'company-1', 'membership-1');
+
+    expect(companyProxy.forward).toHaveBeenCalledWith(
+      req,
+      '/companies/company-1/members/membership-1/accept',
+    );
+    expect(result).toEqual({ success: true });
+  });
+
+  it('debe reenviar POST /companies/:id/members/:membershipId/decline al company-service', async () => {
+    companyProxy.forward.mockResolvedValue({ body: { success: true } });
+    const req = makeReq();
+
+    const result = await controller.declineInvitation(req, 'company-1', 'membership-1');
+
+    expect(companyProxy.forward).toHaveBeenCalledWith(
+      req,
+      '/companies/company-1/members/membership-1/decline',
+    );
+    expect(result).toEqual({ success: true });
+  });
+
+  it('debe reenviar DELETE /companies/:id/members/:membershipId al company-service', async () => {
+    companyProxy.forward.mockResolvedValue({ body: { success: true } });
+    const req = makeReq({ method: 'DELETE' });
+
+    const result = await controller.removeMember(req, 'company-1', 'membership-1');
 
     expect(companyProxy.forward).toHaveBeenCalledWith(
       req,

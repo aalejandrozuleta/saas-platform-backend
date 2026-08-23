@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common';
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { Injectable, Logger } from '@nestjs/common';
+import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { EnvService } from '@config/env/env.service';
 import { type ImageStoragePort } from '@application/ports/image-storage.port';
 
@@ -11,6 +11,7 @@ import { type ImageStoragePort } from '@application/ports/image-storage.port';
  */
 @Injectable()
 export class S3ImageStorageService implements ImageStoragePort {
+  private readonly logger = new Logger(S3ImageStorageService.name);
   private readonly client: S3Client;
   private readonly bucket: string;
   private readonly publicUrl: string;
@@ -43,5 +44,28 @@ export class S3ImageStorageService implements ImageStoragePort {
     );
 
     return `${this.publicUrl}/${key}`;
+  }
+
+  /**
+   * Traduce la URL pública de vuelta a la key del bucket (`upload` la
+   * construyó como `${publicUrl}/${key}`) y borra el objeto.
+   *
+   * @remarks
+   * Si la URL no tiene el prefijo esperado (dato corrupto o ya migrado a
+   * otro storage), se registra una advertencia y se ignora en vez de
+   * fallar — borrar el logo nunca debería bloquearse por un dato legacy
+   * inconsistente.
+   */
+  async deleteByUrl(url: string): Promise<void> {
+    const prefix = `${this.publicUrl}/`;
+
+    if (!url.startsWith(prefix)) {
+      this.logger.warn(`URL de logo con formato inesperado, no se borra del storage: ${url}`);
+      return;
+    }
+
+    const key = url.slice(prefix.length);
+
+    await this.client.send(new DeleteObjectCommand({ Bucket: this.bucket, Key: key }));
   }
 }

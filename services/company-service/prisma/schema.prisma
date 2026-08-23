@@ -45,6 +45,12 @@ model Company {
   memberships          CompanyMembership[]
   createdAt            DateTime            @default(now())
   updatedAt            DateTime            @updatedAt
+
+  // Dos empresas no pueden compartir NIT dentro del mismo país (los formatos
+  // de identificación tributaria no son comparables entre países, así que
+  // no se hace único a nivel global). NULLs no colisionan entre sí en
+  // Postgres, así que las empresas sin taxId no se ven afectadas.
+  @@unique([country, taxId])
 }
 
 model CompanyMembership {
@@ -58,4 +64,8 @@ model CompanyMembership {
   updatedAt DateTime         @updatedAt
 
   @@unique([companyId, userId])
+  // Soporta la consulta "en qué empresas participa este usuario" (patrón de
+  // acceso obvio para un modelo multi-tenant, aunque hoy no exista todavía
+  // un endpoint que lo use) sin escanear toda la tabla.
+  @@index([userId])
 }

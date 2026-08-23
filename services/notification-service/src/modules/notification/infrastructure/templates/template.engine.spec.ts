@@ -47,6 +47,7 @@ describe('TemplateEngine', () => {
         'maintenance',
         'otp-code',
         'worker-provisioned',
+        'membership-invited',
       ]);
     });
   });
@@ -84,6 +85,10 @@ describe('TemplateEngine', () => {
           tempPassword: 'TempPass123@',
           appUrl: 'https://arlok.dev/login',
         },
+      ],
+      [
+        'membership-invited',
+        { companyName: 'Acme', role: 'WORKER', appUrl: 'https://arlok.dev/invitations' },
       ],
     ])('debe renderizar el template "%s" a un string HTML', async (template, variables) => {
       const html = await engine.render(template, variables);
@@ -155,6 +160,38 @@ describe('TemplateEngine', () => {
       });
 
       expect(html).not.toContain('Restablecer contraseña');
+    });
+
+    it('debe incluir el botón de ver invitación en membership-invited cuando se provee appUrl', async () => {
+      const html = await engine.render('membership-invited', {
+        companyName: 'Acme',
+        role: 'WORKER',
+        appUrl: 'https://arlok.dev/invitations',
+      });
+
+      expect(html).toContain('Ver invitación');
+      expect(html).toContain('Acme');
+    });
+
+    it('debe descartar appUrl con esquema no http(s) (ej. javascript:) en membership-invited', async () => {
+      const html = await engine.render('membership-invited', {
+        companyName: 'Acme',
+        role: 'WORKER',
+        appUrl: 'javascript:alert(document.cookie)',
+      });
+
+      expect(html).not.toContain('javascript:');
+      expect(html).not.toContain('Ver invitación');
+    });
+
+    it('debe descartar appUrl malformado en membership-invited', async () => {
+      const html = await engine.render('membership-invited', {
+        companyName: 'Acme',
+        role: 'WORKER',
+        appUrl: 'not-a-valid-url',
+      });
+
+      expect(html).not.toContain('Ver invitación');
     });
   });
 });

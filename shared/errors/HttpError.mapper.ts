@@ -54,6 +54,7 @@ export const HttpErrorMapper: Record<ErrorCode, number> = {
   [ErrorCode.MEMBERSHIP_ALREADY_EXISTS]: 409,
   [ErrorCode.MEMBERSHIP_NOT_FOUND]: 404,
   [ErrorCode.USER_NOT_FOUND]: 404,
+  [ErrorCode.TAX_ID_ALREADY_REGISTERED]: 409,
 };
 
 /**
