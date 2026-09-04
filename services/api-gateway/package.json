@@ -20,22 +20,22 @@
     "@nestjs/platform-express": "11.1.18",
     "@nestjs/swagger": "^11.2.6",
     "@saas/shared": "workspace:*",
-    "axios": "^1.16.0",
+    "axios": "^1.20.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.15.1",
     "cookie-parser": "^1.4.7",
     "express": "^5.2.1",
-    "express-rate-limit": "^8.2.1",
+    "express-rate-limit": "^8.7.0",
     "form-data": "^4.0.6",
-    "helmet": "^8.1.0",
+    "helmet": "^8.3.0",
     "ioredis": "^5.10.0",
     "jsonwebtoken": "^9.0.3",
-    "multer": "^2.2.0",
+    "multer": "^2.3.0",
     "opossum": "^10.0.0",
     "prom-client": "^15.1.3",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
-    "zod": "^4.3.6"
+    "zod": "^4.5.4"
   },
   "dependenciesMeta": {
     "@saas/shared": {
@@ -51,7 +51,7 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/multer": "^2.2.0",
     "@types/opossum": "^8.1.9",
-    "jest": "^30.2.0",
+    "jest": "^30.5.0",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.9.3"
