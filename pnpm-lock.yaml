@@ -130,7 +130,7 @@ importers:
         version: 11.2.6(@nestjs/common@11.1.18(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.18)(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)
       '@saas/shared':
         specifier: workspace:*
-        version: link:../../shared
+        version: file:shared(@nestjs/websockets@11.1.18)(reflect-metadata@0.2.2)
       axios:
         specifier: ^1.16.0
         version: 1.18.1
@@ -163,7 +163,7 @@ importers:
         version: 9.0.3
       multer:
         specifier: ^2.2.0
-        version: 2.2.0
+        version: 2.4.0
       opossum:
         specifier: ^10.0.0
         version: 10.0.0
@@ -185,7 +185,7 @@ importers:
     devDependencies:
       '@nestjs/cli':
         specifier: ^11.0.16
-        version: 11.0.16(@swc/core@1.15.21)(@types/node@26.1.0)
+        version: 11.0.16(@swc/core@1.15.21)(@types/node@26.6.3)
       '@nestjs/testing':
         specifier: 11.1.18
         version: 11.1.18(@nestjs/common@11.1.18(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.18)(@nestjs/platform-express@11.1.18)
@@ -209,10 +209,10 @@ importers:
         version: 8.1.9
       jest:
         specifier: ^30.2.0
-        version: 30.3.0(@types/node@26.1.0)(ts-node@10.9.2(@swc/core@1.15.21)(@types/node@26.1.0)(typescript@5.9.3))
+        version: 30.3.0(@types/node@26.6.3)(ts-node@10.9.2(@swc/core@1.15.21)(@types/node@26.6.3)(typescript@5.9.3))
       ts-node:
         specifier: ^10.9.2
-        version: 10.9.2(@swc/core@1.15.21)(@types/node@26.1.0)(typescript@5.9.3)
+        version: 10.9.2(@swc/core@1.15.21)(@types/node@26.6.3)(typescript@5.9.3)
       tsconfig-paths:
         specifier: ^4.2.0
         version: 4.2.0
@@ -254,10 +254,10 @@ importers:
         version: 7.6.0
       '@prisma/client':
         specifier: ^7.6.0
-        version: 7.6.0(prisma@7.6.0(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.7))(react@19.2.7)(typescript@5.9.3))(typescript@5.9.3)
+        version: 7.6.0(prisma@7.6.0(@types/react-dom@19.2.3(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.4(react@19.3.0))(react@19.3.0)(typescript@5.9.3))(typescript@5.9.3)
       '@saas/shared':
         specifier: workspace:*
-        version: link:../../shared
+        version: file:shared(@nestjs/websockets@11.1.18)(reflect-metadata@0.2.2)
       argon2:
         specifier: ^0.44.0
         version: 0.44.0
@@ -290,7 +290,7 @@ importers:
         version: 9.7.3
       multer:
         specifier: ^2.2.0
-        version: 2.2.0
+        version: 2.4.0
       otplib:
         specifier: ^12.0.1
         version: 12.0.1
@@ -311,7 +311,7 @@ importers:
         version: 7.8.2
       sharp:
         specifier: ^0.35.3
-        version: 0.35.3(@types/node@26.1.0)
+        version: 0.35.3(@types/node@26.6.3)
       swagger-ui-express:
         specifier: ^5.0.1
         version: 5.0.1(express@5.2.1)
@@ -324,7 +324,7 @@ importers:
     devDependencies:
       '@nestjs/cli':
         specifier: ^11.0.16
-        version: 11.0.16(@swc/core@1.15.21)(@types/node@26.1.0)
+        version: 11.0.16(@swc/core@1.15.21)(@types/node@26.6.3)
       '@nestjs/testing':
         specifier: 11.1.18
         version: 11.1.18(@nestjs/common@11.1.18(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.18)(@nestjs/platform-express@11.1.18)
@@ -345,25 +345,13 @@ importers:
         version: 1.5.6
       prisma:
         specifier: ^7.6.0
-        version: 7.6.0(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.7))(react@19.2.7)(typescript@5.9.3)
+        version: 7.6.0(@types/react-dom@19.2.3(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.4(react@19.3.0))(react@19.3.0)(typescript@5.9.3)
       tsx:
         specifier: ^4.22.4
         version: 4.22.4
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-
-  services/auth-service/dist/generated/prisma:
-    dependencies:
-      '@prisma/client-runtime-utils':
-        specifier: 7.6.0
-        version: 7.6.0
-
-  services/auth-service/src/generated/prisma:
-    dependencies:
-      '@prisma/client-runtime-utils':
-        specifier: 7.6.0
-        version: 7.6.0
 
   services/company-service:
     dependencies:
@@ -390,10 +378,10 @@ importers:
         version: 7.6.0
       '@prisma/client':
         specifier: ^7.6.0
-        version: 7.6.0(prisma@7.6.0(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.7))(react@19.2.7)(typescript@5.9.3))(typescript@5.9.3)
+        version: 7.6.0(prisma@7.6.0(@types/react-dom@19.2.3(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.4(react@19.3.0))(react@19.3.0)(typescript@5.9.3))(typescript@5.9.3)
       '@saas/shared':
         specifier: workspace:*
-        version: link:../../shared
+        version: file:shared(@nestjs/websockets@11.1.18)(reflect-metadata@0.2.2)
       axios:
         specifier: ^1.16.0
         version: 1.18.1
@@ -420,7 +408,7 @@ importers:
         version: 9.0.3
       multer:
         specifier: ^2.2.0
-        version: 2.2.0
+        version: 2.4.0
       pg:
         specifier: ^8.18.0
         version: 8.20.0
@@ -435,7 +423,7 @@ importers:
         version: 7.8.2
       sharp:
         specifier: ^0.35.3
-        version: 0.35.3(@types/node@26.1.0)
+        version: 0.35.3(@types/node@26.6.3)
       swagger-ui-express:
         specifier: ^5.0.1
         version: 5.0.1(express@5.2.1)
@@ -448,7 +436,7 @@ importers:
     devDependencies:
       '@nestjs/cli':
         specifier: ^11.0.16
-        version: 11.0.16(@swc/core@1.15.21)(@types/node@26.1.0)
+        version: 11.0.16(@swc/core@1.15.21)(@types/node@26.6.3)
       '@nestjs/testing':
         specifier: 11.1.18
         version: 11.1.18(@nestjs/common@11.1.18(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.18)(@nestjs/platform-express@11.1.18)
@@ -466,22 +454,10 @@ importers:
         version: 2.2.0
       prisma:
         specifier: ^7.6.0
-        version: 7.6.0(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.7))(react@19.2.7)(typescript@5.9.3)
+        version: 7.6.0(@types/react-dom@19.2.3(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.4(react@19.3.0))(react@19.3.0)(typescript@5.9.3)
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-
-  services/company-service/dist/generated/prisma:
-    dependencies:
-      '@prisma/client-runtime-utils':
-        specifier: 7.6.0
-        version: 7.6.0
-
-  services/company-service/src/generated/prisma:
-    dependencies:
-      '@prisma/client-runtime-utils':
-        specifier: 7.6.0
-        version: 7.6.0
 
   services/config-service:
     dependencies:
@@ -514,10 +490,10 @@ importers:
         version: 7.6.0
       '@prisma/client':
         specifier: ^7.6.0
-        version: 7.6.0(prisma@7.6.0(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.7))(react@19.2.7)(typescript@5.9.3))(typescript@5.9.3)
+        version: 7.6.0(prisma@7.6.0(@types/react-dom@19.2.3(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.4(react@19.3.0))(react@19.3.0)(typescript@5.9.3))(typescript@5.9.3)
       '@saas/shared':
         specifier: workspace:*
-        version: link:../../shared
+        version: file:shared(@nestjs/websockets@11.1.18)(reflect-metadata@0.2.2)
       class-transformer:
         specifier: ^0.5.1
         version: 0.5.1
@@ -566,7 +542,7 @@ importers:
     devDependencies:
       '@nestjs/cli':
         specifier: ^11.0.16
-        version: 11.0.16(@swc/core@1.15.21)(@types/node@26.1.0)
+        version: 11.0.16(@swc/core@1.15.21)(@types/node@26.6.3)
       '@nestjs/testing':
         specifier: 11.1.18
         version: 11.1.18(@nestjs/common@11.1.18(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.18)(@nestjs/platform-express@11.1.18)
@@ -578,22 +554,10 @@ importers:
         version: 5.0.6
       prisma:
         specifier: ^7.6.0
-        version: 7.6.0(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.7))(react@19.2.7)(typescript@5.9.3)
+        version: 7.6.0(@types/react-dom@19.2.3(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.4(react@19.3.0))(react@19.3.0)(typescript@5.9.3)
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-
-  services/config-service/dist/generated/prisma:
-    dependencies:
-      '@prisma/client-runtime-utils':
-        specifier: 7.6.0
-        version: 7.6.0
-
-  services/config-service/src/generated/prisma:
-    dependencies:
-      '@prisma/client-runtime-utils':
-        specifier: 7.6.0
-        version: 7.6.0
 
   services/notification-service:
     dependencies:
@@ -629,7 +593,7 @@ importers:
         version: 11.1.18(@nestjs/common@11.1.18(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.18)(@nestjs/platform-socket.io@11.1.18)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       '@saas/shared':
         specifier: workspace:*
-        version: link:../../shared
+        version: file:shared(@nestjs/websockets@11.1.18)(reflect-metadata@0.2.2)
       bullmq:
         specifier: ^5.56.4
         version: 5.79.1
@@ -665,7 +629,7 @@ importers:
         version: 0.2.2
       resend:
         specifier: ^4.7.0
-        version: 4.8.0(react-dom@19.2.4(react@19.2.7))(react@19.2.7)
+        version: 4.8.0(react-dom@19.2.4(react@19.3.0))(react@19.3.0)
       rxjs:
         specifier: ^7.8.2
         version: 7.8.2
@@ -684,7 +648,7 @@ importers:
     devDependencies:
       '@nestjs/cli':
         specifier: ^11.0.16
-        version: 11.0.16(@swc/core@1.15.21)(@types/node@26.1.0)
+        version: 11.0.16(@swc/core@1.15.21)(@types/node@26.6.3)
       '@nestjs/testing':
         specifier: 11.1.18
         version: 11.1.18(@nestjs/common@11.1.18(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.18)(@nestjs/platform-express@11.1.18)
@@ -1832,6 +1796,9 @@ packages:
   '@mongodb-js/saslprep@1.4.12':
     resolution: {integrity: sha512-QAfAMwNgnYxZ2C6D1HgeP7Gc4i/uvJRim415PCIL9ptRxWMNbWeLBYb2/9R4pGKny/s1FVu2JA2cxCUBUOggrA==}
 
+  '@mongodb-js/saslprep@1.5.4':
+    resolution: {integrity: sha512-05UC0jQsjKAOuXQ0H9Ud9vUTJpZIg+n/FinpR30tI5I8pY2inTfPOZ5OF/cg3Ce/N9MoD1xhRCeOsJtuTbFYlw==}
+
   '@msgpackr-extract/msgpackr-extract-darwin-arm64@3.0.4':
     resolution: {integrity: sha512-LCkGo6JDfaBhgST7UpPWgNgLINpcpabaHfyz5OBx75nUYxBsaEPxjnyNjWpeb/xBup/682QnBfRBy2/LvPutZQ==}
     cpu: [arm64]
@@ -2224,6 +2191,9 @@ packages:
   '@rtsao/scc@1.1.0':
     resolution: {integrity: sha512-zt6OdqaDoOnJ1ZYsCYGt9YmWzDXl4vQdKTyJev62gFhRGKdx7mcT54V9KIjg+d2wi9EXsPvAPKe7i7WjfVWB8g==}
 
+  '@saas/shared@file:shared':
+    resolution: {directory: shared, type: directory}
+
   '@scarf/scarf@1.4.0':
     resolution: {integrity: sha512-xxeapPiUXdZAE3che6f3xogoJPeZgig6omHEy1rIY5WVsB3H2BHNnZH+gHG6x91SCWyQCzWGsuL2Hh3ClO5/qQ==}
 
@@ -2500,6 +2470,9 @@ packages:
   '@types/node@26.1.0':
     resolution: {integrity: sha512-O0A1G3xPGy4w7AgQdAQYUlQ+BKk2Oovw8eRpofyp5KdBZULnbe+WqaOVNrm705SHphCiG4XHsACrSmPu1f+Kgw==}
 
+  '@types/node@26.6.3':
+    resolution: {integrity: sha512-dsqMQQoeTLqu9wynDD00q573mNzso3IdQOAfHRJqLCcmCFPoGo9A1bDpUcv/9tnKpErQWv9uKeGfl37EIS02Yg==}
+
   '@types/opossum@8.1.9':
     resolution: {integrity: sha512-Jm/tYxuJFefiwRYs+/EOsUP3ktk0c8siMgAHPLnA4PXF4wKghzcjqf88dY+Xii5jId5Txw4JV0FMKTpjbd7KJA==}
 
@@ -2523,8 +2496,8 @@ packages:
   '@types/react@19.2.14':
     resolution: {integrity: sha512-ilcTH/UniCkMdtexkoCN0bI7pMcJDvmQFPvuPvmEaYA/NSfFTAgdUSLAoVjaRJm7+6PvcM+q1zYOwS4wTYMF9w==}
 
-  '@types/react@19.2.17':
-    resolution: {integrity: sha512-MXfmqaVPEVgkBT/aY0aGCkRWWtByiYQXo3xdQ8r5RzuFrPiRn8Gar2tQdXSUQ2GKV3bkXckek89V8wQBY2Q/Aw==}
+  '@types/react@19.3.0':
+    resolution: {integrity: sha512-N0rFCuH9YoxG9/m61l9MfpJKfmLOVU0em7ipIz6TRgSSkvReLB9vL85GB+yr8Bs5leqpvg96JSwF4ZS1s4viQg==}
 
   '@types/send@1.2.1':
     resolution: {integrity: sha512-arsCikDvlU99zl1g69TcAB3mzZPpxgw0UQnaHeC1Nwb015xp8bknZv5rIfri9xTOcMuaVgvabfIRA7PSZVuZIQ==}
@@ -3032,6 +3005,10 @@ packages:
     resolution: {integrity: sha512-h/C0qe6857pQhcSJHLfsR1uYGj98Ge3wKAD3Ed9KqH3wcVh+BM4Jq4xISD7vs9OPuT07n+q3QQVjslJ286j6ag==}
     engines: {node: '>=20.19.0'}
 
+  bson@7.3.3:
+    resolution: {integrity: sha512-oz3LwE3qGEhTCSyhzQRLY3Bj1NLOsjFMf6tcmY5J8M+3R7EVcmoBfSHWvjUK3yXCLDUsGpIuB3aQL4nDZ1EV/g==}
+    engines: {node: '>=20.19.0'}
+
   buffer-equal-constant-time@1.0.1:
     resolution: {integrity: sha512-zRpUiDwd/xk6ADqPMATG8vc9VPrkck7T07OIx0gnjmJAnHnTVXNQG3vfvWNuiZIkwu9KrKdA1iJKfsfTVxE6NA==}
 
@@ -3212,10 +3189,6 @@ packages:
 
   concat-map@0.0.1:
     resolution: {integrity: sha512-/Srv4dswyQNBfohGpz9o6Yb3Gz3SrUDqBH5rTuhGR7ahtlbYKnVxw2bCFMRljaA7EXHaXZ8wsHdodFvbkhKmqg==}
-
-  concat-stream@2.0.0:
-    resolution: {integrity: sha512-MWufYdFw53ccGjCA+Ol7XJYpAlW6/prSMzuPOTRnJGcGzuhLn4Scrz7qf6o8bROZ514ltazcIFJZevcfbo0x7A==}
-    engines: {'0': node >= 6.0}
 
   confbox@0.2.4:
     resolution: {integrity: sha512-ysOGlgTFbN2/Y6Cg3Iye8YKulHw+R2fNXHrgSmXISQdMnomY6eNDprVdW9R5xBguEqI954+S6709UyiO7B+6OQ==}
@@ -4455,6 +4428,10 @@ packages:
     resolution: {integrity: sha512-kpSuLD3/7RenBnjnJdOHXCKC8dTd1JzeOiJhN0necWWci6cC+qX+VuwPnMVgb+a4+KNJSfgqahpnfWaeDXCimw==}
     engines: {node: '>=18.0.0'}
 
+  kareem@3.4.0:
+    resolution: {integrity: sha512-JAKhnR4S027v/8949QXNInRskgETCg9rFUMi1VjhGbjX+XltCAAEFcXykkSocNkom1kc66EMJfjWvhj87BDQKg==}
+    engines: {node: '>=18.0.0'}
+
   keyv@4.5.4:
     resolution: {integrity: sha512-oxVHkHR/EJf2CNXnWxRLW6mg7JyCCUcG0DtEGmL2ctUo1PNTin1PUil+r/+4r5MpVgC/fn1kjsx7mjSujKqIpw==}
 
@@ -4597,6 +4574,10 @@ packages:
     resolution: {integrity: sha512-aisnrDP4GNe06UcKFnV5bfMNPBUw4jsLGaWwWfnH3v02GnBuXX2MCVn5RbrWo0j3pczUilYblq7fQ7Nw2t5XKw==}
     engines: {node: '>= 0.8'}
 
+  media-typer@1.1.1:
+    resolution: {integrity: sha512-yz3xRaG20c6/BOzvYoDaGtPmGscs7YivItZEEqe6GbwNfHuxu9YNmvnEkMzKldAGY4/80pRcQRZSEnhquk9XuQ==}
+    engines: {node: '>= 0.8'}
+
   memfs@3.5.3:
     resolution: {integrity: sha512-UERzLsxzllchadvbPs5aolHh65ISpKpM+ccLbOJ8/vvpBKmAWf+la7dXFy7Mr0ySHbdHrFv5kGFCUHHe6GFEmw==}
     engines: {node: '>= 4.0.0'}
@@ -4678,6 +4659,10 @@ packages:
     resolution: {integrity: sha512-h0AZ9A7IDVwwHyMxmdMXKy+9oNlF0zFoahHiX3vQ8e3KFcSP3VmsmfvtRSuLPxmyv2vjIDxqty8smTgie/SNRQ==}
     engines: {node: '>=20.19.0'}
 
+  mongodb-connection-string-url@7.0.2:
+    resolution: {integrity: sha512-ZoS07RoFqpKYQwAk59qmrx8+jJHNHU30UjlU96QktiGn1ltvDr+vCznLX5DiUBLEpMAHatHNWV1nM/74ul66kA==}
+    engines: {node: '>=20.19.0'}
+
   mongodb@7.2.0:
     resolution: {integrity: sha512-F/2+BMZtLVhY30ioZp0dAmZ+IRZMBqI+nrv6t5+9/1AIwCa8sMRC3jBf81lpxMhnZgqq8CoUD503Z1oZWq1/sw==}
     engines: {node: '>=20.19.0'}
@@ -4705,6 +4690,37 @@ packages:
       socks:
         optional: true
 
+  mongodb@7.6.0:
+    resolution: {integrity: sha512-WbZ6OCjYw2c53LOjfkQa+reXr7kIiOVpXXglnASFuiMtif0BvsMwHe3ClJHLm1/r7wJFwaasfFtD6iYIktB01g==}
+    engines: {node: '>=20.19.0'}
+    peerDependencies:
+      '@aws-sdk/credential-providers': ^3.806.0
+      '@mongodb-js/zstd': ^7.0.0
+      gcp-metadata: ^7.0.1
+      kerberos: ^7.0.0
+      mongodb-client-encryption: ^7.2.0
+      snappy: ^7.3.2
+      socks: ^2.8.6
+    peerDependenciesMeta:
+      '@aws-sdk/credential-providers':
+        optional: true
+      '@mongodb-js/zstd':
+        optional: true
+      gcp-metadata:
+        optional: true
+      kerberos:
+        optional: true
+      mongodb-client-encryption:
+        optional: true
+      snappy:
+        optional: true
+      socks:
+        optional: true
+
+  mongoose@9.10.2:
+    resolution: {integrity: sha512-oFcFL3dsX5tDzMwBD+GGoDqKIj6RNG3bu3oqlvcUIgPulHP14/6N7c07j3s0XgbrlT7U/lbiXOD89hmPtEXnfQ==}
+    engines: {node: '>=20.19.0'}
+
   mongoose@9.7.3:
     resolution: {integrity: sha512-9DsD4sq0tL9IKyfttZ6qn74KXBcD4lxDTzGXoAeOLMnDFFp1gqc5oc4s2BiMPbetJrLwvVylfyR4cqLst2pasQ==}
     engines: {node: '>=20.19.0'}
@@ -4727,8 +4743,8 @@ packages:
   msgpackr@2.0.2:
     resolution: {integrity: sha512-c5hYOXFbP79Slh6Dzd2wzk+jnV7mX1UxfMYtilnY1NmalXPqG8DGb5cYCMBrW4AsH3zekBBZd4QrKz9NhtvYLQ==}
 
-  multer@2.2.0:
-    resolution: {integrity: sha512-6rdyFg2kLrMh9Jee7/BMPuV9lEAd7lLW2YUpF9/YxR7njyoUwwQ0ZPh3TaIY50Sw6vlyD2HW3wGOkTS4P79xrQ==}
+  multer@2.4.0:
+    resolution: {integrity: sha512-7dqa0ZcFfzbefdTuIkzOSMvZWC0J7FLqBOjJUZvDCXShIURWKxAyTT1wHhnE5q19c7jOJf43IYYKjBmZVZmvhg==}
     engines: {node: '>= 10.16.0'}
 
   mute-stream@2.0.0:
@@ -5086,6 +5102,7 @@ packages:
   prom-client@15.1.3:
     resolution: {integrity: sha512-6ZiOBfCywsD4k1BN9IX0uZhF+tJkV8q8llP64G5Hajs4JOeVLPCwpPVcpXy3BwYiUGgyJzsJJQeOIv7+hDSq8g==}
     engines: {node: ^16 || ^18 || >=20}
+    deprecated: prom-client has been replaced by @prometheus-io/client
 
   proper-lockfile@4.1.2:
     resolution: {integrity: sha512-TjNPblN4BwAWMXU8s9AEz4JmQxnD1NNL7bNOY/AKUzyamc379FWASUhc/K1pL2noVb+XmZKLL68cjzLsiOAMaA==}
@@ -5150,8 +5167,8 @@ packages:
     resolution: {integrity: sha512-9nfp2hYpCwOjAN+8TZFGhtWEwgvWHXqESH8qT89AT/lWklpLON22Lc8pEtnpsZz7VmawabSU0gCjnj8aC0euHQ==}
     engines: {node: '>=0.10.0'}
 
-  react@19.2.7:
-    resolution: {integrity: sha512-HNe9WslTbXmFK8o8cmwgAeJFSBvt1bPdHCVKtaaV+WlAN36mpT4hcRpwbf3fY56ar2oIXzsBpOAiIRHAdY0OlQ==}
+  react@19.3.0:
+    resolution: {integrity: sha512-E8LUcbtBWt20bbl2YoHfx4ZDBdxVTfOKtCZn9cDSJ4l6/nuoApcpIBcj47t2wZoVX8g2ZHuMHbiShgCR1T5Sog==}
     engines: {node: '>=0.10.0'}
 
   readable-stream@3.6.2:
@@ -5716,9 +5733,6 @@ packages:
     resolution: {integrity: sha512-3KS2b+kL7fsuk/eJZ7EQdnEmQoaho/r6KUef7hxvltNA5DR8NAUM+8wJMbJyZ4G9/7i3v5zPBIMN5aybAh2/Jg==}
     engines: {node: '>= 0.4'}
 
-  typedarray@0.0.6:
-    resolution: {integrity: sha512-/aCDEGatGvZ2BIk+HmLf4ifCJFwvKFNb9/JeZPMulfgFracn9QFcAf5GO8B/mweUjSoblS5In0cWhqpfs/5PQA==}
-
   typedoc@0.28.18:
     resolution: {integrity: sha512-NTWTUOFRQ9+SGKKTuWKUioUkjxNwtS3JDRPVKZAXGHZy2wCA8bdv2iJiyeePn0xkmK+TCCqZFT0X7+2+FLjngA==}
     engines: {node: '>= 18', pnpm: '>= 10'}
@@ -5753,6 +5767,9 @@ packages:
 
   undici-types@8.3.0:
     resolution: {integrity: sha512-j375ScV60dom+YkPFIfTLcOiPxkN/buHz5GobjLhixFuANaNs3C9l4GmrWqejgXWJ7BbJcFYpTEUkS1Ge8bpZQ==}
+
+  undici-types@8.9.0:
+    resolution: {integrity: sha512-KTDyRTYX8sWmKXAikPHHSyc63CRPETMctyjKFupcC6OBLXT3xsN0e9aF7m+mIXutFWpUXuedtowG7iLOzp0kQg==}
 
   universalify@2.0.1:
     resolution: {integrity: sha512-gptHNQghINnc/vTGIk0SOFGFNXw7JVrlRUtConJRlvaw6DuX0wO5Jeko9sWrMBhh+PsYAZ7oXAiOnf/UKogyiw==}
@@ -6001,6 +6018,18 @@ snapshots:
       '@angular-devkit/core': 19.2.19(chokidar@4.0.3)
       '@angular-devkit/schematics': 19.2.19(chokidar@4.0.3)
       '@inquirer/prompts': 7.3.2(@types/node@26.1.0)
+      ansi-colors: 4.1.3
+      symbol-observable: 4.0.0
+      yargs-parser: 21.1.1
+    transitivePeerDependencies:
+      - '@types/node'
+      - chokidar
+
+  '@angular-devkit/schematics-cli@19.2.19(@types/node@26.6.3)(chokidar@4.0.3)':
+    dependencies:
+      '@angular-devkit/core': 19.2.19(chokidar@4.0.3)
+      '@angular-devkit/schematics': 19.2.19(chokidar@4.0.3)
+      '@inquirer/prompts': 7.3.2(@types/node@26.6.3)
       ansi-colors: 4.1.3
       symbol-observable: 4.0.0
       yargs-parser: 21.1.1
@@ -6842,12 +6871,29 @@ snapshots:
     optionalDependencies:
       '@types/node': 26.1.0
 
+  '@inquirer/checkbox@4.3.2(@types/node@26.6.3)':
+    dependencies:
+      '@inquirer/ansi': 1.0.2
+      '@inquirer/core': 10.3.2(@types/node@26.6.3)
+      '@inquirer/figures': 1.0.15
+      '@inquirer/type': 3.0.10(@types/node@26.6.3)
+      yoctocolors-cjs: 2.1.3
+    optionalDependencies:
+      '@types/node': 26.6.3
+
   '@inquirer/confirm@5.1.21(@types/node@26.1.0)':
     dependencies:
       '@inquirer/core': 10.3.2(@types/node@26.1.0)
       '@inquirer/type': 3.0.10(@types/node@26.1.0)
     optionalDependencies:
       '@types/node': 26.1.0
+
+  '@inquirer/confirm@5.1.21(@types/node@26.6.3)':
+    dependencies:
+      '@inquirer/core': 10.3.2(@types/node@26.6.3)
+      '@inquirer/type': 3.0.10(@types/node@26.6.3)
+    optionalDependencies:
+      '@types/node': 26.6.3
 
   '@inquirer/core@10.3.2(@types/node@26.1.0)':
     dependencies:
@@ -6862,6 +6908,19 @@ snapshots:
     optionalDependencies:
       '@types/node': 26.1.0
 
+  '@inquirer/core@10.3.2(@types/node@26.6.3)':
+    dependencies:
+      '@inquirer/ansi': 1.0.2
+      '@inquirer/figures': 1.0.15
+      '@inquirer/type': 3.0.10(@types/node@26.6.3)
+      cli-width: 4.1.0
+      mute-stream: 2.0.0
+      signal-exit: 4.1.0
+      wrap-ansi: 6.2.0
+      yoctocolors-cjs: 2.1.3
+    optionalDependencies:
+      '@types/node': 26.6.3
+
   '@inquirer/editor@4.2.23(@types/node@26.1.0)':
     dependencies:
       '@inquirer/core': 10.3.2(@types/node@26.1.0)
@@ -6869,6 +6928,14 @@ snapshots:
       '@inquirer/type': 3.0.10(@types/node@26.1.0)
     optionalDependencies:
       '@types/node': 26.1.0
+
+  '@inquirer/editor@4.2.23(@types/node@26.6.3)':
+    dependencies:
+      '@inquirer/core': 10.3.2(@types/node@26.6.3)
+      '@inquirer/external-editor': 1.0.3(@types/node@26.6.3)
+      '@inquirer/type': 3.0.10(@types/node@26.6.3)
+    optionalDependencies:
+      '@types/node': 26.6.3
 
   '@inquirer/expand@4.0.23(@types/node@26.1.0)':
     dependencies:
@@ -6878,12 +6945,27 @@ snapshots:
     optionalDependencies:
       '@types/node': 26.1.0
 
+  '@inquirer/expand@4.0.23(@types/node@26.6.3)':
+    dependencies:
+      '@inquirer/core': 10.3.2(@types/node@26.6.3)
+      '@inquirer/type': 3.0.10(@types/node@26.6.3)
+      yoctocolors-cjs: 2.1.3
+    optionalDependencies:
+      '@types/node': 26.6.3
+
   '@inquirer/external-editor@1.0.3(@types/node@26.1.0)':
     dependencies:
       chardet: 2.1.1
       iconv-lite: 0.7.2
     optionalDependencies:
       '@types/node': 26.1.0
+
+  '@inquirer/external-editor@1.0.3(@types/node@26.6.3)':
+    dependencies:
+      chardet: 2.1.1
+      iconv-lite: 0.7.2
+    optionalDependencies:
+      '@types/node': 26.6.3
 
   '@inquirer/figures@1.0.15': {}
 
@@ -6894,12 +6976,26 @@ snapshots:
     optionalDependencies:
       '@types/node': 26.1.0
 
+  '@inquirer/input@4.3.1(@types/node@26.6.3)':
+    dependencies:
+      '@inquirer/core': 10.3.2(@types/node@26.6.3)
+      '@inquirer/type': 3.0.10(@types/node@26.6.3)
+    optionalDependencies:
+      '@types/node': 26.6.3
+
   '@inquirer/number@3.0.23(@types/node@26.1.0)':
     dependencies:
       '@inquirer/core': 10.3.2(@types/node@26.1.0)
       '@inquirer/type': 3.0.10(@types/node@26.1.0)
     optionalDependencies:
       '@types/node': 26.1.0
+
+  '@inquirer/number@3.0.23(@types/node@26.6.3)':
+    dependencies:
+      '@inquirer/core': 10.3.2(@types/node@26.6.3)
+      '@inquirer/type': 3.0.10(@types/node@26.6.3)
+    optionalDependencies:
+      '@types/node': 26.6.3
 
   '@inquirer/password@4.0.23(@types/node@26.1.0)':
     dependencies:
@@ -6908,6 +7004,14 @@ snapshots:
       '@inquirer/type': 3.0.10(@types/node@26.1.0)
     optionalDependencies:
       '@types/node': 26.1.0
+
+  '@inquirer/password@4.0.23(@types/node@26.6.3)':
+    dependencies:
+      '@inquirer/ansi': 1.0.2
+      '@inquirer/core': 10.3.2(@types/node@26.6.3)
+      '@inquirer/type': 3.0.10(@types/node@26.6.3)
+    optionalDependencies:
+      '@types/node': 26.6.3
 
   '@inquirer/prompts@7.10.1(@types/node@26.1.0)':
     dependencies:
@@ -6924,6 +7028,21 @@ snapshots:
     optionalDependencies:
       '@types/node': 26.1.0
 
+  '@inquirer/prompts@7.10.1(@types/node@26.6.3)':
+    dependencies:
+      '@inquirer/checkbox': 4.3.2(@types/node@26.6.3)
+      '@inquirer/confirm': 5.1.21(@types/node@26.6.3)
+      '@inquirer/editor': 4.2.23(@types/node@26.6.3)
+      '@inquirer/expand': 4.0.23(@types/node@26.6.3)
+      '@inquirer/input': 4.3.1(@types/node@26.6.3)
+      '@inquirer/number': 3.0.23(@types/node@26.6.3)
+      '@inquirer/password': 4.0.23(@types/node@26.6.3)
+      '@inquirer/rawlist': 4.1.11(@types/node@26.6.3)
+      '@inquirer/search': 3.2.2(@types/node@26.6.3)
+      '@inquirer/select': 4.4.2(@types/node@26.6.3)
+    optionalDependencies:
+      '@types/node': 26.6.3
+
   '@inquirer/prompts@7.3.2(@types/node@26.1.0)':
     dependencies:
       '@inquirer/checkbox': 4.3.2(@types/node@26.1.0)
@@ -6939,6 +7058,21 @@ snapshots:
     optionalDependencies:
       '@types/node': 26.1.0
 
+  '@inquirer/prompts@7.3.2(@types/node@26.6.3)':
+    dependencies:
+      '@inquirer/checkbox': 4.3.2(@types/node@26.6.3)
+      '@inquirer/confirm': 5.1.21(@types/node@26.6.3)
+      '@inquirer/editor': 4.2.23(@types/node@26.6.3)
+      '@inquirer/expand': 4.0.23(@types/node@26.6.3)
+      '@inquirer/input': 4.3.1(@types/node@26.6.3)
+      '@inquirer/number': 3.0.23(@types/node@26.6.3)
+      '@inquirer/password': 4.0.23(@types/node@26.6.3)
+      '@inquirer/rawlist': 4.1.11(@types/node@26.6.3)
+      '@inquirer/search': 3.2.2(@types/node@26.6.3)
+      '@inquirer/select': 4.4.2(@types/node@26.6.3)
+    optionalDependencies:
+      '@types/node': 26.6.3
+
   '@inquirer/rawlist@4.1.11(@types/node@26.1.0)':
     dependencies:
       '@inquirer/core': 10.3.2(@types/node@26.1.0)
@@ -6946,6 +7080,14 @@ snapshots:
       yoctocolors-cjs: 2.1.3
     optionalDependencies:
       '@types/node': 26.1.0
+
+  '@inquirer/rawlist@4.1.11(@types/node@26.6.3)':
+    dependencies:
+      '@inquirer/core': 10.3.2(@types/node@26.6.3)
+      '@inquirer/type': 3.0.10(@types/node@26.6.3)
+      yoctocolors-cjs: 2.1.3
+    optionalDependencies:
+      '@types/node': 26.6.3
 
   '@inquirer/search@3.2.2(@types/node@26.1.0)':
     dependencies:
@@ -6955,6 +7097,15 @@ snapshots:
       yoctocolors-cjs: 2.1.3
     optionalDependencies:
       '@types/node': 26.1.0
+
+  '@inquirer/search@3.2.2(@types/node@26.6.3)':
+    dependencies:
+      '@inquirer/core': 10.3.2(@types/node@26.6.3)
+      '@inquirer/figures': 1.0.15
+      '@inquirer/type': 3.0.10(@types/node@26.6.3)
+      yoctocolors-cjs: 2.1.3
+    optionalDependencies:
+      '@types/node': 26.6.3
 
   '@inquirer/select@4.4.2(@types/node@26.1.0)':
     dependencies:
@@ -6966,9 +7117,23 @@ snapshots:
     optionalDependencies:
       '@types/node': 26.1.0
 
+  '@inquirer/select@4.4.2(@types/node@26.6.3)':
+    dependencies:
+      '@inquirer/ansi': 1.0.2
+      '@inquirer/core': 10.3.2(@types/node@26.6.3)
+      '@inquirer/figures': 1.0.15
+      '@inquirer/type': 3.0.10(@types/node@26.6.3)
+      yoctocolors-cjs: 2.1.3
+    optionalDependencies:
+      '@types/node': 26.6.3
+
   '@inquirer/type@3.0.10(@types/node@26.1.0)':
     optionalDependencies:
       '@types/node': 26.1.0
+
+  '@inquirer/type@3.0.10(@types/node@26.6.3)':
+    optionalDependencies:
+      '@types/node': 26.6.3
 
   '@ioredis/commands@1.5.1': {}
 
@@ -7016,6 +7181,41 @@ snapshots:
       graceful-fs: 4.2.11
       jest-changed-files: 30.3.0
       jest-config: 30.3.0(@types/node@26.1.0)(ts-node@10.9.2(@swc/core@1.15.21)(@types/node@26.1.0)(typescript@5.9.3))
+      jest-haste-map: 30.3.0
+      jest-message-util: 30.3.0
+      jest-regex-util: 30.0.1
+      jest-resolve: 30.3.0
+      jest-resolve-dependencies: 30.3.0
+      jest-runner: 30.3.0
+      jest-runtime: 30.3.0
+      jest-snapshot: 30.3.0
+      jest-util: 30.3.0
+      jest-validate: 30.3.0
+      jest-watcher: 30.3.0
+      pretty-format: 30.3.0
+      slash: 3.0.0
+    transitivePeerDependencies:
+      - babel-plugin-macros
+      - esbuild-register
+      - supports-color
+      - ts-node
+
+  '@jest/core@30.3.0(ts-node@10.9.2(@swc/core@1.15.21)(@types/node@26.6.3)(typescript@5.9.3))':
+    dependencies:
+      '@jest/console': 30.3.0
+      '@jest/pattern': 30.0.1
+      '@jest/reporters': 30.3.0
+      '@jest/test-result': 30.3.0
+      '@jest/transform': 30.3.0
+      '@jest/types': 30.3.0
+      '@types/node': 26.1.0
+      ansi-escapes: 4.3.2
+      chalk: 4.1.2
+      ci-info: 4.4.0
+      exit-x: 0.2.2
+      graceful-fs: 4.2.11
+      jest-changed-files: 30.3.0
+      jest-config: 30.3.0(@types/node@26.1.0)(ts-node@10.9.2(@swc/core@1.15.21)(@types/node@26.6.3)(typescript@5.9.3))
       jest-haste-map: 30.3.0
       jest-message-util: 30.3.0
       jest-regex-util: 30.0.1
@@ -7211,6 +7411,10 @@ snapshots:
     dependencies:
       sparse-bitfield: 3.0.3
 
+  '@mongodb-js/saslprep@1.5.4':
+    dependencies:
+      sparse-bitfield: 3.0.3
+
   '@msgpackr-extract/msgpackr-extract-darwin-arm64@3.0.4':
     optional: true
 
@@ -7256,6 +7460,34 @@ snapshots:
       '@angular-devkit/schematics': 19.2.19(chokidar@4.0.3)
       '@angular-devkit/schematics-cli': 19.2.19(@types/node@26.1.0)(chokidar@4.0.3)
       '@inquirer/prompts': 7.10.1(@types/node@26.1.0)
+      '@nestjs/schematics': 11.0.9(chokidar@4.0.3)(typescript@5.9.3)
+      ansis: 4.2.0
+      chokidar: 4.0.3
+      cli-table3: 0.6.5
+      commander: 4.1.1
+      fork-ts-checker-webpack-plugin: 9.1.0(typescript@5.9.3)(webpack@5.104.1(@swc/core@1.15.21))
+      glob: 13.0.0
+      node-emoji: 1.11.0
+      ora: 5.4.1
+      tsconfig-paths: 4.2.0
+      tsconfig-paths-webpack-plugin: 4.2.0
+      typescript: 5.9.3
+      webpack: 5.104.1(@swc/core@1.15.21)
+      webpack-node-externals: 3.0.0
+    optionalDependencies:
+      '@swc/core': 1.15.21
+    transitivePeerDependencies:
+      - '@types/node'
+      - esbuild
+      - uglify-js
+      - webpack-cli
+
+  '@nestjs/cli@11.0.16(@swc/core@1.15.21)(@types/node@26.6.3)':
+    dependencies:
+      '@angular-devkit/core': 19.2.19(chokidar@4.0.3)
+      '@angular-devkit/schematics': 19.2.19(chokidar@4.0.3)
+      '@angular-devkit/schematics-cli': 19.2.19(@types/node@26.6.3)(chokidar@4.0.3)
+      '@inquirer/prompts': 7.10.1(@types/node@26.6.3)
       '@nestjs/schematics': 11.0.9(chokidar@4.0.3)(typescript@5.9.3)
       ansis: 4.2.0
       chokidar: 4.0.3
@@ -7330,6 +7562,13 @@ snapshots:
       class-transformer: 0.5.1
       class-validator: 0.15.1
 
+  '@nestjs/mongoose@11.0.4(@nestjs/common@11.1.18(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.18)(mongoose@9.10.2)(rxjs@7.8.2)':
+    dependencies:
+      '@nestjs/common': 11.1.18(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@nestjs/core': 11.1.18(@nestjs/common@11.1.18(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/platform-express@11.1.18)(@nestjs/websockets@11.1.18)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      mongoose: 9.10.2
+      rxjs: 7.8.2
+
   '@nestjs/mongoose@11.0.4(@nestjs/common@11.1.18(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.18)(mongoose@9.7.3)(rxjs@7.8.2)':
     dependencies:
       '@nestjs/common': 11.1.18(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -7343,7 +7582,7 @@ snapshots:
       '@nestjs/core': 11.1.18(@nestjs/common@11.1.18(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/platform-express@11.1.18)(@nestjs/websockets@11.1.18)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       cors: 2.8.6
       express: 5.2.1
-      multer: 2.2.0
+      multer: 2.4.0
       path-to-regexp: 8.4.2
       tslib: 2.8.1
     transitivePeerDependencies:
@@ -7468,11 +7707,11 @@ snapshots:
 
   '@prisma/client-runtime-utils@7.6.0': {}
 
-  '@prisma/client@7.6.0(prisma@7.6.0(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.7))(react@19.2.7)(typescript@5.9.3))(typescript@5.9.3)':
+  '@prisma/client@7.6.0(prisma@7.6.0(@types/react-dom@19.2.3(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.4(react@19.3.0))(react@19.3.0)(typescript@5.9.3))(typescript@5.9.3)':
     dependencies:
       '@prisma/client-runtime-utils': 7.6.0
     optionalDependencies:
-      prisma: 7.6.0(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.7))(react@19.2.7)(typescript@5.9.3)
+      prisma: 7.6.0(@types/react-dom@19.2.3(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.4(react@19.3.0))(react@19.3.0)(typescript@5.9.3)
       typescript: 5.9.3
 
   '@prisma/config@7.6.0':
@@ -7556,13 +7795,13 @@ snapshots:
     transitivePeerDependencies:
       - '@types/react-dom'
 
-  '@prisma/studio-core@0.27.3(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.7))(react@19.2.7)':
+  '@prisma/studio-core@0.27.3(@types/react-dom@19.2.3(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.4(react@19.3.0))(react@19.3.0)':
     dependencies:
-      '@radix-ui/react-toggle': 1.1.10(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.7))(react@19.2.7)
-      '@types/react': 19.2.17
+      '@radix-ui/react-toggle': 1.1.10(@types/react-dom@19.2.3(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.4(react@19.3.0))(react@19.3.0)
+      '@types/react': 19.3.0
       chart.js: 4.5.1
-      react: 19.2.7
-      react-dom: 19.2.4(react@19.2.7)
+      react: 19.3.0
+      react-dom: 19.2.4(react@19.3.0)
     transitivePeerDependencies:
       - '@types/react-dom'
 
@@ -7574,11 +7813,11 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.14
 
-  '@radix-ui/react-compose-refs@1.1.2(@types/react@19.2.17)(react@19.2.7)':
+  '@radix-ui/react-compose-refs@1.1.2(@types/react@19.3.0)(react@19.3.0)':
     dependencies:
-      react: 19.2.7
+      react: 19.3.0
     optionalDependencies:
-      '@types/react': 19.2.17
+      '@types/react': 19.3.0
 
   '@radix-ui/react-primitive@2.1.3(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
     dependencies:
@@ -7589,14 +7828,14 @@ snapshots:
       '@types/react': 19.2.14
       '@types/react-dom': 19.2.3(@types/react@19.2.14)
 
-  '@radix-ui/react-primitive@2.1.3(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.7))(react@19.2.7)':
+  '@radix-ui/react-primitive@2.1.3(@types/react-dom@19.2.3(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.4(react@19.3.0))(react@19.3.0)':
     dependencies:
-      '@radix-ui/react-slot': 1.2.3(@types/react@19.2.17)(react@19.2.7)
-      react: 19.2.7
-      react-dom: 19.2.4(react@19.2.7)
+      '@radix-ui/react-slot': 1.2.3(@types/react@19.3.0)(react@19.3.0)
+      react: 19.3.0
+      react-dom: 19.2.4(react@19.3.0)
     optionalDependencies:
-      '@types/react': 19.2.17
-      '@types/react-dom': 19.2.3(@types/react@19.2.17)
+      '@types/react': 19.3.0
+      '@types/react-dom': 19.2.3(@types/react@19.3.0)
 
   '@radix-ui/react-slot@1.2.3(@types/react@19.2.14)(react@19.2.4)':
     dependencies:
@@ -7605,12 +7844,12 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.14
 
-  '@radix-ui/react-slot@1.2.3(@types/react@19.2.17)(react@19.2.7)':
+  '@radix-ui/react-slot@1.2.3(@types/react@19.3.0)(react@19.3.0)':
     dependencies:
-      '@radix-ui/react-compose-refs': 1.1.2(@types/react@19.2.17)(react@19.2.7)
-      react: 19.2.7
+      '@radix-ui/react-compose-refs': 1.1.2(@types/react@19.3.0)(react@19.3.0)
+      react: 19.3.0
     optionalDependencies:
-      '@types/react': 19.2.17
+      '@types/react': 19.3.0
 
   '@radix-ui/react-toggle@1.1.10(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
     dependencies:
@@ -7623,16 +7862,16 @@ snapshots:
       '@types/react': 19.2.14
       '@types/react-dom': 19.2.3(@types/react@19.2.14)
 
-  '@radix-ui/react-toggle@1.1.10(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.7))(react@19.2.7)':
+  '@radix-ui/react-toggle@1.1.10(@types/react-dom@19.2.3(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.4(react@19.3.0))(react@19.3.0)':
     dependencies:
       '@radix-ui/primitive': 1.1.3
-      '@radix-ui/react-primitive': 2.1.3(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.7))(react@19.2.7)
-      '@radix-ui/react-use-controllable-state': 1.2.2(@types/react@19.2.17)(react@19.2.7)
-      react: 19.2.7
-      react-dom: 19.2.4(react@19.2.7)
+      '@radix-ui/react-primitive': 2.1.3(@types/react-dom@19.2.3(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.4(react@19.3.0))(react@19.3.0)
+      '@radix-ui/react-use-controllable-state': 1.2.2(@types/react@19.3.0)(react@19.3.0)
+      react: 19.3.0
+      react-dom: 19.2.4(react@19.3.0)
     optionalDependencies:
-      '@types/react': 19.2.17
-      '@types/react-dom': 19.2.3(@types/react@19.2.17)
+      '@types/react': 19.3.0
+      '@types/react-dom': 19.2.3(@types/react@19.3.0)
 
   '@radix-ui/react-use-controllable-state@1.2.2(@types/react@19.2.14)(react@19.2.4)':
     dependencies:
@@ -7642,13 +7881,13 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.14
 
-  '@radix-ui/react-use-controllable-state@1.2.2(@types/react@19.2.17)(react@19.2.7)':
+  '@radix-ui/react-use-controllable-state@1.2.2(@types/react@19.3.0)(react@19.3.0)':
     dependencies:
-      '@radix-ui/react-use-effect-event': 0.0.2(@types/react@19.2.17)(react@19.2.7)
-      '@radix-ui/react-use-layout-effect': 1.1.1(@types/react@19.2.17)(react@19.2.7)
-      react: 19.2.7
+      '@radix-ui/react-use-effect-event': 0.0.2(@types/react@19.3.0)(react@19.3.0)
+      '@radix-ui/react-use-layout-effect': 1.1.1(@types/react@19.3.0)(react@19.3.0)
+      react: 19.3.0
     optionalDependencies:
-      '@types/react': 19.2.17
+      '@types/react': 19.3.0
 
   '@radix-ui/react-use-effect-event@0.0.2(@types/react@19.2.14)(react@19.2.4)':
     dependencies:
@@ -7657,12 +7896,12 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.14
 
-  '@radix-ui/react-use-effect-event@0.0.2(@types/react@19.2.17)(react@19.2.7)':
+  '@radix-ui/react-use-effect-event@0.0.2(@types/react@19.3.0)(react@19.3.0)':
     dependencies:
-      '@radix-ui/react-use-layout-effect': 1.1.1(@types/react@19.2.17)(react@19.2.7)
-      react: 19.2.7
+      '@radix-ui/react-use-layout-effect': 1.1.1(@types/react@19.3.0)(react@19.3.0)
+      react: 19.3.0
     optionalDependencies:
-      '@types/react': 19.2.17
+      '@types/react': 19.3.0
 
   '@radix-ui/react-use-layout-effect@1.1.1(@types/react@19.2.14)(react@19.2.4)':
     dependencies:
@@ -7670,18 +7909,18 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.14
 
-  '@radix-ui/react-use-layout-effect@1.1.1(@types/react@19.2.17)(react@19.2.7)':
+  '@radix-ui/react-use-layout-effect@1.1.1(@types/react@19.3.0)(react@19.3.0)':
     dependencies:
-      react: 19.2.7
+      react: 19.3.0
     optionalDependencies:
-      '@types/react': 19.2.17
+      '@types/react': 19.3.0
 
-  '@react-email/render@1.1.2(react-dom@19.2.4(react@19.2.7))(react@19.2.7)':
+  '@react-email/render@1.1.2(react-dom@19.2.4(react@19.3.0))(react@19.3.0)':
     dependencies:
       html-to-text: 9.0.5
       prettier: 3.8.1
-      react: 19.2.7
-      react-dom: 19.2.4(react@19.2.7)
+      react: 19.3.0
+      react-dom: 19.2.4(react@19.3.0)
       react-promise-suspense: 0.3.4
 
   '@react-email/render@2.0.10(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
@@ -7692,6 +7931,35 @@ snapshots:
       react-dom: 19.2.4(react@19.2.4)
 
   '@rtsao/scc@1.1.0': {}
+
+  '@saas/shared@file:shared(@nestjs/websockets@11.1.18)(reflect-metadata@0.2.2)':
+    dependencies:
+      '@nestjs/common': 11.1.18(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@nestjs/core': 11.1.18(@nestjs/common@11.1.18(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/platform-express@11.1.18)(@nestjs/websockets@11.1.18)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@nestjs/mongoose': 11.0.4(@nestjs/common@11.1.18(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.18)(mongoose@9.10.2)(rxjs@7.8.2)
+      '@nestjs/platform-express': 11.1.18(@nestjs/common@11.1.18(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.18)
+      '@nestjs/swagger': 11.2.6(@nestjs/common@11.1.18(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.18)(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)
+      class-transformer: 0.5.1
+      class-validator: 0.15.1
+      express: 5.2.1
+      ioredis: 5.10.1
+      mongoose: 9.10.2
+      pino: 10.3.1
+      prom-client: 15.1.3
+      rxjs: 7.8.2
+    transitivePeerDependencies:
+      - '@aws-sdk/credential-providers'
+      - '@fastify/static'
+      - '@mongodb-js/zstd'
+      - '@nestjs/microservices'
+      - '@nestjs/websockets'
+      - gcp-metadata
+      - kerberos
+      - mongodb-client-encryption
+      - reflect-metadata
+      - snappy
+      - socks
+      - supports-color
 
   '@scarf/scarf@1.4.0': {}
 
@@ -7971,6 +8239,10 @@ snapshots:
     dependencies:
       undici-types: 8.3.0
 
+  '@types/node@26.6.3':
+    dependencies:
+      undici-types: 8.9.0
+
   '@types/opossum@8.1.9':
     dependencies:
       '@types/node': 26.1.0
@@ -7994,16 +8266,16 @@ snapshots:
       '@types/react': 19.2.14
     optional: true
 
-  '@types/react-dom@19.2.3(@types/react@19.2.17)':
+  '@types/react-dom@19.2.3(@types/react@19.3.0)':
     dependencies:
-      '@types/react': 19.2.17
+      '@types/react': 19.3.0
     optional: true
 
   '@types/react@19.2.14':
     dependencies:
       csstype: 3.2.3
 
-  '@types/react@19.2.17':
+  '@types/react@19.3.0':
     dependencies:
       csstype: 3.2.3
 
@@ -8574,6 +8846,8 @@ snapshots:
 
   bson@7.3.1: {}
 
+  bson@7.3.3: {}
+
   buffer-equal-constant-time@1.0.1: {}
 
   buffer-from@1.1.2: {}
@@ -8749,13 +9023,6 @@ snapshots:
   component-emitter@1.3.1: {}
 
   concat-map@0.0.1: {}
-
-  concat-stream@2.0.0:
-    dependencies:
-      buffer-from: 1.1.2
-      inherits: 2.0.4
-      readable-stream: 3.6.2
-      typedarray: 0.0.6
 
   confbox@0.2.4: {}
 
@@ -9977,6 +10244,25 @@ snapshots:
       - supports-color
       - ts-node
 
+  jest-cli@30.3.0(@types/node@26.6.3)(ts-node@10.9.2(@swc/core@1.15.21)(@types/node@26.6.3)(typescript@5.9.3)):
+    dependencies:
+      '@jest/core': 30.3.0(ts-node@10.9.2(@swc/core@1.15.21)(@types/node@26.6.3)(typescript@5.9.3))
+      '@jest/test-result': 30.3.0
+      '@jest/types': 30.3.0
+      chalk: 4.1.2
+      exit-x: 0.2.2
+      import-local: 3.2.0
+      jest-config: 30.3.0(@types/node@26.6.3)(ts-node@10.9.2(@swc/core@1.15.21)(@types/node@26.6.3)(typescript@5.9.3))
+      jest-util: 30.3.0
+      jest-validate: 30.3.0
+      yargs: 17.7.2
+    transitivePeerDependencies:
+      - '@types/node'
+      - babel-plugin-macros
+      - esbuild-register
+      - supports-color
+      - ts-node
+
   jest-config@30.3.0(@types/node@26.1.0)(ts-node@10.9.2(@swc/core@1.15.21)(@types/node@26.1.0)(typescript@5.9.3)):
     dependencies:
       '@babel/core': 7.29.7
@@ -10005,6 +10291,70 @@ snapshots:
     optionalDependencies:
       '@types/node': 26.1.0
       ts-node: 10.9.2(@swc/core@1.15.21)(@types/node@26.1.0)(typescript@5.9.3)
+    transitivePeerDependencies:
+      - babel-plugin-macros
+      - supports-color
+
+  jest-config@30.3.0(@types/node@26.1.0)(ts-node@10.9.2(@swc/core@1.15.21)(@types/node@26.6.3)(typescript@5.9.3)):
+    dependencies:
+      '@babel/core': 7.29.7
+      '@jest/get-type': 30.1.0
+      '@jest/pattern': 30.0.1
+      '@jest/test-sequencer': 30.3.0
+      '@jest/types': 30.3.0
+      babel-jest: 30.3.0(@babel/core@7.29.7)
+      chalk: 4.1.2
+      ci-info: 4.4.0
+      deepmerge: 4.3.1
+      glob: 10.5.0
+      graceful-fs: 4.2.11
+      jest-circus: 30.3.0
+      jest-docblock: 30.2.0
+      jest-environment-node: 30.3.0
+      jest-regex-util: 30.0.1
+      jest-resolve: 30.3.0
+      jest-runner: 30.3.0
+      jest-util: 30.3.0
+      jest-validate: 30.3.0
+      parse-json: 5.2.0
+      pretty-format: 30.3.0
+      slash: 3.0.0
+      strip-json-comments: 3.1.1
+    optionalDependencies:
+      '@types/node': 26.1.0
+      ts-node: 10.9.2(@swc/core@1.15.21)(@types/node@26.6.3)(typescript@5.9.3)
+    transitivePeerDependencies:
+      - babel-plugin-macros
+      - supports-color
+
+  jest-config@30.3.0(@types/node@26.6.3)(ts-node@10.9.2(@swc/core@1.15.21)(@types/node@26.6.3)(typescript@5.9.3)):
+    dependencies:
+      '@babel/core': 7.29.7
+      '@jest/get-type': 30.1.0
+      '@jest/pattern': 30.0.1
+      '@jest/test-sequencer': 30.3.0
+      '@jest/types': 30.3.0
+      babel-jest: 30.3.0(@babel/core@7.29.7)
+      chalk: 4.1.2
+      ci-info: 4.4.0
+      deepmerge: 4.3.1
+      glob: 10.5.0
+      graceful-fs: 4.2.11
+      jest-circus: 30.3.0
+      jest-docblock: 30.2.0
+      jest-environment-node: 30.3.0
+      jest-regex-util: 30.0.1
+      jest-resolve: 30.3.0
+      jest-runner: 30.3.0
+      jest-util: 30.3.0
+      jest-validate: 30.3.0
+      parse-json: 5.2.0
+      pretty-format: 30.3.0
+      slash: 3.0.0
+      strip-json-comments: 3.1.1
+    optionalDependencies:
+      '@types/node': 26.6.3
+      ts-node: 10.9.2(@swc/core@1.15.21)(@types/node@26.6.3)(typescript@5.9.3)
     transitivePeerDependencies:
       - babel-plugin-macros
       - supports-color
@@ -10243,6 +10593,19 @@ snapshots:
       - supports-color
       - ts-node
 
+  jest@30.3.0(@types/node@26.6.3)(ts-node@10.9.2(@swc/core@1.15.21)(@types/node@26.6.3)(typescript@5.9.3)):
+    dependencies:
+      '@jest/core': 30.3.0(ts-node@10.9.2(@swc/core@1.15.21)(@types/node@26.6.3)(typescript@5.9.3))
+      '@jest/types': 30.3.0
+      import-local: 3.2.0
+      jest-cli: 30.3.0(@types/node@26.6.3)(ts-node@10.9.2(@swc/core@1.15.21)(@types/node@26.6.3)(typescript@5.9.3))
+    transitivePeerDependencies:
+      - '@types/node'
+      - babel-plugin-macros
+      - esbuild-register
+      - supports-color
+      - ts-node
+
   jiti@2.6.1: {}
 
   js-tokens@4.0.0: {}
@@ -10307,6 +10670,8 @@ snapshots:
       safe-buffer: 5.2.1
 
   kareem@3.3.0: {}
+
+  kareem@3.4.0: {}
 
   keyv@4.5.4:
     dependencies:
@@ -10438,6 +10803,8 @@ snapshots:
 
   media-typer@1.1.0: {}
 
+  media-typer@1.1.1: {}
+
   memfs@3.5.3:
     dependencies:
       fs-monkey: 1.1.0
@@ -10498,11 +10865,40 @@ snapshots:
       '@types/whatwg-url': 13.0.0
       whatwg-url: 14.2.0
 
+  mongodb-connection-string-url@7.0.2:
+    dependencies:
+      '@types/whatwg-url': 13.0.0
+      whatwg-url: 14.2.0
+
   mongodb@7.2.0:
     dependencies:
       '@mongodb-js/saslprep': 1.4.12
       bson: 7.3.1
       mongodb-connection-string-url: 7.0.1
+
+  mongodb@7.6.0:
+    dependencies:
+      '@mongodb-js/saslprep': 1.5.4
+      bson: 7.3.3
+      mongodb-connection-string-url: 7.0.2
+
+  mongoose@9.10.2:
+    dependencies:
+      '@standard-schema/spec': 1.1.0
+      kareem: 3.4.0
+      mongodb: 7.6.0
+      mpath: 0.9.0
+      mquery: 6.0.0
+      ms: 2.1.3
+      sift: 17.1.3
+    transitivePeerDependencies:
+      - '@aws-sdk/credential-providers'
+      - '@mongodb-js/zstd'
+      - gcp-metadata
+      - kerberos
+      - mongodb-client-encryption
+      - snappy
+      - socks
 
   mongoose@9.7.3:
     dependencies:
@@ -10544,11 +10940,10 @@ snapshots:
     optionalDependencies:
       msgpackr-extract: 3.0.4
 
-  multer@2.2.0:
+  multer@2.4.0:
     dependencies:
       append-field: 1.0.0
       busboy: 1.6.0
-      concat-stream: 2.0.0
       type-is: 1.6.18
 
   mute-stream@2.0.0: {}
@@ -10890,12 +11285,12 @@ snapshots:
       - react
       - react-dom
 
-  prisma@7.6.0(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.7))(react@19.2.7)(typescript@5.9.3):
+  prisma@7.6.0(@types/react-dom@19.2.3(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.4(react@19.3.0))(react@19.3.0)(typescript@5.9.3):
     dependencies:
       '@prisma/config': 7.6.0
       '@prisma/dev': 0.24.3(typescript@5.9.3)
       '@prisma/engines': 7.6.0
-      '@prisma/studio-core': 0.27.3(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.7))(react@19.2.7)
+      '@prisma/studio-core': 0.27.3(@types/react-dom@19.2.3(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.4(react@19.3.0))(react@19.3.0)
       mysql2: 3.15.3
       postgres: 3.4.7
     optionalDependencies:
@@ -10967,9 +11362,9 @@ snapshots:
       react: 19.2.4
       scheduler: 0.27.0
 
-  react-dom@19.2.4(react@19.2.7):
+  react-dom@19.2.4(react@19.3.0):
     dependencies:
-      react: 19.2.7
+      react: 19.3.0
       scheduler: 0.27.0
 
   react-is@18.3.1: {}
@@ -10980,7 +11375,7 @@ snapshots:
 
   react@19.2.4: {}
 
-  react@19.2.7: {}
+  react@19.3.0: {}
 
   readable-stream@3.6.2:
     dependencies:
@@ -11028,9 +11423,9 @@ snapshots:
 
   require-main-filename@2.0.0: {}
 
-  resend@4.8.0(react-dom@19.2.4(react@19.2.7))(react@19.2.7):
+  resend@4.8.0(react-dom@19.2.4(react@19.3.0))(react@19.3.0):
     dependencies:
-      '@react-email/render': 1.1.2(react-dom@19.2.4(react@19.2.7))(react@19.2.7)
+      '@react-email/render': 1.1.2(react-dom@19.2.4(react@19.3.0))(react@19.3.0)
     transitivePeerDependencies:
       - react
       - react-dom
@@ -11186,7 +11581,7 @@ snapshots:
 
   setprototypeof@1.2.0: {}
 
-  sharp@0.35.3(@types/node@26.1.0):
+  sharp@0.35.3(@types/node@26.6.3):
     dependencies:
       '@img/colour': 1.1.0
       detect-libc: 2.1.2
@@ -11217,7 +11612,7 @@ snapshots:
       '@img/sharp-win32-arm64': 0.35.3
       '@img/sharp-win32-ia32': 0.35.3
       '@img/sharp-win32-x64': 0.35.3
-      '@types/node': 26.1.0
+      '@types/node': 26.6.3
 
   shebang-command@2.0.0:
     dependencies:
@@ -11574,6 +11969,27 @@ snapshots:
       yn: 3.1.1
     optionalDependencies:
       '@swc/core': 1.15.21
+    optional: true
+
+  ts-node@10.9.2(@swc/core@1.15.21)(@types/node@26.6.3)(typescript@5.9.3):
+    dependencies:
+      '@cspotcode/source-map-support': 0.8.1
+      '@tsconfig/node10': 1.0.12
+      '@tsconfig/node12': 1.0.11
+      '@tsconfig/node14': 1.0.3
+      '@tsconfig/node16': 1.0.4
+      '@types/node': 26.6.3
+      acorn: 8.16.0
+      acorn-walk: 8.3.5
+      arg: 4.1.3
+      create-require: 1.1.1
+      diff: 4.0.4
+      make-error: 1.3.6
+      typescript: 5.9.3
+      v8-compile-cache-lib: 3.0.1
+      yn: 3.1.1
+    optionalDependencies:
+      '@swc/core': 1.15.21
 
   tsconfig-paths-webpack-plugin@4.2.0:
     dependencies:
@@ -11625,7 +12041,7 @@ snapshots:
   type-is@2.1.0:
     dependencies:
       content-type: 2.0.0
-      media-typer: 1.1.0
+      media-typer: 1.1.1
       mime-types: 3.0.2
 
   typed-array-buffer@1.0.3:
@@ -11661,8 +12077,6 @@ snapshots:
       possible-typed-array-names: 1.1.0
       reflect.getprototypeof: 1.0.10
 
-  typedarray@0.0.6: {}
-
   typedoc@0.28.18(typescript@5.9.3):
     dependencies:
       '@gerrit0/mini-shiki': 3.23.0
@@ -11693,6 +12107,8 @@ snapshots:
       which-boxed-primitive: 1.1.1
 
   undici-types@8.3.0: {}
+
+  undici-types@8.9.0: {}
 
   universalify@2.0.1: {}
 
