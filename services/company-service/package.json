@@ -31,7 +31,7 @@
     "@prisma/adapter-pg": "^7.3.0",
     "@prisma/client": "^7.6.0",
     "@saas/shared": "workspace:*",
-    "axios": "^1.16.0",
+    "axios": "^1.20.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.15.1",
     "cookie-parser": "^1.4.7",
